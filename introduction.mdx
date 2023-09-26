@@ -1,71 +1,183 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: Quickstart
+description: "Start earning tips with your browser plugin in under 5 minutes. Coming soon: Enable frictionless one-time payments, create/validate/manage Licence Keys with a simple API, in-built counter to limit certain features to paid users, recurring payments, free trials, multi-device login"
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.svg"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.svg"
-  alt="Hero Dark"
-/>
 
-## Setting up
 
-The first step to world-class documentation is setting up your editing environnments.
+## Information
+This library uses [Mozilla's webextension-polyfill library](https://github.com/mozilla/webextension-polyfill) internally for compatability across browsers which means it should work on almost all modern browsers.
+For now, the only regularly tested browser is Chrome, but it should work on Firefox, Edge, Opera, and Brave. If you find a compatibility bug, please [open an issue](https://github.com/olostep/olostep-extensions/issues/new).
 
-<CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
-  </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
 
-## Make it yours
+The library works both for manifest v2 and v3.
 
-Update your docs to your brand and add valuable content for the best user conversion.
 
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
-  </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/components/accordion"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/showcase"
-  >
-    Check out our showcase of our favorite documentation
-  </Card>
-</CardGroup>
+**Note**: The Olostep JS Library doesn't track your users. This library only communicates with Olostep's servers to process tips/donations.
+
+## Installing
+
+<Steps>
+    <Step title="Import">
+        Copy the [OlostepExt.js](https://github.com/olostep/olostep-extensions/blob/main/OlostepExt.js) file into your project. If you're using a bundler like Webpack or Rollup, make sure to add OlostepExt in your final bundle.
+
+        For example, in Webpack, you can add the following to your webpack.config.js file to copy OlostepExt into your final bundle:
+        ```js webpack.config.js
+        const CopyWebpackPlugin = require('copy-webpack-plugin');
+        // ...
+        plugins: [
+            new CopyPlugin({
+                patterns: [
+                    { from: "./src/OlostepExt.js", to: "OlostepExt.js" },
+                ],
+            }),
+        ],
+        // ...
+        ```
+        **Note**: A npm package is coming soon.
+    </Step>
+    <Step title="Configure your manifest.json">
+        Olostep needs the following configuration in your manifest.json (for both manifest v2 and v3):
+        ```
+        {
+            "permissions": [
+                "storage"
+            ]
+        }
+        ```
+        You will also need to expose the OlostepExt.js file as web-accessible resource in your manifest.json.
+        The syntax varies depending on whether you are using manifest v3 or v2.
+        <CodeGroup>
+        ```manifest manifest v3
+        {
+            "web_accessible_resources": [
+                {
+                    "resources": [
+                        "OlostepExt.js"
+                    ],
+                    "matches": [
+                        "<all_urls>"
+                    ]
+                }
+            ]
+        }
+        ```
+        ```manifest manifest v2
+        {
+            "web_accessible_resources": [
+                "OlostepExt.js"
+            ]
+        }
+        ```
+        </CodeGroup>
+    </Step>
+    <Step title="Add OlostepExt to background.js">
+        You need to put OlostepExt in your background file, often named something like background.js. If you don't include OlostepExt in your background file, it won't work correctly.
+
+        With either Manifest v3 or Manifest v2, you'll need to [sign up and register an extension](https://www.olostep.com/olostep-auth/). When you register an extension, you'll create a public configuration_key that you'll use when initializing OlostepExt. We'll use "olostep_pk_sample_extension" as the configuration_key in the following examples.
+
+        <Tabs>
+            <Tab title="Manifest v3">
+                You can use the [importScripts()](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts) method to import OlostepExt into your background file.
+
+                Let's say you have set up your manifest.json file like this:
+                ```manifest manifest.json
+                {
+                    "background": {
+                        "service_worker": "background.js"
+                    }
+                }
+                ```
+                You can import OlostepExt into your background.js file like this:
+                ```js background.js
+                importScripts('OlostepExt.js')
+                let olostep = OlostepExt("olostep_pk_sample_extension");
+                olostep.init();
+                ```
+                The `init()` method will initialize Olostep (by fetching your Stripe/PayPal configuration, your products, prices...) and set up the necessary listeners to communicate with your extension's content scripts.
+
+                If you don't call `init()`, Olostep will not work correctly.
+
+                **Note about service workers**: In the example above, OlostepExt will become undefined when accessed in service worker callbacks. To use OlostepExt in service worker callbacks, redeclare it like so:
+                ```js background.js
+                chrome.storage.local.get('alan-kay', function() {
+                    let olostep = OlostepExt("olostep_pk_sample_extension");
+                    // ...
+                })
+                ```
+                Make sure to redeclare OlostepExt in each service worker callback that uses it.
+
+                **Don't call `init()` again in service worker callbacks.** It will cause Olostep to stop working correctly.
+            </Tab>
+            <Tab title="Manifest v2">
+                Add OlostepExt to your manifest.json file like this:
+                ```manifest manifest.json
+                {
+                    "background": {
+                        "scripts": [
+                            "OlostepExt.js",
+                            "background.js"
+                        ]
+                    }
+                }
+                ```
+                Then, in your background.js file, initialize OlostepExt like this:
+                ```js background.js
+                let olostep = OlostepExt("olostep_pk_sample_extension");
+                olostep.init();
+                ```
+            </Tab>
+        </Tabs>
+    </Step>
+
+    <Step title="Import OlostepExt inside your contentscript.js">
+        You can only call the `olostep.tips.request()` method from your extension's content scripts (or HTML pages) since it needs a valid DOM to render the request window.
+
+        If you try to call it from your background.js file, it will throw an error. If you want, you can send a message from your background.js file to your content script to trigger the `olostep.tips.request()` method.
+
+        This is how you need to setup your manifest.json file in order to use Olostep in your content scripts:
+        <CodeGroup>
+        ```manifest manifest v3/v2
+        "content_scripts": [
+            {
+                "matches": [
+                    "<all_urls>"
+                ],
+                "js": [
+                    "OlostepExt.js",
+                    "content.js"
+                ]
+            }
+        ]
+        ```
+        </CodeGroup>
+        Then, in your content.js file, you can import Olostep and start using the APIs (like `olostep.tips.request()` or `olostep.users.get()`)
+    </Step>
+    <Step title="Import OlostepExt inside HTML pages (optional)">
+        What if you want to use OlostepExt inside your HTML pages and you don't have a content script?
+
+        You can use the OlostepWeb JS library to do that.
+
+        It's a mirror of the OlostepExt JS library, but it doesn't need to be imported in your manifest.json file. You can import it directly in your HTML pages.
+
+        Instead of relying on browser specific APIs, it uses equivalent web alternatives.
+
+        In future releases, it will be also able to communicate with OlostepExt to get the same exact functionalities and sync data between your extension and your HTML pages.
+
+        You can import it either from the CDN or from your local files.
+        <CodeGroup>
+        ```html CDN
+        <script src="https://cdn.jsdelivr.net/gh/olostep/olostep-extensions/OlostepWeb.js"></script>
+        ```
+        ```html Local
+        <script src="OlostepWeb.js"></script>
+        ```
+        </CodeGroup>
+        Then, you can initialize it with your configuration_key:
+        ```js
+        let olostep = OlostepWeb("olostep_pk_sample_extension");
+        olostep.init();
+        ```
+        After you initialize it, you can use the same APIs as OlostepExt.
+    </Step>
+</Steps>
