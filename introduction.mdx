@@ -7,7 +7,7 @@ description: "Start earning tips with your browser plugin in under 5 minutes. Co
 
 ## Information
 This library uses [Mozilla's webextension-polyfill library](https://github.com/mozilla/webextension-polyfill) internally for compatability across browsers which means it should work on almost all modern browsers.
-For now, the only regularly tested browser is Chrome, but it should work on Firefox, Edge, Opera, and Brave. If you find a compatibility bug, please [open an issue](https://github.com/olostep/olostep-extensions/issues/new).
+For now, the only regularly tested browser is Chrome, but it should work on Firefox, Edge, Opera, and Brave. If you find a compatibility bug, please [open an issue](https://github.com/olostep/OlostepExt/issues/new).
 
 
 The library works both for manifest v2 and v3.
@@ -19,7 +19,7 @@ The library works both for manifest v2 and v3.
 
 <Steps>
     <Step title="Import">
-        Copy the [OlostepExt.js](https://github.com/olostep/olostep-extensions/blob/main/OlostepExt.js) file into your project. If you're using a bundler like Webpack or Rollup, make sure to add OlostepExt in your final bundle.
+        Copy the [OlostepExt.js](https://github.com/olostep/OlostepExt/blob/main/OlostepExt/OlostepExt.js) file into your project. If you're using a bundler like Webpack or Rollup, make sure to add OlostepExt in your final bundle.
 
         For example, in Webpack, you can add the following to your webpack.config.js file to copy OlostepExt into your final bundle:
         ```js webpack.config.js
@@ -151,9 +151,16 @@ The library works both for manifest v2 and v3.
         ]
         ```
         </CodeGroup>
-        Then, in your content.js file, you can import Olostep and start using the APIs (like `olostep.tips.request()` or `olostep.users.get()`)
+        Then, in your content.js file, you can import Olostep and start using the APIs (like `olostep.tips.request()` or `olostep.users.get()`).
+
+        You don't need to call `init()` in your content scripts. It's only needed in your background.js file.
+        ```js content.js
+        let olostep = OlostepExt("olostep_pk_sample_extension");
+
+        // Implement API calls here...
+        ```
     </Step>
-    <Step title="Import OlostepExt inside HTML pages (optional)">
+    <Step title="Import OlostepExt inside HTML pages (optional - Coming Soon)">
         What if you want to use OlostepExt inside your HTML pages and you don't have a content script?
 
         You can use the OlostepWeb JS library to do that.
@@ -181,3 +188,63 @@ The library works both for manifest v2 and v3.
         After you initialize it, you can use the same APIs as OlostepExt.
     </Step>
 </Steps>
+
+## A note on popup.html
+
+A common use case of the OlostepExt JS library is to use it in your extension's popup.html
+
+popup.html files are HTML pages that are displayed when your users click on your extension's icon in their browser's toolbar.
+
+They are useful to display a small UI to your users and allow them to interact with your extension and tip you.
+
+You can't use the Olostep JS library directly in your popup.html file because it's not a content script. You can't use the OlostepWeb JS library either.
+
+But you can send a message from your popup.html file to your content script to trigger the `olostep.tips.request()` method.
+
+Here's an example of how you can do that:
+
+```js popup.js
+// popup.js
+function popup() {
+    chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
+        var activeTab = tabs[0];
+        chrome.tabs.sendMessage(activeTab.id, {"message": "request-olostep-tip"});
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("button1").addEventListener("click", popup);
+});
+```
+
+```html popup.html
+<!-- popup.html -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Popup</title>
+        <script src="popup.js"></script>
+    </head>
+    <body>
+        <button id="button1">Click me</button>
+    </body>
+</html>
+```
+
+```js content.js
+// content.js
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if( request.message === "request-olostep-tip" ) {
+            olostep.tips.request({
+                  item: "coffee",
+                  price_per_item: 300,
+                  currency: "USD",
+                  //...
+            });
+        }
+    }
+);
+```
+
+*Credits:* https://stackoverflow.com/a/29955199/18290336
