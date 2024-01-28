@@ -1,0 +1,27 @@
+---
+title: 'Overview'
+---
+
+The API is structured around two main concepts: **Agents** and **Datasets**.
+
+## Agents
+
+You can think of an agent as a "crawler" that is responsible for retrieving data from a specified URL and returning it into the desired format (HTML, Markdown or PDF).
+
+You start an agent by sending a `GET` request to the `/olostep-p2p-incomingAPI` endpoint on the `agent.olostep.com` server. The response keeps hanging until:
+
+1) the agent successfully finishes the scrape
+
+2) there is an error (returned with a `5xx` or `4xx` status code)
+
+3) or the scrape times out (you can specify the `timeout` in the request).
+
+The response contains the `defaultDatasetId`, which is the unique identifier of the dataset that was created by the agent. You can use this identifier to retrieve the dataset later on (to access the HTML, Markdown or PDF file).
+
+Optionally, you can decide to use the `expandMarkdown` or `expandHTML` parameters to directly retrieve the Markdown and HTML content (`markdown_content` and `html_content`) of the dataset, alongside the `defaultDatasetId`. This avoids the need to make another request to retrieve the actual content.
+
+## Datasets
+
+A dataset is a collection of data that was retrieved by an agent. Depending on your API tier, it remains available also for future reference (like a cached pointer to the page). You can access it by sending a `GET` request to the `/olostep-p2p-dataset-API` endpoint on the `dataset.olostep.com` server.
+The response contains the following fields (depending on the configs sent to the agent):
+`markdown_content` and `html_content`. If the requested page was a PDF, the `markdown_content` will contain the text extracted from the PDF.

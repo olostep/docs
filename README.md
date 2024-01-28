@@ -1,13 +1,5 @@
-# Official documentation for the Olostep Extensions Library
+# Official documentation for the Olostep Scraping API
 
-The Olostep Extensions Library enables earning tips and monetizing your Chrome extension in minutes.
+The Olostep API allows you to build reliable and cheap web scrapers.
 
 To get started, you need to create an account on [Olostep](https://olostep.com).
-
-## Main library
-
-This is the documentation for the main library.
-
-You can find the library [here](https://github.com/olostep/OlostepExt)
-
-

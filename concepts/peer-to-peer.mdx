@@ -1,0 +1,21 @@
+---
+title: 'Peer to Peer'
+description: 'How the P2P network works'
+icon: 'globe'
+---
+
+## Introduction
+The Olostep API uses a peer to peer network built on desktop clients/chromium users. All users are anonymous, consensual and the proxies are ethically sourced. Nodes are protected using anonymization and enforced rate limiting.
+Every node in the network is a desktop client/browser that loads the website and runs your scripts. It is a distributed system that allows you to build reliable and cheap web scrapers.
+
+## Implementation
+Under the hood, Olostep uses an "allocator" (a serverless Lambda function) listening for incoming requests. When a request is received, the "allocator" will find the best node to handle the request and send the url/script to the node. All nodes are listening thanks to a network of webhooks. The node which receives the request, will then run the script and send the results to the "allocator". The "allocator" will finally send the results back to the API caller.
+
+Ajax and Fetch requests are used to load the actual websites. The web scraping implementation is run after having parsed the HTML using the `DOMParser()` API. For more complex scenarios, the websites are loaded inside a secured, sandboxed iframe and the JS is run inside the iframe.
+
+## Example privacy disclaimer
+To collect consent from end-users, participating partners must display a privacy disclaimer during the onboarding process and give full control to the users. This is an example of a disclaimer that can be used:
+
+<Frame caption="Users can decide to accept or decline joining the p2p network at any time">
+    <img src="/images/example_privacy_disclaimer.png" />
+</Frame>
