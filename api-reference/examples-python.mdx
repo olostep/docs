@@ -30,13 +30,14 @@ querystring = {
 
 headers = {"Authorization": "Bearer " + API_KEY}
 
+print("Starting Olostep...")
 response = requests.request(
                 "GET",
                 "https://agent.olostep.com/olostep-p2p-incomingAPI", # API endpoint
                 headers=headers,
                 params=querystring
             )
-
+print(response.text)
 # response is an object that has the following structure
 # {
 #    "defaultDatasetId": "defaultDatasetId_mngjljq1qc",
