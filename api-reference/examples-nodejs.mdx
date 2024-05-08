@@ -1,0 +1,48 @@
+---
+title: 'NodeJS'
+---
+
+```javascript
+let API_KEY = '<YOUR_API_KEY>'; // change this to your API key
+let url = "https://en.wikipedia.org/wiki/Alexander_the_Great"; // change this to the URL you want to scrape
+
+
+const options = {
+    method: 'GET',
+    headers: {
+        Authorization: 'Bearer ' + API_KEY,
+    }
+};
+
+console.log('Starting Olostep...');
+fetch('https://agent.olostep.com/olostep-p2p-incomingAPI?' + new URLSearchParams({
+    "url": url,
+
+    // Optional parameters. Already set to default values.
+    // If you want to change them, see the available options at https://docs.olostep.com/api-reference/start-agent
+
+    // "timeout": 65,
+    // "waitBeforeScraping": 1,
+    // "expandMarkdown": true,
+    // "expandHtml": false,
+    // "saveHtml": true,
+    // "saveMarkdown": true,
+    // "removeImages": true,
+    // "fastLane": false,
+    // "removeCSSselectors": 'default',
+    // "htmlTransformer": 'none'
+  }), options)
+    .then(response => response.json())
+    .then(response => {
+        console.log(response)
+        // response is an object with the following structure:
+        // {
+        //    "defaultDatasetId": "defaultDatasetId_mngjljq1qc",
+        //    "html_content": "",
+        //    "markdown_content": " Alexander the Great - Wikipedia...",
+        //    "text_content": "",
+        //    "usedProvidedNodeCountry": True
+        //     }
+        //
+    }).catch(err => console.error(err));
+```
