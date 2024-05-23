@@ -9,12 +9,12 @@ require 'json'
 require 'pp'
 
 API_KEY = '<YOUR_API_KEY>' # Replace <YOUR_API_KEY> with your API key
-url = 'https://en.wikipedia.org/wiki/Alexander_the_Great'; # Change this to the URL you want to scrape
+url_to_scrape = 'https://en.wikipedia.org/wiki/Alexander_the_Great'; # Here put the url that you want to scrape
 
-def start_olostep(url)
+def start_olostep(url_to_scrape)
 
   querystring = {
-    "url" => url,
+    "url_to_scrape" => url_to_scrape,
     # optional parameters can be uncommented and modified as needed
     # "timeout" => 40,
     # "waitBeforeScraping" => 1,
@@ -28,7 +28,7 @@ def start_olostep(url)
     # "htmlTransformer" => 'none'
   }
 
-  uri = URI.parse("https://agent.olostep.com/olostep-p2p-incomingAPI") # endpoint API
+  uri = URI.parse("https://agent.olostep.com/olostep-p2p-incomingAPI") # API endpoint
   uri.query = URI.encode_www_form(querystring)
 
   http = Net::HTTP.new(uri.host, uri.port)
@@ -44,5 +44,5 @@ def start_olostep(url)
   json_response["markdown_content"]
 end
 
-start_olostep(url)
+start_olostep(url_to_scrape)
 ```
