@@ -7,11 +7,11 @@ title: 'Python'
 import requests
 
 API_KEY = '<YOUR_API_KEY>' # Replace <YOUR_API_KEY> with your API key
-url = "https://en.wikipedia.org/wiki/Alexander_the_Great" # Change this to the URL you want to scrape
+url_to_scrape = "https://en.wikipedia.org/wiki/Alexander_the_Great" # Change this to the URL you want to scrape
 
 def start_olostep(url):
     querystring = {
-        "url":url,
+        "url_to_scrape": url_to_scrape,
        # optional parameters.
        # If you want to change them, uncomment and see the available options at:
        # https://docs.olostep.com/api-reference/start-agent
@@ -47,5 +47,5 @@ def start_olostep(url):
     #    "usedProvidedNodeCountry": True
     #   }
 
-start_olostep(url)
+start_olostep(url_to_scrape)
 ```
