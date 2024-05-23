@@ -4,10 +4,10 @@ title: 'TypeScript'
 
 ```typescript
 const API_KEY: string = '<YOUR_API_KEY>'; // Replace <YOUR_API_KEY> with your API key
-const url: string = "https://en.wikipedia.org/wiki/Alexander_the_Great"; // Change this to the URL you want to scrape
+const url_to_scrape: string = "https://en.wikipedia.org/wiki/Alexander_the_Great"; // Here put the url that you want to scrape
 
 
-function start_olostep(url: string) {
+function start_olostep(url_to_scrape: string) {
     console.log('Starting Olostep...');
     const options: RequestInit = {
         method: 'GET',
@@ -16,7 +16,7 @@ function start_olostep(url: string) {
         }
     };
     fetch('https://agent.olostep.com/olostep-p2p-incomingAPI?' + new URLSearchParams({
-        "url": url,
+        "url_to_scrape": url_to_scrape,
 
         // Optional parameters. Already set to default values.
         // If you want to change them, see the available options at https://docs.olostep.com/api-reference/start-agent
@@ -47,5 +47,5 @@ function start_olostep(url: string) {
         .catch(err => console.error(err));
 }
 
-start_olostep(url);
+start_olostep(url_to_scrape);
 ```
