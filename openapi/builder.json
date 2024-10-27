@@ -139,13 +139,121 @@
             }
           },
           {
-            "name": "fastLane",
+            "name": "actions",
             "in": "query",
             "required": false,
-            "description": "Experimental option to speed up the scraping process",
+            "description": "Actions to perform on the page before getting the content",
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "array",
+              "items": {
+                "type": "object",
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "Wait",
+                    "required": [
+                      "type",
+                      "milliseconds"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "wait"
+                        ],
+                        "description": "Wait for a specified amount of milliseconds"
+                      },
+                      "milliseconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Time to wait in milliseconds"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Click",
+                    "required": [
+                      "type",
+                      "selector"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "click"
+                        ],
+                        "description": "Click on an element"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "CSS selector for the element to click"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Fill Input",
+                    "required": [
+                      "type",
+                      "selector",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fill_input"
+                        ],
+                        "description": "Fill an input element with a value"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "CSS selector for the input element"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Text to enter into the input"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Scroll",
+                    "required": [
+                      "type",
+                      "direction",
+                      "amount"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scroll"
+                        ],
+                        "description": "Scroll the page"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "up",
+                          "down",
+                          "left",
+                          "right"
+                        ],
+                        "description": "Direction to scroll"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "Amount to scroll in pixels"
+                      }
+                    }
+                  }
+                ]
+              }
             }
           }
         ],
