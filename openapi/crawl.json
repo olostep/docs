@@ -1,0 +1,313 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Crawl API",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://agent.olostep.com"
+      }
+    ],
+    "components": {
+        "securitySchemes": {
+          "Authorization": {
+            "type": "http",
+            "scheme": "bearer"
+          }
+        }
+      },
+    "paths": {
+      "/crawl": {
+        "post": {
+          "summary": "Starts a new crawl process",
+          "description": "Initiates a new crawl process with the specified parameters.",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "start_url": {
+                      "type": "string",
+                      "description": "The starting point of crawl. All subset URLs are included."
+                    },
+                    "max_pages": {
+                      "type": "number",
+                      "description": "Specify the maximum number of pages to crawl."
+                    },
+                    "max_depth": {
+                      "type": "number",
+                      "description": "Specify the maximum depth of the crawl."
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Specify any additional URLs in glob pattern that are to be excluded. For example: `/careers/**`"
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Specify any additional URL in glob pattern that are to be included. For example: `'/**'`, `'/blog/**'`"
+                    },
+                    "include_external": {
+                      "type": "boolean",
+                      "description": "Crawl first-degree external links."
+                    }
+                  },
+                  "required": ["start_url"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Crawl started successfully."
+            },
+            "400": {
+              "description": "Bad request due to incorrect or missing parameters."
+            },
+            "500": {
+              "description": "Internal server error."
+            }
+          }
+        }
+      },
+      "/crawl/{crawlId}": {
+        "get": {
+          "summary": "Fetches information about a specific crawl",
+          "description": "Retrieves details about a specific crawl using its crawlId.",
+          "parameters": [
+            {
+              "name": "crawlId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The ID of the crawl to retrieve information for."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with crawl information.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "crawl_id": {
+                        "type": "string"
+                      },
+                      "org_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "depth": {
+                        "type": "number"
+                      },
+                      "urls_count": {
+                        "type": "number"
+                      },
+                      "external_urls_count": {
+                        "type": "number"
+                      },
+                      "start_epoch": {
+                        "type": "number"
+                      },
+                      "start_date": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request due to incorrect or missing parameters."
+            },
+            "404": {
+              "description": "Crawl not found for the provided ID."
+            },
+            "500": {
+              "description": "Internal server error."
+            }
+          }
+        }
+      },
+      "/crawl/{crawlId}/list": {
+        "get": {
+          "summary": "Fetches the list of completed URLs for a specific crawl.",
+          "description": "Retrieves the list of URLs that have been crawled for a specific crawl ID, including a list of `external_urls` linked in the site.",
+          "parameters": [
+            {
+              "name": "crawlId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The ID of the crawl to retrieve the list of URLs for."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with the list of URLs.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "crawl_id": {
+                        "type": "string"
+                      },
+                      "urls_count": {
+                        "type": "number"
+                      },
+                      "urls": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "url": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "external_urls_count": {
+                        "type": "number"
+                      },
+                      "external_urls": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "url": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request due to incorrect or missing parameters."
+            },
+            "404": {
+              "description": "Crawl not found for the provided ID."
+            },
+            "500": {
+              "description": "Internal server error."
+            }
+          }
+        }
+      },
+      "/crawl/{crawlId}/content": {
+        "get": {
+          "summary": "Fetches the content for crawled URLs",
+          "description": "Retrieves the content for the URLs that have been crawled for a specific crawl ID.",
+          "parameters": [
+            {
+              "name": "crawlId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The ID of the crawl to retrieve the content for."
+            },
+            {
+              "name": "formats",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": "JSON array of formats to fetch (e.g., [\"html\", \"markdown\"])."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with the content of the URLs.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "crawl_id": {
+                        "type": "string"
+                      },
+                      "requested_formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "urls_count": {
+                        "type": "number"
+                      },
+                      "urls": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "datasetId": {
+                                "type": "string"
+                              },
+                            "url": {
+                              "type": "string"
+                            },
+                            "isExternal": {
+                              "type": "boolean"
+                            },
+                            "html_content": {
+                              "type": "string"
+                            },
+                            "markdown_content": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request due to incorrect or missing parameters."
+            },
+            "404": {
+              "description": "Crawl not found for the provided ID."
+            },
+            "500": {
+              "description": "Internal server error."
+            }
+          }
+        }
+      }
+    }
+  }
