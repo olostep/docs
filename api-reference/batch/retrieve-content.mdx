@@ -1,0 +1,71 @@
+---
+title: "Retrieve Content"
+description: "Get HTML or Markdown content for completed URLs"
+api: "GET https://batches.olostep.com/batches/{batch_id}/content"
+---
+
+Retrieves the processed content (HTML and/or Markdown) for all completed URLs in a batch.
+
+## Base URL
+
+```bash
+https://batches.olostep.com
+```
+
+## Authentication
+
+Bearer token authentication is required:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Request
+
+### Query Parameters
+
+| Parameter | Type   | Required | Description                                      |
+|-----------|--------|----------|--------------------------------------------------|
+| formats   | Array  | No       | Content formats to retrieve: ["html", "markdown"] (defaults to both) |
+
+## Example Requests
+
+### Retrieve Both Formats
+```bash
+curl https://batches.olostep.com/batches/batch_xyz123/content \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Retrieve HTML Only
+```bash
+curl "https://batches.olostep.com/batches/batch_xyz123/content?formats=[\"html\"]" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Response
+
+```json
+{
+  "batch_id": "batch_xyz123",
+  "requested_formats": ["html", "markdown"],
+  "urls": [
+    {
+      "custom_id": "product_123",
+      "url": "https://example.com/product-123",
+      "html_content": "<!DOCTYPE html>...",
+      "markdown_content": "# Product Title..."
+    }
+  ],
+  "total_urls": 100,
+  "successful_urls": 98,
+  "failed_urls": 2
+}
+```
+
+## Error Codes
+
+| Status | Description                           |
+|--------|---------------------------------------|
+| 401    | Invalid or missing authentication token |
+| 404    | Batch not found                       |
+| 500    | Internal server error                 |

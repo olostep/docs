@@ -1,0 +1,153 @@
+---
+title: "Create Batch"
+description: "Create a new batch processing request"
+api: "POST https://batches.olostep.com/batches"
+---
+
+Create a new batch of URLs for processing. Each batch can contain up to 100,000 URLs and typically completes within 5-15 minutes.
+
+## Authentication
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+## Request
+
+<RequestExample>
+  <CodeGroup title="Request" tag="POST" label="/batches">
+```bash {{ title: 'cURL' }}
+curl -X POST https://batches.olostep.com/batches \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "batch_array": [
+      {
+        "custom_id": "test_1",
+        "url": "https://example.com/page1",
+        "waitBeforeScraping": 1,
+        "saveHtml": true,
+        "saveMarkdown": true,
+        "removeCSSselectors": "default",
+        "fastLane": true
+      }
+    ],
+    "batch_country": "IT"
+  }'
+```
+
+```python {{ title: 'Python' }}
+import requests
+
+response = requests.post(
+    "https://batches.olostep.com/batches",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json={
+        "batch_array": [
+            {
+                "custom_id": "test_1",
+                "url": "https://example.com/page1",
+                "waitBeforeScraping": 1,
+                "saveHtml": True,
+                "saveMarkdown": True,
+                "removeCSSselectors": "default",
+                "fastLane": True
+            }
+        ],
+        "batch_country": "IT"
+    }
+)
+print(response.json())
+```
+  </CodeGroup>
+</RequestExample>
+
+
+### URL Parameters
+
+<ParamField body="batch_array" type="array" required>
+  Array of URLs to process
+</ParamField>
+
+### Batch Array Object Parameters
+
+<ParamField body="custom_id" type="string" required>
+  Unique identifier for the URL
+</ParamField>
+
+<ParamField body="url" type="string" required>
+  URL to process
+</ParamField>
+
+<ParamField body="waitBeforeScraping" type="integer" default="1">
+  Wait time before scraping in seconds
+</ParamField>
+
+<ParamField body="saveHtml" type="boolean" default="true">
+  Save HTML content
+</ParamField>
+
+<ParamField body="saveMarkdown" type="boolean" default="true">
+  Save Markdown content
+</ParamField>
+
+<ParamField body="removeCSSselectors" type="string" default="default">
+  CSS selectors to remove. Use "default", "none", or a JSON array of selectors
+</ParamField>
+
+<ParamField body="fastLane" type="boolean" default="true">
+  Use fast lane processing
+</ParamField>
+
+### Optional Parameters
+
+<ParamField body="batch_country" type="string">
+  Country for node selection (defaults to "RANDOM")
+</ParamField>
+
+<ParamField body="batch_parser" type="string">
+  Specific parser to use (defaults to "none")
+</ParamField>
+
+## Response
+
+<ResponseField name="batch_id" type="string">
+  The unique identifier for the batch
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the batch
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "batch_id": "batch_xyz123",
+  "total_urls": 1,
+  "status": "in_progress"
+}
+```
+</ResponseExample>
+
+## Or, Try it locally!
+
+```bash
+curl -X POST https://batches.olostep.com/batches \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "batch_array": [
+      {
+        "custom_id": "product_123",
+        "url": "https://example.com/product-123"
+      },
+      {
+        "custom_id": "product_124",
+        "url": "https://example.com/product-124"
+      }
+    ],
+    "batch_country": "IT"
+  }'

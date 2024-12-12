@@ -1,0 +1,74 @@
+---
+title: "Batch Overview"
+description: "Introduction to Olostep's batch processing capabilities"
+---
+
+Batches allow you to process large numbers of URLs efficiently through our distributed architecture. Instead of making individual API calls, you can send up to 100,000 URLs in a single batch request.
+
+## Features
+
+- Process up to 100k URLs in a single batch
+- Average completion time of 5-15 minutes for large batches
+- Support for both HTML and Markdown content retrieval
+- Real-time status tracking and progress monitoring
+- Automatic retry mechanism for failed URLs
+- Cost-effective parallel processing
+
+## Basic Usage
+
+```python
+import requests
+
+response = requests.post(
+    "https://batches.olostep.com/batches",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json={
+        "batch_array": [
+            {
+                "custom_id": "product_123",
+                "url": "https://example.com/product-123"
+            },
+            {
+                "custom_id": "product_124",
+                "url": "https://example.com/product-124"
+            }
+        ]
+    }
+)
+
+batch_id = response.json()['batch_id']
+```
+
+## Limitations
+
+| Limit                        | Value             |
+|------------------------------|-------------------|
+| Maximum URLs per batch       | 100,000           |
+| Maximum URL length           | 2,048 characters  |
+| Concurrent batches per org   | 10                |
+| Batch results retention      | 7 days            |
+
+## Workflow
+
+1. Create a batch with your URLs
+2. Monitor batch status
+3. Retrieve completed URLs and content
+4. Check for any failed URLs
+5. Retry failed URLs if needed
+
+## Best Practices
+
+- Group related URLs in the same batch
+- Use meaningful custom_ids for easy tracking
+- Monitor batch progress regularly
+- Implement proper error handling
+- Store retrieved content promptly
+
+## Next Steps
+
+- [Create your first batch](/api-reference/batch/create-batch)
+- [Monitor batch progress](/api-reference/batch/retrieve-batch)
+- [Retrieve content](/api-reference/batch/retrieve-content)

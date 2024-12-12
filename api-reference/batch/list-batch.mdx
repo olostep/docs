@@ -1,0 +1,72 @@
+---
+title: "List Batch URLs"
+description: "Get a list of completed or failed URLs in a batch"
+api: "GET https://batches.olostep.com/batches/{batch_id}/list"
+---
+
+Returns a list of URLs that have either completed processing or failed, based on the status parameter.
+
+## Base URL
+
+```bash
+https://batches.olostep.com
+```
+
+## Authentication
+
+Bearer token authentication is required:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Request
+
+### Query Parameters
+
+| Parameter | Type   | Required | Description                                                         |
+|-----------|--------|----------|---------------------------------------------------------------------|
+| status    | String | No       | Filter URLs by status: "completed" or "failed" (defaults to "completed") |
+
+## Example Requests
+
+### List Completed URLs
+```bash
+curl https://batches.olostep.com/batches/batch_xyz123/list?status=completed \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### List Failed URLs
+```bash
+curl https://batches.olostep.com/batches/batch_xyz123/list?status=failed \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Response
+
+```json
+{
+  "batch_id": "batch_xyz123",
+  "urls": [
+    {
+      "custom_id": "product_123",
+      "url": "https://example.com/product-123"
+    },
+    {
+      "custom_id": "product_124",
+      "url": "https://example.com/product-124"
+    }
+  ],
+  "count": 2
+}
+```
+
+## Error Codes
+
+| Status | Description                                      |
+|--------|--------------------------------------------------|
+| 401    | Invalid or missing authentication token          |
+| 404    | Batch not found                                  |
+| 500    | Internal server error                            |
+
+
