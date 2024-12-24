@@ -18,9 +18,9 @@
     }
   },
   "paths": {
-    "/crawl": {
+    "/crawls": {
       "post": {
-        "summary": "Starts a new crawl process",
+        "summary": "Starts a new crawl.",
         "description": "Initiates a new crawl process with the specified parameters.",
         "requestBody": {
           "required": true,
@@ -116,9 +116,9 @@
         }
       }
     },
-    "/crawl/{crawlId}": {
+    "/crawls/{crawlId}": {
       "get": {
-        "summary": "Fetches information about a specific crawl",
+        "summary": "Fetches information about a specific crawl.",
         "description": "This endpoint retrieves details about a specific crawl using its `crawlId`. The response includes information such as the crawl status, the number of URLs crawled, the current depth, and the start time.",
         "parameters": [
           {
@@ -177,7 +177,7 @@
         }
       }
     },
-    "/crawl/{crawlId}/list": {
+    "/crawls/{crawlId}/list": {
       "get": {
         "summary": "Fetches the list of pages for a specific crawl.",
         "description": "This endpoint retrieves the list of pages that have been crawled for a specific crawl ID. The response includes the pages along with their html and markdown as requested. The `search_query` parameter allows for sorting the results by relevance. The `formats` query parameter specifies the formats of the content to be fetched (e.g., HTML, Markdown). The `limit` parameter allows to limit the number of results returned. The `cursor` parameter gets the next set of urls.  The response includes the content for the URLs along with the total, successful, and failed URLs, and a `cursor` value for subsequent requests.",

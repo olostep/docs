@@ -1,0 +1,105 @@
+---
+title: 'Example'
+---
+
+This example is in Python and can be easily translated to other languages.
+
+### Setup:
+```py
+import requests
+import time
+
+API_URL = 'https://agent.olostep.com'
+API_KEY = '<your token>'
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+
+def initiate_crawl(data):
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
+    return response.json()
+
+def get_crawl_info(crawl_id):
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+    return response.json()
+
+def get_crawled_list(crawl_id, cursor=None):
+    url = f'{API_URL}/crawls/{crawl_id}/list'
+    params = []
+    if cursor is not None:
+        params.append(f'cursor={cursor}')
+    if params:
+        url += '?' + '&'.join(params)
+    response = requests.get(url, headers=HEADERS)
+    return response.json()
+```
+
+
+### Example 1: Basic Crawl
+```py
+def example_basic_crawl():
+    data = {
+        "start_url": "https://sugarbooandco.com",
+        "max_pages": 100,
+        "include_urls": ["/**"],
+        "include_external": False
+    }
+    crawl = initiate_crawl(data)
+    crawl_id = crawl['id']
+
+    while True:
+        info = get_crawl_info(crawl_id)
+        if info['status'] == 'completed':
+            break
+        time.sleep(5)
+
+    crawl_list = get_crawled_list(crawl_id)
+    print(crawl_list['pages'])
+```
+
+### Example 2: Crawl with Cursor Pagination
+```py
+def example_crawl_with_cursor():
+    data = {
+        "start_url": "https://sugarbooandco.com",
+        "max_pages": 100,
+        "include_urls": ["/**"],
+        "include_external": False
+    }
+    crawl = initiate_crawl(data)
+    crawl_id = crawl['id']
+    cursor = 0
+
+    while True:
+        crawl_list = get_crawled_list(crawl_id, cursor)
+        print(crawl_list['pages'])
+        if 'cursor' not in crawl_list:
+            break
+        cursor = crawl_list['cursor']
+        time.sleep(5)
+```
+
+### Example 3: Crawl with Search Query and Top N
+```py
+def example_crawl_with_search_query():
+    data = {
+        "start_url": "https://sugarbooandco.com",
+        "max_pages": 100,
+        "include_urls": ["/**"],
+        "include_external": False,
+        "search_query": "contact us",
+        "top_n": 5
+    }
+    crawl = initiate_crawl(data)
+    crawl_id = crawl['id']
+
+    while True:
+        info = get_crawl_info(crawl_id)
+        if info['status'] == 'completed':
+            break
+        time.sleep(5)
+
+    crawl_list = get_crawled_list(crawl_id)
+    print(crawl_list['pages'])
+```
