@@ -58,19 +58,54 @@
                   "include_external": {
                     "type": "boolean",
                     "description": "Crawl first-degree external links."
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "An optional search query to find specific links and also sort the results by relevance."
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "An optional number to only crawl the top N most relevant links on every page as per search query."
                   }
                 },
-                "required": [
-                  "start_url",
-                  "include_urls"
-                ]
+                "required": ["start_url", "include_urls"]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Crawl started successfully."
+            "description": "Crawl started successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "object": { "type": "string" },
+                    "status": { "type": "string" },
+                    "created": { "type": "number" },
+                    "start_date": { "type": "string" },
+                    "start_url": { "type": "string" },
+                    "max_pages": { "type": "number" },
+                    "max_depth": { "type": "number" },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "include_external": { "type": "boolean" },
+                    "search_query": { "type": "string" },
+                    "top_n": { "type": "number" },
+                    "current_depth": { "type": "number" },
+                    "pages_count": { "type": "number" }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request due to incorrect or missing parameters."
@@ -84,7 +119,7 @@
     "/crawl/{crawlId}": {
       "get": {
         "summary": "Fetches information about a specific crawl",
-        "description": "Retrieves details about a specific crawl using its crawlId.",
+        "description": "This endpoint retrieves details about a specific crawl using its `crawlId`. The response includes information such as the crawl status, the number of URLs crawled, the current depth, and the start time.",
         "parameters": [
           {
             "name": "crawlId",
@@ -104,33 +139,27 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "crawl_id": {
-                      "type": "string"
+                    "id": { "type": "string" },
+                    "object": { "type": "string" },
+                    "status": { "type": "string" },
+                    "created": { "type": "number" },
+                    "start_date": { "type": "string" },
+                    "start_url": { "type": "string" },
+                    "max_pages": { "type": "number" },
+                    "max_depth": { "type": "number" },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": { "type": "string" }
                     },
-                    "org_id": {
-                      "type": "string"
+                    "include_urls": {
+                      "type": "array",
+                      "items": { "type": "string" }
                     },
-                    "status": {
-                      "type": "string"
-                    },
-                    "depth": {
-                      "type": "number"
-                    },
-                    "urls_count": {
-                      "type": "number"
-                    },
-                    "failed_urls_count": {
-                      "type": "number"
-                    },
-                    "include_external": {
-                      "type": "boolean"
-                    },
-                    "start_epoch": {
-                      "type": "number"
-                    },
-                    "start_date": {
-                      "type": "string"
-                    }
+                    "include_external": { "type": "boolean" },
+                    "search_query": { "type": "string" },
+                    "top_n": { "type": "number" },
+                    "current_depth": { "type": "number" },
+                    "pages_count": { "type": "number" }
                   }
                 }
               }
@@ -150,8 +179,8 @@
     },
     "/crawl/{crawlId}/list": {
       "get": {
-        "summary": "Fetches the list of completed, failed, or external URLs for a specific crawl.",
-        "description": "Retrieves the list of URLs that have been crawled for a specific crawl ID, including a list of `external_urls` linked in the site.",
+        "summary": "Fetches the list of pages for a specific crawl.",
+        "description": "This endpoint retrieves the list of pages that have been crawled for a specific crawl ID. The response includes the pages along with their html and markdown as requested. The `search_query` parameter allows for sorting the results by relevance. The `formats` query parameter specifies the formats of the content to be fetched (e.g., HTML, Markdown). The `limit` parameter allows to limit the number of results returned. The `cursor` parameter gets the next set of urls.  The response includes the content for the URLs along with the total, successful, and failed URLs, and a `cursor` value for subsequent requests.",
         "parameters": [
           {
             "name": "crawlId",
@@ -161,6 +190,43 @@
               "type": "string"
             },
             "description": "The ID of the crawl to retrieve the list of URLs for."
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "description": "JSON array of formats to fetch (e.g., [\"html\", \"markdown\"])."
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An optional search query to sort the results by relevance. Uses the original search_query by default if provided."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Optional integer representing the index to start fetching content from. Useful to get the next set of urls until all are fetched. Start with 0, then provide *response['cursor']* value of the previous request."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Optional integer to limit the number of results returned. Recommended 50-100 results at a time. Paginated using *cursor*."
           }
         ],
         "responses": {
@@ -171,52 +237,22 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "crawl_id": {
-                      "type": "string"
-                    },
-                    "urls_count": {
-                      "type": "number"
-                    },
-                    "urls": {
+                    "id": { "type": "string" },
+                    "object": { "type": "string" },
+                    "status": { "type": "string" },
+                    "search_query": { "type": "string" },
+                    "pages_count": { "type": "number" },
+                    "pages": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "dataset_id": {
-                            "type": "string"
-                          },
-                          "url": {
-                            "type": "string"
-                          },
-                          "is_external": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    },
-                    "failed_urls_count": {
-                      "type": "number"
-                    },
-                    "failed_urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "dataset_id": {
-                            "type": "string"
-                          },
-                          "url": {
-                            "type": "string"
-                          },
-                          "is_external": {
-                            "type": "boolean"
-                          }
+                          "id": { "type": "string" },
+                          "dataset_id": { "type": "string" },
+                          "url": { "type": "string" },
+                          "is_external": { "type": "boolean" },
+                          "html_content": { "type": "string" },
+                          "markdown_content": { "type": "string" }
                         }
                       }
                     },
@@ -225,122 +261,15 @@
                       "properties": {
                         "external_urls": {
                           "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request due to incorrect or missing parameters."
-          },
-          "404": {
-            "description": "Crawl not found for the provided ID."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/crawl/{crawlId}/content": {
-      "get": {
-        "summary": "Fetches the content for crawled URLs",
-        "description": "Retrieves the content for the URLs that have been crawled for a specific crawl ID.",
-        "parameters": [
-          {
-            "name": "crawlId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The ID of the crawl to retrieve the content for."
-          },
-          {
-            "name": "formats",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "JSON array of formats to fetch (e.g., [\"html\", \"markdown\"])."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response with the content of the URLs.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "crawl_id": {
-                      "type": "string"
-                    },
-                    "requested_formats": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "urls_count": {
-                      "type": "number"
-                    },
-                    "urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "datasetId": {
-                            "type": "string"
-                          },
-                          "url": {
-                            "type": "string"
-                          },
-                          "isExternal": {
-                            "type": "boolean"
-                          },
-                          "html_content": {
-                            "type": "string"
-                          },
-                          "markdown_content": {
-                            "type": "string"
-                          }
+                          "items": { "type": "string" }
+                        },
+                        "failed_urls": {
+                          "type": "array",
+                          "items": { "type": "string" }
                         }
                       }
                     },
-                    "failed_urls_count": {
-                      "type": "number"
-                    },
-                    "failed_urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "dataset_id": {
-                            "type": "string"
-                          },
-                          "url": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
+                    "cursor": { "type": "number" }
                   }
                 }
               }
