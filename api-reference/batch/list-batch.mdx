@@ -4,7 +4,7 @@ description: "Get a list of completed or failed URLs in a batch"
 api: "GET https://batches.olostep.com/batches/{batch_id}/list"
 ---
 
-Returns a list of URLs that have either completed processing or failed, based on the status parameter.
+Returns a list of URLs that have either completed processing or failed, based on the status parameter. The URLs are cleaned to remove tracking parameters and unnecessary query strings.
 
 ## Base URL
 
@@ -14,59 +14,87 @@ https://batches.olostep.com
 
 ## Authentication
 
-Bearer token authentication is required:
-
-```bash
-Authorization: Bearer YOUR_API_KEY
-```
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
 
 ## Request
 
+### Path Parameters
+
+<ParamField body="batch_id" type="string" required> The unique ID of the batch to retrieve </ParamField>
+
 ### Query Parameters
 
-| Parameter | Type   | Required | Description                                                         |
-|-----------|--------|----------|---------------------------------------------------------------------|
-| status    | String | No       | Filter URLs by status: "completed" or "failed" (defaults to "completed") |
+<ParamField query="status" type="string">
+  Filter URLs by status: "completed" or "failed" (defaults to "completed")
+</ParamField>
 
 ## Example Requests
 
-### List Completed URLs
-```bash
+<RequestExample>
+  <CodeGroup title="Request" tag="GET" label="/batches/{batch_id}/list">
+```bash {{ title: 'cURL' }}
 curl https://batches.olostep.com/batches/batch_xyz123/list?status=completed \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### List Failed URLs
-```bash
+```bash {{ title: 'List Failed URLs' }}
 curl https://batches.olostep.com/batches/batch_xyz123/list?status=failed \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
+  </CodeGroup>
+</RequestExample>
 
 ## Response
 
+<ResponseField name="batch_id" type="string">
+  The unique identifier for the batch
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  List of processed URLs, cleaned to remove unnecessary parameters
+</ResponseField>
+
+<ResponseField name="count" type="integer">
+  Total count of URLs in the response
+</ResponseField>
+
+<ResponseExample>
 ```json
 {
   "batch_id": "batch_xyz123",
-  "urls": [
+  "items": [
     {
       "custom_id": "product_123",
       "url": "https://example.com/product-123"
-    },
-    {
-      "custom_id": "product_124",
-      "url": "https://example.com/product-124"
     }
   ],
-  "count": 2
+  "count": 1
 }
 ```
+</ResponseExample>
+
+## Notes
+
+- URLs in the response are cleaned to remove parameters like: `sb-p2p`, `should-crawl`, `record-id`, `oo-step`, etc.
+- `custom_id` values have `defaultDatasetId_` and `scrape_` prefixes removed
+- Failed URLs list compares original batch URLs with completed ones to determine failures
 
 ## Error Codes
 
-| Status | Description                                      |
-|--------|--------------------------------------------------|
-| 401    | Invalid or missing authentication token          |
-| 404    | Batch not found                                  |
-| 500    | Internal server error                            |
+### 400 - Invalid Status Parameter
+The `status` parameter provided is invalid. Ensure it is set to either `completed` or `failed`.
 
+### 402 - Invalid API Key
+The API key provided is invalid. Double-check the key or contact support at [info@olostep.com](mailto:info@olostep.com).
 
+### 500 - Internal Server Error
+A server error occurred, or insufficient nodes are available to process the batch. Retry or contact support if the issue persists.
+
+### Example Error Response
+```json
+{
+  "invalid_api_key": true,
+  "message": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues."
+}

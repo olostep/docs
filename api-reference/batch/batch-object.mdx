@@ -11,36 +11,37 @@ The batch object contains all information about a batch processing request, incl
 
 ```json
 {
-  "batch_id": "batch_xyz123",
-  "org_id": "zecento",
+  "id": "batch_xyz123",
+  "object": "batch",
   "status": "in_progress",
+  "created": 1698757200000,
   "total_urls": 100,
   "completed_urls": 45,
   "number_retried": 0,
-  "start_epoch": 1698757200,
-  "start_date": "2024-10-31",
-  "completion_percentage": "45.00"
+  "batch_parser": "none",
+  "batch_country": "IT",
+  "start_date": "2024-10-31"
 }
 ```
 
 ## Fields
 
-| Field               | Type   | Description                                      |
-|---------------------|--------|--------------------------------------------------|
-| batch_id            | String | Unique identifier for the batch                  |
-| org_id              | String | Organization identifier                          |
-| status              | String | Current status: "in_progress", "completed", or "failed" |
-| total_urls          | Number | Total number of URLs in the batch                |
-| completed_urls      | Number | Number of successfully processed URLs            |
-| number_retried      | Number | Number of retry attempts made                    |
-| start_epoch         | Number | Batch creation timestamp in Unix epoch           |
-| start_date          | String | Batch creation date (YYYY-MM-DD)                 |
-| completion_percentage | String | Percentage of URLs successfully processed       |
+| **Field**           | **Type**  | **Description**                                   |
+|---------------------|-----------|--------------------------------------------------|
+| **id**              | `String`  | Unique identifier for the batch                  |
+| **object**          | `String`  | Type identifier, always `"batch"`                |
+| **status**          | `String`  | Current status: `"in_progress"` or `"completed"` |
+| **created**         | `Number`  | Batch creation timestamp in milliseconds         |
+| **total_urls**      | `Number`  | Total number of URLs in the batch                |
+| **completed_urls**  | `Number`  | Number of successfully processed URLs             |
+| **number_retried**  | `Number`  | Number of retry attempts made                     |
+| **batch_parser**    | `String`  | Parser used for the batch                        |
+| **batch_country**   | `String`  | Country selected for node allocation              |
+| **start_date**      | `String`  | Batch creation date (`YYYY-MM-DD`)               |
 
 ## Status Values
 
-| Status     | Description                                         |
-|------------|-----------------------------------------------------|
-| in_progress| Batch is currently being processed                  |
-| completed  | All URLs have been processed                        |
-| failed     | Batch processing encountered critical errors       |
+| **Status**      | **Description**                               |
+|-----------------|-----------------------------------------------|
+| `in_progress`   | Batch is currently being processed           |
+| `completed`     | All URLs have been processed successfully    |

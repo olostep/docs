@@ -4,7 +4,7 @@ description: "Create a new batch processing request"
 api: "POST https://batches.olostep.com/batches"
 ---
 
-Create a new batch of URLs for processing. Each batch can contain up to 100,000 URLs and typically completes within 5-15 minutes.
+Create a new batch of URLs for processing. Each batch can process up to 10,000 URLs using Olostep's distributed architecture.
 
 ## Authentication
 
@@ -23,8 +23,8 @@ curl -X POST https://batches.olostep.com/batches \
   -d '{
     "batch_array": [
       {
-        "custom_id": "test_1",
-        "url": "https://example.com/page1",
+        "custom_id": "product_123",
+        "url": "https://example.com/product-123",
         "waitBeforeScraping": 1,
         "saveHtml": true,
         "saveMarkdown": true,
@@ -32,7 +32,9 @@ curl -X POST https://batches.olostep.com/batches \
         "fastLane": true
       }
     ],
-    "batch_country": "IT"
+    "batch_country": "IT",
+    "batch_parser": "none",
+    "parallel_executions_batch": 4
   }'
 ```
 
@@ -48,8 +50,8 @@ response = requests.post(
     json={
         "batch_array": [
             {
-                "custom_id": "test_1",
-                "url": "https://example.com/page1",
+                "custom_id": "product_123",
+                "url": "https://example.com/product-123",
                 "waitBeforeScraping": 1,
                 "saveHtml": True,
                 "saveMarkdown": True,
@@ -57,14 +59,15 @@ response = requests.post(
                 "fastLane": True
             }
         ],
-        "batch_country": "IT"
+        "batch_country": "IT",
+        "batch_parser": "none",
+        "parallel_executions_batch": 4
     }
 )
 print(response.json())
 ```
   </CodeGroup>
 </RequestExample>
-
 
 ### URL Parameters
 
@@ -112,9 +115,17 @@ print(response.json())
   Specific parser to use (defaults to "none")
 </ParamField>
 
+<ParamField body="parallel_executions_batch" type="integer" default="4">
+  Number of parallel executions (defaults to 4)
+</ParamField>
+
+<ParamField body="force_batch_connection_id" type="string">
+  Force specific node connection (optional)
+</ParamField>
+
 ## Response
 
-<ResponseField name="batch_id" type="string">
+<ResponseField name="id" type="string">
   The unique identifier for the batch
 </ResponseField>
 
@@ -125,29 +136,31 @@ print(response.json())
 <ResponseExample>
 ```json
 {
-  "batch_id": "batch_xyz123",
+  "id": "batch_xyz123",
+  "object": "batch",
+  "status": "in_progress",
+  "created": 1698757200000,
   "total_urls": 1,
-  "status": "in_progress"
+  "completed_urls": 0,
+  "number_retried": 0,
+  "batch_parser": "none",
+  "batch_country": "IT",
+  "start_date": "2024-10-31"
 }
 ```
 </ResponseExample>
 
-## Or, Try it locally!
+## Error Codes
 
-```bash
-curl -X POST https://batches.olostep.com/batches \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "batch_array": [
-      {
-        "custom_id": "product_123",
-        "url": "https://example.com/product-123"
-      },
-      {
-        "custom_id": "product_124",
-        "url": "https://example.com/product-124"
-      }
-    ],
-    "batch_country": "IT"
-  }'
+<ErrorField code="400" description="Invalid request format or batch size limits exceeded" />
+<ErrorField code="402" description="Invalid API key" />
+<ErrorField code="500" description="Internal server error or insufficient nodes available" />
+
+<ErrorExample>
+```json
+{
+  "invalid_api_key": true,
+  "message": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues."
+}
+```
+</ErrorExample>

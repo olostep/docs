@@ -1,10 +1,11 @@
 ---
 title: "Retrieve Batch"
-description: "Get information about a specific batch"
+description: "Get detailed information about a specific batch, including status, progress, and metadata."
 api: "GET https://batches.olostep.com/batches/{batch_id}"
 ---
 
-Returns detailed information about a specific batch, including its current status and progress.
+
+Retrieve detailed information about a specific batch. The endpoint automatically updates the batch status to `completed` when all URLs have been processed.
 
 ## Base URL
 
@@ -20,6 +21,12 @@ Bearer token authentication is required:
 Authorization: Bearer YOUR_API_KEY
 ```
 
+## Request
+
+### Path Parameters
+
+<ParamField body="batch_id" type="string" required> The unique ID of the batch to retrieve </ParamField>
+
 ## Example Request
 
 ```bash
@@ -31,34 +38,60 @@ curl https://batches.olostep.com/batches/batch_xyz123 \
 
 ```json
 {
-  "batch_id": "batch_xyz123",
+  "id": "batch_xyz123",
+  "object": "batch",
   "status": "in_progress",
+  "created": 1698757200000,
   "total_urls": 100,
   "completed_urls": 45,
   "number_retried": 0,
-  "start_epoch": 1698757200,
-  "start_date": "2024-10-31",
-  "completion_percentage": "45.00"
+  "start_date": "2024-10-31"
 }
 ```
 
-## Fields
+### Response Fields
 
-| Field                   | Type   | Description                                  |
-|-------------------------|--------|----------------------------------------------|
-| batch_id                | String | Unique identifier for the batch             |
-| status                  | String | Current status: "in_progress", "completed", or "failed" |
-| total_urls              | Number | Total number of URLs in the batch           |
-| completed_urls          | Number | Number of successfully processed URLs       |
-| number_retried          | Number | Number of retry attempts made               |
-| start_epoch             | Number | Batch creation timestamp in Unix epoch      |
-| start_date              | String | Batch creation date (YYYY-MM-DD)            |
-| completion_percentage   | String | Percentage of URLs successfully processed  |
+Got it! Here's a neat table format for the response fields in Mintlify:
+
+### Response Fields
+
+I see now! Here’s a neat, organized table format based on your original, without any unnecessary `ParamField` tags:
+
+### Response Fields
+
+| Field            | Type   | Description                                      |
+|------------------|--------|--------------------------------------------------|
+| id               | String | Unique identifier for the batch                  |
+| object           | String | Object type, always `batch`                      |
+| status           | String | Current status: `in_progress`, `completed`       |
+| created          | Number | Timestamp of batch creation (epoch in ms)        |
+| total_urls       | Number | Total number of URLs in the batch                |
+| completed_urls   | Number | Number of URLs successfully processed            |
+| number_retried   | Number | Total retry attempts made                        |
+| start_date       | String | Batch creation date (formatted as `YYYY-MM-DD`)  |
+
+## Status Behavior
+
+The `status` is automatically updated to `completed` when:
+1. The number of `completed_urls` matches `total_urls`.
+2. The previous status was `in_progress`.
 
 ## Error Codes
 
-| Status | Description                           |
-|--------|---------------------------------------|
-| 401    | Invalid or missing authentication token |
-| 404    | Batch not found                       |
-| 500    | Internal server error                 |
+### 402 - Invalid API Key
+The provided API key is invalid. Double-check the key or contact support at [info@olostep.com](mailto:info@olostep.com).
+
+### 404 - Batch Not Found
+The specified `batch_id` does not exist.
+
+### 500 - Internal Server Error
+An unexpected error occurred. Retry later or contact support if the issue persists.
+
+### Example Error Response
+
+```json
+{
+  "invalid_api_key": true,
+  "message": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues."
+}
+```
