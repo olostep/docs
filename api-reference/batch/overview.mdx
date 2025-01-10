@@ -27,14 +27,14 @@ response = requests.post(
         "Content-Type": "application/json"
     },
     json={
-        "batch_array": [
+        "items": [
             {
                 "custom_id": "product_123",
                 "url": "https://example.com/product-123"
             }
         ],
         "batch_parser": "none",
-        "batch_country": "RANDOM"
+        "country": "RANDOM"
     }
 )
 
@@ -65,7 +65,7 @@ batch_id = response.json()['id']
 - Group related URLs in the same batch
 - Use meaningful `custom_id`s for easy tracking
 - Specify `batch_parser` when dealing with specific websites
-- Use `batch_country` for region-specific content
+- Use `country` for region-specific content
 - Monitor batch progress regularly
 - Implement proper error handling
 

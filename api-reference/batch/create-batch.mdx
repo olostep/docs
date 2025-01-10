@@ -21,7 +21,7 @@ curl -X POST https://batches.olostep.com/batches \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "batch_array": [
+    "items": [
       {
         "custom_id": "product_123",
         "url": "https://example.com/product-123",
@@ -32,7 +32,7 @@ curl -X POST https://batches.olostep.com/batches \
         "fastLane": true
       }
     ],
-    "batch_country": "IT",
+    "country": "IT",
     "batch_parser": "none",
     "parallel_executions_batch": 4
   }'
@@ -48,7 +48,7 @@ response = requests.post(
         "Content-Type": "application/json"
     },
     json={
-        "batch_array": [
+        "items": [
             {
                 "custom_id": "product_123",
                 "url": "https://example.com/product-123",
@@ -59,7 +59,7 @@ response = requests.post(
                 "fastLane": True
             }
         ],
-        "batch_country": "IT",
+        "country": "IT",
         "batch_parser": "none",
         "parallel_executions_batch": 4
     }
@@ -71,7 +71,7 @@ print(response.json())
 
 ### URL Parameters
 
-<ParamField body="batch_array" type="array" required>
+<ParamField body="items" type="array" required>
   Array of URLs to process
 </ParamField>
 
@@ -107,7 +107,7 @@ print(response.json())
 
 ### Optional Parameters
 
-<ParamField body="batch_country" type="string">
+<ParamField body="country" type="string">
   Country for node selection (defaults to "RANDOM")
 </ParamField>
 
@@ -144,7 +144,7 @@ print(response.json())
   "completed_urls": 0,
   "number_retried": 0,
   "batch_parser": "none",
-  "batch_country": "IT",
+  "country": "IT",
   "start_date": "2024-10-31"
 }
 ```
