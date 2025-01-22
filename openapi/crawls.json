@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://agent.olostep.com"
+      "url": "https://api.olostep.com"
     }
   ],
   "components": {
@@ -20,8 +20,13 @@
   "paths": {
     "/crawls": {
       "post": {
-        "summary": "Starts a new crawl.",
+        "summary": "Start a new crawl",
         "description": "Initiates a new crawl process with the specified parameters.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -68,7 +73,10 @@
                     "description": "An optional number to only crawl the top N most relevant links on every page as per search query."
                   }
                 },
-                "required": ["start_url", "include_urls"]
+                "required": [
+                  "start_url",
+                  "include_urls"
+                ]
               }
             }
           }
@@ -81,27 +89,65 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "object": { "type": "string" },
-                    "status": { "type": "string" },
-                    "created": { "type": "number" },
-                    "start_date": { "type": "string" },
-                    "start_url": { "type": "string" },
-                    "max_pages": { "type": "number" },
-                    "max_depth": { "type": "number" },
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl ID"
+                    },
+                    "object": {
+                      "type": "string",
+                       "description": "The kind of object. \"crawl\" for this endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                       "description": "`in_progress` or `completed`"
+                      
+                    },
+                    "created": {
+                      "type": "number",
+                       "description": "Created time in epoch"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Created time in date"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
                     "exclude_urls": {
                       "type": "array",
-                      "items": { "type": "string" }
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "include_urls": {
                       "type": "array",
-                      "items": { "type": "string" }
+                      "items": {
+                        "type": "string"
+                      }
                     },
-                    "include_external": { "type": "boolean" },
-                    "search_query": { "type": "string" },
-                    "top_n": { "type": "number" },
-                    "current_depth": { "type": "number" },
-                    "pages_count": { "type": "number" }
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "The current depth of the crawl process."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Count of pages crawled"
+                    }
                   }
                 }
               }
@@ -118,8 +164,13 @@
     },
     "/crawls/{crawlId}": {
       "get": {
-        "summary": "Fetches information about a specific crawl.",
-        "description": "This endpoint retrieves details about a specific crawl using its `crawlId`. The response includes information such as the crawl status, the number of URLs crawled, the current depth, and the start time.",
+        "summary": "Retrieve crawl information",
+        "description": "Fetches information about a specific crawl using its `crawlId`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "parameters": [
           {
             "name": "crawlId",
@@ -139,27 +190,65 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "object": { "type": "string" },
-                    "status": { "type": "string" },
-                    "created": { "type": "number" },
-                    "start_date": { "type": "string" },
-                    "start_url": { "type": "string" },
-                    "max_pages": { "type": "number" },
-                    "max_depth": { "type": "number" },
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl ID"
+                    },
+                    "object": {
+                      "type": "string",
+                        "description": "The kind of object. \"crawl\" for this endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                       "description": "`in_progress` or `completed`"
+                      
+                    },
+                    "created": {
+                      "type": "number",
+                       "description": "Created time in epoch"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Created time in date"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
                     "exclude_urls": {
                       "type": "array",
-                      "items": { "type": "string" }
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "include_urls": {
                       "type": "array",
-                      "items": { "type": "string" }
+                      "items": {
+                        "type": "string"
+                      }
                     },
-                    "include_external": { "type": "boolean" },
-                    "search_query": { "type": "string" },
-                    "top_n": { "type": "number" },
-                    "current_depth": { "type": "number" },
-                    "pages_count": { "type": "number" }
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "The current depth of the crawl process."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Count of pages crawled"
+                    }
                   }
                 }
               }
@@ -179,8 +268,13 @@
     },
     "/crawls/{crawlId}/list": {
       "get": {
-        "summary": "Fetches the list of pages for a specific crawl.",
-        "description": "This endpoint retrieves the list of pages that have been crawled for a specific crawl ID. The response includes the pages along with their html and markdown as requested. The `search_query` parameter allows for sorting the results by relevance. The `formats` query parameter specifies the formats of the content to be fetched (e.g., HTML, Markdown). The `limit` parameter allows to limit the number of results returned. The `cursor` parameter gets the next set of urls.  The response includes the content for the URLs along with the total, successful, and failed URLs, and a `cursor` value for subsequent requests.",
+        "summary": "Retrieve list of URLs optionally with content for a specific crawl",
+        "description": "Fetches the list of URLs and content that have been processed for a specific crawl ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "parameters": [
           {
             "name": "crawlId",
@@ -197,9 +291,15 @@
             "required": false,
             "schema": {
               "type": "array",
-              "items": { "type": "string" }
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
             },
-            "description": "JSON array of formats to fetch (e.g., [\"html\", \"markdown\"])."
+            "description": "Array of formats to fetch (e.g., [\"html\", \"markdown\"])."
           },
           {
             "name": "search_query",
@@ -217,7 +317,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Optional integer representing the index to start fetching content from. Useful to get the next set of urls until all are fetched. Start with 0, then provide *response['cursor']* value of the previous request."
+            "description": "Optional integer representing the index to start fetching content from. Useful to paginate until all URLs are fetched. Start with 0, then provide `response['cursor']` value of the last request."
           },
           {
             "name": "limit",
@@ -226,7 +326,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Optional integer to limit the number of results returned. Recommended 50-100 results at a time. Paginated using *cursor*."
+            "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*. Maximum 10MB of content can be fetched in a single request."
           }
         ],
         "responses": {
@@ -237,22 +337,51 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "object": { "type": "string" },
-                    "status": { "type": "string" },
-                    "search_query": { "type": "string" },
-                    "pages_count": { "type": "number" },
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"crawl\" for this endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` or `completed`"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "pages_count": {
+                      "type": "number"
+                    },
                     "pages": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": { "type": "string" },
-                          "dataset_id": { "type": "string" },
-                          "url": { "type": "string" },
-                          "is_external": { "type": "boolean" },
-                          "html_content": { "type": "string" },
-                          "markdown_content": { "type": "string" }
+                          "id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string",
+                            "description": "If needed to fetch content later from the `/retrieve` API"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "is_external": {
+                            "type": "boolean"
+                          },
+                          "html_content": {
+                            "type": "string"
+                          },
+                          "markdown_content": {
+                            "type": "string"
+                          },
+                          "json_content": {
+                            "type": "string"
+                          }
                         }
                       }
                     },
@@ -261,15 +390,24 @@
                       "properties": {
                         "external_urls": {
                           "type": "array",
-                          "items": { "type": "string" }
+                          "description": "External URLs that were found during crawl",
+                          "items": {
+                            "type": "string"
+                          }
                         },
                         "failed_urls": {
                           "type": "array",
-                          "items": { "type": "string" }
+                          "description": "URLs that were found but couldn't be scraped",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       }
                     },
-                    "cursor": { "type": "number" }
+                    "cursor": {
+                      "type": "integer",
+                      "description": "To be passed in the query in next request to get the next items."
+                    }
                   }
                 }
               }
