@@ -1,0 +1,53 @@
+---
+sidebarTitle: 'Scrapes'
+title: Scrapes
+icon: file-lines
+---
+
+The Scrape endpoint allows to scrape any web page.
+
+### Example
+
+<CodeGroup>
+
+```python crawl.py
+import requests
+import time
+
+# Define the API URL and your API key
+API_URL = 'https://api.olostep.com'
+API_KEY = '<your_token>'
+
+# Set the headers for the requests
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+
+# Function to initiate a scrape and get the result
+def initiate_scrape(data):
+    response = requests.post(f'{API_URL}/scrapes', headers=HEADERS, json=data)
+    return response.json()
+
+# Data for initiating the scrape
+data = {
+    "url_to_scrape": "https://github.com",
+    "formats": ["html", "markdown"],
+    "wait_before_scraping": 1000,  # Wait for 1 second before starting the scrape
+}
+
+# Initiate the scrape and get the result
+result = initiate_scrape(data)
+
+# Print the scrape result
+print(f"Scrape ID: {result['id']}")
+print(f"URL: {result['url_to_scrape']}")
+print(f"HTML Content: {result['result'].get('html_content', 'No HTML content')}")
+print(f"Markdown Content: {result['result'].get('markdown_content', 'No Markdown content')}")
+print(f"Links on Page: {result['result'].get('links_on_page', 'No links')}")
+print(f"Page Metadata: {result['result'].get('page_metadata', 'No metadata')}")
+```
+
+</CodeGroup>
+
+For more detailed information, refer to the API reference available in the documentation.
