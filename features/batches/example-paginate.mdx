@@ -43,7 +43,7 @@ def get_batch_list(batch_id, cursor=None, limit=None, status=None, formats=None)
         'status': status,
         'formats': json.dumps(formats) if formats else None
     }
-    response = requests.get(f'{API_URL}/batches/{batch_id}/list', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/batches/{batch_id}/items', headers=HEADERS, params=params)
     return response.json()
 
 def example_batch_with_cursor():

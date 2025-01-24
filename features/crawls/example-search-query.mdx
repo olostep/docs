@@ -38,9 +38,7 @@ def get_crawled_list(crawl_id, search_query=None):
     params = {
         'search_query': search_query
     }
-    # Remove None values from params
-    params = {k: v for k, v in params.items() if v is not None}
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/list', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
     return response.json()
 
 def example_crawl_with_search_query():

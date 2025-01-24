@@ -48,7 +48,7 @@ def get_crawled_list(crawl_id, formats=None):
     params = {
         'formats': json.dumps(formats) if formats else None
     }
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/list', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
     return response.json()
 
 # Data for initiating the crawl

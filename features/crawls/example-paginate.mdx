@@ -41,7 +41,7 @@ def get_crawled_list(crawl_id, cursor=None, limit=None):
         'cursor': cursor,
         'limit': limit
     }
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/list', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
     return response.json()
 
 def example_crawl_with_cursor():
