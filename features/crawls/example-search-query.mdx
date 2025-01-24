@@ -1,0 +1,70 @@
+---
+sidebarTitle: 'Search Query'
+title: Search for Relevant Pages
+---
+
+You can also use a search query to refine the crawl and limit the results to the top N most relevant pages.
+
+In this example, we initiate a crawl with a search query "contact us" and limit the results to crawling only top 5 most relevant URLs on every page.
+
+<CodeGroup>
+
+```python crawl-search-query.py
+import requests
+import time
+
+# Define the API URL and your API key
+API_URL = 'https://api.olostep.com'
+API_KEY = '<your_token>'
+
+# Set the headers for the requests
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+
+# Function to initiate a crawl
+def initiate_crawl(data):
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
+    return response.json()
+
+# Function to get crawl information
+def get_crawl_info(crawl_id):
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+    return response.json()
+
+# Function to get the list of crawled pages with search query
+def get_crawled_list(crawl_id, search_query=None):
+    params = {
+        'search_query': search_query
+    }
+    # Remove None values from params
+    params = {k: v for k, v in params.items() if v is not None}
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}/list', headers=HEADERS, params=params)
+    return response.json()
+
+def example_crawl_with_search_query():
+    data = {
+        "start_url": "https://sugarbooandco.com",
+        "max_pages": 100,
+        "include_urls": ["/**"],
+        "include_external": False,
+        "search_query": "contact us",
+        "top_n": 5
+    }
+    crawl = initiate_crawl(data)
+    crawl_id = crawl['id']
+
+    while True:
+        info = get_crawl_info(crawl_id)
+        if info['status'] == 'completed':
+            break
+        time.sleep(5)
+
+    crawl_list = get_crawled_list(crawl_id, search_query="contact us")
+    print(crawl_list['pages'])
+
+# Run the example
+example_crawl_with_search_query()
+```
+</CodeGroup>
