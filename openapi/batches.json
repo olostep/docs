@@ -1,0 +1,342 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Batches API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://api.olostep.com/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "Authorization": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "paths": {
+        "/batches": {
+            "post": {
+                "summary": "Start a new batch",
+                "description": "Initiates a new batch process with the specified parameters.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "custom_id": {
+                                                    "type": "string",
+                                                    "description": "An internal unique identifier for the url."
+                                                },
+                                                "url": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                    "description": "URL of the item."
+                                                }
+                                            },
+                                            "required": [
+                                                "custom_id",
+                                                "url"
+                                            ]
+                                        },
+                                        "description": "Array of items to be processed in the batch."
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "description": "Country for the batch execution. Provide in ISO 3166-1 alpha-2 codes like US(USA), IN(India), etc"
+                                    },
+                                    "parser": {
+                                        "type": "string",
+                                        "description": "Parser to be used for the batch."
+                                    }
+                                },
+                                "required": [
+                                    "items"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Batch started successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "Batch ID"
+                                        },
+                                        "object": {
+                                            "type": "string",
+                                            "description": "The kind of object. \"batch\" for this endpoint."
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "description": "`in_progress` or `completed`"
+                                        },
+                                        "created": {
+                                            "type": "number",
+                                            "description": "Created epoch"
+                                        },
+                                        "total_urls": {
+                                            "type": "number",
+                                            "description": "Count of URLs in the batch"
+                                        },
+                                        "completed_urls": {
+                                            "type": "number",
+                                            "description": "Count of completed URLs"
+                                        },
+                                        "parser": {
+                                            "type": "string"
+                                        },
+                                        "country": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request due to incorrect or missing parameters."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        },
+        "/batches/{batchId}": {
+            "get": {
+                "summary": "Retrieve batch information",
+                "description": "Fetches information about a specific batch using its `batchId`.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "batchId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "The ID of the batch to retrieve information for."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with batch information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "Batch ID"
+                                        },
+                                        "object": {
+                                            "type": "string",
+                                            "description": "The kind of object. \"batch\" for this endpoint."
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "description": "`in_progress` or `completed`"
+                                        },
+                                        "created": {
+                                            "type": "number",
+                                            "description": "Created epoch"
+                                        },
+                                        "total_urls": {
+                                            "type": "number",
+                                            "description": "Count of URLs in the batch"
+                                        },
+                                        "completed_urls": {
+                                            "type": "number",
+                                            "description": "Count of completed URLs"
+                                        },
+                                        "parser": {
+                                            "type": "string"
+                                        },
+                                        "country": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request due to incorrect or missing parameters."
+                    },
+                    "404": {
+                        "description": "Batch not found for the provided ID."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        },
+        "/batches/{batchId}/items": {
+            "get": {
+                "summary": "Retrieve completed or failed items list optionally with content for a specific batch",
+                "description": "Fetches the list of items and content that  as per the requested status for a specific batch ID.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "batchId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "The ID of the batch to retrieve the list of URLs for."
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "completed",
+                                "failed"
+                            ]
+                        },
+                        "description": "Status of the URLs to retrieve (completed or failed)."
+                    },
+                    {
+                        "name": "formats",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "html",
+                                    "markdown",
+                                    "json"
+                                ]
+                            }
+                        },
+                        "description": "Array of formats to fetch (e.g., [\"html\", \"markdown\"])."
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Optional integer representing the index to start fetching content from. Useful to paginate until all URLs are fetched. \n\n Start with 0, then provide `response['cursor']` value of the last request."
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*.\n\nMaximum 10MB of content can be fetched in a single request."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with the list of URLs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "Batch ID"
+                                        },
+                                        "object": {
+                                            "type": "string",
+                                            "description": "The kind of object. \"batch\" for this endpoint."
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "description": "`in_progress` or `completed`"
+                                        },
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "custom_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "retrieve_id": {
+                                                        "type": "string",
+                                                        "description": "If needed to fetch content later from the `/retrieve` API"
+                                                    },
+                                                    "url": {
+                                                        "type": "string"
+                                                    },
+                                                    "html_content": {
+                                                        "type": "string"
+                                                    },
+                                                    "markdown_content": {
+                                                        "type": "string"
+                                                    },
+                                                    "json_content": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "items_count": {
+                                            "type": "integer"
+                                        },
+                                        "cursor": {
+                                            "type": "integer",
+                                            "description": "To be passed in the query in next request to get the next items."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request due to incorrect or missing parameters."
+                    },
+                    "404": {
+                        "description": "Batch not found for the provided ID."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        }
+    }
+}

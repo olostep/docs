@@ -1,0 +1,433 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Scrapes API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/scrapes": {
+      "post": {
+        "summary": "Initiate a web page scrape",
+        "description": "This endpoint allows users to start a web page scrape with various configurations.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url_to_scrape": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL to start scraping from."
+                  },
+                  "wait_before_scraping": {
+                    "type": "integer",
+                    "description": "Time to wait in milliseconds before starting the scraping."
+                  },
+                  "formats": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["html", "markdown", "screenshot", "parser_extract", "llm_extract", "raw_pdf"]
+                    },
+                    "description": "Formats to save the scraped content."
+                  },
+                  "remove_css_selectors": {
+                    "type": "string",
+                    "enum": ["default", "none", "array"],
+                    "description": "Option to remove certain CSS selectors from the content."
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "discriminator": {
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "title": "Wait",
+                          "required": ["type", "milliseconds"],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": ["wait"],
+                              "description": "Wait for a specified amount of milliseconds"
+                            },
+                            "milliseconds": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "description": "Time to wait in milliseconds"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Click",
+                          "required": ["type", "selector"],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": ["click"],
+                              "description": "Click on an element"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "CSS selector for the element to click"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Fill Input",
+                          "required": ["type", "selector", "value"],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": ["fill_input"],
+                              "description": "Fill an input element with a value"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "CSS selector for the input element"
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "Text to enter into the input"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Scroll",
+                          "required": ["type", "direction", "amount"],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": ["scroll"],
+                              "description": "Scroll the page"
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": ["up", "down", "left", "right"],
+                              "description": "Direction to scroll"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "description": "Amount to scroll in pixels"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "description": "Actions to perform on the page before getting the content."
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Country to load the request from. Provide in ISO 3166-1 alpha-2 codes like US(USA), IN(India), etc"
+                  },
+                  "transformer": {
+                    "type": "string",
+                    "enum": ["postlight", "none", "reader"],
+                    "description": "Specify the HTML transformer to use."
+                  },
+                  "remove_images": {
+                    "type": "boolean",
+                    "description": "Option to remove images from the scraped content."
+                  },
+                  "remove_class_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of class names to remove from the content."
+                  },
+                  "parser_extract": {
+                    "type": "object",
+                    "properties": {
+                      "parser_id": {
+                        "type": "string",
+                        "description": "ID of the parser to use."
+                      },
+                      "schema": {
+                        "type": "object",
+                        "description": "Schema for the parser."
+                      }
+                    },
+                    "description": "Configuration for parser extraction."
+                  },
+                  "llm_extract": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "object",
+                        "description": "Schema for the LLM extraction."
+                      },
+                      "system_prompt": {
+                        "type": "string",
+                        "description": "System prompt for the LLM."
+                      },
+                      "prompt": {
+                        "type": "string",
+                        "description": "Prompt for the LLM."
+                      }
+                    },
+                    "description": "Configuration for LLM extraction."
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "description": "Option to return absolute links."
+                      },
+                      "query_to_order_links_by": {
+                        "type": "string",
+                        "description": "Query to order links by."
+                      }
+                    },
+                    "description": "Configuration for links on the page."
+                  },
+                  "screen_size": {
+                    "type": "object",
+                    "properties": {
+                      "screen_type": {
+                        "type": "string",
+                        "enum": ["mobile", "desktop"],
+                        "description": "Type of screen."
+                      },
+                      "screen_width": {
+                        "type": "integer",
+                        "description": "Width of the screen."
+                      },
+                      "screen_height": {
+                        "type": "integer",
+                        "description": "Height of the screen."
+                      }
+                    },
+                    "description": "Configuration for screen size."
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "User-defined metadata."
+                  }
+                },
+                "required": ["url_to_scrape"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with the scrape initiation details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Scrape ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"scrape\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Created epoch"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "User-defined metadata."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "The URL that was scraped."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Content from parser_extract or llm_extract"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to incorrect or missing parameters."
+          },
+          "401": {
+            "description": "Unauthorized access due to missing or invalid API token."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/scrapes/{scrape_id}": {
+      "get": {
+        "summary": "Retrieve scrape result",
+        "description": "This endpoint allows users to retrieve the result of a previously initiated scrape.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scrape_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the scrape to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the scrape result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Scrape ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"scrape\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Created epoch"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "User-defined metadata."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "The URL that was scraped."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Content from parser_extract or llm_extract"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to incorrect or missing parameters."
+          },
+          "404": {
+            "description": "Scrape not found for the provided ID."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  }
+}

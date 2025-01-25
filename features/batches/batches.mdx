@@ -1,0 +1,77 @@
+---
+sidebarTitle: 'Get Started'
+title: Get Started
+---
+The Batches endpoint allows you to process multiple URLs in a single batch, making it easier to manage large sets of data.
+Batches are useful for true large-scale processing. We recommend using batches with 10K URLs at a time.
+
+## Initiating a Batch
+
+To initiate a new batch, specify the **items to be processed** along with their custom IDs and URLs. You can also provide optional parameters such as the country and parser to be used for the batch.
+
+<CodeGroup>
+
+```python crawl.py
+import requests
+import time
+
+# Define the API URL and your API key
+API_URL = 'https://api.olostep.com/v1'
+API_KEY = '<your_token>'
+
+# Set the headers for the requests
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+# Function to initiate a batch
+def initiate_batch(data):
+    response = requests.post(f'{API_URL}/batches', headers=HEADERS, json=data)
+    return response.json()
+
+# Function to get batch information
+def get_batch_info(batch_id):
+    response = requests.get(f'{API_URL}/batches/{batch_id}', headers=HEADERS)
+    return response.json()
+
+# Function to get the list of URLs in the batch with optional parameters
+def get_batch_list(batch_id, status=None, formats=None):
+    params = {
+        'status': status,
+        'formats': json.dumps(formats) if formats else None
+    }
+    response = requests.get(f'{API_URL}/batches/{batch_id}/items', headers=HEADERS, params=params)
+    return response.json()
+
+# Data for initiating the batch
+data = {
+    "items": [
+        {"custom_id": "1", "url": "https://github.com"},
+        {"custom_id": "2", "url": "https://github.com/features"}
+    ]
+}
+
+# Initiate the batch
+batch = initiate_batch(data)
+batch_id = batch['id']
+
+# Wait for the batch to complete
+while True:
+    info = get_batch_info(batch_id)
+    if info['status'] == 'completed':
+        break
+    time.sleep(5)
+
+# Get the list of URLs in the batch with specified formats
+formats = ["html", "markdown"]
+batch_list = get_batch_list(batch_id, formats=formats)
+
+# Print the content of the URLs in the batch
+for item in batch_list['items']:
+    print(f"CustomID: {item['custom_id']}")
+    print(f"URL: {item['url']}")
+    print(f"HTML Content: {item.get('html_content', 'No HTML content')}")
+    print(f"Markdown Content: {item.get('markdown_content', 'No Markdown content')}")
+```
+
+</CodeGroup>

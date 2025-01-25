@@ -1,0 +1,85 @@
+---
+sidebarTitle: 'Paginate / Stream'
+title: Paginate or Stream using Cursor
+---
+
+We use a `cursor` and `limit` based mechanism to help you paginate or stream data efficiently.
+
+When you specify a `limit`, the response includes a `cursor` value that you can use to fetch the next set of results. This process continues until all results have been retrieved.
+
+The `cursor` value is also returned if a request is made while the crawl is still in progress and there are pages yet to be processed. This allows you to stream pages as they are crawled, enabling immediate processing.
+
+<CodeGroup>
+
+```python batch-paginate.py
+import requests
+import time
+
+# Define the API URL and your API key
+API_URL = 'https://api.olostep.com/v1'
+API_KEY = '<your_token>'
+
+# Set the headers for the requests
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+
+# Function to initiate a batch
+def initiate_batch(data):
+    response = requests.post(f'{API_URL}/batches', headers=HEADERS, json=data)
+    return response.json()
+
+# Function to get batch information
+def get_batch_info(batch_id):
+    response = requests.get(f'{API_URL}/batches/{batch_id}', headers=HEADERS)
+    return response.json()
+
+# Function to get the list of URLs in the batch with cursor pagination
+def get_batch_list(batch_id, cursor=None, limit=None, status=None, formats=None):
+    params = {
+        'cursor': cursor,
+        'limit': limit,
+        'status': status,
+        'formats': json.dumps(formats) if formats else None
+    }
+    response = requests.get(f'{API_URL}/batches/{batch_id}/items', headers=HEADERS, params=params)
+    return response.json()
+
+def example_batch_with_cursor():
+    data = {
+        "items": [
+            {"custom_id": "1", "url": "https://github.com"},
+            {"custom_id": "2", "url": "https://github.com/features"}
+        ]
+    }
+    batch = initiate_batch(data)
+    batch_id = batch['id']
+
+    # Wait for the batch to complete
+    while True:
+        info = get_batch_info(batch_id)
+        if info['status'] == 'completed':
+            break
+        time.sleep(5)
+
+    cursor = 0
+    limit = 10
+    formats = ["html", "markdown"]
+
+    while True:
+        batch_list = get_batch_list(batch_id, cursor=cursor, limit=limit, formats=formats)
+        for item in batch_list['items']:
+            print(f"CustomID: {item['custom_id']}")
+            print(f"URL: {item['url']}")
+            print(f"HTML Content: {item.get('html_content', 'No HTML content')}")
+            print(f"Markdown Content: {item.get('markdown_content', 'No Markdown content')}")
+        if 'cursor' not in batch_list:
+            break
+        cursor = batch_list['cursor']
+        time.sleep(5)
+
+# Run the example
+example_batch_with_cursor()
+```
+</CodeGroup>

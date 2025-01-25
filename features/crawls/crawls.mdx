@@ -1,0 +1,85 @@
+---
+sidebarTitle: 'Get Started'
+title: Get Started
+---
+
+The Crawls endpoint allows you to autonomously scrape all relevant pages in websites like docs, blogs, and more.
+
+## Initiating a Crawl
+
+To initiate a new crawl, specify the **starting point and the URLs to include.**
+
+Other optional parameters such as the maximum number of pages to crawl, the depth of the crawl, and exclude URL patterns are available.
+
+### Example
+In this example, we initiate a crawl on `https://sugarbooandco.com` and specify that we want to crawl up to 100 pages with all kinds of URLs.
+
+Setup the required methods:
+
+
+<CodeGroup>
+
+```python crawl.py
+import requests
+import time
+
+# Define the API URL and your API key
+API_URL = 'https://api.olostep.com/v1'
+API_KEY = '<your_token>'
+
+# Set the headers for the requests
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+
+# Function to initiate a crawl
+def initiate_crawl(data):
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
+    return response.json()
+
+# Function to get crawl information
+def get_crawl_info(crawl_id):
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+    return response.json()
+
+# Function to get the list of crawled pages with formats parameter
+def get_crawled_list(crawl_id, formats=None):
+    params = {
+        'formats': json.dumps(formats) if formats else None
+    }
+    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
+    return response.json()
+
+# Data for initiating the crawl
+data = {
+    "start_url": "https://sugarbooandco.com",
+    "include_urls": ["/**"],
+    "max_pages": 10
+}
+
+# Initiate the crawl
+crawl = initiate_crawl(data)
+crawl_id = crawl['id']
+
+# Wait for the crawl to complete
+while True:
+    info = get_crawl_info(crawl_id)
+    if info['status'] == 'completed':
+        break
+    time.sleep(5)
+
+# Get the list of crawled pages with specified formats
+formats = ["html", "markdown"]
+crawl_list = get_crawled_list(crawl_id, formats=formats)
+
+# Print the content of the crawled pages
+for page in crawl_list['pages']:
+    print(f"URL: {page['url']}")
+    print(f"HTML Content: {page.get('html_content', 'No HTML content')}")
+    print(f"Markdown Content: {page.get('markdown_content', 'No Markdown content')}")
+```
+
+</CodeGroup>
+
+For more detailed information, refer to the API reference available in the documentation.
