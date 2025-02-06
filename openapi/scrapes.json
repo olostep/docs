@@ -205,20 +205,20 @@
                     "properties": {
                       "screen_type": {
                         "type": "string",
-                        "enum": ["mobile", "desktop"],
-                        "description": "Type of screen."
+                        "enum": ["default", "mobile", "desktop"],
+                        "description": "Type of screen. Desktop uses 1920x1080 pixels, mobile uses 414x896 pixels, and default uses 1024x768 pixels."
                       },
                       "screen_width": {
                         "type": "integer",
-                        "description": "Width of the screen. In pixels"
+                        "description": "Width of the screen in pixels. Desktop: 1920px, mobile: 414px, default: 768px."
                       },
                       "screen_height": {
                         "type": "integer",
-                        "description": "Height of the screen. In pixels"
+                        "description": "Height of the screen in pixels. Desktop: 1080px, mobile: 896px, default: 1024px."
                       }
                     },
-                    "description": "Configuration for screen size."
-                  },
+                  "description": "Configuration for screen size. Preset dimensions are available through screen_type: desktop (1920x1080), mobile (414x896), or default (768x1024)."
+                },
                   "metadata": {
                     "type": "object",
                     "description": "User-defined metadata."
