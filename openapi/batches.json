@@ -6,7 +6,7 @@
     },
     "servers": [
         {
-            "url": "https://api.olostep.com/v1"
+            "url": "https://api.olostep.com"
         }
     ],
     "components": {
@@ -18,7 +18,7 @@
         }
     },
     "paths": {
-        "/batches": {
+        "/v1/batches": {
             "post": {
                 "summary": "Start a new batch",
                 "description": "Initiates a new batch process with the specified parameters.",
@@ -124,7 +124,7 @@
                 }
             }
         },
-        "/batches/{batchId}": {
+        "/v1/batches/{batchId}": {
             "get": {
                 "summary": "Retrieve batch information",
                 "description": "Fetches information about a specific batch using its `batchId`.",
@@ -199,7 +199,7 @@
                 }
             }
         },
-        "/batches/{batchId}/items": {
+        "/v1/batches/{batchId}/items": {
             "get": {
                 "summary": "Retrieve completed or failed items list optionally with content for a specific batch",
                 "description": "Fetches the list of items and content that  as per the requested status for a specific batch ID.",
@@ -232,23 +232,6 @@
                         "description": "Status of the URLs to retrieve (completed or failed)."
                     },
                     {
-                        "name": "formats",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "enum": [
-                                    "html",
-                                    "markdown",
-                                    "json"
-                                ]
-                            }
-                        },
-                        "description": "Array of formats to fetch (e.g., [\"html\", \"markdown\"])."
-                    },
-                    {
                         "name": "cursor",
                         "in": "query",
                         "required": false,
@@ -265,6 +248,23 @@
                             "type": "integer"
                         },
                         "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*.\n\nMaximum 10MB of content can be fetched in a single request."
+                    },
+                    {
+                        "name": "formats",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "html",
+                                    "markdown",
+                                    "json"
+                                ]
+                            }
+                        },
+                        "description": "**Deprecated:** Use `/retrieve` endpoint with `retrieve_id`.\n\nArray of formats to fetch (e.g., [\"html\", \"markdown\"])."
                     }
                 ],
                 "responses": {
@@ -297,19 +297,22 @@
                                                     },
                                                     "retrieve_id": {
                                                         "type": "string",
-                                                        "description": "If needed to fetch content later from the `/retrieve` API"
+                                                        "description": "To fetch content from the `/retrieve` API"
                                                     },
                                                     "url": {
                                                         "type": "string"
                                                     },
                                                     "html_content": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
                                                     },
                                                     "markdown_content": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
                                                     },
                                                     "json_content": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
                                                     }
                                                 }
                                             }

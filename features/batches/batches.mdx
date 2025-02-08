@@ -7,7 +7,7 @@ Batches are useful for true large-scale processing. We recommend using batches w
 
 ## Initiating a Batch
 
-To initiate a new batch, specify the **items to be processed** along with their custom IDs and URLs. You can also provide optional parameters such as the country and parser to be used for the batch.
+To initiate a new batch, specify the **items** to be processed with their `customID` and `url`. You can also provide optional parameters such as the country and parser to be used for the batch.
 
 <CodeGroup>
 
@@ -16,31 +16,40 @@ import requests
 import time
 
 # Define the API URL and your API key
-API_URL = 'https://api.olostep.com/v1'
+API_URL = 'https://api.olostep.com'
 API_KEY = '<your_token>'
-
 # Set the headers for the requests
 HEADERS = {
     'Content-Type': 'application/json',
     'Authorization': f'Bearer {API_KEY}'
 }
+
 # Function to initiate a batch
 def initiate_batch(data):
-    response = requests.post(f'{API_URL}/batches', headers=HEADERS, json=data)
+    response = requests.post(f'{API_URL}/v1/batches', headers=HEADERS, json=data)
     return response.json()
 
 # Function to get batch information
 def get_batch_info(batch_id):
-    response = requests.get(f'{API_URL}/batches/{batch_id}', headers=HEADERS)
+    response = requests.get(f'{API_URL}/v1/batches/{batch_id}', headers=HEADERS)
     return response.json()
 
-# Function to get the list of URLs in the batch with optional parameters
-def get_batch_list(batch_id, status=None, formats=None):
+# Function to get the list of URLs in the batch
+def get_batch_items(batch_id, status="completed"):
     params = {
-        'status': status,
-        'formats': json.dumps(formats) if formats else None
+        'status': status
     }
-    response = requests.get(f'{API_URL}/batches/{batch_id}/items', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/v1/batches/{batch_id}/items', headers=HEADERS, params=params)
+    return response.json()
+
+# Function to retrieve content
+def retrieve_content(retrieve_id, formats):
+    api_url = f"{API_URL}/v1/retrieve"
+    params = {
+        "retrieve_id": retrieve_id,
+        "formats": json.dumps(formats)
+    }
+    response = requests.get(api_url, headers=HEADERS, params=params)
     return response.json()
 
 # Data for initiating the batch
@@ -54,6 +63,7 @@ data = {
 # Initiate the batch
 batch = initiate_batch(data)
 batch_id = batch['id']
+print(batch_id)
 
 # Wait for the batch to complete
 while True:
@@ -62,16 +72,26 @@ while True:
         break
     time.sleep(5)
 
-# Get the list of URLs in the batch with specified formats
-formats = ["html", "markdown"]
-batch_list = get_batch_list(batch_id, formats=formats)
+# Get the list of completed URLs
+batch_items = get_batch_items(batch_id, "completed")
 
 # Print the content of the URLs in the batch
-for item in batch_list['items']:
+for item in batch_items['items']:
     print(f"CustomID: {item['custom_id']}")
     print(f"URL: {item['url']}")
-    print(f"HTML Content: {item.get('html_content', 'No HTML content')}")
-    print(f"Markdown Content: {item.get('markdown_content', 'No Markdown content')}")
+    print(f"Retrieve ID: {item['retrieve_id']}")
+
+    retrieve_id = item['retrieve_id']
+    formats = ["html", "markdown"]
+    retrieved_data = retrieve_content(retrieve_id, formats)
+    
+    if retrieved_data:
+        html_content = retrieved_data.get("html_content")
+        markdown_content = retrieved_data.get("markdown_content")
+        print(f"HTML Content:\n{html_content}")
+        print(f"Markdown Content:\n{markdown_content}")
+    else:
+        print("Failed to retrieve content")
 ```
 
 </CodeGroup>
