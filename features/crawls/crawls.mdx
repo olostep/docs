@@ -3,19 +3,16 @@ sidebarTitle: 'Get Started'
 title: Get Started
 ---
 
-The Crawls endpoint allows you to autonomously scrape all relevant pages in websites like docs, blogs, and more.
+The crawls endpoint allows you to autonomously scrape all relevant pages in websites like docs, blogs, and more.
 
 ## Initiating a Crawl
 
-To initiate a new crawl, specify the **starting point and the URLs to include.**
+To start a new crawl, provide the **starting point, URLs to include and max pages.**
 
-Other optional parameters such as the maximum number of pages to crawl, the depth of the crawl, and exclude URL patterns are available.
+Other optional parameters such as the depth of the crawl, exclude URL patterns and if to include external URLs are also available.
 
 ### Example
-In this example, we initiate a crawl on `https://sugarbooandco.com` and specify that we want to crawl up to 100 pages with all kinds of URLs.
-
-Setup the required methods:
-
+In this example, we initiate a crawl on `https://sugarbooandco.com` and specify that we want to crawl up to 100 pages with all kinds of URLs except collections.
 
 <CodeGroup>
 
@@ -24,7 +21,7 @@ import requests
 import time
 
 # Define the API URL and your API key
-API_URL = 'https://api.olostep.com/v1'
+API_URL = 'https://api.olostep.com'
 API_KEY = '<your_token>'
 
 # Set the headers for the requests
@@ -35,27 +32,38 @@ HEADERS = {
 
 # Function to initiate a crawl
 def initiate_crawl(data):
-    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
+    response = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data)
     return response.json()
 
 # Function to get crawl information
 def get_crawl_info(crawl_id):
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}', headers=HEADERS)
     return response.json()
 
 # Function to get the list of crawled pages with formats parameter
-def get_crawled_list(crawl_id, formats=None):
+def get_crawled_pages(crawl_id):
+    params = {}
+    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
+    return response.json()
+
+# Function to retrieve content
+def retrieve_content(retrieve_id, formats):
+    api_url = f"{API_URL}/v1/retrieve"
     params = {
-        'formats': json.dumps(formats) if formats else None
+        "retrieve_id": retrieve_id,
+        "formats": json.dumps(formats)
     }
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
+    response = requests.get(api_url, headers=HEADERS, params=params)
     return response.json()
 
 # Data for initiating the crawl
 data = {
     "start_url": "https://sugarbooandco.com",
+    "max_pages": 100,
     "include_urls": ["/**"],
-    "max_pages": 10
+    "exclude_urls": ["/collections/**"], # Optional
+    "max_depth": None, # Default
+    "include_external": False # Default
 }
 
 # Initiate the crawl
@@ -69,17 +77,27 @@ while True:
         break
     time.sleep(5)
 
-# Get the list of crawled pages with specified formats
-formats = ["html", "markdown"]
-crawl_list = get_crawled_list(crawl_id, formats=formats)
+# Get the list of crawled pages with their retrieve_id
+crawl_pages = get_crawled_pages(crawl_id, formats=None)
 
 # Print the content of the crawled pages
-for page in crawl_list['pages']:
+for page in crawl_pages['pages']:
     print(f"URL: {page['url']}")
-    print(f"HTML Content: {page.get('html_content', 'No HTML content')}")
-    print(f"Markdown Content: {page.get('markdown_content', 'No Markdown content')}")
+    print(f"Retrieve ID: {page['retrieve_id']}")
+
+    retrieve_id = page['retrieve_id']
+    formats = ["html", "markdown"]
+    retrieved_data = retrieve_content(retrieve_id, formats)
+    
+    if retrieved_data:
+        html_content = retrieved_data.get("html_content")
+        markdown_content = retrieved_data.get("markdown_content")
+        print(f"HTML Content:\n{html_content}")
+        print(f"Markdown Content:\n{markdown_content}")
+    else:
+        print("Failed to retrieve content")
 ```
 
 </CodeGroup>
 
-For more detailed information, refer to the API reference available in the documentation.
+For more detailed information, please refer the API reference.
