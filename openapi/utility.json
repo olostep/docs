@@ -1,0 +1,96 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Utility API",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://api.olostep.com"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "Authorization": {
+          "type": "http",
+          "scheme": "bearer"
+        }
+      }
+    },
+    "paths": {
+      "/v1/retrieve": {
+        "get": {
+          "summary": "Retrieve page content",
+          "description": "Fetches the content of a crawled page using its `retrieve_id`.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "retrieve_id",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The ID of the page content to retrieve. Available in the response of `/v1/crawls/{crawlId}/pages` endpoint."
+            },
+            {
+              "name": "formats",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "html",
+                    "markdown",
+                    "json"
+                  ]
+                }
+              },
+              "description": "Optional array of formats to retrieve. If not provided, all available formats will be returned."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with page content.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "html_content": {
+                        "type": "string",
+                        "description": "HTML content of the page, if requested and available."
+                      },
+                      "markdown_content": {
+                        "type": "string",
+                        "description": "Markdown content of the page, if requested and available."
+                      },
+                      "json_content": {
+                        "type": "string",
+                        "description": "JSON content of the page returned from parsers, if requested and available."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request due to incorrect or missing parameters."
+            },
+            "404": {
+              "description": "Content not found for the provided `retrieve_id`."
+            },
+            "500": {
+              "description": "Internal server error."
+            }
+          }
+        }
+      }
+    }
+  }
