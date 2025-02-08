@@ -25,33 +25,33 @@ HEADERS = {
 
 # Function to initiate a crawl
 def initiate_crawl(data):
-    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
+    response = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data)
     return response.json()
 
 # Function to get crawl information
 def get_crawl_info(crawl_id):
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}', headers=HEADERS)
     return response.json()
 
 # Function to get the list of crawled pages with search query
-def get_crawled_list(crawl_id, search_query=None):
+def get_crawled_pages(crawl_id, search_query=None):
     params = {
         'search_query': search_query
     }
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}/list', headers=HEADERS, params=params)
     return response.json()
 
-def example_crawl_with_search_query():
+def crawl_with_search_query():
     data = {
         "start_url": "https://sugarbooandco.com",
         "max_pages": 100,
         "include_urls": ["/**"],
-        "include_external": False,
-        "search_query": "contact us",
-        "top_n": 5
+        "search_query": "contact us", # look for urls matching query
+        "top_n": 5 # only visit top n matching urls per page
     }
     crawl = initiate_crawl(data)
     crawl_id = crawl['id']
+    print(crawl_id)
 
     while True:
         info = get_crawl_info(crawl_id)
@@ -59,10 +59,10 @@ def example_crawl_with_search_query():
             break
         time.sleep(5)
 
-    crawl_list = get_crawled_list(crawl_id, search_query="contact us")
-    print(crawl_list['pages'])
+    crawled_pages = get_crawled_pages(crawl_id, search_query="contact us")
+    print(crawled_pages['pages'])
 
 # Run the example
-example_crawl_with_search_query()
+crawl_with_search_query()
 ```
 </CodeGroup>

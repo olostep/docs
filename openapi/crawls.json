@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://api.olostep.com/v1"
+      "url": "https://api.olostep.com"
     }
   ],
   "components": {
@@ -18,7 +18,7 @@
     }
   },
   "paths": {
-    "/crawls": {
+    "/v1/crawls": {
       "post": {
         "summary": "Start a new crawl",
         "description": "Initiates a new crawl process with the specified parameters.",
@@ -75,7 +75,8 @@
                 },
                 "required": [
                   "start_url",
-                  "include_urls"
+                  "include_urls",
+                  "max_pages"
                 ]
               }
             }
@@ -95,16 +96,15 @@
                     },
                     "object": {
                       "type": "string",
-                       "description": "The kind of object. \"crawl\" for this endpoint."
+                      "description": "The kind of object. \"crawl\" for this endpoint."
                     },
                     "status": {
                       "type": "string",
-                       "description": "`in_progress` or `completed`"
-                      
+                      "description": "`in_progress` or `completed`"
                     },
                     "created": {
                       "type": "number",
-                       "description": "Created time in epoch"
+                      "description": "Created time in epoch"
                     },
                     "start_date": {
                       "type": "string",
@@ -162,7 +162,7 @@
         }
       }
     },
-    "/crawls/{crawl_id}": {
+    "/v1/crawls/{crawlId}": {
       "get": {
         "summary": "Retrieve crawl information",
         "description": "Fetches information about a specific crawl using its `crawl_id`.",
@@ -196,16 +196,15 @@
                     },
                     "object": {
                       "type": "string",
-                        "description": "The kind of object. \"crawl\" for this endpoint."
+                      "description": "The kind of object. \"crawl\" for this endpoint."
                     },
                     "status": {
                       "type": "string",
-                       "description": "`in_progress` or `completed`"
-                      
+                      "description": "`in_progress` or `completed`"
                     },
                     "created": {
                       "type": "number",
-                       "description": "Created time in epoch"
+                      "description": "Created time in epoch"
                     },
                     "start_date": {
                       "type": "string",
@@ -266,7 +265,7 @@
         }
       }
     },
-    "/crawls/{crawl_id}/pages": {
+    "/v1/crawls/{crawlId}/pages": {
       "get": {
         "summary": "Retrieve list of crawled pages optionally with content",
         "description": "Fetches the list of crawled pages and content that have been processed for a specific crawl ID.",
@@ -286,31 +285,6 @@
             "description": "The ID of the crawl to retrieve the list of URLs for."
           },
           {
-            "name": "formats",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "html",
-                  "markdown"
-                ]
-              }
-            },
-            "description": "Array of formats to fetch (e.g., [\"html\", \"markdown\"])."
-          },
-          {
-            "name": "search_query",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "An optional search query to sort the results by relevance. Uses the original search_query by default if provided."
-          },
-          {
             "name": "cursor",
             "in": "query",
             "required": false,
@@ -327,6 +301,31 @@
               "type": "integer"
             },
             "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*. Maximum 10MB of content can be fetched in a single request."
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An optional search query to sort the results by relevance. Uses the original search_query by default if provided."
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
+            },
+            "description": "**Deprecated:** Use `/retrieve` endpoint with `retrieve_id`.\n\nArray of formats to fetch (e.g., [\"html\", \"markdown\"])."
           }
         ],
         "responses": {
@@ -365,7 +364,7 @@
                           },
                           "retrieve_id": {
                             "type": "string",
-                            "description": "If needed to fetch content later from the `/retrieve` API"
+                            "description": "To fetch content from the `/retrieve` endpoint"
                           },
                           "url": {
                             "type": "string"
@@ -374,13 +373,12 @@
                             "type": "boolean"
                           },
                           "html_content": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
                           },
                           "markdown_content": {
-                            "type": "string"
-                          },
-                          "json_content": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
                           }
                         }
                       }

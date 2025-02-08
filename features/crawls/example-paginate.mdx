@@ -3,11 +3,9 @@ sidebarTitle: 'Paginate / Stream'
 title: Paginate or Stream using Cursor
 ---
 
-We use a `cursor` and `limit` based mechanism to help you paginate or stream data efficiently.
+We use a `cursor` and `limit` based mechanism to help you paginate or stream results as the crawl continues.
 
-When you specify a `limit`, the response includes a `cursor` value that you can use to fetch the next set of results. This process continues until all results have been retrieved.
-
-The `cursor` value is also returned if a request is made while the crawl is still in progress and there are pages yet to be processed. This allows you to stream pages as they are crawled, enabling immediate processing.
+The endpoint returns a `cursor` value to pass and fetch the next set of pages. It is also returned when you paginate data by specifying a `limit`.
 
 <CodeGroup>
 
@@ -16,7 +14,7 @@ import requests
 import time
 
 # Define the API URL and your API key
-API_URL = 'https://api.olostep.com/v1'
+API_URL = 'https://api.olostep.com'
 API_KEY = '<your_token>'
 
 # Set the headers for the requests
@@ -27,24 +25,24 @@ HEADERS = {
 
 # Function to initiate a crawl
 def initiate_crawl(data):
-    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
+    response = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data)
     return response.json()
 
 # Function to get crawl information
 def get_crawl_info(crawl_id):
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}', headers=HEADERS)
     return response.json()
 
 # Function to get the list of crawled pages with cursor pagination
-def get_crawled_list(crawl_id, cursor=None, limit=None):
+def get_crawled_pages(crawl_id, cursor=None, limit=None):
     params = {
         'cursor': cursor,
         'limit': limit
     }
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
+    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
     return response.json()
 
-def example_crawl_with_cursor():
+def crawl_with_cursor():
     data = {
         "start_url": "https://sugarbooandco.com",
         "max_pages": 100,
@@ -54,17 +52,21 @@ def example_crawl_with_cursor():
     crawl_id = crawl['id']
     cursor = 0
 
-    ## Works also while the crawl is in_progress to process crawled pages in realtime
+    # Works both while the crawl is `in_progress` or `completed`
     while True:
-        crawl_list = get_crawled_list(crawl_id, cursor=cursor, limit=10)
-        for page in crawl_list['pages']:
+        crawl_pages = get_crawled_pages(crawl_id, cursor=cursor, limit=10)
+        for page in crawl_pages['pages']:
             print(f"URL: {page['url']}")
-        if 'cursor' not in crawl_list:
+            print(f"Retrieve ID: {page['retrieve_id']}")
+
+        # Process the pages as they are received
+
+        if 'cursor' not in crawl_pages:
             break
-        cursor = crawl_list['cursor']
+        cursor = crawl_pages['cursor']
         time.sleep(5)
 
 # Run the example
-example_crawl_with_cursor()
+crawl_with_cursor()
 ```
 </CodeGroup>
