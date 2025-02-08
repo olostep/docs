@@ -47,14 +47,14 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "enum": ["html", "markdown", "screenshot", "parser_extract", "llm_extract", "raw_pdf"]
+                      "enum": ["html", "markdown", "parser_extract", "llm_extract", "raw_pdf"]
                     },
                     "description": "Formats to save the scraped content."
                   },
                   "remove_css_selectors": {
                     "type": "string",
                     "enum": ["default", "none", "array"],
-                    "description": "Option to remove certain CSS selectors from the content."
+                    "description": "Option to remove certain CSS selectors from the content. Optionally, you can also pass a JSON stringified array of specific selectors you want to remove. The CSS selectors removed when this option is set to default are ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
                   },
                   "actions": {
                     "type": "array",
@@ -148,12 +148,13 @@
                   },
                   "transformer": {
                     "type": "string",
-                    "enum": ["postlight", "none", "reader"],
-                    "description": "Specify the HTML transformer to use."
+                    "enum": ["postlight", "none"],
+                    "description": "Specify the HTML transformer to use, if any. Postlight's Mercury Parser library is used to remove ads and other unwanted content from the scraped content."
                   },
                   "remove_images": {
                     "type": "boolean",
-                    "description": "Option to remove images from the scraped content."
+                    "description": "Option to remove images from the scraped content. Defaults to false.",
+                    "default": false
                   },
                   "remove_class_names": {
                     "type": "array",
@@ -182,17 +183,8 @@
                       "schema": {
                         "type": "object",
                         "description": "Schema for the LLM extraction."
-                      },
-                      "system_prompt": {
-                        "type": "string",
-                        "description": "System prompt for the LLM."
-                      },
-                      "prompt": {
-                        "type": "string",
-                        "description": "Prompt for the LLM."
                       }
-                    },
-                    "description": "Configuration for LLM extraction."
+                    }
                   },
                   "links_on_page": {
                     "type": "object",
@@ -213,20 +205,20 @@
                     "properties": {
                       "screen_type": {
                         "type": "string",
-                        "enum": ["mobile", "desktop"],
-                        "description": "Type of screen."
+                        "enum": ["default", "mobile", "desktop"],
+                        "description": "Type of screen. Desktop uses 1920x1080 pixels, mobile uses 414x896 pixels, and default uses 1024x768 pixels."
                       },
                       "screen_width": {
                         "type": "integer",
-                        "description": "Width of the screen."
+                        "description": "Width of the screen in pixels. Desktop: 1920px, mobile: 414px, default: 768px."
                       },
                       "screen_height": {
                         "type": "integer",
-                        "description": "Height of the screen."
+                        "description": "Height of the screen in pixels. Desktop: 1080px, mobile: 896px, default: 1024px."
                       }
                     },
-                    "description": "Configuration for screen size."
-                  },
+                  "description": "Configuration for screen size. Preset dimensions are available through screen_type: desktop (1920x1080), mobile (414x896), or default (768x1024)."
+                },
                   "metadata": {
                     "type": "object",
                     "description": "User-defined metadata."

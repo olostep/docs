@@ -127,7 +127,7 @@
         "/v1/batches/{batchId}": {
             "get": {
                 "summary": "Retrieve batch information",
-                "description": "Fetches information about a specific batch using its `batchId`.",
+                "description": "Fetches information about a specific batch using its `batch_id`.",
                 "security": [
                     {
                         "Authorization": []
@@ -135,7 +135,7 @@
                 ],
                 "parameters": [
                     {
-                        "name": "batchId",
+                        "name": "batch_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -210,13 +210,13 @@
                 ],
                 "parameters": [
                     {
-                        "name": "batchId",
+                        "name": "batch_id",
                         "in": "path",
                         "required": true,
                         "schema": {
                             "type": "string"
                         },
-                        "description": "The ID of the batch to retrieve the list of URLs for."
+                        "description": "The ID of the batch to retrieve the list of URLs and retrieve_id for."
                     },
                     {
                         "name": "status",
@@ -275,7 +275,7 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "id": {
+                                        "batch_id": {
                                             "type": "string",
                                             "description": "Batch ID"
                                         },
