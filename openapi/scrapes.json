@@ -49,11 +49,12 @@
                       "type": "string",
                       "enum": ["html", "markdown", "parser_extract", "llm_extract", "raw_pdf"]
                     },
-                    "description": "Formats to save the scraped content."
+                    "description": "Formats in which you want the content."
                   },
                   "remove_css_selectors": {
                     "type": "string",
                     "enum": ["default", "none", "array"],
+                    "default": "default",
                     "description": "Option to remove certain CSS selectors from the content. Optionally, you can also pass a JSON stringified array of specific selectors you want to remove. The CSS selectors removed when this option is set to default are ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
                   },
                   "actions": {
@@ -191,14 +192,15 @@
                     "properties": {
                       "absolute_links": {
                         "type": "boolean",
-                        "description": "Option to return absolute links."
+                        "default": true,
+                        "description": "When true, returns complete URLs (e.g., 'https://example.com/page') instead of relative paths (e.g., '/page')."
                       },
                       "query_to_order_links_by": {
                         "type": "string",
-                        "description": "Query to order links by."
+                        "description": "Orders the returned links by their similarity to the provided query text, prioritizing the most relevant matches first"
                       }
                     },
-                    "description": "Configuration for links on the page."
+                    "description": "With this option, you can get all the links present on the page you scrape."
                   },
                   "screen_size": {
                     "type": "object",
@@ -221,7 +223,7 @@
                 },
                   "metadata": {
                     "type": "object",
-                    "description": "User-defined metadata."
+                    "description": "User-defined metadata. Not supported yet"
                   }
                 },
                 "required": ["url_to_scrape"]
