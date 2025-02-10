@@ -1,0 +1,49 @@
+---
+sidebarTitle: 'Get Started'
+title: Maps
+---
+The Maps endpoint allows you to extract sitemap URLs from any website. Simply provide a website URL to get a list of all sitemap URLs associated with that domain. This is useful for content discovery and site structure analysis.
+
+## Extracting Sitemaps
+
+To extract sitemaps from a website, send a POST request with the target **url** to be processed. The endpoint typically responds within seconds, providing a comprehensive list of sitemap URLs.
+
+<CodeGroup>
+
+```python maps.py
+import requests
+import time
+
+# Define the API URL and your API key
+API_URL = 'https://api.olostep.com'
+API_KEY = '<your_token>'
+
+# Set the headers for the requests
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}'
+}
+
+# Data for the request
+payload = {
+    "url": "https://docs.olostep.com"
+}
+
+# Make the request and measure latency
+start_time = time.time()
+response = requests.post(f'{API_URL}/v1/maps', headers=HEADERS, json=payload)
+latency = round((time.time() - start_time) * 1000, 2)
+
+# Print results
+print(f"Latency: {latency}ms")
+print("\nResponse Status Code:", response.status_code)
+print("\nResponse Body:")
+print(response.text)
+```
+
+</CodeGroup>
+
+The response will include all discovered sitemap URLs for the specified website. This endpoint is particularly useful when you need to:
+- Discover all content pages on a website
+- Analyze site structure and hierarchy
+- Prepare URLs for batch processing
