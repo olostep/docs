@@ -1,0 +1,198 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Maps API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/v1/maps": {
+      "post": {
+        "summary": "Get all the urls on a certain website",
+        "description": "This endpoint allows users to get all the urls on a certain website",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL of the website for which you want the links"
+                  }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with URLs found on the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["urls_count", "urls"],
+                  "properties": {
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "Total number of URLs found on the page"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array of URLs found on the page"
+                    }
+                  }
+                },
+                "example": {
+                  "urls_count": 22,
+                  "urls": [
+                    "https://docs.olostep.com/api-reference/batches/create","https://docs.olostep.com/api-reference/batches/info","https://docs.olostep.com/api-reference/batches/items","https://docs.olostep.com/api-reference/crawls/create","https://docs.olostep.com/api-reference/crawls/info","https://docs.olostep.com/api-reference/crawls/pages","https://docs.olostep.com/api-reference/retrieve","https://docs.olostep.com/api-reference/retrieve-dataset","https://docs.olostep.com/api-reference/scrapes/create","https://docs.olostep.com/api-reference/scrapes/get","https://docs.olostep.com/api-reference/start-agent","https://docs.olostep.com/concepts/cost-effectiveness","https://docs.olostep.com/concepts/js-rendering","https://docs.olostep.com/concepts/latency","https://docs.olostep.com/features/batches/batches","https://docs.olostep.com/features/crawls/crawls","https://docs.olostep.com/features/crawls/example-paginate","https://docs.olostep.com/features/crawls/example-search-query","https://docs.olostep.com/features/maps/maps","https://docs.olostep.com/features/scrapes/scrapes","https://docs.olostep.com/get-started/authentication","https://docs.olostep.com/get-started/welcome"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to incorrect or missing parameters."
+          },
+          "401": {
+            "description": "Unauthorized access due to missing or invalid API token."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/scrapes/{scrape_id}": {
+      "get": {
+        "summary": "Retrieve scrape result",
+        "description": "This endpoint allows users to retrieve the result of a previously initiated scrape.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scrape_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the scrape to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the scrape result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Scrape ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"scrape\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Created epoch"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "User-defined metadata."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "The URL that was scraped."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Content from parser_extract or llm_extract"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to incorrect or missing parameters."
+          },
+          "404": {
+            "description": "Scrape not found for the provided ID."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  }
+}
