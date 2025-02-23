@@ -1,0 +1,92 @@
+---
+sidebarTitle: Extract Text and Markdown from Any Website
+title: Extracting Text and Markdown Format from Any Website Using Olostep
+description: Learn how to extract text and markdown formats from any website using Olostep's API.
+---
+
+## Overview
+
+Olostep provides an API that allows users to scrape and extract content from any website in multiple formats, including text. This is useful if you want to feed it to an LLM without all the extra content that is present in HTML.
+In the text format we strip more content (slashes, asterisks and other markdown properties) than in the markdown format, so if you want to keep some of the formatting, you should use the markdown format.
+
+In this guide we will see how to extract text and markdown from a website like `https://www.nea.com/team` using Olostep's API.
+
+## Prerequisites
+
+Before getting started, ensure you have the following:
+
+- A valid Olostep API key. You can get one by signing up at [Olostep](https://www.olostep.com/dashboard).
+- Python installed on your system
+- The `requests` and `json` libraries (these come pre-installed with Python, but you can install them using `pip install requests` if needed)
+
+## Extracting Text from a Website
+
+The following Python script demonstrates how to extract text and markdown content from a website using Olostep's API.
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.nea.com/team",
+    "country": "US",
+    "formats": ["text"],
+    "wait_before_scraping": 0,
+    "remove_css_selectors": "default",
+}
+
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+print(json.dumps(response.json(), indent=4))
+```
+
+## Example Response
+
+A successful response will look something like this:
+
+```json
+{
+    "id": "scrape_63x2e5sf5r",
+    "object": "scrape",
+    "created": 1740341743,
+    "metadata": {},
+    "retrieve_id": "63x2e5sf5r",
+    "url_to_scrape": "https://www.nea.com/team",
+    "result": {
+        "html_content": null,
+        "markdown_content": "NEA ….",
+        "text_content": "url=https%3A%2{…}\n",
+        "json_content": null,
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_63x2e5sf5r.txt",
+        "json_hosted_url": null,
+        "text_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/plain_text_63x2e5sf5r.txt",
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+## Explanation
+
+- The `url_to_scrape` parameter specifies the website URL to extract content from.
+- The `formats` parameter defines the output formats (text in this case).
+- The `Authorization` header contains your API key to authenticate the request.
+- The response is formatted as JSON and printed for readability.
+
+## Conclusion
+
+Using Olostep, you can easily extract text and markdown content from any website. This is useful if you want to get content from a website and feed it to an LLM for data extraction and analysis. If you want to extract content at scale from the same website over and over (e.g. monitoring data, price tracking, etc...) we recommend using the html format and passing custom parsers to the API (or use the one we already have) to extract the content you need.
+
