@@ -1,12 +1,15 @@
 ---
-sidebarTitle: Extract Text and Markdown from Any Website
-title: Extracting Text and Markdown Format from Any Website Using Olostep
+sidebarTitle: Extract Markdown and Text from Any Website
+title: Extracting Markdown and Text Format from Any Website Using Olostep
 description: Learn how to extract text and markdown formats from any website using Olostep's API.
 ---
 
 ## Overview
 
-Olostep provides an API that allows users to scrape and extract content from any website in multiple formats, including text. This is useful if you want to feed it to an LLM without all the extra content that is present in HTML.
+Olostep provides an API that allows users to scrape and extract content from any website in multiple formats, including html, structured json, text and markdown.
+
+Getting the result as text or markdown is useful if you want to feed it to an LLM without all the extra HTML markup
+
 In the text format we strip more content (slashes, asterisks and other markdown properties) than in the markdown format, so if you want to keep some of the formatting, you should use the markdown format.
 
 In this guide we will see how to extract text and markdown from a website like `https://www.nea.com/team` using Olostep's API.
@@ -32,7 +35,7 @@ url = "https://api.olostep.com/v1/scrapes"
 payload = {
     "url_to_scrape": "https://www.nea.com/team",
     "country": "US",
-    "formats": ["text"],
+    "formats": ["text", "markdown"],
     "wait_before_scraping": 0,
     "remove_css_selectors": "default",
 }
