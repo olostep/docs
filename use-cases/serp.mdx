@@ -3,3 +3,107 @@ sidebarTitle: Google Search results
 title: SERP API to get Google Search Results
 description: Olostep provides the most affordable Google search results in 1-3 seconds. Get structured search results data in JSON format
 ---
+
+## Overview
+
+Olostep's API allows you to extract structured data from search engine results by using custom parsers. These parsers transform the raw HTML of search results into clean, structured JSON data that's ready for analysis or integration into your applications.
+
+## Using Custom Parsers
+
+You can get structured results from search engines by passing custom parsers to the Olostep API. In this example, we'll see how users can get JSON data from Google search results.
+
+We also offer specialized parsers for other Google services:
+- Google News
+- Google Images
+- Google Maps
+- Google Places
+- Google Videos
+
+Please contact us at [info@olostep.com](mailto:info@olostep.com) to get access to these additional parsers or to discuss creating custom parsers for your specific use cases.
+
+## Integration Example
+
+To get parsed JSON content from search results, you need to include `parser_extract` in the `formats` parameter and specify the name of the parser in the `parser_extract` object.
+
+Here's how to retrieve Google search results in a structured format:
+
+```python
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+    "formats": ["parser_extract", "markdown"],
+    "parser_extract": {"parser_id": "@olostep/google-search"},
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "wait_before_scraping": 0,
+}
+headers = {
+    "Authorization": "Bearer <YOUR-API-KEY>",
+    "Content-Type": "application/json"
+}
+response = requests.request("POST", endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+### Response Format
+
+When you make a request to the Olostep API with the Google Search parser, you'll receive a response like the example below:
+
+````json
+{
+"id": "scrape_94iqy385ty",
+"object": "scrape",
+"created": 1740595134,
+"metadata": {},
+"retrieve_id": "94iqy385ty",
+"url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+"result": {
+"html_content": null,
+"markdown_content": null,
+"text_content": null,
+"json_content": "{\"searchParameters\":{\"type\":\"search\",\"engine\":\"google\",\"q\":\"alexander the great\"},\"knowledgeGraph\":{\"title\":\"Alexander the Great\",\"type\":\"Former King of Macedonia\",\"description\":\"Alexander III of Macedon, most commonly known as Alexander the Great, was a king of the ancient Greek kingdom of Macedon.\",\"imageUrl\":\"https://www.mayaincaaztec.com/ancient-greece/alexander-the-great\",\"attributes\":{\"Born\":\"July 356 BC, Pella\",\"Died\":\"June 323 BC (age 32 years), Babylon\",\"Spouse\":\"Roxana (m. 327 BC\u2013323 BC), Parysatis II (m. 324 BC\u2013323 BC), Stateira (m. 324 BC\u2013323 BC)\",\"Children\":\"Alexander IV of Macedon\",\"Full name\":\"Alexander III of Macedon\",\"Siblings\":\"Cleopatra of Macedon, Philip III of Macedon, Thessalonike of Macedon, Cynane, Caranus, Europa of Macedon\"}},\"organic\":[{\"title\":\"Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Alexander_the_Great\",\"position\":1,\"snippet\":\"He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.\",\"sitelinks\":[{\"title\":\"Death of Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Death_of_Alexander_the_Great\"},{\"title\":\"Wars of Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Wars_of_Alexander_the_Great\"}]},{\"title\":\"Alexander the Great | Biography, Empire, Death, & Facts\",\"link\":\"https://www.britannica.com/biography/Alexander-the-Great#:~:text=Top%20Questions-,Why%20is%20Alexander%20the%20Great%20famous%3F,Greece%20to%20part%20of%20India.\",\"position\":2},{\"title\":\"Alexander the Great's Last Three Wishes. - LinkedIn\",\"link\":\"https://www.linkedin.com/pulse/moment-can-last-lifetime-alexander-greats-three-wishes-holt#:~:text=1)%20The%20king%20of%20Macedon,my%20coffin%2C%22%20Alexander%20said.\",\"position\":3},{\"title\":\"Alexander the Great Failure: The Collapse of the Macedonian Empire\",\"link\":\"https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.\",\"position\":4},{\"title\":\"Who defeated Alexander The Great? Who conquered Greece after him ...\",\"link\":\"https://www.quora.com/Who-defeated-Alexander-The-Great-Who-conquered-Greece-after-him-and-why-were-they-able-to-conquer-that-region-while-Alexander-couldnt#:~:text=No%20one%20defeated%20Alexander%20the,his%20death%20was%20not%20natural.\",\"position\":5},{\"title\":\"Alexander the Great | Biography, Empire, Death, & Facts\",\"link\":\"https://www.britannica.com/biography/Alexander-the-Great\",\"position\":6,\"snippet\":\"Feb 11, 2025 \u2014 Alexander the Great, a fearless Macedonian king and military genius, conquered vast territories from Greece to Egypt and India, ...\"},{\"title\":\"Alexander the Great: Empire & Death\",\"link\":\"https://www.history.com/topics/ancient-greece/alexander-the-great\",\"position\":7,\"snippet\":\"Nov 9, 2009 \u2014 Alexander the Great was an ancient Macedonian ruler and one of history's greatest military minds who, as King of Macedonia and Persia, ...\"},{\"title\":\"History - Alexander the Great\",\"link\":\"https://www.bbc.co.uk/history/historic_figures/alexander_the_great.shtml\",\"position\":8,\"snippet\":\"Alexander III of Macedon, better known as Alexander the Great, single-handedly changed the nature of the ancient world in little more than a decade.\"},{\"title\":\"Alexander the Great - National Geographic Education\",\"link\":\"https://education.nationalgeographic.org/resource/alexander-great/\",\"position\":9,\"snippet\":\"Oct 19, 2023 \u2014 Alexander was born in 356 B.C.E. in Pella, Macedonia, to King Philip II. As a young boy, Alexander was taught to read, write, and play the lyre.\"},{\"title\":\"Who loved Alexander the Great?\",\"link\":\"https://museums.cam.ac.uk/magic/who-loved-alexander-great\",\"position\":10,\"snippet\":\"Throughout his life, Alexander married 3 women and fathered at least 2 children but also had several male lovers. Amongst his closest relationships was that ...\"},{\"title\":\"Alexander the Great (1956)\",\"link\":\"https://www.imdb.com/title/tt0048937/\",\"position\":11,\"snippet\":\"The life and military conquests of Alexander III of Macedon (July 20/21, 356 - June 10/11, 323 B.C.), commonly known as Alexander the Great.\"},{\"title\":\"Alexander the Great\",\"link\":\"https://www.worldhistory.org/Alexander_the_Great/\",\"position\":12,\"snippet\":\"Nov 14, 2013 \u2014 He is known as 'the great' both for his military genius and his diplomatic skills in handling the various populaces of the regions he conquered.\"}],\"peopleAlsoAsk\":[{\"question\":\"What is Alexander the Great most famous for?\"},{\"question\":\"What did Alexander the Great say before he died?\",\"link\":\"https://www.linkedin.com/pulse/moment-can-last-lifetime-alexander-greats-three-wishes-holt#:~:text=1)%20The%20king%20of%20Macedon,my%20coffin%2C%22%20Alexander%20said.\",\"title\":\"Alexander the Great's Last Three Wishes. - LinkedIn\"},{\"question\":\"What led to the fall of Alexander?\",\"link\":\"https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.\",\"title\":\"Alexander the Great Failure: The Collapse of the Macedonian Empire\"},{\"question\":\"Which country defeated Alexander the Great?\",\"link\":\"https://www.quora.com/Who-defeated-Alexander-The-Great-Who-conquered-Greece-after-him-and-why-were-they-able-to-conquer-that-region-while-Alexander-couldnt#:~:text=No%20one%20defeated%20Alexander%20the,his%20death%20was%20not%20natural.\",\"title\":\"Who defeated Alexander The Great? Who conquered Greece after him ...\"}],\"relatedSearches\":[{\"query\":\"Alexander the Great book\"},{\"query\":\"Alexander the Great empire\"},{\"query\":\"Alexander the Great death\"},{\"query\":\"Alexander the Great religion\"},{\"query\":\"Alexander the Great Empire map\"},{\"query\":\"Alexander the Great achievements\"},{\"query\":\"What was Alexander the Great known for\"},{\"query\":\"Alexander the Great empire name\"}]}",
+"llm_extract": null,
+"screenshot_hosted_url": null,
+"html_hosted_url": null,
+"markdown_hosted_url": null,
+"json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/json_94iqy385ty.json",
+"text_hosted_url": null,
+"links_on_page": [],
+"page_metadata": {
+"status_code": 200,
+"title": ""
+}
+}
+}
+````
+
+The response contains:
+
+Basic request information: id, object, created timestamp, url_to_scrape
+Result object with URLs to access different formats of the data
+JSON content with structured search results including:
+
+searchParameters: Information about the search query
+knowledgeGraph: Detailed information about the search subject (when available)
+organic: List of search results with title, link, position, and snippet
+peopleAlsoAsk: Related questions that users commonly search for
+relatedSearches: Suggested related search queries
+
+
+
+This structured format makes it easy to integrate search results into your applications, perform data analysis, or build search-related features.
+
+
+
+This structured format makes it easy to integrate search results into your applications, perform data analysis, or build search-related features.
+
+For the URL in this example, https://www.google.com/search?q=alexander+the+great&gl=us&hl=en Olostep will also provide a hosted JSON file with the structured search results. You can access the JSON file using the following URL:
+[View example JSON](https://olostep-storage.s3.us-east-1.amazonaws.com/json_94iqy385ty.json)
+
+If you want to get also the html and markdown content of the search results, you can include the `html` and `markdown` formats in the `formats` parameter.
+You will get also the html and markdown content of the search results in the response and two urls where we host the content for 7 days like these:
+
+- [Markdown format](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_vxc86vq2pf.txt)
+- [HTML](https://olostep-storage.s3.us-east-1.amazonaws.com/text_vxc86vq2pf.txt)
+
+To get information about available parsers or to request a custom parser for your specific use case, please contact us at [info@olostep.com](mailto:info@olostep.com).
