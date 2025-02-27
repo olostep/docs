@@ -1,0 +1,60 @@
+---
+sidebarTitle: Get Website Structure
+title: Understand the structure of a website with Olostep
+description: Extract all the urls that make up a website to understand its structure and see which pages you want to get content from.
+---
+
+## Overview
+This is useful for content discovery, site structure analysis or decide which of those URLs you want to get the content from.
+
+## Extracting Sitemaps
+
+To extract URLs from a website, send a POST request with the **url** of the website to be processed to the maps endpoint. The endpoint typically responds within seconds, providing a comprehensive list of URLs.
+
+<CodeGroup>
+    ```python maps.py
+    import requests
+    import time
+
+    # Define the API URL and your API key
+    API_URL = 'https://api.olostep.com'
+    API_KEY = '<your_token>'
+
+    # Set the headers for the requests
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Data for the request
+    payload = {
+        "url": "https://docs.olostep.com"
+    }
+
+    # Make the request and measure latency
+    start_time = time.time()
+    response = requests.post(f'{API_URL}/v1/maps', headers=HEADERS, json=payload)
+    latency = round((time.time() - start_time) * 1000, 2)
+
+    # Print results
+    print(f"Latency: {latency}ms")
+    print("\nResponse Status Code:", response.status_code)
+    print("\nResponse Body:")
+    print(response.text)
+    ```
+</CodeGroup>
+
+### Example Response
+
+```
+Latency: 1220.72ms
+Response Status Code: 200
+Response Body:
+{"urls_count":26,"urls":["https://docs.olostep.com/api-reference/batches/create","https://docs.olostep.com/api-reference/batches/info","https://docs.olostep.com/api-reference/batches/items","https://docs.olostep.com/api-reference/crawls/create","https://docs.olostep.com/api-reference/crawls/info","https://docs.olostep.com/api-reference/crawls/pages","https://docs.olostep.com/api-reference/maps/create","https://docs.olostep.com/api-reference/retrieve","https://docs.olostep.com/api-reference/retrieve-dataset","https://docs.olostep.com/api-reference/scrapes/create","https://docs.olostep.com/api-reference/scrapes/get","https://docs.olostep.com/api-reference/start-agent","https://docs.olostep.com/concepts/cost-effectiveness","https://docs.olostep.com/concepts/js-rendering","https://docs.olostep.com/concepts/latency","https://docs.olostep.com/features/batches/batches","https://docs.olostep.com/features/crawls/crawls","https://docs.olostep.com/features/crawls/example-paginate","https://docs.olostep.com/features/crawls/example-search-query","https://docs.olostep.com/features/maps/maps","https://docs.olostep.com/features/scrapes/scrapes","https://docs.olostep.com/get-started/authentication","https://docs.olostep.com/get-started/welcome","https://docs.olostep.com/use-cases/extract-text-markdown-from-website","https://docs.olostep.com/use-cases/price-monitoring","https://docs.olostep.com/use-cases/serp"]}
+```
+
+The response will include all discovered sitemap URLs for the specified website. This endpoint is particularly useful when you need to:
+- Discover all content pages on a website
+- Filter which URLs you want to get content from with the scrapes endpoint
+- Analyze site structure and hierarchy
+- Prepare URLs for batch processing
