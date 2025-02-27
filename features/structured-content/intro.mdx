@@ -1,0 +1,132 @@
+---
+sidebarTitle: Introduction
+title: Get structured JSON content from any website
+description: Learn how to use Olostep to extract only the data you need from any website in JSON format.
+---
+
+## Structured Content from Any Website
+
+By default, Olostep supports and returns content in various formats including:
+- HTML
+- Text
+- raw_PDF
+- Markdown
+
+For some use cases you might not want the whole content but only the specific, structured and clean data you want. Olostep provides two ways to achieve this:
+
+## 1. Using Custom Parsers
+
+Custom parsers are ideal when you need to extract data at scale in a recurrent way from the same websites. This approach is  cost-efficient and fast as it extracts data directly from static HTML/CSS selectors.
+We run the parsers in our servers so you only get the structured JSON data you need.
+
+We offer pre-built parsers for popular websites and can create custom parsers for your specific needs or enable your account to pass custom parsers directly to the API.
+
+### Pre-built Parsers
+
+Olostep offers several pre-built parsers for popular websites:
+- Google Search: `@olostep/google-search`
+- Amazon Product: `@olostep/amazon-it-product`
+- Linkedin Profile: get in touch with us to get the parser ID
+- TikTok data extraction: get in touch with us to get the parser ID
+- Google News: get in touch with us to get the parser ID
+- Google Maps: get in touch with us to get the parser ID
+
+### Example Usage
+
+```python
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+    "formats": ["parser_extract"],
+    "parser_extract": {"parser_id": "@olostep/google-search"},
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "wait_before_scraping": 0,
+}
+headers = {
+    "Authorization": "Bearer <YOUR-API-KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+
+### Need a Custom Parser?
+
+If you need a parser for a specific website or the ID of a pre-built parser:
+- Contact us at info@olostep.com
+
+## 2. Using LLM Extraction
+For websites with changing structures or one-off extraction needs, Olostep offers LLM-powered extraction. This approach:
+
+- Feeds the content to a Large Language Model
+- Instructs the model to parse and return only the specified data
+- Returns a clean JSON structure containing exactly what you need
+
+```python
+import requests
+import json
+
+def extract_with_llm():
+url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": ["markdown", "llm_extract"],
+        "schema": {
+            "event": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "date": {"type": "string"},
+                    "description": {"type": "string"},
+                    "venue": {"type": "string"},
+                    "address": {"type": "string"},
+                    "start_time": {"type": "string"}
+                }
+            }
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # The LLM extract will be available in the result
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+extract_with_llm()
+```
+
+Sample Response
+
+```
+{
+"llm_extract": {
+"event": {
+"title": "Stefano Marchese and Friends",
+"date": "Wednesday / January 22, 2025",
+"description": "Join acclaimed Italian singer-songwriter and educator Stefano Marchese for an unforgettable evening of musical magic as he takes the stage alongside a constellation of extraordinary talent in a concert titled Concerto di Duetti.",
+"venue": "David Friend Recital Hall (DFRH)",
+"address": "921 Boylston Street Boston MA 02115 United States",
+"start_time": "7:30 p.m. (EST)"
+}
+}
+}
+```
+
+## Choosing the Right Approach
+
+- **Custom Parsers**: Better for high-volume, consistent, recurring website scraping
+- **LLM Extraction**: Ideal for flexible extraction needs or websites with changing structures
+
+Both methods provide clean, structured JSON data that can be immediately used in your applications without additional processing.
