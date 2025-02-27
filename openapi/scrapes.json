@@ -47,13 +47,23 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "enum": ["html", "markdown", "parser_extract", "llm_extract", "raw_pdf"]
+                      "enum": [
+                        "html",
+                        "markdown",
+                        "parser_extract",
+                        "llm_extract",
+                        "raw_pdf"
+                      ]
                     },
                     "description": "Formats to save the scraped content."
                   },
                   "remove_css_selectors": {
                     "type": "string",
-                    "enum": ["default", "none", "array"],
+                    "enum": [
+                      "default",
+                      "none",
+                      "array"
+                    ],
                     "description": "Option to remove certain CSS selectors from the content. Optionally, you can also pass a JSON stringified array of specific selectors you want to remove. The CSS selectors removed when this option is set to default are ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
                   },
                   "actions": {
@@ -67,11 +77,16 @@
                         {
                           "type": "object",
                           "title": "Wait",
-                          "required": ["type", "milliseconds"],
+                          "required": [
+                            "type",
+                            "milliseconds"
+                          ],
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": ["wait"],
+                              "enum": [
+                                "wait"
+                              ],
                               "description": "Wait for a specified amount of milliseconds"
                             },
                             "milliseconds": {
@@ -84,11 +99,16 @@
                         {
                           "type": "object",
                           "title": "Click",
-                          "required": ["type", "selector"],
+                          "required": [
+                            "type",
+                            "selector"
+                          ],
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": ["click"],
+                              "enum": [
+                                "click"
+                              ],
                               "description": "Click on an element"
                             },
                             "selector": {
@@ -100,11 +120,17 @@
                         {
                           "type": "object",
                           "title": "Fill Input",
-                          "required": ["type", "selector", "value"],
+                          "required": [
+                            "type",
+                            "selector",
+                            "value"
+                          ],
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": ["fill_input"],
+                              "enum": [
+                                "fill_input"
+                              ],
                               "description": "Fill an input element with a value"
                             },
                             "selector": {
@@ -120,16 +146,27 @@
                         {
                           "type": "object",
                           "title": "Scroll",
-                          "required": ["type", "direction", "amount"],
+                          "required": [
+                            "type",
+                            "direction",
+                            "amount"
+                          ],
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": ["scroll"],
+                              "enum": [
+                                "scroll"
+                              ],
                               "description": "Scroll the page"
                             },
                             "direction": {
                               "type": "string",
-                              "enum": ["up", "down", "left", "right"],
+                              "enum": [
+                                "up",
+                                "down",
+                                "left",
+                                "right"
+                              ],
                               "description": "Direction to scroll"
                             },
                             "amount": {
@@ -144,11 +181,14 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "Country to load the request from. Provide in ISO 3166-1 alpha-2 codes like US(USA), IN(India), etc"
+                    "description": "Residential country to load the request from.\n\nSupported values are:\n- US (United States)\n- CA (Canada)\n- IT (Italy)\n- IN (India)\n- GB (England)\n- JP (Japan)\n- MX (Mexico)\n- AU (Australia)\n- ID (Indonesia)\n- UA (UAE)\n- RU (Russia)\n- RANDOM\n\nSome operations, like scraping Google Search and Google News, support all countries."
                   },
                   "transformer": {
                     "type": "string",
-                    "enum": ["postlight", "none"],
+                    "enum": [
+                      "postlight",
+                      "none"
+                    ],
                     "description": "Specify the HTML transformer to use, if any. Postlight's Mercury Parser library is used to remove ads and other unwanted content from the scraped content."
                   },
                   "remove_images": {
@@ -205,7 +245,11 @@
                     "properties": {
                       "screen_type": {
                         "type": "string",
-                        "enum": ["default", "mobile", "desktop"],
+                        "enum": [
+                          "default",
+                          "mobile",
+                          "desktop"
+                        ],
                         "description": "Type of screen. Desktop uses 1920x1080 pixels, mobile uses 414x896 pixels, and default uses 1024x768 pixels."
                       },
                       "screen_width": {
@@ -217,14 +261,16 @@
                         "description": "Height of the screen in pixels. Desktop: 1080px, mobile: 896px, default: 1024px."
                       }
                     },
-                  "description": "Configuration for screen size. Preset dimensions are available through screen_type: desktop (1920x1080), mobile (414x896), or default (768x1024)."
-                },
+                    "description": "Configuration for screen size. Preset dimensions are available through screen_type: desktop (1920x1080), mobile (414x896), or default (768x1024)."
+                  },
                   "metadata": {
                     "type": "object",
                     "description": "User-defined metadata."
                   }
                 },
-                "required": ["url_to_scrape"]
+                "required": [
+                  "url_to_scrape"
+                ]
               }
             }
           }
@@ -306,8 +352,11 @@
           "400": {
             "description": "Bad request due to incorrect or missing parameters."
           },
-          "401": {
-            "description": "Unauthorized access due to missing or invalid API token."
+          "402": {
+            "description": "Payment required due to invalid API key."
+          },
+          "404": {
+            "description": "Not found error when the requested scrape is not found."
           },
           "500": {
             "description": "Internal server error."
@@ -412,8 +461,11 @@
           "400": {
             "description": "Bad request due to incorrect or missing parameters."
           },
+          "402": {
+            "description": "Payment required due to invalid API key."
+          },
           "404": {
-            "description": "Scrape not found for the provided ID."
+            "description": "Not found error when the requested scrape is not found."
           },
           "500": {
             "description": "Internal server error."
