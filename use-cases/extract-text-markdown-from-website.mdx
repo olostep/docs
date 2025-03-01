@@ -1,18 +1,16 @@
 ---
 sidebarTitle: Extract Markdown and Text
-title: Extracting Markdown and Text Format from Any Website Using Olostep
-description: Learn how to extract text and markdown formats from any website using Olostep's API.
+title: Extracting Markdown and Plain Text
+description: Learn how to extract content in text and markdown from any web page.
 ---
 
 ## Overview
 
-Olostep provides an API that allows users to scrape and extract content from any website in multiple formats, including html, structured json, text and markdown.
-
-Getting the result as text or markdown is useful if you want to feed it to an LLM without all the extra HTML markup
+Olostep's [scrape](../../features/scrapes/scrapes) endpoint allows to extract content from any website. Content in plain text or markdown is useful if you to feed it to an LLM without all the HTML.
 
 In the text format we strip more content (slashes, asterisks and other markdown properties) than in the markdown format, so if you want to keep some of the formatting, you should use the markdown format.
 
-In this guide we will see how to extract text and markdown from a website like `https://www.nea.com/team` using Olostep's API.
+In this guide we will see how to extract text and markdown from a website like `https://www.nea.com/team`.
 
 ## Prerequisites
 
@@ -84,12 +82,12 @@ A successful response will look something like this:
 
 ## Explanation
 
-- The `url_to_scrape` parameter specifies the website URL to extract content from.
-- The `formats` parameter defines the output formats (text in this case).
-- The `Authorization` header contains your API key to authenticate the request.
+- `url_to_scrape`: specifies the website URL to extract content from.
+- `formats`: defines the output formats (text in this case).
+- `Authorization`: contains your API key to authenticate the request.
 - The response is formatted as JSON and printed for readability.
 
 ## Conclusion
 
-Using Olostep, you can easily extract text and markdown content from any website. This is useful if you want to get content from a website and feed it to an LLM for data extraction and analysis. If you want to extract content at scale from the same website over and over (e.g. monitoring data, price tracking, etc...) we recommend using the html format and passing custom parsers to the API (or use the one we already have) to extract the content you need.
+Using Olostep, you can easily extract text and markdown content from any website. This is useful if you want to get content from a website and feed it to an LLM for data extraction and analysis. If you want to extract content at scale from the same website over and over (e.g. monitoring data, price tracking, etc...) we recommend using a [custom parser](../../features/structured-content/parsers) to get the content in JSON format.
 
