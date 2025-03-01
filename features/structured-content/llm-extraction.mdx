@@ -1,0 +1,69 @@
+---
+sidebarTitle: Using LLM Extraction
+title: Using LLM Extraction
+---
+
+For websites with changing structures or one-off extraction needs, Olostep offers LLM-powered extraction. This approach:
+
+- Feeds the content to a Large Language Model
+- Instructs the model to parse and return only the specified data
+- Returns a clean JSON structure containing exactly what you need
+
+```python
+import requests
+import json
+
+def extract_with_llm():
+url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": ["markdown", "llm_extract"],
+        "schema": {
+            "event": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "date": {"type": "string"},
+                    "description": {"type": "string"},
+                    "venue": {"type": "string"},
+                    "address": {"type": "string"},
+                    "start_time": {"type": "string"}
+                }
+            }
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # The LLM extract will be available in the result
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+extract_with_llm()
+```
+
+Sample Response:
+
+```json
+{
+    "llm_extract": {
+        "event": {
+            "title": "Stefano Marchese and Friends",
+            "date": "Wednesday / January 22, 2025",
+            "description": "Join acclaimed Italian singer-songwriter and educator Stefano Marchese for an unforgettable evening of musical magic as he takes the stage alongside a constellation of extraordinary talent in a concert titled Concerto di Duetti.",
+            "venue": "David Friend Recital Hall (DFRH)",
+            "address": "921 Boylston Street Boston MA 02115 United States",
+            "start_time": "7:30 p.m. (EST)"
+        }
+    }
+}
+```
