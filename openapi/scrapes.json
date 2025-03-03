@@ -238,6 +238,20 @@
                       "query_to_order_links_by": {
                         "type": "string",
                         "description": "Orders the returned links by their similarity to the provided query text, prioritizing the most relevant matches first"
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter extracted links using glob patterns with `include_links`. Use patterns like \"*.pdf\" to match file extensions, \"/blog/*\" for specific paths, or full URLs like \"https://example.com/*\". Supports wildcards (*), character classes ([a-z]), and alternation ({pattern1,pattern2})."
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter extracted links using glob patterns with `exclude_links`. Use patterns like \"*.pdf\" to match file extensions, \"/blog/*\" for specific paths, or full URLs like \"https://example.com/*\". Supports wildcards (*), character classes ([a-z]), and alternation ({pattern1,pattern2})."
                       }
                     },
                     "description": "With this option, you can get all the links present on the page you scrape."
