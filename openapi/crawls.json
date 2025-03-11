@@ -43,7 +43,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "URL path names in glob pattern to include. For example: \n- `'/**'` for the entire website\n- `'/blog/**'` for only blogs."
+                    "description": "URL path patterns to include in the crawl using glob syntax.\n\nDefaults to `/**` which includes all URLs. Use patterns like `/blog/**` to crawl specific sections (e.g., only blog pages), `/products/*.html` for product pages, or multiple patterns for different sections. Supports standard glob features like * (any characters) and ** (recursive matching)."
                   },
                   "exclude_urls": {
                     "type": "array",
@@ -75,7 +75,6 @@
                 },
                 "required": [
                   "start_url",
-                  "include_urls",
                   "max_pages"
                 ]
               }
