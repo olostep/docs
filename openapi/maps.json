@@ -21,7 +21,7 @@
     "/v1/maps": {
       "post": {
         "summary": "Get all the urls on a certain website",
-        "description": "This endpoint allows users to get all the urls on a certain website",
+        "description": "This endpoint allows users to get all the urls on a certain website. For large websites, results are paginated using cursor-based pagination.",
         "security": [
           {
             "Authorization": []
@@ -46,12 +46,46 @@
                   "top_n": {
                     "type": "number",
                     "description": "An optional number to limit to only top n links for a search query."
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL path patterns to include using glob syntax. For example: `/blog/**` to only include blog URLs. Only URLs matching these patterns will be returned."
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL path patterns to exclude using glob syntax. For example: `/careers/**`. Excluded URLs will supersede included URLs."
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "description": "OPTIONAL: Pagination cursor from a previous response. When provided, returns the next set of URLs from where the previous request left off due to response size limit."
                   }
                 },
                 "required": ["url"]
               },
-              "example": {
-                "url": "https://docs.olostep.com"
+              "examples": {
+                "basic": {
+                  "value": {
+                    "url": "https://docs.olostep.com"
+                  }
+                },
+                "withFilters": {
+                  "value": {
+                    "url": "https://docs.olostep.com",
+                    "include_urls": ["/api-reference/**"],
+                    "exclude_urls": ["/api-reference/deprecated/**"]
+                  }
+                },
+                "withCursor": {
+                  "value": {
+                    "cursor": "abc123_xyz456"
+                  }
+                }
               }
             }
           }
@@ -65,9 +99,13 @@
                   "type": "object",
                   "required": ["urls_count", "urls"],
                   "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for this map"
+                    },
                     "urls_count": {
                       "type": "integer",
-                      "description": "Total number of URLs found on the page"
+                      "description": "Number of URLs in the current response"
                     },
                     "urls": {
                       "type": "array",
@@ -75,35 +113,49 @@
                         "type": "string"
                       },
                       "description": "Array of URLs found on the page"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "Pagination cursor to retrieve the next set of URLs limited due to 10MB size limit. If null or not present, all URLs have been retrieved."
                     }
                   }
                 },
-                "example": {
-                  "urls_count": 22,
-                  "urls": [
-                    "https://docs.olostep.com/api-reference/batches/create",
-                    "https://docs.olostep.com/api-reference/batches/info",
-                    "https://docs.olostep.com/api-reference/batches/items",
-                    "https://docs.olostep.com/api-reference/crawls/create",
-                    "https://docs.olostep.com/api-reference/crawls/info",
-                    "https://docs.olostep.com/api-reference/crawls/pages",
-                    "https://docs.olostep.com/api-reference/retrieve",
-                    "https://docs.olostep.com/api-reference/retrieve-dataset",
-                    "https://docs.olostep.com/api-reference/scrapes/create",
-                    "https://docs.olostep.com/api-reference/scrapes/get",
-                    "https://docs.olostep.com/api-reference/start-agent",
-                    "https://docs.olostep.com/concepts/cost-effectiveness",
-                    "https://docs.olostep.com/concepts/js-rendering",
-                    "https://docs.olostep.com/concepts/latency",
-                    "https://docs.olostep.com/features/batches/batches",
-                    "https://docs.olostep.com/features/crawls/crawls",
-                    "https://docs.olostep.com/features/crawls/example-paginate",
-                    "https://docs.olostep.com/features/crawls/example-search-query",
-                    "https://docs.olostep.com/features/maps/maps",
-                    "https://docs.olostep.com/features/scrapes/scrapes",
-                    "https://docs.olostep.com/get-started/authentication",
-                    "https://docs.olostep.com/get-started/welcome"
-                  ]
+                "examples": {
+                  "basicResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 22,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/batches/create",
+                        "https://docs.olostep.com/api-reference/batches/info",
+                        "https://docs.olostep.com/api-reference/batches/items"
+                      ]
+                    }
+                  },
+                  "cursorResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 15,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/crawls/create",
+                        "https://docs.olostep.com/api-reference/crawls/info",
+                        "https://docs.olostep.com/api-reference/crawls/pages"
+                      ],
+                      "cursor": "abc123_def789"
+                    }
+                  },
+                  "allRetrievedResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 10,
+                      "urls": [
+                        "https://docs.olostep.com/features/maps/maps",
+                        "https://docs.olostep.com/get-started/authentication",
+                        "https://docs.olostep.com/get-started/welcome"
+                      ],
+                      "cursor": null
+                    }
+                  }
                 }
               }
             }
