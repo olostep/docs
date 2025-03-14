@@ -71,6 +71,10 @@
                   "top_n": {
                     "type": "number",
                     "description": "An optional number to only crawl the top N most relevant links on every page as per search query."
+                  },
+                  "webhook_url": {
+                    "type": "string",
+                    "description": "An optional POST request endpoint called when this crawl is completed. The body of the request will be same as the response of this [`v1/crawls/{crawl_id}`](./info#response-created) endpoint."
                   }
                 },
                 "required": [
@@ -146,6 +150,9 @@
                     "pages_count": {
                       "type": "number",
                       "description": "Count of pages crawled"
+                    },
+                    "webhook_url": {
+                      "type": "string"
                     }
                   }
                 }
@@ -246,6 +253,9 @@
                     "pages_count": {
                       "type": "number",
                       "description": "Count of pages crawled"
+                    },
+                    "webhook_url": {
+                      "type": "string"
                     }
                   }
                 }
