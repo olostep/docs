@@ -1,0 +1,59 @@
+---
+sidebarTitle: 'Context'
+title: Pass custom cookies to the API
+description: Reuse cookies, authentication, and cached data for your API requests
+---
+
+With contexts you can pass custom cookies to the API. This allows you to reuse cookies, authentication, and stored data for your API requests.
+
+This is useful to preserve authentication and session data between requests without needing to log in repeatedly, or to reuse cached data for subsequent requests.
+
+
+### Creating a Context
+
+Here is how you can create a context to pass custom cookies to the API:
+
+1. Install the Olostep browser plugin from here: [Olostep browser plugin](https://chromewebstore.google.com/detail/olostep/mjalbmdidmklbojfgakdpbifkgjjilkh)
+2. Visit the website for which you want to save the cookies/authentication
+3. Login to the website with the credentials you want to save
+4. Click on the Olostep plugin icon and select "Submit Context"
+5. Copy the context_id (which will be something like `ctx_yylqbfayto`) from the plugin and use it in your API requests
+
+
+### Using Context in the API requests
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.feizy.com/account-dashboard",
+    "formats": ["html", "markdown"],
+    "remove_css_selectors": "none",
+    "country": "US",
+    "context": {
+        "context_id": "ctx_yylqbfayto"
+    }
+}
+
+headers = {
+    "Authorization": "Bearer <API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+# Parse the JSON response
+data = response.json()
+
+# Print the JSON with proper indentation
+print(json.dumps(data, indent=4))
+```
+
+### Conclusion
+
+With context you are applying the same cookies and authentication to the API requests as you have saved in the browser plugin. This allows you to reuse cookies, authentication, and stored data for your API requests.
+
+If you have any questions or need help, feel free to reach out to us at info@olostep.com
