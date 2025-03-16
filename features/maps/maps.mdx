@@ -1,8 +1,15 @@
 ---
-sidebarTitle: 'Get Started'
+sidebarTitle: 'Map'
+icon: map
 title: Maps
+description: Get all the URLs on a website in seconds. You can also also decide the URLs paths you want to include or exclude from the response.
 ---
-The maps endpoint allows you to get all URLs on a certain website. This is useful for content discovery, site structure analysis or decide which of those URLs you want to get the content from.
+The maps endpoint allows you to get all URLs on a certain website. This is useful for content discovery, site structure analysis (e.g. for SEO) or decide which of those URLs you want to get the content from.
+
+The response time is typically within seconds, making it a fast and cost-effective way to extract all URLs from a website, even backlinks.
+
+
+By default the endpoint returns around 100k URLs in a single call (10MB max). If the response includes more data, the API returns a `cursor` parameter which can be used for pagination and getting the subsequent urls. For more details refer to the [API Reference](https://docs.olostep.com/api-reference/maps/create#body-cursor)
 
 ## Extracting Sitemaps
 
@@ -47,3 +54,44 @@ The response will include all discovered sitemap URLs for the specified website.
 - Discover all content pages on a website
 - Analyze site structure and hierarchy
 - Prepare URLs for batch processing
+
+For more fine-grained control over the URLs returned you can use the params `include_urls` and  `exclude_urls`.
+
+### Example
+
+Let's say that from www.brex.com you want to extract all the urls that have the paths after `/product/` e.g `https://www.brex.com/product/api/no-code` but also include `www.brex.com/product`.
+You can use the following code:
+
+<CodeGroup>
+
+    ```python maps.py
+    import requests
+
+    url = "https://api.olostep.com/v1/maps"
+
+    payload = {
+    "url": "https://www.brex.com/",
+    "include_urls": ["/product", "/product/**"],
+    "top_n": 100000
+    }
+
+    headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+    }
+
+    response = requests.request("POST", url, json=payload, headers=headers)
+
+    print(response.text)
+    ```
+
+</CodeGroup>
+
+For more details refer to the [API Reference](https://docs.olostep.com/api-reference/maps)
+
+## How is it billed?
+Each request sent to the maps endpoint is billed as 1 credit. Then for every extra 1000 urls returned in the response an additional credit is used.
+
+## Conclusion
+
+The maps endpoint is a powerful tool for content discovery and site analysis. It provides a comprehensive list of URLs on a website, enabling you to extract content from specific pages or analyze the site structure. This endpoint is particularly useful for SEO professionals, content marketers, AI agents who need to analyze website content or structure.
