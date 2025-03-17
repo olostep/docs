@@ -1,24 +1,23 @@
 ---
-sidebarTitle: Crawl matching pages in a site
-title: Crawl matching pages in a site
-description: Extract and convert specific pages of a website into clean markdown format - perfect for feeding into LLMs.
+sidebarTitle: Get specific pages in Website
+title: Crawl and Extract Content from Stripe's Blog Pages
+description: Learn how to crawl and extract content from Stripe's blog posts after identifying the URLs.
 ---
 
 ## Overview
 
-Crawling specific pages from a website and converting them to markdown is particularly useful when you need to:
-- Extract documentation for use with LLMs
-- Create a knowledge base from specific sections of a website
-- Generate clean, structured content from complex web pages
-- Focus on particular URL patterns within a large website
+This guide will show you how to:
 
-## Crawling Specific Pages
+- Start a crawl specifically targeting Stripe's blog posts
+- Monitor the crawl progress
+- Retrieve and process the crawled content
 
-To crawl specific pages from a website, you'll use the crawls endpoint to start a new crawl with URL pattern filters. This allows you to target only the pages you need while ignoring irrelevant content.
+## Crawling Stripe's Blog Pages
+
+To crawl Stripe's blog pages, use the crawls endpoint with the blog URLs you extracted in the previous step. This will fetch the full HTML content of each page, which you can then process to extract the information you need.
 
 <CodeGroup>
-    ```python crawl_specific_pages.py
-    from concurrent.futures import ThreadPoolExecutor, as_completed
+    ```python crawl_stripe_blog.py
     import requests
     import time
     import json
@@ -35,275 +34,103 @@ To crawl specific pages from a website, you'll use the crawls endpoint to start 
     # Record start time for crawl duration tracking
     crawl_start_time = time.time()
     
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] Starting documentation crawl...")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Starting Stripe blog crawl...")
     
-    # Start a new crawl with specific URL patterns
-    data = {
-        "start_url": "https://docs.stripe.com/payments/checkout/",
-        "max_pages": 100,
-        "include_urls": ["/payments/checkout/**"] # Only include pages matching this pattern
+    # Start a crawl focused on Stripe's engineering blog posts
+    # You can adjust the patterns based on your specific interests
+    payload = {
+        "start_url": "https://stripe.com/blog",
+        "include_urls": ["/blog/engineering/**"],  # Focus on engineering posts
+        "max_pages": 25  # Limit to 25 pages for this example
     }
-    
+
     # Start the crawl
-    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=data)
-    crawl_id = response.json()['id']
-    
-    # Wait for the crawl to complete
+    print("Starting crawl of Stripe's engineering blog posts...")
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=payload)
+    data = response.json()
+    crawl_id = data['id']
+    print(f"Crawl started with ID: {crawl_id}")
+
+    # Monitor crawl progress
     while True:
-        response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
-        pages_count = response.json()['pages_count']
-        print(f'Pages completed: {pages_count}')
-        if response.json()['status'] == 'completed':
-            break
+        status_response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+        status_data = status_response.json()
+        print(f"Crawl status: {status_data['status']} - Pages crawled: {status_data.get('pages_count', 0)}")
         
-        print("Still crawling... Waiting 5 seconds")
+        if status_data['status'] == 'completed' or status_data['status'] == 'failed':
+            break
+            
+        # Wait 5 seconds before checking again
         time.sleep(5)
-    
+
     # Calculate and display crawl duration
     crawl_duration = time.time() - crawl_start_time
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Crawl completed in {crawl_duration:.2f} seconds")
     ```
 </CodeGroup>
 
-## Converting Pages to Markdown
+## Retrieving and Processing Blog Content
 
-Once the crawl is complete, you can retrieve the content of all crawled pages in markdown format, which is ideal for feeding into LLMs or creating documentation.
+Once the crawl is complete, you can retrieve the content of all crawled pages and process it for your specific needs.
 
 <CodeGroup>
-    ```python get_markdown_content.py
+    ```python retrieve_blog_content.py
     # Continuing from the previous example
     
-    # Fetch crawled pages with their markdown content
-    params = {
-        "retrieve_id": "<page_retrieve_id>",
-        "formats": json.dumps(["markdown"])
+    # If crawl completed successfully, retrieve the pages
+    if status_data['status'] == 'completed':
+        print(f"\nCrawl completed! Retrieved {status_data['pages_count']} pages.")
+        pages_response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS)
+        pages_data = pages_response.json()
+        
+        # Save the full crawl results
+        with open('stripe_blog_content.json', 'w') as f:
+            json.dump(pages_data, f, indent=2)
+        print(f"Full crawl results saved to stripe_blog_content.json")
+        
+        # Print a sample of the first page
+        first_page = pages_data['pages'][0]
+        print(f"\nSample from first page: {first_page['url']}")
+        print(f"Title: {first_page['title']}")
+        print(f"Text excerpt: {first_page['text'][:200]}...")
+    else:
+        print(f"Crawl failed with status: {status_data['status']}")
+    ```
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "pages": [
+    {
+      "url": "https://stripe.com/blog/engineering",
+      "title": "Engineering | Stripe Blog",
+      "content": "<html>...</html>",
+      "text": "Engineering | Stripe Blog\nStripe builds economic infrastructure for the internet...",
+      "metadata": {
+        "og:title": "Engineering | Stripe Blog",
+        "og:description": "Read about Stripe's engineering work, from infrastructure to product development."
+      }
+    },
+    {
+      "url": "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+      "title": "Using ML to detect and respond to performance degradations | Stripe Blog",
+      "content": "<html>...</html>",
+      "text": "Using ML to detect and respond to performance degradations..."  
     }
-    
-    # Get all pages from the crawl
-    response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS)
-    pages = response.json()['pages']
-    
-    results = []
-    total_pages = len(pages)
-    
-    # Process pages in parallel for efficiency
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        # Create futures for content retrieval
-        future_to_page = {}
-        for page in pages:
-            params = {
-                "retrieve_id": page['retrieve_id'],
-                "formats": json.dumps(["markdown"])
-            }
-            future = executor.submit(
-                requests.get, 
-                f"{API_URL}/retrieve", 
-                headers=HEADERS, 
-                params=params
-            )
-            future_to_page[future] = page
-        
-        # Process results as they complete
-        for i, future in enumerate(as_completed(future_to_page), 1):
-            page = future_to_page[future]
-            url = page['url']
-            print(f"Processing {i}/{total_pages}: {url}")
-            
-            try:
-                response = future.result()
-                content_data = response.json()
-                if content_data and "markdown_content" in content_data:
-                    results.append({
-                        'url': url,
-                        'markdown_content': content_data['markdown_content']
-                    })
-                    print(f"✓ Content retrieved for {url}")
-                else:
-                    print(f"⚠ No markdown content for {url}")
-            except Exception as e:
-                print(f"❌ Error retrieving content for {url}: {str(e)}")
-    
-    print(f"Found {len(results)} pages with markdown content")
-    ```
-</CodeGroup>
+    // Additional pages...
+  ]
+}
+```
 
-## Saving the Markdown Content
+## Next Steps
 
-After retrieving the markdown content, you can save it to a file for further processing or use with LLMs.
+Now that you've successfully crawled and extracted content from Stripe's blog, you can:
 
-<CodeGroup>
-    ```python save_markdown.py
-    # Continuing from the previous example
-    
-    # Save all markdown content to a single file
-    output_file = "doc_markdown.md"
-    
-    with open(output_file, "w", encoding="utf-8") as f:
-        for page in results:
-            url = page['url']
-            content = page['markdown_content']
-            
-            # Write page header and content
-            f.write(f"## URL: {url}\n\n")  # Add URL as a heading
-            f.write(f"{content}\n\n")       # Add page content
-            f.write("---\n\n")              # Add separator between pages
-            
-            print(f"✓ Added content from {url}")
+1. **Expand your crawl**: Modify the `include_urls` parameter to crawl other sections of Stripe's blog
+2. **Implement regular updates**: Set up a scheduled job to periodically crawl for new content
+3. **Perform deeper analysis**: Use NLP tools to extract insights from the blog content
+4. **Build a search engine**: Create a searchable database of Stripe's blog content
 
-    print(f"\n✅ Process complete! All content has been saved to '{output_file}'")
-    print(f"Total pages processed: {len(results)}")
-    ```
-</CodeGroup>
-
-## Complete Example
-
-Here's a complete example that combines all the steps above into a reusable class:
-
-<CodeGroup>
-    ```python complete_example.py
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    import requests
-    import time
-    import json
-    from datetime import datetime
-
-    class OlostepManager:
-        def __init__(self, api_key):
-            self.API_URL = 'https://api.olostep.com/v1'
-            self.HEADERS = {
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {api_key}'
-            }
-
-        def start_crawl(self, start_url, max_pages=250, include_urls=None):
-            """Start a new crawl and return the crawl ID"""
-            data = {
-                "start_url": start_url,
-                "max_pages": max_pages,
-                "include_urls": include_urls or [f"{start_url}/**"]
-            }
-            response = requests.post(f'{self.API_URL}/crawls', headers=self.HEADERS, json=data)
-            return response.json()['id']
-
-        def await_crawl_completion(self, crawl_id):
-            """Wait for the crawl to complete"""
-            while True:
-                response = requests.get(f'{self.API_URL}/crawls/{crawl_id}', headers=self.HEADERS)
-                pages_count = response.json()['pages_count']
-                print(f'Pages completed: {pages_count}')
-                if response.json()['status'] == 'completed':
-                    break
-                
-                print("Still crawling... Waiting 5 seconds")
-                time.sleep(5)
-
-        def get_pages(self, crawl_id, formats, max_workers=20):
-            """Get all crawled pages with the specified formats content"""
-            # Get pages from crawl
-            response = requests.get(f'{self.API_URL}/crawls/{crawl_id}/pages', headers=self.HEADERS)
-            pages = response.json()['pages']
-            
-            results = []
-            total_pages = len(pages)
-            
-            # Process pages in parallel
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                # Create futures for content retrieval
-                future_to_page = {
-                    executor.submit(self._retrieve_content, page['retrieve_id'], formats): page
-                    for page in pages
-                }
-                
-                # Process results as they complete
-                for i, future in enumerate(as_completed(future_to_page), 1):
-                    page = future_to_page[future]
-                    url = page['url']
-                    print(f"Processing {i}/{total_pages}: {url}")
-                    
-                    try:
-                        content_data = future.result()
-                        if content_data and "markdown_content" in content_data:
-                            results.append({
-                                'url': url,
-                                'markdown_content': content_data['markdown_content']
-                            })
-                            print(f"✓ Content retrieved for {url}")
-                        else:
-                            print(f"⚠ No markdown content for {url}")
-                    except Exception as e:
-                        print(f"❌ Error retrieving content for {url}: {str(e)}")
-            
-            return results
-
-        def _retrieve_content(self, retrieve_id, formats):
-            """Retrieves content for a single page."""
-            params = {
-                "retrieve_id": retrieve_id,
-                "formats": json.dumps(formats)
-            }
-            response = requests.get(f"{self.API_URL}/retrieve", headers=self.HEADERS, params=params)
-            return response.json()
-
-        def save_markdown_to_file(self, pages, output_file="doc_markdown.md"):
-            """Save markdown content to a file"""
-            with open(output_file, "w", encoding="utf-8") as f:
-                for page in pages:
-                    url = page['url']
-                    content = page['markdown_content']
-                    
-                    # Write page header and content
-                    f.write(f"## URL: {url}\n\n")
-                    f.write(f"{content}\n\n")
-                    f.write("---\n\n")
-                    
-                    print(f"✓ Added content from {url}")
-
-            print(f"\n✅ Process complete! All content has been saved to '{output_file}'")
-            print(f"Total pages processed: {len(pages)}")
-
-    # Usage example
-    def main():
-        # Initialize with your API key
-        olostep = OlostepManager(api_key='<your_olostep_api_key>')
-        
-        # Record start time
-        crawl_start_time = time.time()
-        
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] Starting documentation crawl...")
-        
-        # Start crawl with specific URL patterns
-        crawl_id = olostep.start_crawl(
-            start_url="https://docs.stripe.com/payments/checkout/",
-            max_pages=100,
-            include_urls=["/payments/checkout/**"]  # Only include pages matching this pattern
-        )
-        
-        # Wait for completion
-        olostep.await_crawl_completion(crawl_id)
-        
-        # Calculate duration
-        crawl_duration = time.time() - crawl_start_time
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] Crawl completed in {crawl_duration:.2f} seconds")
-
-        # Get markdown content
-        pages = olostep.get_pages(crawl_id=crawl_id, formats=["markdown"])
-        
-        # Save to file
-        olostep.save_markdown_to_file(pages)
-
-    if __name__ == "__main__":
-        main()
-    ```
-</CodeGroup>
-
-## Use Cases
-
-This approach is particularly valuable for:
-
-1. **LLM Training and Context** - Extract documentation to provide as context for LLMs to answer product-specific questions
-2. **Documentation Conversion** - Convert web-based documentation to markdown for offline reading or integration with other systems
-3. **Knowledge Base Creation** - Build a structured knowledge base from specific sections of a website
-4. **API Documentation Analysis** - Extract and analyze API documentation from developer portals
-5. **Content Migration** - Move content from one platform to another while preserving structure and formatting
-
-By focusing on specific URL patterns, you can extract exactly the content you need while ignoring irrelevant pages, making this approach highly efficient for targeted content extraction.
+Using Olostep's content crawling capabilities, you can build powerful tools for monitoring and analyzing any websites content strategy.
