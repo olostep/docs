@@ -1,60 +1,95 @@
 ---
-sidebarTitle: Get Website Structure
-title: Understand the structure of a website
-description: Extract all the urls that make up a website to understand its structure and see which pages you want to get the content from.
+sidebarTitle: Get Website URLs
+title: Extract All URLs from Stripe's Website
+description: Get a complete map of Stripe's website structure to understand its organization and discover available content.
 ---
 
 ## Overview
-This is useful for content discovery, site structure analysis or decide which of those URLs you want to get the content from.
 
-## Extracting Sitemaps
+Before diving into specific sections of a website, it's often useful to get a complete picture of its structure. In this guide, we'll show you how to extract all URLs from Stripe's website, which will help you:
 
-To extract URLs from a website, send a POST request with the **url** of the website to be processed to the maps endpoint. The endpoint typically responds within seconds, providing a comprehensive list of URLs
+- Understand the overall site architecture
+- Discover content sections you might not be aware of
+- Use LLMs to decide which URLs to further scrape
+
+## Extracting All Stripe URLs
+
+To extract all URLs from Stripe's website, use the maps endpoint with Stripe's domain. This will return a comprehensive list of all discoverable URLs on their site.
 
 <CodeGroup>
-    ```python maps.py
+    ```python get_stripe_urls.py
     import requests
     import time
+    import json
 
-    # Define the API URL and your API key
-    API_URL = 'https://api.olostep.com'
-    API_KEY = '<your_token>'
-
-    # Set the headers for the requests
+    # Configuration
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
     HEADERS = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {API_KEY}'
     }
 
-    # Data for the request
-    payload = {
-        "url": "https://docs.olostep.com"
-    }
-
-    # Make the request and measure latency
+    # Start time for latency tracking
     start_time = time.time()
-    response = requests.post(f'{API_URL}/v1/maps', headers=HEADERS, json=payload)
+    
+    # Define the payload with just the base URL
+    payload = {
+        "url": "https://stripe.com"
+    }
+    
+    # Make the request
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Calculate latency
     latency = round((time.time() - start_time) * 1000, 2)
-
-    # Print results
-    print(f"Latency: {latency}ms")
-    print("\nResponse Status Code:", response.status_code)
-    print("\nResponse Body:")
-    print(response.text)
+    print(f"Request completed in {latency}ms")
+    
+    # Process the results
+    data = response.json()
+    print(f"Found {data['urls_count']} URLs on Stripe's website")
+    
+    # Print the first 10 URLs as a sample
+    print("\nSample URLs:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Save all URLs to a file for further analysis
+    with open('stripe_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nAll URLs saved to stripe_urls.json")
     ```
 </CodeGroup>
 
 ### Example Response
 
-```
-Latency: 1220.72ms
-Response Status Code: 200
-Response Body:
-{"urls_count":26,"urls":["https://docs.olostep.com/api-reference/batches/create","https://docs.olostep.com/api-reference/batches/info","https://docs.olostep.com/api-reference/batches/items","https://docs.olostep.com/api-reference/crawls/create","https://docs.olostep.com/api-reference/crawls/info","https://docs.olostep.com/api-reference/crawls/pages","https://docs.olostep.com/api-reference/maps/create","https://docs.olostep.com/api-reference/retrieve","https://docs.olostep.com/api-reference/retrieve-dataset","https://docs.olostep.com/api-reference/scrapes/create","https://docs.olostep.com/api-reference/scrapes/get","https://docs.olostep.com/api-reference/start-agent","https://docs.olostep.com/concepts/cost-effectiveness","https://docs.olostep.com/concepts/js-rendering","https://docs.olostep.com/concepts/latency","https://docs.olostep.com/features/batches/batches","https://docs.olostep.com/features/crawls/crawls","https://docs.olostep.com/features/crawls/example-paginate","https://docs.olostep.com/features/crawls/example-search-query","https://docs.olostep.com/features/maps/maps","https://docs.olostep.com/features/scrapes/scrapes","https://docs.olostep.com/get-started/authentication","https://docs.olostep.com/get-started/welcome","https://docs.olostep.com/use-cases/extract-text-markdown-from-website","https://docs.olostep.com/use-cases/price-monitoring","https://docs.olostep.com/use-cases/serp"]}
+```json
+{
+  "id": "map_abc123xyz",
+  "urls_count": 3842,
+  "urls": [
+    "https://stripe.com",
+    "https://stripe.com/about",
+    "https://stripe.com/blog",
+    "https://stripe.com/docs",
+    "https://stripe.com/pricing",
+    "https://stripe.com/customers",
+    "https://stripe.com/partners",
+    "https://stripe.com/enterprise",
+    "https://stripe.com/payments",
+    "https://stripe.com/billing"
+    // ... thousands more URLs
+  ]
+}
 ```
 
-The response will include all discovered sitemap URLs for the specified website. This endpoint is particularly useful when you need to:
-- Discover all content pages on a website
-- Filter which URLs you want to get content from with the scrapes endpoint
-- Analyze site structure and hierarchy
-- Prepare URLs for batch processing
+## Analyzing Stripe's Website Structure
+
+After extracting all URLs, you can analyze the structure to identify patterns. This is particularly useful for understanding how Stripe organizes their content. For example, you might notice these URL patterns:
+
+- `/blog/**` - Blog posts and articles
+- `/docs/**` - Documentation pages
+- `/payments/**` - Payment product information
+- `/billing/**` - Billing product information
+
+In some cases, you only want to get URLs in a specific section of the website. For instance, all blog posts. You can use our inbuilt filter in the [next guide](/use-cases/extract-specific-paths).

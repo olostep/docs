@@ -1,41 +1,111 @@
 ---
-sidebarTitle: Get all Blog Urls from Stripe
-title: Get all Blog Urls from Stripe
-description: Extract all the urls on stripe that have the path /blog
+sidebarTitle: Get specific URLs in Website
+title: Extract Blog URLs from Stripe's Website
+description: Filter and extract only the blog URLs from Stripe's website for targeted content analysis.
 ---
 
 ## Overview
-If you want to extract all the blog urls from stripe or any website, you can use the maps endpoint to extract all the urls that have the path `/blog` (e.g `https://stripe.com/blog/engineering/page/3`)
 
-## Extracting URLs with a specific path
+Instead of [mapping entire website](/use-cases/get-website-structure), you might want to focus on specific sections. In this guide, we'll show you how to extract only the blog URLs from Stripe's website.
 
-To extract URLs that follow a specific path from a website, send a POST request with the **url** of the website to be processed to the maps endpoint with the param 'include_urls` as shown here:
+## Extracting Only Blog URLs
+
+To extract only blog URLs from Stripe's website, use the maps endpoint with path pattern filters. The `include_urls` parameter allows you to specify exactly which URL patterns you want to include in the results.
 
 <CodeGroup>
-    ```python maps.py
+    ```python extract_stripe_blog_urls.py
     import requests
+    import time
+    import json
 
-    url = "https://api.olostep.com/v1/maps"
-
-    payload = {
-    "url": "https://stripe.com",
-    "include_urls": ["/blog", "/blog/**"],
+    # Configuration
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
     }
-    headers = {
-    "Authorization": "Bearer <YOUR_API_KEY>",
-    "Content-Type": "application/json"
-}
 
-    response = requests.request("POST", url, json=payload, headers=headers)
-
-    print(response.text)
+    # Start time for latency tracking
+    start_time = time.time()
+    
+    # Define the payload with URL patterns to include
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog", "/blog/**"]  # Match /blog and all paths under /blog
+    }
+    
+    # Make the request
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Calculate latency
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"Request completed in {latency}ms")
+    
+    # Process the results
+    data = response.json()
+    print(f"Found {data['urls_count']} blog URLs on Stripe's website")
+    
+    # Print the first 10 URLs as a sample
+    print("\nSample blog URLs:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Save blog URLs to a file for further processing
+    with open('stripe_blog_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nAll blog URLs saved to stripe_blog_urls.json")
     ```
 </CodeGroup>
 
+### Understanding the URL Patterns
+
+In the example above, we're using two pattern specifications:
+
+- `/blog` - Matches exactly the main blog page (https://stripe.com/blog)
+- `/blog/**` - Matches all subpaths under /blog, including individual blog posts, category pages, etc.
+
+This combination ensures we capture all blog-related content while excluding other sections of the website.
+
 ### Example Response
 
-```
-{"id":"map_slc8d0uvpl","urls_count":278,"urls":["https://stripe.com/blog/page/1","https://stripe.com/blog/page/2","https://stripe.com/blog/page/3","https://stripe.com/blog/page/4","https://stripe.com/blog/page/5","https://stripe.com/blog/page/6","https://stripe.com/blog/page/7","https://stripe.com/blog/page/8","https://stripe.com/blog/page/9","https://stripe.com/blog/product","https://stripe.com/blog/product/page/2","https://stripe.com/blog/product/page/3","https://stripe.com/blog/product/page/4","https://stripe.com/blog/product/page/5","https://stripe.com/blog/industry","https://stripe.com/blog/corporate","https://stripe.com/blog/corporate/page/2","https://stripe.com/blog/engineering","https://stripe.com/blog/engineering/page/2","https://stripe.com/blog/engineering/page/3","https://stripe.com/blog/changelog","https://stripe.com/blog/atlas-startups-can-now-accept-payments-prior-to-receiving-their-ein","https://stripe.com/blog/ai-enhancements-to-adaptive-acceptance","https://stripe.com/blog/introducing-credits-for-usage-based-billing","https://stripe.com/blog/how-we-built-it-usage-based-billing","https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations-in-slices-of-stripe-payments","https://stripe.com/blog/how-stripe-radar-responded-to-a-new-wave-of-card-testing","https://stripe.com/blog/what-does-the-future-hold-for-real-time-payments","https://stripe.com/blog/the-ml-flywheel-how-we-continually-improve-our-models-to-reduce-card-testing","https://stripe.com/blog/in-a-competitive-landscape-rtps-move-to-stand-out","https://stripe.com/blog/the-forces-behind-the-rise-of-real-time-payments","https://stripe.com/blog/using-ml-to-comply-with-sca-requirements","https://stripe.com/blog/subscription-business-leaders-are-looking-for-a-better-way-to-combat-churn","https://stripe.com/blog/how-we-built-it-payment-method-a-b-testing","https://stripe.com/blog/our-biggest-ever-upgrades-to-stripe-billing","https://stripe.com/blog/stripe-sessions-is-back-on-may-6-2025","https://stripe.com/blog/reduce-payments-costs-with-instant-bank-payments-via-link","https://stripe.com/blog/our-top-product-updates-from-stripe-tour-ny","https://stripe.com/blog/stripe-terminals-expanding-ecosystem-new-partnerships-bring-flexibility-and-innovation-to-unified-commerce","https://stripe.com/blog/introducing-stripes-new-api-release-process","https://stripe.com/blog/the-pricing-model-dilemma-according-to-2000-subscription-business-leaders","https://stripe.com/blog/workbench-a-new-way-to-debug-monitor-and-grow-your-stripe-integration","https://stripe.com/blog/surprising-findings-from-our-analysis-of-3ds-transactions-in-the-us","https://stripe.com/blog/three-ways-our-usage-based-billing-product-is-unique","https://stripe.com/blog/testing-the-impact-of-buy-now-pay-later","https://stripe.com/blog/how-stripes-document-databases-supported-99.999-uptime-with-zero-downtime-data-migrations","https://stripe.com/blog/introducing-no-code-migrations-to-stripe-billing","https://stripe.com/blog/passkeys-a-faster-more-secure-way-to-log-in-to-the-stripe-dashboard","https://stripe.com/blog/customer-centricity-is-driving-a-new-era-in-streaming-media","https://stripe.com/blog/platforms-can-now-white-label-payment-workflows-in-record-time","https://stripe.com/blog/stripe-organizations-powering-the-worlds-most-complex-businesses","https://stripe.com/blog/untapped-opportunity-at-the-bottom-of-your-customer-funnel","https://stripe.com/blog/enterprise-payments","https://stripe.com/blog/test-clocks-how-we-made-it-easier-to-test-stripe-billing-integrations","https://stripe.com/blog/ending-bitcoin-support","https://stripe.com/blog/biggest-updates-sessions-2024","https://stripe.com/blog/shepherd-how-stripe-adapted-chronon-to-scale-ml-feature-development","https://stripe.com/blog/its-a-sellers-marketplace","https://stripe.com/blog/stripe-apps-more-than-doubles-in-size-offers-new-ways-to-discover-apps","https://stripe.com/blog/the-disruption-the-auto-industry-has-been-waiting-for","https://stripe.com/blog/ledger-stripe-system-for-tracking-and-validating-money-movement","https://stripe.com/blog/stripe-sessions-2022","https://stripe.com/blog/how-we-built-it-smart-retries","https://stripe.com/blog/stripe-sessions-2024","https://stripe.com/blog/the-future-is-arriving-fast-in-the-insurance-industry","https://stripe.com/blog/a-dynamic-back-office-is-the-new-business-superpower","https://stripe.com/blog/stripe-sessions-2023","https://stripe.com/blog/creator-economy-2023","https://stripe.com/blog/dynamic-payment-methods","https://stripe.com/blog/improving-instant-payouts","https://stripe.com/blog/billing-customer-portal","https://stripe.com/blog/exploring-python-using-gdb","https://stripe.com/blog/how-we-built-it-stripe-radar","https://stripe.com/blog/new-elements-features","https://stripe.com/blog/crypto-onramp","https://stripe.com/blog/markdoc","https://stripe.com/blog/new-and-improved-stripe-terminal","https://stripe.com/blog/reimagining-bank-transfers","https://stripe.com/blog/migrating-to-typescript","https://stripe.com/blog/sessions-is-back-on-may-24","https://stripe.com/blog/fast-secure-builds-choose-two","https://stripe.com/blog/connect-ten-years","https://stripe.com/blog/expanding-global-payouts-with-crypto","https://stripe.com/blog/japanese-payment-methods-jp","https://stripe.com/blog/japanese-payment-methods-en","https://stripe.com/blog/sorbet-stripes-type-checker-for-ruby","https://stripe.com/blog/payment-links-updates-jan-2022","https://stripe.com/blog/partner-program","https://stripe.com/blog/connect-front-end-experience","https://stripe.com/blog/some-recent-updates","https://stripe.com/blog/new-recurring-billing-features","https://stripe.com/blog/stripe-checkout","https://stripe.com/blog/orderahead","https://stripe.com/blog/shoptiques","https://stripe.com/blog/heyzap","https://stripe.com/blog/stripe-shop","https://stripe.com/blog/stripe-ireland","https://stripe.com/blog/engineering-challenges-at-stripe","https://stripe.com/blog/stripe-alipay","https://stripe.com/blog/stripe-in-australia","https://stripe.com/blog/apple-pay","https://stripe.com/blog/mayday","https://stripe.com/blog/android-pay-beta","https://stripe.com/blog/alipay-launch","https://stripe.com/blog/checkout-in-more-languages","https://stripe.com/blog/accept-ach-payments","https://stripe.com/blog/atlas-beta","https://stripe.com/blog/atlas-cuba","https://stripe.com/blog/upgrading-tls","https://stripe.com/blog/bring-your-own-team","https://stripe.com/blog/ios-and-android-updates","https://stripe.com/blog/stripe-en-france","https://stripe.com/blog/native-support-for-taxes-and-shipping","https://stripe.com/blog/ui-components-for-ios","https://stripe.com/blog/managed-accounts-for-european-marketplaces","https://stripe.com/blog/get-ready-for-apple-pay-on-the-web","https://stripe.com/blog/stripe-and-runkit","https://stripe.com/blog/instant-payouts-for-marketplaces","https://stripe.com/blog/stripe-in-singapore","https://stripe.com/blog/stripe-in-japan","https://stripe.com/blog/introducing-veneur-high-performance-and-global-aggregation-for-datadog","https://stripe.com/blog/radar","https://stripe.com/blog/a-primer-on-machine-learning-for-fraud-detection","https://stripe.com/blog/service-discovery-at-stripe","https://stripe.com/blog/works-with-stripe","https://stripe.com/blog/started-on-stripe-atlas","https://stripe.com/blog/reproducible-research","https://stripe.com/blog/atlas-guide","https://stripe.com/blog/european-payment-methods","https://stripe.com/blog/multiplan-subscriptions","https://stripe.com/blog/online-migrations","https://stripe.com/blog/idempotency","https://stripe.com/blog/130-plus-currencies-in-canada","https://stripe.com/blog/international-womens-day","https://stripe.com/blog/yc-w17","https://stripe.com/blog/rate-limiters","https://stripe.com/blog/stripe-and-indie-hackers","https://stripe.com/blog/new-roles-and-permissions-in-the-dashboard","https://stripe.com/blog/teaching-employees-to-code","https://stripe.com/blog/connect-updates","https://stripe.com/blog/sigma","https://stripe.com/blog/eu-connect","https://stripe.com/blog/dach-benelux","https://stripe.com/blog/ios-sdk-updates","https://stripe.com/blog/hong-kong","https://stripe.com/blog/marc-andreessen-ama","https://stripe.com/blog/payable-is-joining-stripe","https://stripe.com/blog/new-zealand","https://stripe.com/blog/u2f-restricted-keys","https://stripe.com/blog/atlas-pitching","https://stripe.com/blog/stripe-elements","https://stripe.com/blog/schedule-queries-in-stripe-sigma","https://stripe.com/blog/atlas-starting-sales","https://stripe.com/blog/india-private-beta","https://stripe.com/blog/stripe-snapshot-fraud","https://stripe.com/blog/query-connected-accounts-with-stripe-sigma","https://stripe.com/blog/operating-kubernetes","https://stripe.com/blog/strong-customer-authentication-guide","https://stripe.com/blog/completing-tls-upgrade","https://stripe.com/blog/carbon-neutral-journey","https://stripe.com/blog/atlas-business-of-saas","https://stripe.com/blog/connect-dashboard-updates-june-2018","https://stripe.com/blog/stripe-press","https://stripe.com/blog/issuing","https://stripe.com/blog/terminal","https://stripe.com/blog/stripe-and-world-bank","https://stripe.com/blog/sec-3d-2","https://stripe.com/blog/premium-support","https://stripe.com/blog/atlas-scaling-eng","https://stripe.com/blog/strong-customer-authentication-mar-2019","https://stripe.com/blog/3ds2","https://stripe.com/blog/chargeback-protection","https://stripe.com/blog/intercom-and-stripe","https://stripe.com/blog/sorbet","https://stripe.com/blog/connect-express-onboarding","https://stripe.com/blog/mexico-city","https://stripe.com/blog/capital","https://stripe.com/blog/introducing-stripe-corporate-card","https://stripe.com/blog/instant-payouts-for-us-businesses","https://stripe.com/blog/introducing-global-payouts-us-platforms","https://stripe.com/blog/connect-express-in-more-countries","https://stripe.com/blog/introducing-connect-onboarding","https://stripe.com/blog/nyc-office","https://stripe.com/blog/stripe-launches-in-mexico","https://stripe.com/blog/google-pay-on-checkout","https://stripe.com/blog/covid-19","https://stripe.com/blog/jcb-expansion","https://stripe.com/blog/guide-credit-risk","https://stripe.com/blog/bacs-dd","https://stripe.com/blog/becs-direct-debit-in-australia","https://stripe.com/blog/fpx-malaysia","https://stripe.com/blog/payouts-with-no-code","https://stripe.com/blog/connect-onboarding-for-standard-accounts-stub","https://stripe.com/blog/instant-payouts-for-ca-sg-businesses-stub","https://stripe.com/blog/cross-border-payouts-now-available-beta","https://stripe.com/blog/new-radar-tools-for-managing-fraud-workflows","https://stripe.com/blog/capital-for-platforms","https://stripe.com/blog/introducing-stripe-treasury","https://stripe.com/blog/canada-connect-features","https://stripe.com/blog/afterpay-on-stripe","https://stripe.com/blog/new-currencies","https://stripe.com/blog/the-new-connect","https://stripe.com/blog/email-transparency","https://stripe.com/blog/ctf3-launch","https://stripe.com/blog/capture-the-flag-20","https://stripe.com/blog/capture-the-flag","https://stripe.com/blog/bitcoin-the-stripe-perspective","https://stripe.com/blog/new-radar-features","https://stripe.com/blog/building-stripe-tax","https://stripe.com/blog/global-launch-of-chinese-payment-methods","https://stripe.com/blog/creator-economy","https://stripe.com/blog/introducing-the-payment-element","https://stripe.com/blog/atlas-first-five-years","https://stripe.com/blog/stripe-extension-for-vs-code","https://stripe.com/blog/sessions-keynote-2021","https://stripe.com/blog/managing-sca-enforcement-changes-in-europe","https://stripe.com/blog/introducing-increment","https://stripe.com/blog/stripe-sessions-2021","https://stripe.com/blog/new-invoicing-features","https://stripe.com/blog/stripe-sessions-2019-keynote","https://stripe.com/blog/connect-payouts","https://stripe.com/blog/radar-2018","https://stripe.com/blog/remote-hub","https://stripe.com/blog/stripe-cli","https://stripe.com/blog/accessible-color-systems","https://stripe.com/blog/payment-api-design","https://stripe.com/blog/first-negative-emissions-purchases","https://stripe.com/blog/globe","https://stripe.com/blog/european-payment-methods-available-worldwide","https://stripe.com/blog/negative-emissions-commitment","https://stripe.com/blog/remote-hub-one-year","https://stripe.com/blog/payments-updates-june-2018","https://stripe.com/blog/atlas-llc","https://stripe.com/blog/singapore-eng-office","https://stripe.com/blog/phone-payments-with-twilio-pay","https://stripe.com/blog/railyard-training-models","https://stripe.com/blog/stripe-expands-in-europe","https://stripe.com/blog/stripe-billing-updates","https://stripe.com/blog/secret-life-of-dns","https://stripe.com/blog/stripe-launches-in-malaysia","https://stripe.com/blog/stripe-launches-in-five-more-european-countries","https://stripe.com/blog/terminal-in-person-payments","https://stripe.com/blog/checkout","https://stripe.com/blog/dublin-eng-office","https://stripe.com/blog/scaling-email-transparency","https://stripe.com/blog/open-source-retreat-2016","https://stripe.com/blog/open-source-retreat-meetup-2016","https://stripe.com/blog/open-source-retreat-2016-grantees","https://stripe.com/blog/stripe-open-source-retreat","https://stripe.com/blog/open-source-retreat-meetup","https://stripe.com/blog/atlas-update","https://stripe.com/blog/atlas-updates","https://stripe.com/blog/hypothesis","https://stripe.com/blog/express-for-business","https://stripe.com/blog/aws-reserved-instances","https://stripe.com/blog/canonical-log-lines","https://stripe.com/blog/similarity-clustering","https://stripe.com/blog/issuing-self-serve","https://stripe.com/blog/improving-reviews-in-radar","https://stripe.com/blog/advanced-fraud-detection-updates","https://stripe.com/blog/dashboard-updates-dec-2018","https://stripe.com/blog/increment-subscriptions","https://stripe.com/blog/phone-and-chat-support","https://stripe.com/blog/stripe-sessions","https://stripe.com/blog/opposing-racism","https://stripe.com/blog/dashboard-updates-oct-2020","https://stripe.com/blog/sca-readiness","https://stripe.com/blog/stripe-partner-program","https://stripe.com/blog/billing-eu","https://stripe.com/blog/billing","https://stripe.com/blog/developer-dashboard","https://stripe.com/blog/increment","https://stripe.com/blog/why-some-businesses-arent-allowed","https://stripe.com/blog/atlas-taxes","https://stripe.com/blog/stripe-home","https://stripe.com/blog/api-versioning","https://stripe.com/blog/stripe-dotnet","https://stripe.com/blog/android-sdk-updates"]}
+```json
+{
+  "id": "map_xyz789abc",
+  "urls_count": 278,
+  "urls": [
+    "https://stripe.com/blog",
+    "https://stripe.com/blog/page/1",
+    "https://stripe.com/blog/page/2",
+    "https://stripe.com/blog/engineering",
+    "https://stripe.com/blog/product",
+    "https://stripe.com/blog/how-we-built-it-usage-based-billing",
+    "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+    "https://stripe.com/blog/stripe-radar-responded-to-card-testing",
+    "https://stripe.com/blog/future-of-real-time-payments",
+    "https://stripe.com/blog/ml-flywheel-improve-models"
+    // ... additional URLs omitted for brevity
+  ]
+}
 ```
 
-The response will include all discovered URLs for the specified website that follow the patter you have defined. You can also use the `exclude_urls` param to exclude specific urls from the response.
+## Filtering Blog URLs by Category
+
+You can further refine your extraction to focus on specific blog categories. For example, if you're only interested in Stripe's engineering blog posts:
+
+<CodeGroup>
+    ```python extract_engineering_blog_urls.py
+    # Define the payload with more specific URL patterns
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog/engineering", "/blog/engineering/**"]
+    }
+    ```
+</CodeGroup>
+
+## Next Steps
+
+Now that you have extracted all of Stripe's blog URLs, 
+
+1. You can fetch their content individually using the [scrape API](../../api-reference/scrapes/create).
+2. Or, use the [next guide](/use-cases/crawl-matching-pages) to crawl and extract the actual content from these blog pages directly with inbuilt filters.
