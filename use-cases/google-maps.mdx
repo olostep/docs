@@ -1,0 +1,187 @@
+---
+sidebarTitle: Google Maps Results (python)
+title: Get Google Maps Results (python)
+description: SERP API to scrape Google Maps location data using Olostep and a Python code snippet.
+---
+
+## Overview
+
+Olostep's API allows you to extract structured data from Google Maps locations by using parsers. These parsers transform the raw HTML of Google Maps pages into clean, structured JSON data that's ready for analysis or integration into your applications.
+
+## Integration Example
+
+To get parsed JSON content from Google Maps results, you need to include parser_extract in the formats parameter and specify the name of the parser @olostep/google-maps in the parser_extract object.
+Here's how to retrieve Google Maps location data in a structured format:
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+payload = {
+"url_to_scrape": "https://www.google.com/maps/search/Coffee+on+the+Rocks/@40.3699261,-105.5321621,17z?hl=en",
+"formats": ["parser_extract"],
+"parser_extract": {"parser_id": "@olostep/google-maps"},
+"remove_css_selectors": "none"
+}
+headers = {
+"Authorization": "Bearer <YOUR-API-KEY>",
+"Content-Type": "application/json"
+}
+response = requests.request("POST", url, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+
+## Response Format
+When you make a request to the Olostep API with the Google Maps parser, you'll receive a JSON response like the example below:
+
+```json
+{
+"id": "scrape_brbeksysng",
+"object": "scrape",
+"created": 1711069122,
+"metadata": {},
+"retrieve_id": "brbeksysng",
+"url_to_scrape": "https://www.google.com/maps/search/Coffee+on+the+Rocks/@40.3699261,-105.5321621,17z?hl=en",
+"result": {
+"html_content": null,
+"markdown_content": null,
+"text_content": null,
+"json_content": "...", // Full JSON content will be here
+"llm_extract": null,
+"screenshot_hosted_url": null,
+"html_hosted_url": null,
+"markdown_hosted_url": null,
+"json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/json_brbeksysng.json",
+"text_hosted_url": null,
+"links_on_page": [],
+"page_metadata": {
+"status_code": 200,
+"title": ""
+}
+}
+}
+```
+
+The response contains:
+
+- **Basic request information**: `id`, `object`, `created` timestamp, `url_to_scrape`
+- **Result object** with URLs to access different formats of the data
+- **json_content** with structured search results including:
+
+- `Business details` (name, address, contact information)
+- `Rating and review information`
+- `Opening hours`
+- `User reviews with text and images`
+- `Similar places nearby`
+- `Popular tags and amenities`
+
+## json_content
+
+The json_content field contains detailed information about the location. Here's an example of data you can expect:
+
+```json
+{
+"searchString": "",
+"title": "Coffee on the Rocks",
+"price": "·$1–10",
+"categoryName": "Cafe",
+"address": "510 Moraine Ave, Estes Park, CO 80517",
+"city": "Estes Park",
+"postalCode": "80517",
+"state": "CO",
+"countryCode": "US",
+"website": "coffeeontherocks.org",
+"phone": "(970) 909-4836",
+"phoneUnformatted": "+19709094836",
+"totalScore": 4.6,
+"reviewsCount": 1555,
+"reviewsDistribution": {
+"oneStar": 42,
+"twoStar": 38,
+"threeStar": 70,
+"fourStar": 244,
+"fiveStar": 1161
+},
+"imagesCount": 10,
+"imageCategories": [
+"All", "Latest", "Videos", "Menu", "Food & drink",
+"Vibe", "Garden", "Mountain", "Breakfast sandwich", "Street View & 360°"
+],
+"openingHours": [
+{"day": "Friday", "hours": "7 AM–4 PM"},
+{"day": "Saturday", "hours": "7 AM–4 PM"},
+{"day": "Sunday", "hours": "7 AM–4 PM"},
+{"day": "Monday", "hours": "7 AM–4 PM"},
+{"day": "Tuesday", "hours": "7 AM–4 PM"},
+{"day": "Wednesday", "hours": "7 AM–4 PM"},
+{"day": "Thursday", "hours": "7 AM–4 PM"}
+],
+"peopleAlsoSearch": [
+{
+"category": "People also search for",
+"title": "Mountain Home Cafe",
+"reviewsCount": 1915,
+"totalScore": 4.5
+},
+// Additional similar places...
+],
+"reviewsTags": [
+{"title": "river", "count": 75},
+{"title": "duck pond", "count": 48},
+{"title": "breakfast sandwiches", "count": 41},
+// Additional review tags...
+],
+"additionalInfo": {
+"Service options": [
+{"Dine-in": true},
+{"Takeout": true},
+{"Delivery": true}
+],
+"Popular for": [
+{"Lunch": true},
+{"Solo dining": true},
+{"Lunch": true},
+{"Dinner": false}
+],
+// Additional service information...
+},
+"reviews": [
+{
+"name": "Katie Steinbach",
+"text": "Such a fun place to try while you are in Estes! The coffee itself wasn't my favorite but the atmosphere and service made up for it. The staff was very friendly and we got our food and drinks within minutes of walking through the door. ...",
+"publishAt": "6 months ago",
+"publishedAtDate": "2024-09-22T01:18:42.734Z",
+"likesCount": 1,
+"stars": 5,
+"reviewImageUrls": [
+// Review images...
+]
+},
+// Additional reviews...
+]
+}
+```
+
+Olostep provides a hosted JSON file with the structured location data. You can access the JSON file using the json_hosted_url field in the response:
+
+- Structured JSON: [View example JSON](https://olostep-storage.s3.us-east-1.amazonaws.com/json_brbeksysng.json)
+
+If you want to also get the HTML and Markdown content of the location data, you can include these formats in the formats parameter and Olostep will return them in the response and provide hosted URLs for each format.
+
+## Use Cases
+The Google Maps parser is particularly useful for:
+
+Business Intelligence: Collect data about competitors' locations, ratings, and customer feedback
+Market Research: Analyze customer reviews and sentiments about businesses in specific areas
+Location-Based Applications: Integrate detailed business information and customer reviews
+Real Estate Analysis: Gather data about nearby amenities and local businesses
+Local SEO: Monitor business presence and customer reviews on Google Maps
+
+## Important Notes
+
+Language Parameter: The ?hl=en parameter sets the language to English. Adjust as needed for other languages.
+
+## Conclusion
+Using the Google Maps parser with Olostep's API allows you to extract structured location data that can be easily integrated into your applications or used for analysis. The parser handles the complex task of extracting information from Google Maps pages, providing you with clean, structured data.
+To get information about available parsers or to request a custom parser for your specific use case, please contact us at `info@olostep.com`
