@@ -2,11 +2,11 @@
 sidebarTitle: 'Map'
 icon: map
 title: Maps
-description: Get all the URLs on a website in seconds. You can also also decide the URLs paths you want to include or exclude from the response.
+description: Get all the URLs on a website in seconds. Useful for site structure analysis or decide which url to scrape.
 ---
 The maps endpoint allows you to get all URLs on a certain website. This is useful for content discovery, site structure analysis (e.g. for SEO) or decide which of those URLs you want to get the content from.
 
-The response time is typically within seconds, making it a fast and cost-effective way to extract all URLs from a website, even backlinks.
+The response time is typically within seconds, making it a fast and cost-effective way to extract all URLs from a website, even backlinks. You can also also decide the URLs paths you want to include or exclude from the response.
 
 
 By default the endpoint returns around 100k URLs in a single call (10MB max). If the response includes more data, the API returns a `cursor` parameter which can be used for pagination and getting the subsequent urls. For more details refer to the [API Reference](https://docs.olostep.com/api-reference/maps/create#body-cursor)
@@ -19,41 +19,30 @@ To extract URLs from a website, send a POST request with the **url** of the webs
 
 ```python maps.py
 import requests
-import time
+import json
 
-# Define the API URL and your API key
-API_URL = 'https://api.olostep.com'
-API_KEY = '<your_token>'
+url = "https://api.olostep.com/v1/maps"
 
-# Set the headers for the requests
-HEADERS = {
-    'Content-Type': 'application/json',
-    'Authorization': f'Bearer {API_KEY}'
-}
-
-# Data for the request
 payload = {
-    "url": "https://docs.olostep.com"
+"url": "https://docs.olostep.com",
+}
+headers = {
+"Authorization": "Bearer <YOUR_API_KEY>",
+"Content-Type": "application/json"
 }
 
-# Make the request and measure latency
-start_time = time.time()
-response = requests.post(f'{API_URL}/v1/maps', headers=HEADERS, json=payload)
-latency = round((time.time() - start_time) * 1000, 2)
+response = requests.request("POST", url, json=payload, headers=headers)
 
-# Print results
-print(f"Latency: {latency}ms")
-print("\nResponse Status Code:", response.status_code)
-print("\nResponse Body:")
-print(response.text)
+print(json.dumps(response.json(), indent=4))
 ```
 
 </CodeGroup>
 
-The response will include all discovered sitemap URLs for the specified website. This endpoint is particularly useful when you need to:
+The response will include all discovered URLs for the specified website. This endpoint is particularly useful when you need to:
 - Discover all content pages on a website
 - Analyze site structure and hierarchy
 - Prepare URLs for batch processing
+- Decide which specific URLs to scrape
 
 For more fine-grained control over the URLs returned you can use the params `include_urls` and  `exclude_urls`.
 
