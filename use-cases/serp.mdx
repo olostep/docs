@@ -1,29 +1,17 @@
 ---
-sidebarTitle: Google Search Results
-title: SERP API to get Google Search Results
-description: We provide the most affordable Google search results in 1-3 seconds. Get structured search results data in JSON format
+sidebarTitle: Google Search Results (python)
+title: Get Google Search Results (python)
+description: SERP API to scrape Google search results using Olostep and a Python code snippet.
 ---
 
 ## Overview
 
 Olostep's API allows you to extract structured data from search engine results by using [parsers](../../features/structured-content/parsers). These parsers transform the raw HTML of search results into clean, structured JSON data that's ready for analysis or integration into your applications.
 
-## Using Custom Parsers
-
-You can get structured results from search engines by passing custom parsers to the Olostep APIs. In this example, we'll see how users can get JSON data from Google search results.
-
-We also offer specialized parsers for other Google services:
-- Google News
-- Google Images
-- Google Maps
-- Google Places
-- Google Videos
-
-Please contact us at [info@olostep.com](mailto:info@olostep.com) to get access to these additional parsers or to discuss creating custom parsers for your specific use cases.
 
 ## Integration Example
 
-To get parsed JSON content from search results, you need to include `parser_extract` in the `formats` parameter and specify the name of the parser in the `parser_extract` object.
+To get parsed JSON content from search results, you need to include `parser_extract` in the `formats` parameter and specify the name of the parser `@olostep/google-search` in the `parser_extract` object.
 
 Here's how to retrieve Google search results in a structured format:
 
@@ -48,7 +36,7 @@ print(json.dumps(response.json(), indent=4))
 
 ## Response Format
 
-When you make a request to the Olostep API with the Google Search parser, you'll receive a structured JSON response like the example below:
+When you make a request to the Olostep API with the Google Search parser, you'll receive a JSON response like the example below:
 
 ```json
 {
@@ -82,21 +70,165 @@ The response contains:
 
 - **Basic request information**: `id`, `object`, `created` timestamp, `url_to_scrape`
 - **Result object** with URLs to access different formats of the data
-- **JSON content** with structured search results including:
+- **json_content** with structured search results including:
 - `searchParameters`: Information about the search query
 - `knowledgeGraph`: Detailed information about the search subject (when available)
 - `organic`: List of search results with title, link, position, and snippet
 - `peopleAlsoAsk`: Related questions that users commonly search for
 - `relatedSearches`: Suggested related search queries
 
+`json_content` is the main part of the response with the structured search results. You can access the JSON content directly from the response or use the hosted URL provided in the response.
 
-For the URL in this example, Olostep will also provide a hosted JSON file with the structured search results. You can access the JSON file using the `json_hosted_url` field in the response:
+## json_content
+```json
+{
+  "searchParameters": {
+    "type": "search",
+    "engine": "google",
+    "q": "alexander the great"
+  },
+  "knowledgeGraph": {
+    "title": "Alexander the Great",
+    "type": "Former King of Macedonia",
+    "description": "Alexander III of Macedon, most commonly known as Alexander the Great, was a king of the ancient Greek kingdom of Macedon.",
+    "imageUrl": "https://www.mayaincaaztec.com/ancient-greece/alexander-the-great",
+    "attributes": {
+      "Born": "July 356 BC, Pella",
+      "Died": "June 323 BC (age 32 years), Babylon",
+      "Spouse": "Roxana (m. 327 BC–323 BC), Parysatis II (m. 324 BC–323 BC), Stateira (m. 324 BC–323 BC)",
+      "Children": "Alexander IV of Macedon",
+      "Full name": "Alexander III of Macedon",
+      "Siblings": "Cleopatra of Macedon, Philip III of Macedon, Thessalonike of Macedon, Cynane, Caranus, Europa of Macedon"
+    }
+  },
+  "organic": [
+    {
+      "title": "Alexander the Great",
+      "link": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+      "position": 1,
+      "snippet": "He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.",
+      "sitelinks": [
+        {
+          "title": "Death of Alexander the Great",
+          "link": "https://en.wikipedia.org/wiki/Death_of_Alexander_the_Great"
+        },
+        {
+          "title": "Wars of Alexander the Great",
+          "link": "https://en.wikipedia.org/wiki/Wars_of_Alexander_the_Great"
+        }
+      ]
+    },
+    {
+      "title": "Alexander the Great Failure: The Collapse of the Macedonian Empire",
+      "link": "https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.",
+      "position": 2
+    },
+    {
+      "title": "Which Indian king first time defeated Alexander? - Quora",
+      "link": "https://www.quora.com/Which-Indian-king-first-time-defeated-Alexander#:~:text=Alexander%20the%20Great%20was%20defeated,returned%20with%20only%2020000%20troops.",
+      "position": 3
+    },
+    {
+      "title": "Alexander the Great | Biography, Empire, Death, & Facts",
+      "link": "https://www.britannica.com/biography/Alexander-the-Great",
+      "position": 4,
+      "snippet": "Feb 11, 2025 — Alexander the Great, a fearless Macedonian king and military genius, conquered vast territories from Greece to Egypt and India, ..."
+    },
+    {
+      "title": "Alexander the Great: Empire & Death",
+      "link": "https://www.history.com/topics/ancient-greece/alexander-the-great",
+      "position": 5,
+      "snippet": "Nov 9, 2009 — Alexander the Great was an ancient Macedonian ruler and one of history's greatest military minds who, as King of Macedonia and Persia, ..."
+    },
+    {
+      "title": "Alexander the Great (1956)",
+      "link": "https://www.imdb.com/title/tt0048937/",
+      "position": 6,
+      "snippet": "The life and military conquests of Alexander III of Macedon (July 20/21, 356 - June 10/11, 323 B.C.), commonly known as Alexander the Great."
+    },
+    {
+      "title": "History - Alexander the Great",
+      "link": "https://www.bbc.co.uk/history/historic_figures/alexander_the_great.shtml",
+      "position": 7,
+      "snippet": "Alexander III of Macedon, better known as Alexander the Great, single-handedly changed the nature of the ancient world in little more than a decade."
+    },
+    {
+      "title": "Who loved Alexander the Great?",
+      "link": "https://museums.cam.ac.uk/magic/who-loved-alexander-great",
+      "position": 8,
+      "snippet": "Throughout his life, Alexander married 3 women and fathered at least 2 children but also had several male lovers. Amongst his closest relationships was that ..."
+    },
+    {
+      "title": "Alexander the Great",
+      "link": "https://www.worldhistory.org/Alexander_the_Great/",
+      "position": 9,
+      "snippet": "Nov 14, 2013 — He is known as 'the great' both for his military genius and his diplomatic skills in handling the various populaces of the regions he conquered."
+    },
+    {
+      "title": "Alexander the Great - National Geographic Education",
+      "link": "https://education.nationalgeographic.org/resource/alexander-great/",
+      "position": 10,
+      "snippet": "Oct 19, 2023 — Alexander was born in 356 B.C.E. in Pella, Macedonia, to King Philip II. As a young boy, Alexander was taught to read, write, and play the lyre."
+    }
+  ],
+  "peopleAlsoAsk": [
+    {
+      "question": "What is Alexander the Great most famous for?"
+    },
+    {
+      "question": "What did Alexander the Great say before he died?"
+    },
+    {
+      "question": "What led to the fall of Alexander?",
+      "link": "https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.",
+      "title": "Alexander the Great Failure: The Collapse of the Macedonian Empire"
+    },
+    {
+      "question": "Who first defeated Alexander the Great?",
+      "link": "https://www.quora.com/Which-Indian-king-first-time-defeated-Alexander#:~:text=Alexander%20the%20Great%20was%20defeated,returned%20with%20only%2020000%20troops.",
+      "title": "Which Indian king first time defeated Alexander? - Quora"
+    }
+  ],
+  "relatedSearches": [
+    {
+      "query": "Alexander the Great book"
+    },
+    {
+      "query": "Alexander the Great empire"
+    },
+    {
+      "query": "Alexander the Great death"
+    },
+    {
+      "query": "Alexander the Great religion"
+    },
+    {
+      "query": "Alexander the Great Empire map"
+    },
+    {
+      "query": "Alexander the Great achievements"
+    },
+    {
+      "query": "What was Alexander the Great known for"
+    },
+    {
+      "query": "Alexander the Great movie"
+    }
+  ]
+}
+```
+
+Olostep provides also a hosted JSON file with the structured search results. You can access the JSON file using the `json_hosted_url` field in the response:
 
 - Structured JSON: [View example JSON](https://olostep-storage.s3.us-east-1.amazonaws.com/json_vxc86vq2pf.json)
 
 If you want to also get the HTML and Markdown content of the search results, you can include these formats in the `formats` parameter and Olostep will return them in the response and provide hosted URLs for each format.
 - [Markdown format](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_vxc86vq2pf.txt)
 - [HTML](https://olostep-storage.s3.us-east-1.amazonaws.com/text_vxc86vq2pf.txt)
+
+## Important Notes
+
+4. **Search Parameters**: The `gl=us` and `hl=en` parameters set the geolocation to US and language to English. Adjust these as needed.
 
 
 ## Conclusion

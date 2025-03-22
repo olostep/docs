@@ -1,16 +1,14 @@
 ---
-sidebarTitle: Extract Markdown and Text
-title: Extracting Markdown and Plain Text
-description: Learn how to extract content in text and markdown from any web page.
+sidebarTitle: Get Markdown of a Website
+title: Get the Markdown of a Website
+description: Learn how to extract content as LLM-friendly markdown from any web page.
 ---
 
 ## Overview
 
-Olostep's [scrape](../../features/scrapes/scrapes) endpoint allows to extract content from any website. Content in plain text or markdown is useful if you to feed it to an LLM without all the HTML.
+Olostep's [scrape](../../features/scrapes/scrapes) endpoint allows to extract content from any website. Content in markdown is useful if you want to feed it to an LLM without all the HTML.
 
-In the text format we strip more content (slashes, asterisks and other markdown properties) than in the markdown format, so if you want to keep some of the formatting, you should use the markdown format.
-
-In this guide we will see how to extract text and markdown from a website like `https://www.nea.com/team`.
+In this guide we will see how to extract markdown from a website like `https://www.nea.com/team`.
 
 ## Prerequisites
 
@@ -33,7 +31,7 @@ url = "https://api.olostep.com/v1/scrapes"
 payload = {
     "url_to_scrape": "https://www.nea.com/team",
     "country": "US",
-    "formats": ["text", "markdown"],
+    "formats": ["markdown"],
     "wait_before_scraping": 0,
     "remove_css_selectors": "default",
 }
@@ -63,14 +61,14 @@ A successful response will look something like this:
     "result": {
         "html_content": null,
         "markdown_content": "NEA ….",
-        "text_content": "url=https%3A%2{…}\n",
+        "text_content": null,
         "json_content": null,
         "llm_extract": null,
         "screenshot_hosted_url": null,
         "html_hosted_url": null,
         "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_63x2e5sf5r.txt",
         "json_hosted_url": null,
-        "text_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/plain_text_63x2e5sf5r.txt",
+        "text_hosted_url": null,
         "links_on_page": [],
         "page_metadata": {
             "status_code": 200,
@@ -89,5 +87,5 @@ A successful response will look something like this:
 
 ## Conclusion
 
-Using Olostep, you can easily extract text and markdown content from any website. This is useful if you want to get content from a website and feed it to an LLM for data extraction and analysis. If you want to extract content at scale from the same website over and over (e.g. monitoring data, price tracking, etc...) we recommend using a [custom parser](../../features/structured-content/parsers) to get the content in JSON format.
+Using Olostep, you can easily extract  markdown content from any website. This is useful if you want to get content from a website and feed it to an LLM for data extraction and analysis. If you want to extract content at scale from the same website over and over (e.g. monitoring data, price tracking, etc...) we recommend using a [custom parser](../../features/structured-content/parsers) to get the content in JSON format.
 

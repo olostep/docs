@@ -1,0 +1,224 @@
+---
+sidebarTitle: Google Search Results (JS)
+title: "Get Google Search Results (JS)"
+description: "SERP API to scrape Google search results using Olostep and a Javascript code snippet."
+---
+
+# Google Search Scraper with Olostep
+
+This guide demonstrates how to use the Olostep API to scrape Google search results and parse them into structured JSON data. This is particularly useful for automating research tasks, gathering competitive intelligence, or building applications that require search data.
+
+## How It Works
+
+The example below in Javascript shows how to search for a LinkedIn profile URL of a specific person (Patrick Collison) using Google search and Olostep's google search parser `@olostep/google-search`
+
+```javascript
+async function scrapeGoogleSearch(apiKey, query = "site%3Alinkedin.com+Patrick+Collison") {
+  const endpoint = "https://api.olostep.com/v1/scrapes";
+
+  const payload = {
+    "formats": ["parser_extract"],
+    "parser_extract": {"parser_id": "@olostep/google-search"},
+    "url_to_scrape": `https://www.google.com/search?q=${encodeURIComponent(query)}&gl=us&hl=en`,
+    "wait_before_scraping": 0,
+  };
+
+  const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json"
+  };
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    console.log(JSON.stringify(data, null, 4));
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+}
+
+// Replace <API_KEY> with your actual Olostep API key
+scrapeGoogleSearch("<API_KEY>");
+```
+
+## Response Format
+
+When you make a request to the Olostep API with the Google Search parser, you'll receive a JSON response like the example below:
+
+```json
+{
+    "id": "scrape_f2xghz17kt",
+    "object": "scrape",
+    "created": 1742679301,
+    "metadata": {},
+    "retrieve_id": "f2xghz17kt",
+    "url_to_scrape": "https://www.google.com/search?q=site%253Alinkedin.com%2BPatrick%2BCollison&gl=us&hl=en",
+    "result": {
+        "html_content": null,
+        "markdown_content": null,
+        "text_content": null,
+        "json_content": "{\"searchParameters\":{\"type\":\"search\",\"engine\":\"google\",\"q\":\"site:linkedin.com Patrick Collison\"},\"knowledgeGraph\":{\"description\":\"Experience. Stripe Graphic · Stripe. -. Education. Massachusetts Institute of Technology Graphic · Massachusetts Institute of Technology. 2006 - 2010 ...\"},\"organic\":[{\"title\":\"Patrick Collison - Stripe\",\"link\":\"https://www.linkedin.com/in/patrickcollison\",\"position\":1,\"snippet\":\"Experience. Stripe Graphic · Stripe. -. Education. Massachusetts Institute of Technology Graphic · Massachusetts Institute of Technology. 2006 - 2010 ...\",\"meta\":\"10.8K+ followers\"},{\"title\":\"The Stripe Story: How Patrick Collison Revolutionized ...\",\"link\":\"https://www.linkedin.com/pulse/stripe-story-how-patrick-collison-revolutionized-online-anshuman-jha-jzzic\",\"position\":2,\"snippet\":\"The Early Years: A Genius in the Making. Patrick Collison wasn't just bright—he was a supernova. By age 10, he'd devoured university-level math ...\"},{\"title\":\"In 2005, Patrick Collison was a 16-year-old winning ...\",\"link\":\"https://www.linkedin.com/posts/itselanagold_in-2005-patrick-collison-was-a-16-year-old-activity-7308533537576497154-w5vC\",\"position\":3,\"snippet\":\"In 2005, Patrick Collison was a 16-year-old winning Ireland's Young Scientist of the Year competition. By 2008, he and his younger brother ...\"},{\"title\":\"Patrick Collison on the importance of waiting a really long ...\",\"link\":\"https://www.linkedin.com/posts/the-startup-archive_patrick-collison-on-the-importance-of-waiting-activity-7286001819145707520-1mdI\",\"position\":4,\"snippet\":\"Patrick argues you should also view every person you hire as bringing along another 50 people just like them if your company is successful.\"},{\"title\":\"Tim Ferriss' Post - Patrick Collison — CEO of Stripe (#353)\",\"link\":\"https://www.linkedin.com/posts/timferriss_patrick-collison-ceo-of-stripe-353-activity-7271892372358148096--dsK\",\"position\":5,\"snippet\":\"Author of 5 #1 NYT/WSJ bestsellers, early-stage investor, host of The Tim Ferriss Show podcast (1B+ downloads), and collector of the strange.\"},{\"title\":\"Patrick Collison wanted a guide to Stripe's culture that ...\",\"link\":\"https://www.linkedin.com/posts/first-round-capital_patrick-collison-wanted-a-guide-to-stripes-activity-7304833456948097024-Tt6h\",\"position\":6,\"snippet\":\"Patrick Collison wanted a guide to Stripe's culture that convinced 50% of candidates not to join. And Eeke de Milliano was tasked with ...\"},{\"title\":\"The Collison brothers (John & Patrick) explain why Stripe is ...\",\"link\":\"https://www.linkedin.com/posts/marcelvanoost_the-collison-brothers-john-patrick-explain-activity-7301586346349850624-L-4U\",\"position\":7,\"snippet\":\"The Collison brothers (John & Patrick) explain why Stripe is better off staying Private: \\\" This is our life's work. We're not going anywhere ...\"},{\"title\":\"Stripe CEO Patrick Collison on Crafting a Culture ...\",\"link\":\"https://www.linkedin.com/posts/jennifer-chatman-8086a918_stripe-ceo-patrick-collison-on-crafting-a-activity-7231753022849085440-0RE5\",\"position\":8,\"snippet\":\"When Patrick Collison and his brother John Collison founded digital payment company Stripe in 2010, he didn't come in with “any kind of ...\"},{\"title\":\"Patrick Collison on the importance of beauty and ...\",\"link\":\"https://www.linkedin.com/posts/the-startup-archive_patrick-collison-on-the-importance-of-beauty-activity-7247935993817751552-Qt6h\",\"position\":9,\"snippet\":\"Patrick Collison on the importance of beauty and craftsmanship when building products “If Stripe is a monstrously successful business, ...\"}]}",
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": null,
+        "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/json_f2xghz17kt.json",
+        "text_hosted_url": null,
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+The response contains:
+
+- **Basic request information**: `id`, `object`, `created` timestamp, `url_to_scrape`
+- **Result object** with URLs to access different formats of the data
+- **json_content** with structured search results including:
+- `searchParameters`: Information about the search query
+- `knowledgeGraph`: Detailed information about the search subject (when available)
+- `organic`: List of search results with title, link, position, and snippet
+- `peopleAlsoAsk`: Related questions that users commonly search for
+- `relatedSearches`: Suggested related search queries
+
+`json_content` is the main part of the response with the structured search results. You can access the JSON content directly from the response or use the hosted URL provided in the response.
+
+## json_content
+
+```json
+{
+  "searchParameters": {
+    "type": "search",
+    "engine": "google",
+    "q": "site:linkedin.com Patrick Collison"
+  },
+  "knowledgeGraph": {
+    "description": "Experience. Stripe Graphic · Stripe. -. Education. Massachusetts Institute of Technology Graphic · Massachusetts Institute of Technology. 2006 - 2010 ..."
+  },
+  "organic": [
+    {
+      "title": "Patrick Collison - Stripe",
+      "link": "https://www.linkedin.com/in/patrickcollison",
+      "position": 1,
+      "snippet": "Experience. Stripe Graphic · Stripe. -. Education. Massachusetts Institute of Technology Graphic · Massachusetts Institute of Technology. 2006 - 2010 ...",
+      "meta": "10.8K+ followers"
+    },
+    {
+      "title": "The Stripe Story: How Patrick Collison Revolutionized ...",
+      "link": "https://www.linkedin.com/pulse/stripe-story-how-patrick-collison-revolutionized-online-anshuman-jha-jzzic",
+      "position": 2,
+      "snippet": "The Early Years: A Genius in the Making. Patrick Collison wasn't just bright—he was a supernova. By age 10, he'd devoured university-level math ..."
+    },
+    {
+      "title": "In 2005, Patrick Collison was a 16-year-old winning ...",
+      "link": "https://www.linkedin.com/posts/itselanagold_in-2005-patrick-collison-was-a-16-year-old-activity-7308533537576497154-w5vC",
+      "position": 3,
+      "snippet": "In 2005, Patrick Collison was a 16-year-old winning Ireland's Young Scientist of the Year competition. By 2008, he and his younger brother ..."
+    },
+    {
+      "title": "The Collison brothers (John & Patrick) explain why Stripe is ...",
+      "link": "https://www.linkedin.com/posts/marcelvanoost_the-collison-brothers-john-patrick-explain-activity-7301586346349850624-L-4U",
+      "position": 4,
+      "snippet": "The Collison brothers (John & Patrick) explain why Stripe is better off staying Private: \" This is our life's work. We're not going anywhere ..."
+    },
+    {
+      "title": "Patrick Collison on the importance of waiting a really long ...",
+      "link": "https://www.linkedin.com/posts/the-startup-archive_patrick-collison-on-the-importance-of-waiting-activity-7286001819145707520-1mdI",
+      "position": 5,
+      "snippet": "Patrick argues you should also view every person you hire as bringing along another 50 people just like them if your company is successful."
+    },
+    {
+      "title": "Tim Ferriss' Post - Patrick Collison — CEO of Stripe (#353)",
+      "link": "https://www.linkedin.com/posts/timferriss_patrick-collison-ceo-of-stripe-353-activity-7271892372358148096--dsK",
+      "position": 6,
+      "snippet": "Author of 5 #1 NYT/WSJ bestsellers, early-stage investor, host of The Tim Ferriss Show podcast (1B+ downloads), and collector of the strange."
+    },
+    {
+      "title": "Patrick Collison on the importance of beauty and ...",
+      "link": "https://www.linkedin.com/posts/the-startup-archive_patrick-collison-on-the-importance-of-beauty-activity-7247935993817751552-Qt6h",
+      "position": 7,
+      "snippet": "Patrick Collison on the importance of beauty and craftsmanship when building products "If Stripe is a monstrously successful business, ..."
+    },
+    {
+      "title": "Stripe founder Patrick Collison tells the story of almost ...",
+      "link": "https://www.linkedin.com/posts/the-startup-archive_stripe-founder-patrick-collison-tells-the-activity-7235977194211000321-V-Cd",
+      "position": 8,
+      "snippet": "Stripe founder Patrick Collison tells the story of almost naming the company PayDemon Patrick and John Collison founded Stripe in 2010 when ..."
+    },
+    {
+      "title": "Patrick Collison created $50 billion of value as a co- ...",
+      "link": "https://www.linkedin.com/posts/tom-alder_patrick-collison-created-50-billion-of-value-activity-7239241304780513281-isxK",
+      "position": 9,
+      "snippet": "Patrick Collison created $50 billion of value as a co-founder of Stripe. He has also built the largest carbon removal program in the world."
+    }
+  ]
+}
+```
+Olostep provides also a hosted JSON file with the structured search results. You can access the JSON file using the `json_hosted_url` field in the response:
+
+- Structured JSON: [View example JSON](https://olostep-storage.s3.us-east-1.amazonaws.com/json_f2xghz17kt.json")
+
+If you want to also get the HTML and Markdown content of the search results, you can include these formats in the `formats` parameter and Olostep will return them in the response and provide hosted URLs for each format.
+- [Markdown format](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_f2xghz17kt.txt)
+- [HTML](https://olostep-storage.s3.us-east-1.amazonaws.com/text_f2xghz17kt.txt)
+
+## Example Usage Scenarios
+
+### 1. Finding LinkedIn Profiles
+
+In the example above, we're searching for Patrick Collison's LinkedIn profile by using the search query `site:linkedin.com Patrick Collison`. This technique can be used to find professional profiles for any person.
+
+### 2. Researching Companies
+
+You can modify the query to search for company information:
+
+```javascript
+// Search for company information
+scrapeGoogleSearch(apiKey, "Stripe company information revenue");
+```
+
+### 3. Tracking News Articles
+
+Find recent news about a specific topic:
+
+```javascript
+// Search for recent news about AI
+scrapeGoogleSearch(apiKey, "artificial intelligence news after:2023-01-01");
+```
+
+### 4. Competitive Analysis
+
+Monitor competitors' online presence:
+
+```javascript
+// Search for competitor mentions
+scrapeGoogleSearch(apiKey, "\"Company X\" vs \"Company Y\" comparison");
+```
+
+
+## Important Notes
+
+4. **Search Parameters**: The `gl=us` and `hl=en` parameters set the geolocation to US and language to English. Adjust these as needed.
+
+
+## Conclusion
+
+Once you have the search results data, you can:
+
+1. Parse specific data points of interest
+2. Store the results in a database
+3. Build a custom search interface
+4. Trigger actions based on search findings
+5. Integrate with other APIs or services
+
+If you need to extract different data points or customize the search behavior, please get in touch at 'info@olostep.com`
