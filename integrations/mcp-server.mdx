@@ -1,0 +1,96 @@
+---
+sidebarTitle: 'MCP Server'
+icon: hammer
+title: MCP Server
+description: Use Olostep in AI Agents and apps like Claude Desktop, Cursor, Windsurf etc
+---
+
+Olostep MCP Server offers web access tooling to your AI apps with minimal setup. It allows your AI to:
+1. Search the web using google
+2. Get the markdown content of any web page
+3. Discover and filter out relevant URLs within a website.
+
+## Available Tools
+
+- **get_webpage_content**: Retrieves webpage content in clean markdown format with support for JavaScript rendering
+- **search_google**: Searches Google for the given query and returns the search results
+- **get_website_urls**: Retrieves all URLs from a website and filters out the irrelevant ones
+
+
+## Installation
+To set up Olostep MCP Server, you need to have an API key. You can get the API key by signing up on the [Olostep website](https://olostep.com/auth).
+
+### Running with npx
+
+```bash
+env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp
+```
+
+### Manual Installation
+
+```bash
+npm install -g olostep-mcp
+```
+
+### Running on Claude Desktop
+
+You can install Olostep MCP Server via [Smithery CLI](https://smithery.ai/server/@olostep/olostep-mcp-server) for [Claude Desktop](https://claude.ai/download).
+
+```bash
+npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
+```
+
+Or you can add this to your claude_desktop_config.json:
+
+```bash
+{
+  "mcpServers": {
+    "mcp-server-olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+### Running on Windsurf
+Add this to your ./codeium/windsurf/model_config.json:
+
+```bash
+{
+  "mcpServers": {
+    "mcp-server-olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+### Running on Cursor
+To configure Olostep MCP in Cursor:
+
+- Open Cursor Settings
+- Go to Features > MCP Servers
+- Click "+ Add New MCP Server"
+ - Enter the following: Name: "olostep-mcp" (or your preferred name) Type: "command"
+ - Command: `env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp`
+
+Replace `your-api-key` with your Olostep API key.
+
+> If you are using Windows and are having issues, try `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
+
+Then refresh the MCP server list to see the new tools. The Composer will automatically use Olostep MCP when needed.
+
+You can also explicitly request it by describing how you want to get data from the web. Access the Composer via Command+L (Mac), select "Agent" next to the submit button, and enter your query.
+
+
+## Conclusion
+
+You can find complete details about Olostep MCP [here](https://github.com/olostep/olostep-mcp-server).
