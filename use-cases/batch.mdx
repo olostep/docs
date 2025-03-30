@@ -51,8 +51,7 @@ def compose_items_array():
 
 def start_batch(items):
     payload = {
-        "items": items,
-        "parser": "@olostep/google-search"
+        "items": items
     }
     headers = {"Authorization": f"Bearer {API_KEY}"}
     response = requests.post(
@@ -92,7 +91,7 @@ import time
 def recursive_check(batch_id):
     status = check_batch_status(batch_id)
     print("Status:", status)
-    if status == "complete":
+    if status == "completed":
         print("Batch is complete!")
     else:
         time.sleep(60)
