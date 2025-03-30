@@ -1,0 +1,232 @@
+---
+icon: lines-leaning
+sidebarTitle: Batch Scraping
+title: Get the content of multiple websites in one go
+description: Start a batch scrape to extract content from up to 100k URLs in 5-7 mins
+---
+
+## Overview
+
+Olostep's [Batches](https://docs.olostep.com/api-reference/batches/create) endpoint allows to start a batch of up to 10k URLs and get back the content after 5-7 mins. You can start 10 batches at a time to extract content from up to 100k URLs in one go.
+
+This is useful if you already have the URLs you want to get the content ,for example to aggregate data for analysis, building a search tool in a specialized field  or monitoring multiple websites for changes.
+
+
+In this guide we will see how to start a batch with 10 urls and get the content of the websites in markdown format.
+
+## Prerequisites
+
+Before getting started, ensure you have the following:
+
+- A valid Olostep API key. You can get one by signing up at [Olostep](https://www.olostep.com/dashboard).
+- Python installed on your system
+- The `requests` and `json` libraries (these come pre-installed with Python, but you can install them using `pip install requests` if needed)
+
+### Step 1: Start a Batch with Olostep
+
+To start a batch, read the product data from the CSV and send it to the Olostep batch endpoint. This is done using an HTTP POST request with a JSON payload.
+
+Each batch can have up to 10k URLs. For large datasets (>10,000 URLs), split into multiple batches and send them in parallel.
+
+A batch consists of an array of items, where each item represents a product URL to be processed. Here's the structure of a batch request
+
+```python
+import requests
+
+def start_batch(batch_array):
+    payload = {
+        "batch_array": batch_array,                 # Array of items to process
+        "batch_country": "IT",                      # Country code for the batch
+        "parser": "@olostep/amazon-it-product"      # Optional: Specify a custom parser so you only get the JSON data you need
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()["id"]
+```
+
+#### Batch Array Structure
+Each item in the batch_array should follow this structure:
+<CodeGroup>
+    ```json filename="batch_item.json"
+    {
+        "custom_id": "unique_identifier",    // Required: Your unique identifier for the item
+        "url": "product_url",               // Required: URL to be processed
+        "wait_before_scraping": 0,         // Optional: Wait time before scraping each url in the batch (in milliseconds)
+    }
+    ```
+</CodeGroup>
+Parameters
+<ResponseField name="batch_array" type="array" required>
+    Array of items to process. Maximum of 10,000 URLs per batch. Each item must have a unique `custom_id`.
+</ResponseField>
+<ResponseField name="batch_country" type="string" required>
+    Two-letter country code (e.g., "IT" for Italy).
+</ResponseField>
+<ResponseField name="parser" type="string">
+    Name of the custom parser to use (e.g., "@olostep/amazon-it-product"). Contact us at info@olostep.com to get access to the pre-built parsers or to create your own.
+</ResponseField>
+Response
+<CodeGroup>
+    ```json filename="response.json"
+    {
+        "id": "batch_54ikwskmt8"
+    }
+    ```
+</CodeGroup>
+The endpoint returns a JSON object containing the batch_id, which can be used to monitor the status and then retrieve the results.
+
+Example Usage
+<CodeGroup>
+    ```python
+    # Prepare batch array
+    batch_array = [
+    {
+        "custom_id": "product_123",
+        "url": "https://www.amazon.it/dp/B0CHF6Z393/?coliid=INQXTGFQF4FM4&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    },
+    {
+        "custom_id": "product_124",
+        "url": "https://www.amazon.it/dp/B0CHMJL774/?coliid=I6CFYA5EHVHE2&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    }
+    ]
+
+    # Start batch processing
+    batch_id = start_batch(batch_array)
+    print(f"Started batch: {batch_id}")
+    ```
+</CodeGroup>
+
+### Step 2: Monitor Batch Status
+Once a batch is started, you'll need to monitor its status to determine when processing is complete. The API provides a status endpoint that can be polled periodically (e.g., every 60 seconds) with the batch_id
+
+<CodeGroup>
+    ```python filename="check_status.py"
+    import requests
+
+    def check_batch_status(batch_id):
+    headers = {"Authorization": "Bearer " + API_KEY}
+    response = requests.request(
+    "GET",
+    f"https://api.olostep.com/v1/batches/{batch_id}",
+    headers=headers
+    )
+    return response.json()["status"]
+    ```
+</CodeGroup>
+
+For production use, it's recommended to implement asynchronous monitoring to handle multiple batches efficiently:
+<CodeGroup>
+    ```python
+    import asyncio
+
+    async def monitor_batch(batch_id: str) -> None:
+    """Monitor a single batch until it's completed"""
+    while True:
+    status = check_batch_status(batch_id)
+    if status == "completed":
+    print(f"Batch {batch_id} completed!")
+    return
+    print(f"Batch {batch_id} still processing... Checking again in 60 seconds")
+    await asyncio.sleep(60)
+    ```
+</CodeGroup>
+
+
+### Step 2: Retrieve the IDs for Completed Items
+
+Once the batch is marked as completed, you can fetch the list of completed items. Each item will have a retrieve_id. If you want the actual content use the retrieve endpoint by passing the `retrieve_id`
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    response = requests.get(f"https://api.olostep.com/v1/batches/{batch_id}/items", headers=headers)
+    return response.json()["items"]
+```
+This will return the completed items that have each a `retrieve_id` for every URL sent. You can then use the retrieve endpoint to retrieve and store the extracted data (html, markdown or JSON) for each URL.
+
+You can get the `retrieve_id` for each item in the batch using the following code:
+
+```python
+items = get_completed_items("your_batch_id")
+for item in items:
+    print(f"""
+    URL: {item['url']}
+    Custom ID: {item['custom_id']}
+    Retrieve ID: {item['retrieve_id']}
+    ---
+    """)
+```
+
+### Step 4: Retrieve the Content for each Item
+
+Once you have the `retrieve_id` for each item, you can fetch its content (HTML, Markdown, or JSON) using the retrieve endpoint:
+
+<CodeGroup>
+    ```python filename="retrieve_content.py"
+    def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(
+    url,
+    headers=headers,
+    params=params
+    )
+    return response.json()
+
+    # Example usage
+    retrieve_id = "product_123"
+    content = retrieve_content(retrieve_id)
+
+    # If you want to process multiple items
+    def process_batch_content(batch_id):
+    items = get_completed_items(batch_id)
+    for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    # Process or store the content as needed
+    ```
+</CodeGroup>
+
+## Example Usage Scenarios
+
+### 1. Builing a Search Engine in a Niche Field (e.g. Legal, Medical, Search tool for AI experts, for Donors etc.)
+
+You can use the batch scraping feature to get the content of multiple websites in a niche field and build a search engine for that field. You can refresh that data every week or month to keep the search engine up to date.
+
+### 2. Monitoring Multiple Websites for Changes
+
+For example you can monitor multiple websites for changes in prices, availability of products, new articles etc. You can set up a batch scrape to run every day and get the content of the websites you are monitoring.
+This is useful if you are building a price tracking tool, monitoring tool for news articles or track competitors.
+
+
+### 3. Tracking Social Media Mentions
+
+You can use the batch scraping feature to track mentions of your brand or product on social media. You can set up a batch scrape to run every day and get the content of the social media posts that mention your brand or product.
+
+
+### 4. Aggregators
+
+If you are building an aggregator for a specific field (e.g. news, job listings, real estate listings, music industry, concerts etc.) you can use the batch scraping feature to get the content of multiple websites in that field and aggregate the data in one place.
+
+
+## Conclusion
+
+Using the batch scraping feature, you can extract content from up to 100k URLs in one go. This is useful for building search engines, monitoring tools, aggregators and tracking social media mentions. You can use the extracted content for analysis, building specialized search tools or monitoring multiple websites for changes.
+
+A powerful add-on to the batch is using the parsers to only extract the content you actually need from the websites. Learn more about the [Parsers](https://docs.olostep.com/features/structured-content/parsers).
+
+If you need help in using the batches endpoint reach out to `info@olostep.com` and we are happy to write custom scripts for you.
+
