@@ -2,96 +2,142 @@
 sidebarTitle: 'Get Started'
 title: Get Started
 ---
-The Batches endpoint allows to process multiple URLs in a single batch, making it easier to manage large sets of data.
-You can start a batch of up to 10k urls and retrieve the content after 5-7 mins. You can start many batches in parallel to do up to 1 million requests in around 30 minutes.
+The Batch endpoint allows to process multiple URLs at the same time, making it easier to get content quickly from large sets of urls. 
+You can start a batch of 5 urls up to 10k urls and retrieve the content after 5-8 mins. You can start many batches in parallel to do up to 1 million requests in around 30 minutes.
 
-## Initiating a Batch
+If you need to scrape less than 50 urls at a time we recommended using the scrape endpoint and submit the urls in parallel since it's faster than the batch endpoint. Use the batch endpoint if you want the content from 100 to 10k urls at a time
 
-To initiate a new batch, specify the **items** to be processed with their `customID` and `url`. You can also provide optional parameters such as the country and parser to be used for the batch.
+
+## How to use the Batch endpoint
+
+To initiate a new batch, specify the **items** to be processed with their `custom_id` which is the unique identifier and `url` which is the url from which you want to get the content. You can also provide optional parameters such as the country and parser to be used for the batch.
+
+In the example below, we will create a batch of 10 Google Search URLs and retrieve the structured JSON of the search results with the pre-built parser `@olostep/google-search`
+In this example the `custom_id` is generated using the SHA-256 hash of the URL, ensuring that each URL has a unique identifier. You can decide to use your own custom_id or keep the hash of the URL.
 
 <CodeGroup>
-
 ```python batches.py
 import requests
+import hashlib
 import time
 
-# Define the API URL and your API key
-API_URL = 'https://api.olostep.com'
-API_KEY = '<your_token>'
-# Set the headers for the requests
-HEADERS = {
-    'Content-Type': 'application/json',
-    'Authorization': f'Bearer {API_KEY}'
-}
+API_KEY = "<YOUR_API_KEY>"  # Replace with your actual API key
+API_URL = "https://api.olostep.com/v1"
 
-# Function to initiate a batch
-def initiate_batch(data):
-    response = requests.post(f'{API_URL}/v1/batches', headers=HEADERS, json=data)
-    return response.json()
 
-# Function to get batch information
-def get_batch_info(batch_id):
-    response = requests.get(f'{API_URL}/v1/batches/{batch_id}', headers=HEADERS)
-    return response.json()
+# Step 1: Utilities
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
 
-# Function to get the list of URLs in the batch
-def get_batch_items(batch_id, status="completed"):
-    params = {
-        'status': status
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=ecommerce+platform&gl=us&hl=en",
+        "https://www.google.com/search?q=payment+gateway&gl=us&hl=en",
+        "https://www.google.com/search?q=stripe&gl=us&hl=en",
+        "https://www.google.com/search?q=paddle&gl=us&hl=en",
+        "https://www.google.com/search?q=merchant+of+record&gl=us&hl=en",
+        "https://www.google.com/search?q=saas+payments&gl=us&hl=en",
+        "https://www.google.com/search?q=digital+river&gl=us&hl=en",
+        "https://www.google.com/search?q=subscription+billing&gl=us&hl=en",
+        "https://www.google.com/search?q=online+payments&gl=us&hl=en",
+        "https://www.google.com/search?q=braintree&gl=us&hl=en"
+    ]
+
+    # Add the parser configuration to each item
+    items = []
+    for url in urls:
+        items.append({
+            "custom_id": create_hash_id(url),
+            "url": url,
+        })
+
+    return items
+
+
+# Step 2: Start batch
+def start_batch(items):
+    payload = {
+        "items": items,
+        "country": "US",
+        "parser":  "@olostep/google-search"
     }
-    response = requests.get(f'{API_URL}/v1/batches/{batch_id}/items', headers=HEADERS, params=params)
-    return response.json()
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(f"{API_URL}/batches", headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()["id"]
 
-# Function to retrieve content
-def retrieve_content(retrieve_id, formats):
-    api_url = f"{API_URL}/v1/retrieve"
+
+# Step 3: Wait for completion
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(f"{API_URL}/batches/{batch_id}", headers=headers)
+    response.raise_for_status()
+    return response.json()["status"]
+
+
+def wait_until_complete(batch_id):
+    print("Waiting for batch to complete...")
+    while True:
+        status = check_batch_status(batch_id)
+        print("Status:", status)
+        if status == "completed":
+            print("Batch completed!")
+            return
+        time.sleep(10)
+
+
+# Step 4: Get items
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(f"{API_URL}/batches/{batch_id}/items", headers=headers)
+    response.raise_for_status()
+    return response.json()["items"]
+
+
+# Step 5: Retrieve content with format specified
+def retrieve_content(retrieve_id):
+    url = f"{API_URL}/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
     params = {
         "retrieve_id": retrieve_id,
-        "formats": json.dumps(formats)
+        "formats": ["markdown", "json"]
     }
-    response = requests.get(api_url, headers=HEADERS, params=params)
+    response = requests.get(url, headers=headers, params=params)
+    response.raise_for_status()
     return response.json()
 
-# Data for initiating the batch
-data = {
-    "items": [
-        {"custom_id": "1", "url": "https://github.com"},
-        {"custom_id": "2", "url": "https://github.com/features"}
-    ]
-}
 
-# Initiate the batch
-batch = initiate_batch(data)
-batch_id = batch['id']
-print(batch_id)
+# Step 6: Run end-to-end flow
+if __name__ == "__main__":
+    print("Composing batch...")
+    items = compose_items_array()
 
-# Wait for the batch to complete
-while True:
-    info = get_batch_info(batch_id)
-    if info['status'] == 'completed':
-        break
-    time.sleep(5)
+    print("Starting batch...")
+    batch_id = start_batch(items)
+    print("Batch ID:", batch_id)
+    print(f"You can check the status of the batch at: {API_URL}/batches/{batch_id}?token={API_KEY}")
 
-# Get the list of completed URLs
-batch_items = get_batch_items(batch_id, "completed")
+    wait_until_complete(batch_id)
 
-# Print the content of the URLs in the batch
-for item in batch_items['items']:
-    print(f"CustomID: {item['custom_id']}")
-    print(f"URL: {item['url']}")
-    print(f"Retrieve ID: {item['retrieve_id']}")
+    print("Fetching completed items...")
+    completed_items = get_completed_items(batch_id)
 
-    retrieve_id = item['retrieve_id']
-    formats = ["html", "markdown"]
-    retrieved_data = retrieve_content(retrieve_id, formats)
-    
-    if retrieved_data:
-        html_content = retrieved_data.get("html_content")
-        markdown_content = retrieved_data.get("markdown_content")
-        print(f"HTML Content:\n{html_content}")
-        print(f"Markdown Content:\n{markdown_content}")
-    else:
-        print("Failed to retrieve content")
+    print("Retrieving content...")
+    for item in completed_items:
+        retrieve_id = item["retrieve_id"]
+        print(f"\nRetrieving content for item {item['retrieve_id']}...")
+        content = retrieve_content(retrieve_id)
+        print(f"\n---\nURL: {item['url']}\nCustom ID: {item['custom_id']}\n")
+        #print("Markdown:\n", content.get("markdown_content", "[No markdown found]"))
+        print("JSON:\n", content.get("json_content", "[No JSON found]"))
+
+        # If you want to see the parsed content specifically
+        if "parsed_content" in content:
+            print("\nParsed Content:")
+            print(content["parsed_content"])
 ```
-
 </CodeGroup>
