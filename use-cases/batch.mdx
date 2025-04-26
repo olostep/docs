@@ -130,7 +130,7 @@ Use the `retrieve_id` to get the extracted content in markdown, html or json. He
 def retrieve_content(retrieve_id):
     url = "https://api.olostep.com/v1/retrieve"
     headers = {"Authorization": f"Bearer {API_KEY}"}
-    params = {"retrieve_id": retrieve_id, "formats": ["markdown"]}
+    params = {"retrieve_id": retrieve_id}
 
     response = requests.get(url, headers=headers, params=params)
     return response.json()

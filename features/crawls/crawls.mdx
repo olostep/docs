@@ -47,11 +47,10 @@ def get_crawled_pages(crawl_id):
     return response.json()
 
 # Function to retrieve content
-def retrieve_content(retrieve_id, formats):
+def retrieve_content(retrieve_id):
     api_url = f"{API_URL}/v1/retrieve"
     params = {
-        "retrieve_id": retrieve_id,
-        "formats": json.dumps(formats)
+        "retrieve_id": retrieve_id
     }
     response = requests.get(api_url, headers=HEADERS, params=params)
     return response.json()
@@ -86,8 +85,7 @@ for page in crawl_pages['pages']:
     print(f"Retrieve ID: {page['retrieve_id']}")
 
     retrieve_id = page['retrieve_id']
-    formats = ["html", "markdown"]
-    retrieved_data = retrieve_content(retrieve_id, formats)
+    retrieved_data = retrieve_content(retrieve_id)
     
     if retrieved_data:
         html_content = retrieved_data.get("html_content")
