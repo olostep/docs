@@ -11,7 +11,7 @@ Olostep's API allows you to extract structured data from Google Maps locations b
 
 ## Integration Example
 
-To get parsed JSON content from Google Maps results, you need to include parser_extract in the formats parameter and specify the name of the parser @olostep/google-maps in the parser_extract object.
+To get parsed JSON content from Google Maps results, you need to include `json` in the formats parameter and specify the name of the parser `@olostep/google-maps` in the parser object.
 Here's how to retrieve Google Maps location data in a structured format:
 
 ```python
@@ -21,8 +21,8 @@ import json
 url = "https://api.olostep.com/v1/scrapes"
 payload = {
 "url_to_scrape": "https://www.google.com/maps/search/Coffee+on+the+Rocks/@40.3699261,-105.5321621,17z?hl=en",
-"formats": ["parser_extract"],
-"parser_extract": {"parser_id": "@olostep/google-maps"},
+"formats": ["json"],
+"parser": {"id": "@olostep/google-maps"},
 "remove_css_selectors": "none",
 "wait_before_scraping": 4000
 }

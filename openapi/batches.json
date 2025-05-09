@@ -61,8 +61,17 @@
                                         "description": "Country for the batch execution. Provide in ISO 3166-1 alpha-2 codes like US(USA), IN(India), etc"
                                     },
                                     "parser": {
-                                        "type": "string",
-                                        "description": "Parser to be used for the batch."
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "description": "Parser to be used for the batch."
+                                            }
+                                        },
+                                        "required": [
+                                            "id"
+                                        ],
+                                        "description": "You can use this parameter to specify the parser to use. Parsers are useful to extract structured content from web pages. Olostep has a few parsers built in for most common web pages, and you can also create your own parsers."
                                     }
                                 },
                                 "required": [
