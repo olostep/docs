@@ -63,6 +63,31 @@
                                     "parser": {
                                         "type": "string",
                                         "description": "Parser to be used for the batch."
+                                    },
+                                    "links_on_page": {
+                                        "type": "object",
+                                        "properties": {
+                                            "absolute_links": {
+                                                "type": "boolean",
+                                                "default": true,
+                                                "description": "When true, it returns complete URLs (e.g., 'https://example.com/page') instead of relative paths (e.g., '/page')"
+                                            },
+                                            "include_links": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "description": "Filter extracted links using glob patterns with `include_links`. Use patterns like \"*.pdf\" to match file extensions, \"/blog/*\" for specific paths, or full URLs like \"https://example.com/*\". Supports wildcards (*), character classes ([a-z]), and alternation ({pattern1,pattern2})."
+                                            },
+                                            "exclude_links": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "description": "Filter extracted links using glob patterns with `exclude_links`. Use patterns like \"*.pdf\" to match file extensions, \"/blog/*\" for specific paths, or full URLs like \"https://example.com/*\". Supports wildcards (*), character classes ([a-z]), and alternation ({pattern1,pattern2})."
+                                            }
+                                        },
+                                        "description": "Get all the links present on each page in the batch."
                                     }
                                 },
                                 "required": [
@@ -313,6 +338,13 @@
                                                     "json_content": {
                                                         "type": "string",
                                                         "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
+                                                    },
+                                                    "links_on_page": {
+                                                        "type": "array",
+                                                        "description": "All links on that page`.",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
                                                     }
                                                 }
                                             }
