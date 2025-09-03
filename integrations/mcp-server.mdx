@@ -76,20 +76,30 @@ Add this to your ./codeium/windsurf/model_config.json:
 ### Running on Cursor
 To configure Olostep MCP in Cursor:
 
-- Open Cursor Settings
-- Go to Features > MCP Servers
-- Click "+ Add New MCP Server"
- - Enter the following: Name: "olostep-mcp" (or your preferred name) Type: "command"
- - Command: `env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp`
+- Open Cursor Settings (click on the settings icon in the top right of the IDE)
+- Click on MCP
+- Click on "+ Add new global MCP Server"
+ - Enter the following in the mcp.json file:
+```
+{
+  "mcpServers": {
+    "olostep-web": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+- Remember to replace `YOUR_API_KEY` with your actual API key that you can get from the [Olostep dashboard](https://www.olostep.com/dashboard)
+- You can close the settings tab now. If needed refresh the MCP server list to see the new tools
 
-Replace `your-api-key` with your Olostep API key.
 
 > If you are using Windows and are having issues, try `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
 
-Then refresh the MCP server list to see the new tools. The Composer will automatically use Olostep MCP when needed.
-
-You can also explicitly request it by describing how you want to get data from the web. Access the Composer via Command+L (Mac), select "Agent" next to the submit button, and enter your query.
-
+Next time that you use Cursor it will automatically use the Olostep MCP when needed. You can also explicitly request to use the Olostep MCP when you need up to date information from the web
 
 ## Conclusion
 

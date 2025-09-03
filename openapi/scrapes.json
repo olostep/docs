@@ -51,7 +51,7 @@
                         "html",
                         "markdown",
                         "text",
-                        "parser_extract",
+                        "json",
                         "raw_pdf"
                       ]
                     },
@@ -203,19 +203,18 @@
                     },
                     "description": "List of class names to remove from the content."
                   },
-                  "parser_extract": {
+                  "parser": {
                     "type": "object",
                     "properties": {
-                      "parser_id": {
+                      "id": {
                         "type": "string",
                         "description": "ID of the parser to use."
-                      },
-                      "schema": {
-                        "type": "object",
-                        "description": "Schema for the parser."
                       }
                     },
-                    "description": "Configuration for parser extraction."
+                    "required": [
+                      "id"
+                    ],
+                    "description": "When defining json as a format, you can use this parameter to specify the parser to use. Parsers are useful to extract structured content from web pages. Olostep has a few parsers built in for most common web pages, and you can also create your own parsers."
                   },
                   "llm_extract": {
                     "type": "object",
@@ -332,7 +331,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "Content from parser_extract or llm_extract"
+                          "description": "Content from parser"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"
@@ -444,7 +443,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "Content from parser_extract or llm_extract"
+                          "description": "Content from parser"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"

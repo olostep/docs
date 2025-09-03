@@ -12,7 +12,7 @@ Olostep's API allows you to extract structured data from search engine results b
 
 ## Integration Example
 
-To get parsed JSON content from search results, you need to include `parser_extract` in the `formats` parameter and specify the name of the parser `@olostep/google-search` in the `parser_extract` object.
+To get parsed JSON content from search results, you need to include `json` in the `formats` parameter and specify the name of the parser `@olostep/google-search` in the `parser` object.
 
 Here's how to retrieve Google search results in a structured format:
 
@@ -22,8 +22,8 @@ import json
 
 endpoint = "https://api.olostep.com/v1/scrapes"
 payload = {
-    "formats": ["parser_extract"],
-    "parser_extract": {"parser_id": "@olostep/google-search"},
+    "formats": ["json"],
+    "parser": {"id": "@olostep/google-search"},
     "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
     "wait_before_scraping": 0,
 }
