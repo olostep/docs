@@ -1,0 +1,19 @@
+---
+title: 'Extract Calendars'
+---
+
+**ID:** @olostep/extract-calendars  
+**Credits:** 1
+
+**Description:**
+Extract calendar links from a website page.
+
+**Use Cases:**
+- Find event or calendar subscription links
+- Build calendars from public event listings
+- Enrich records with ICS or Google Calendar links
+
+**Supported Providers:**
+calendly, acuity, doodle, microsoftbookings, hubspot, zcal, setmore, youcanbook, calcom, when2meet, oncehub, timetrade, appointlet, simplybook, bookafy, picktime, square, vagaro, fresha, booksy, schedulicity, appointmentplus, booksteam, genbook, mytime, mindbody, whenworks, rallly, needtomeet, bookeo, supersaas, flexbooker, tidycal, savvycal, fantical, visibook, timekit, chilipiper, mixmax, yesware, outreach, reply, close, timeslots, punchpass, findtime, googlecalendar
+
+

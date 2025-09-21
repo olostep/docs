@@ -1,0 +1,16 @@
+---
+title: 'Extract Emails'
+---
+
+**ID:** @olostep/extract-emails  
+**Credits:** 1
+
+**Description:**
+Extract emails from a website page.
+
+**Use Cases:**
+- Build contact lists for outreach
+- Enrich CRM records with verified emails
+- Audit pages for exposed email addresses
+
+
