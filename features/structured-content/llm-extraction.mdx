@@ -14,7 +14,7 @@ import requests
 import json
 
 def extract_with_llm():
-url = "https://api.olostep.com/v1/scrapes"
+    url = "https://api.olostep.com/v1/scrapes"
 
     headers = {
         "Authorization": "Bearer <API_KEY>",
@@ -23,20 +23,25 @@ url = "https://api.olostep.com/v1/scrapes"
 
     data = {
         "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
-        "formats": ["markdown", "llm_extract"],
-        "schema": {
-            "event": {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "date": {"type": "string"},
-                    "description": {"type": "string"},
-                    "venue": {"type": "string"},
-                    "address": {"type": "string"},
-                    "start_time": {"type": "string"}
+        "formats": [
+            "markdown", 
+            "json"
+        ],
+        "llm_extract": {
+            "schema": {
+                "event": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "date": {"type": "string"},
+                        "description": {"type": "string"},
+                        "venue": {"type": "string"},
+                        "address": {"type": "string"},
+                        "start_time": {"type": "string"}
+                    }
                 }
             }
-        }
+        },
     }
 
     response = requests.post(url, headers=headers, json=data)
@@ -48,22 +53,66 @@ url = "https://api.olostep.com/v1/scrapes"
     return result
 
 if __name__ == "__main__":
-extract_with_llm()
+    extract_with_llm()
 ```
+
+You can either pass the `schema` or a `prompt` to the LLM.
+
+```python
+
+import requests
+import json
+
+def extract_with_llm():
+    url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": [
+            "markdown", 
+            "json"
+        ],
+        "llm_extract": {
+            "prompt": "Extract the event title, date, description, venue, address, and start time from the event page."
+        },
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # The LLM extract will be available in the result
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+    extract_with_llm()
+```
+
+The `prompt` is a natural language string that is passed to the LLM to extract the data. The LLM decides how to extract the data based on the prompt. You can use this when you don't want to use a `schema`.
 
 Sample Response:
 
 ```json
 {
-    "llm_extract": {
-        "event": {
-            "title": "Stefano Marchese and Friends",
-            "date": "Wednesday / January 22, 2025",
-            "description": "Join acclaimed Italian singer-songwriter and educator Stefano Marchese for an unforgettable evening of musical magic as he takes the stage alongside a constellation of extraordinary talent in a concert titled Concerto di Duetti.",
-            "venue": "David Friend Recital Hall (DFRH)",
-            "address": "921 Boylston Street Boston MA 02115 United States",
-            "start_time": "7:30 p.m. (EST)"
-        }
+    "id": "scrape_94iqy385ty",
+    ...
+    "result": {
+        "json_content":  "{\"event\":{\"title\":\"Stefano Marchese and Friends\",\"date\":\"Wednesday / January 22, 2025\",\"description\":\"Join acclaimed Italian singer-songwriter and educator Stefano Marchese for an unforgettable evening of musical magic as he takes the stage alongside a constellation of extraordinary talent in a concert titled Concerto di Duetti.\",\"venue\":\"David Friend Recital Hall (DFRH)\",\"address\":\"921 Boylston Street Boston MA 02115 United States\",\"start_time\":\"7:30 p.m. (EST)\"}}"
     }
 }
+```
+
+json_content is the stringified JSON content of the event. You can access it as a JSON object by parsing the string.
+
+```python
+import json
+
+event = json.loads(result["json_content"])
+print(event["event"]["title"])
 ```
