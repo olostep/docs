@@ -1,0 +1,100 @@
+---
+sidebarTitle: 'Answers'
+title: 'Answers API'
+icon: 'question'
+---
+
+The Answers API allows you to use natural language to get structured answers from the web. You can ask a question and specify the JSON format you want the answer in. For a complete overview of the params see [here](/api-reference/answers/create).
+
+## How to use the Answers API
+
+In the example below, we will ask for the core value proposition of `olostep.io` and expect the response in a specific JSON format.
+
+<CodeGroup>
+
+```python answers.py
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/agent/search"
+payload = {
+  "task": "Please return the core value proposition for the company at the following domain: olostep.io",
+  "json": {
+    "mission": "",
+    "impact": "",
+    "ambition": ""
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+# Make the request
+response = requests.request("POST", endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+
+</CodeGroup>
+
+## Response Format
+
+When you run the above code, you will receive a response like the following:
+
+```json
+{
+  "mission": "Olostep is on a mission to reshape how AI interacts with the web. At its core, it is building the Web Data API for AI.",
+  "impact": "Its powerful API allows AI startups and enterprises to access websites and extract clean, structured data in the format they prefer—HTML, Markdown, plain text, raw PDF, or structured JSON, enabling faster and more reliable AI-powered data extraction.",
+  "ambition": "Olostep aims to be for AI what traditional web APIs are for standard web development—the essential programmatic layer supplying AI with limitless web data, powering the fastest-growing AI companies globally."
+}
+```
+
+### Flexible JSON Parameter
+
+The `json` parameter is highly flexible. You can provide a JSON object with empty values as a schema, or simply describe the data you want as a string.
+
+### Handling Uncertainty
+
+If the API is not confident about an answer, it will return `NOT_FOUND` as the value for the corresponding field.
+
+<CodeGroup>
+
+```python not_found_example.py
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/agent/search"
+payload = {
+  "task": "how much did Olostep raise?",
+  "json": {
+    "amount": ""
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+# Make the request
+response = requests.request("POST", endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+
+</CodeGroup>
+
+This would return:
+```json
+{
+  "amount": "NOT_FOUND"
+}
+```
+
+### Default Response
+
+If you don't pass a `json` parameter, the API will return a default JSON object with the answer.
+
+```json
+{
+    "result": "<The answer to your task>"
+}
+```
