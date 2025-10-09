@@ -39,7 +39,7 @@ print(json.dumps(response.json(), indent=4))
 
 ## Response Format
 
-When you run the above code, you will receive a response like the following:
+When you run the above code, you will receive a `response.result.json_content` like below.
 
 ```json
 {
@@ -48,6 +48,19 @@ When you run the above code, you will receive a response like the following:
   "ambition": "Olostep aims to be for AI what traditional web APIs are for standard web development—the essential programmatic layer supplying AI with limitless web data, powering the fastest-growing AI companies globally."
 }
 ```
+
+It will also return sources used in `response.result.sources`:
+
+```json
+[
+  "https://www.olostep.com/about",
+  "https://docs.olostep.com",
+  "https://www.olostep.com",
+  "https://theresanaiforthat.com/ai/olostep/",
+  ...
+]
+```
+
 
 ### Flexible JSON Parameter
 
