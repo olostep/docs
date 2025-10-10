@@ -1,0 +1,76 @@
+---
+sidebarTitle: 'Agents'
+title: 'Agents API'
+icon: 'robot'
+---
+
+The Agents API allows you to create and manage autonomous research agents that can perform complex, multi-step tasks on a schedule. These agents can search the web, extract data, and deliver results automatically.
+
+## Access Requirements
+
+The Agents API is currently available to select customers. To get access, please:
+
+- Email us at [info@olostep.com](mailto:info@olostep.com)
+- Or [contact our sales team](https://www.olostep.com/contact-sales)
+
+## How to use the Agents API
+
+In the example below, we will create an agent that searches for portfolio companies from various funds and organizes the data into a Google Sheet with scheduled execution.
+
+<CodeGroup>
+
+```python agents.py
+import requests
+
+API_URL = 'https://api.olostep.com/v1/agents' # endpoint available to select customers
+API_KEY = '<token>'
+
+headers = {'Authorization': f'Bearer {API_KEY}', 'Content-Type': 'application/json'}
+data = {
+    "prompt": '''
+      Search every portfolio company from every fund from 
+      (https://www.vcsheet.com/funds) and return the results into a google sheet 
+      with the following columns (Fund Name, Fund Website 
+      URL, Fund LinkedIn URL, Portfolio Company Name, Portfolio
+      Company URL, Portfolio Company LinkedIn URL). Run every week 
+      on Monday at 9:00 AM. Send an email to steve@example.com when 
+      new portfolio companies are added to any of these funds.  
+    ''',
+    "model": "gpt-4.1"
+}
+
+response = requests.post(API_URL, headers=headers, json=data)
+result = response.json()
+
+print(f"Agent ID: {result['id']}")
+print(f"Status: {result['status']}")
+# You can then schedule this agent
+```
+
+</CodeGroup>
+
+## Agent Capabilities
+
+The Olostep agent can:
+
+- **Web Research**: Automatically search and extract data from websites
+- **Data Organization**: Structure information into spreadsheets, databases, or other formats
+- **Scheduled Execution**: Run tasks on a recurring schedule (daily, weekly, at a predefined)
+- **Multi-step Workflows**: Perform complex, multi-part research tasks autonomously
+- **Notifications**: Send email alerts when new data is found or tasks complete
+- **Custom Output**: Return data as CSV, JSON, google sheet or directly in your database
+
+
+## Getting Started
+
+1. **Request Access**: Contact our sales team to get access to the Agents API
+2. **Get Your API Key**: Once approved, you'll receive your API credentials
+3. **Create Your First Agent**: Prompt in natural language or use the API to create your autonomous agent
+4. **Schedule and Monitor**: Set up recurring schedules and monitor agent performance
+
+## Support
+
+For questions about the Agents API or to discuss custom use cases:
+
+- Email: [info@olostep.com](mailto:info@olostep.com)
+- Sales: [Contact Sales](https://www.olostep.com/contact-sales)
