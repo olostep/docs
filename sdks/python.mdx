@@ -2,17 +2,58 @@
 sidebarTitle: 'Python'
 title: 'Olostep Python SDK'
 icon: python
+description: 'Official Python SDK for programmatic web scraping and data extraction'
 ---
 
-Olostep offers AI a way to search the web and extract structured, clean data in real time from any website
+<Note>
+  **PyPI Package**: [olostep](https://pypi.org/project/olostep/) | **Requirements**: Python 3.11+
+</Note>
 
-This documentation for the SDK is a work in progress.
+## Installation
 
-## Quick start
+<CodeGroup>
 
-```bash
-pip install olostep-py
+```bash pip
+pip install olostep
 ```
+
+```bash pip3
+pip3 install olostep
+```
+
+```bash poetry
+poetry add olostep
+```
+
+```bash uv
+uv pip install olostep
+```
+
+</CodeGroup>
+
+## Authentication
+
+Get your API key from [olostep.com/auth](https://www.olostep.com/auth)
+
+<CodeGroup>
+
+```python With API Key
+from olostep import OlostepClient
+
+client = OlostepClient(api_key="YOUR_API_KEY")
+```
+
+```bash Environment Variable
+export OLOSTEP_API_KEY="YOUR_API_KEY"
+```
+
+```powershell Windows
+$env:OLOSTEP_API_KEY="YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Quick Start
 
 ```python
 """
@@ -70,11 +111,11 @@ scrape_result = client.scrape("https://example.com")
 # -> ScrapeResult(id='scrape_123', available=['html_content', 'markdown_content'])
 ```
 
-## API Design
+## Usage
 
 The SDK provides a clean, Pythonic interface organized into logical namespaces. Each operation returns stateful objects with ergonomic methods for follow-up operations.
 
-#### Scraping
+### Scraping
 ```python
 from olostep import OlostepClient
 from olostep import Country, FillInputAction, Format, LLMExtract, LinksOnPage, ScreenSize, Transformer, WaitAction
@@ -113,7 +154,7 @@ result = await client.scrape(
 )
 ```
 
-#### Batch Processing
+### Batch Processing
 ```python
 from olostep import OlostepClient
 from olostep import BatchItem, Country
@@ -155,7 +196,7 @@ async for item in client.batch.items(batch_id='a_batch_id', batch_size=10):
     print(f"{item.custom_id}: {len(content.html_content)} bytes")
 ```
 
-#### Web Crawling
+### Web Crawling
 ```python
 # Minimal: Crawl a site with default settings
 crawl = await client.crawl("https://example.com", max_pages=100)
@@ -192,7 +233,7 @@ async for page in client.crawl.pages(crawl_id='a_crawl_id'):
     print(f"{page.url}: {len(content.html_content)} bytes")
 ```
 
-#### Site Mapping
+### Site Mapping
 ```python
 # Minimal: Extract all links from a site
 sitemap = await client.sitemap("https://example.com")
@@ -217,7 +258,7 @@ async for url in sitemap.urls():  # async generator
 #       create a list but use the generator as such.
 ```
 
-#### Data Retrieval
+### Data Retrieval
 ```python
 # Notes:
 #   * You should generally not need to use this endpoint as the other endpoints generate stateful return objects that can retrieve content.
@@ -232,9 +273,9 @@ result = await client.retrieve("ret_123", ["html", "markdown", "text", "json"])
 # ScrapeResult(id='ret_123', available=['html_content', 'markdown_content', 'text_content', 'json_content'])
 ```
 
-### Method Shorthands
+## Advanced Features
 
-The SDK provides convenient shorthand methods for common operations:
+### Method Shorthands
 
 ```python
 # These are equivalent:
@@ -273,15 +314,11 @@ await client.batch("https://example.com")    # Single URL
 await client.batch(["https://a.com", "https://b.com"])  # Multiple URLs
 ```
 
-### Logging & Error Handling
+## Error Handling
 
-The SDK root logger is predictably called `olostep`. Granular sub-loggers exist.
-The recommended log level is `INFO` or higher.
-`DEBUG` really means debug and is very detailed.
+### Exception Hierarchy
 
-Handling the error behavior of the API can be complex. The SDK handles error detection for you and returns the following errors:
-
-Our exception hierarchy:
+The SDK handles error detection for you and provides a comprehensive exception hierarchy:
 
 ```text
 * Olostep_BaseError -------------------------------------- <- Catch base class for all errors
@@ -310,4 +347,78 @@ Our exception hierarchy:
     + OlostepClientError_Timeout
 ```
 
+### Handling Errors
 
+```python
+from olostep import OlostepClient
+from olostep.errors import (
+    Olostep_BaseError,
+    Olostep_APIConnectionError,
+    OlostepServerError_AuthFailed,
+    OlostepClientError_Timeout,
+)
+
+client = OlostepClient()
+
+try:
+    result = await client.scrape("https://example.com")
+    content = await result.retrieve(["html"])
+    print(content.html_content)
+    
+except Olostep_APIConnectionError:
+    print("Network error - check your connection")
+    
+except OlostepServerError_AuthFailed:
+    print("Authentication failed - check your API key")
+    
+except OlostepClientError_Timeout:
+    print("Request timed out - try again")
+    
+except Olostep_BaseError as e:
+    print(f"Olostep error: {e}")
+```
+
+<Note>
+  The SDK automatically retries failed requests with exponential backoff for transient errors.
+</Note>
+
+## Logging
+
+Enable logging to debug issues:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("olostep")
+logger.setLevel(logging.INFO)  # Use DEBUG for verbose output
+```
+
+**Log Levels**: `INFO` (recommended), `DEBUG` (verbose), `WARNING`, `ERROR`
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OLOSTEP_API_KEY` | Your API key | Required |
+| `OLOSTEP_BASE_API_URL` | API base URL | `https://api.olostep.com/v1` |
+| `OLOSTEP_API_TIMEOUT` | Request timeout (seconds) | `150` |
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="book" href="/api-reference/scrapes/create">
+    Complete API documentation
+  </Card>
+  <Card title="Use Cases" icon="lightbulb" href="/use-cases">
+    Real-world examples
+  </Card>
+  <Card title="PyPI Package" icon="python" href="https://pypi.org/project/olostep/">
+    View on PyPI
+  </Card>
+  <Card title="Get API Key" icon="key" href="https://www.olostep.com/auth">
+    Sign up for free
+  </Card>
+</CardGroup>
