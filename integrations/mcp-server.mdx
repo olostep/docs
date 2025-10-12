@@ -2,23 +2,25 @@
 sidebarTitle: 'MCP Server'
 icon: hammer
 title: MCP Server
-description: Use Olostep in AI Agents and apps like Claude Desktop, Cursor, Windsurf etc
+description: Use Olostep through the Model Context Protocol for fast, efficient web data
 ---
 
-Olostep MCP Server offers web access tooling to your AI apps with minimal setup. It allows your AI to:
-1. Search the web using google
+Olostep MCP Server offers web access tooling to your AI apps. It allows your AI to:
+1. Search the web to ground AI on real world data (facts, docs, events)
 2. Get the markdown content of any web page
 3. Discover and filter out relevant URLs within a website.
 
-## Available Tools
-
-- **get_webpage_content**: Retrieves webpage content in clean markdown format with support for JavaScript rendering
-- **search_google**: Searches Google for the given query and returns the search results
-- **get_website_urls**: Retrieves all URLs from a website and filters out the irrelevant ones
-
 
 ## Installation
-To set up Olostep MCP Server, you need to have an API key. You can get the API key by signing up on the [Olostep website](https://olostep.com/auth).
+You need to have an API key. Get the API key from https://www.olostep.com/dashboard/api-keys.
+
+You can either use our remote hosted URL or run the server locally
+
+### Remote hosted URL
+
+```bash
+coming soon
+```
 
 ### Running with npx
 
@@ -34,46 +36,36 @@ npm install -g olostep-mcp
 
 ### Running on Claude Desktop
 
-You can install Olostep MCP Server via [Smithery CLI](https://smithery.ai/server/@olostep/olostep-mcp-server) for [Claude Desktop](https://claude.ai/download).
+Add this to your claude_desktop_config.json:
+
+```bash
+{
+  "mcpServers": {
+    "mcp-server-olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+Alternatively you can install Olostep MCP Server via [Smithery CLI](https://smithery.ai/server/@olostep/olostep-mcp-server)
 
 ```bash
 npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
 ```
 
-Or you can add this to your claude_desktop_config.json:
-
-```bash
-{
-  "mcpServers": {
-    "mcp-server-olostep": {
-      "command": "npx",
-      "args": ["-y", "olostep-mcp"],
-      "env": {
-        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
-      }
-    }
-  }
-}
-```
-
-### Running on Windsurf
-Add this to your ./codeium/windsurf/model_config.json:
-
-```bash
-{
-  "mcpServers": {
-    "mcp-server-olostep": {
-      "command": "npx",
-      "args": ["-y", "olostep-mcp"],
-      "env": {
-        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
-      }
-    }
-  }
-}
-```
-
 ### Running on Cursor
+
+<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=olostep-web&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIm9sb3N0ZXAtbWNwIl0sImVudiI6eyJPTE9TVEVQX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D">
+  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Add Olostep MCP server to Cursor" style={{ maxHeight: 32 }} />
+</a>
+
+#### Manual setup
+
 To configure Olostep MCP in Cursor:
 
 - Open Cursor Settings (click on the settings icon in the top right of the IDE)
@@ -101,6 +93,30 @@ To configure Olostep MCP in Cursor:
 
 Next time that you use Cursor it will automatically use the Olostep MCP when needed. You can also explicitly request to use the Olostep MCP when you need up to date information from the web
 
-## Conclusion
 
+
+### Running on Windsurf
+Add this to your ./codeium/windsurf/model_config.json:
+
+```bash
+{
+  "mcpServers": {
+    "mcp-server-olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+## Available Tools
+- **get_webpage_content**: Retrieves webpage content in clean markdown format with support for JavaScript rendering
+- **search_google**: Searches Google for the given query and returns the search results
+- **get_website_urls**: Retrieves all URLs from a website and filters out the irrelevant ones
+- **crawl_tool**: **Coming soon** Systematically crawls websites following links and extracting content
+
+## Conclusion
 You can find complete details about Olostep MCP [here](https://github.com/olostep/olostep-mcp-server).
