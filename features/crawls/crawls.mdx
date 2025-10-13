@@ -1,101 +1,257 @@
 ---
-sidebarTitle: 'Get Started'
-title: Get Started
+sidebarTitle: 'Crawl'
+title: Crawl
+description: Crawl a website and get all the pages
+icon: spider
 ---
 
-The crawls endpoint allows you to autonomously scrape all relevant pages in websites like docs, blogs, and more.
+Through the Olostep `/v1/crawls` endpoint you can crawl a website and get all the pages like docs, blogs, and more.
 
-## Initiating a Crawl
+- Crawl a website and get all the pages (or limit the depth of the crawl)
+- Use special patterns to crawl specific pages (e.g. `/blog/**`)
+- Pass a `webhook_url` to get notified when the crawl is completed
+- Search query to only find specific pages and sort by relevance
 
-To start a new crawl, provide the **starting point, URLs to include and max pages.**
+For details, see the [Crawl Endpoint API Reference](/api-reference/crawls/create).
 
-Other optional parameters such as the depth of the crawl, exclude URL patterns and if to include external URLs are also available.
-
-### Example
-In this example, we initiate a crawl on `https://sugarbooandco.com` and specify that we want to crawl up to 100 pages with all kinds of URLs except collections.
+## Installation
 
 <CodeGroup>
 
-```python crawl.py
+```python Python
+# pip install requests
+
 import requests
-import time
+```
 
-# Define the API URL and your API key
-API_URL = 'https://api.olostep.com'
-API_KEY = '<YOUR_API_KEY>'
+```js Node
+// npm install node-fetch
 
-# Set the headers for the requests
-HEADERS = {
-    'Content-Type': 'application/json',
-    'Authorization': f'Bearer {API_KEY}'
-}
+// ESM
+import fetch from 'node-fetch'
 
-# Function to initiate a crawl
-def initiate_crawl(data):
-    response = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data)
-    return response.json()
+// CommonJS
+const fetch = require('node-fetch')
+```
 
-# Function to get crawl information
-def get_crawl_info(crawl_id):
-    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}', headers=HEADERS)
-    return response.json()
-
-# Function to get the list of crawled pages with formats parameter
-def get_crawled_pages(crawl_id):
-    params = {}
-    response = requests.get(f'{API_URL}/v1/crawls/{crawl_id}/pages', headers=HEADERS, params=params)
-    return response.json()
-
-# Function to retrieve content
-def retrieve_content(retrieve_id):
-    api_url = f"{API_URL}/v1/retrieve"
-    params = {
-        "retrieve_id": retrieve_id
-    }
-    response = requests.get(api_url, headers=HEADERS, params=params)
-    return response.json()
-
-# Data for initiating the crawl
-data = {
-    "start_url": "https://sugarbooandco.com",
-    "max_pages": 100,
-    "include_urls": ["/**"],
-    "exclude_urls": ["/collections/**"], # Optional
-    "max_depth": None, # Default
-    "include_external": False # Default
-}
-
-# Initiate the crawl
-crawl = initiate_crawl(data)
-crawl_id = crawl['id']
-
-# Wait for the crawl to complete
-while True:
-    info = get_crawl_info(crawl_id)
-    if info['status'] == 'completed':
-        break
-    time.sleep(5)
-
-# Get the list of crawled pages with their retrieve_id
-crawl_pages = get_crawled_pages(crawl_id)
-
-# Print the content of the crawled pages
-for page in crawl_pages['pages']:
-    print(f"URL: {page['url']}")
-    print(f"Retrieve ID: {page['retrieve_id']}")
-
-    retrieve_id = page['retrieve_id']
-    retrieved_data = retrieve_content(retrieve_id)
-    
-    if retrieved_data:
-        html_content = retrieved_data.get("html_content")
-        markdown_content = retrieved_data.get("markdown_content")
-        print(f"HTML Content:\n{html_content}")
-        print(f"Markdown Content:\n{markdown_content}")
-    else:
-        print("Failed to retrieve content")
+```bash cURL
+# macOS: builtin curl is fine
 ```
 
 </CodeGroup>
 
-For more detailed information, please refer the API reference.
+## Start a crawl
+
+Provide the starting URL, include/exclude URL globs, and `max_pages`. Optional: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`.
+
+<CodeGroup>
+
+```python Python
+import time, json
+
+API_URL = 'https://api.olostep.com'
+API_KEY = '<YOUR_API_KEY>'
+HEADERS = { 
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}' 
+}
+
+data = {
+  "start_url": "https://sugarbooandco.com",
+  "max_pages": 100,
+  "include_urls": ["/**"],
+  "exclude_urls": ["/collections/**"],
+  "include_external": False
+}
+
+res = requests.post(f"{API_URL}/v1/crawls", headers=HEADERS, json=data)
+crawl = res.json()
+print(json.dumps(crawl, indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com'
+const res = await fetch(`${API_URL}/v1/crawls`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    start_url: 'https://sugarbooandco.com',
+    max_pages: 100,
+    include_urls: ['/**'],
+    exclude_urls: ['/collections/**']
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://sugarbooandco.com",
+    "max_pages": 100,
+    "include_urls": ["/**"],
+    "exclude_urls": ["/collections/**"]
+  }'
+```
+
+</CodeGroup>
+
+Since everything in Olostep is an object, you will receive a `crawl` object in response. The `crawl` object has a few properties like `id` and `status`, which you can use to track the crawl.
+
+## Check crawl status
+
+Poll the crawl to track progress until `status` is `completed`.
+
+<CodeGroup>
+
+```python Python
+import time
+
+def get_crawl_info(crawl_id):
+    return requests.get(f'{API_URL}/v1/crawls/{crawl_id}', headers=HEADERS).json()
+
+crawl_id = crawl['id']
+while True:
+    info = get_crawl_info(crawl_id)
+    print(info['status'], info.get('pages_count'))
+    if info['status'] == 'completed':
+        break
+    time.sleep(5)
+```
+
+```js Node
+const crawlId = '<CRAWL_ID>'
+const status = await fetch(`${API_URL}/v1/crawls/${crawlId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+}).then(r => r.json())
+console.log(status)
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/crawls/<CRAWL_ID>" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+Alternatively, you can pass a `webhook_url` when starting the crawl to be notified when the crawl is completed.
+
+## List pages (paginate/stream with cursor)
+
+Fetch pages and iterate using `cursor` and `limit`. Works while the crawl is `in_progress` or `completed`.
+
+<CodeGroup>
+
+```python Python
+def get_pages(crawl_id, cursor=None, limit=10, search_query=None):
+    params = { 
+        'cursor': cursor, 
+        'limit': limit
+    }
+    return requests.get(f'{API_URL}/v1/crawls/{crawl_id}/pages', headers=HEADERS, params=params).json()
+
+cursor = 0
+while True:
+    page_batch = get_pages(crawl_id, cursor=cursor, limit=10)
+    for page in page_batch['pages']:
+        print(page['url'], page['retrieve_id'])
+    if 'cursor' not in page_batch:
+        break
+    cursor = page_batch['cursor']
+    time.sleep(5)
+```
+
+```js Node
+let cursor = 0
+while (true) {
+  const pages = await fetch(`${API_URL}/v1/crawls/${crawlId}/pages?cursor=${cursor}&limit=10`, {
+    headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+  }).then(r => r.json())
+  pages.pages.forEach(p => console.log(p.url, p.retrieve_id))
+  if (pages.cursor === undefined) break
+  cursor = pages.cursor
+}
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/crawls/<CRAWL_ID>/pages" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "cursor=0" \
+  --data-urlencode "limit=10"
+```
+
+</CodeGroup>
+
+## Search query (limit to top N relevant)
+
+Use `search_query` at start, and optionally filter listing with `search_query`. Limit per-page exploration with `top_n`.
+
+<CodeGroup>
+
+```python Python
+data = {
+  "start_url": "https://sugarbooandco.com",
+  "max_pages": 100,
+  "include_urls": ["/**"],
+  "search_query": "contact us",
+  "top_n": 5
+}
+crawl = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data).json()
+pages = requests.get(f"{API_URL}/v1/crawls/{crawl['id']}/pages", headers=HEADERS, params={'search_query': 'contact us'}).json()
+print(len(pages['pages']))
+```
+
+```js Node
+await fetch(`${API_URL}/v1/crawls`, { method: 'POST', headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' }, body: JSON.stringify({ start_url: 'https://sugarbooandco.com', max_pages: 100, include_urls: ['/**'], search_query: 'contact us', top_n: 5 }) })
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://sugarbooandco.com",
+    "max_pages": 100,
+    "include_urls": ["/**"],
+    "search_query": "contact us",
+    "top_n": 5
+  }'
+```
+
+</CodeGroup>
+
+## Retrieve content
+
+Use each page's `retrieve_id` with `/v1/retrieve` to fetch `html_content` and/or `markdown_content`.
+
+<CodeGroup>
+
+```python Python
+def retrieve_content(retrieve_id):
+    return requests.get(f"{API_URL}/v1/retrieve", headers=HEADERS, params={"retrieve_id": retrieve_id}).json()
+
+for page in get_pages(crawl['id'], limit=5)['pages']:
+    retrieved = retrieve_content(page['retrieve_id'])
+    print(retrieved.get('markdown_content'))
+```
+
+```js Node
+const retrieved = await fetch(`${API_URL}/v1/retrieve?retrieve_id=<RETRIEVE_ID>`, { headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' } }).then(r => r.json())
+console.log(retrieved.markdown_content)
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/retrieve" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "retrieve_id=<RETRIEVE_ID>"
+```
+
+</CodeGroup>
+
+## Notes
+
+- Pagination is cursor-based; repeat requests until `cursor` is absent.
+- Content fields on `/v1/crawls/{crawl_id}/pages` are deprecated; prefer `/v1/retrieve`.
+- Webhooks: set `webhook_url` to receive a POST when the crawl completes.
