@@ -145,6 +145,22 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
     };
     ```
   </Tab>
+   <Tab title="Grok">
+    **Parser ID:** `@olostep/grok-scrape`
+    
+    ```javascript
+    const generateGrokItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://grok.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+  </Tab>
 </Tabs>
 
 ### Step 3: Submit the Batch Request
@@ -396,6 +412,57 @@ After submitting a batch request and polling for completion, you'll receive resp
         },
         ...
       ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Grok">
+    ```json
+    {
+      "url": "https://grok.com/",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "### \n\nlatest news in Austin TX today Searched for \"latest news in Austin TX today\" \n\n10 posts \n\n### \n\nAustin since:2025-10-10 until:2025-10-11 filter:news Searched for \"Austin since:2025-10-10 until:2025-10-11 filter:news\" \n\n10 posts \n\n### \n\nAustin Texas news October 10 2025 Searched for \"Austin Texas news October 10 2025\" \n\n15 results \n\n### Top News Stories in Austin, TX – October 10, 2025\n\nHere's a roundup of the latest developments from local sources, focusing on key events, weather...",
+      "sources": [
+        {
+          "url": "https://www.austinchronicle.com/issues/october-10-2025/",
+          "title": "October 10 • 2025 - The Austin Chronicle",
+          "description": "To be clear, by “a good deal,” I don’t mean “rock-bottom prices.” I’m talking about a meal that’s completely worth the cash, both in terms of quality and quantity. And at Le Calamar, a new South First spot that specializes in Texan… ... Proposition Quit Dear Editor, Regarding the recent article in The Austin Chronicle [“Higher Taxes Are on the Ballot. City Leaders Explain What They’ll Get Us,” News, Sept.",
+          "icon": "https://imgs.search.brave.com/IIGvOiGOT-2BIUALAC8jt1l2gfEyH5C1RNDmZTaKBM8/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDQ5NWE3OTli/MzYxZmI5MTBmMTA4/MzNlOTI1NTY3M2Nm/ZTYyMWYyYWI5OTEz/MTJlYzAwNWJjNjg3/ZTZhOWQ4OC93d3cu/YXVzdGluY2hyb25p/Y2xlLmNvbS8",
+          "domain": "https://www.austinchronicle.com/",
+          "cited": true
+        },
+        {
+          "url": "https://www.austinchronicle.com/",
+          "title": "Home - The Austin Chronicle",
+          "description": "Current Issue October 10 • 2025 Vol. 45 • No. 6 Special Issues Best of Austin Austin Music Awards SXSW The 420 Issue The Burger Issue The Drinks Issue Newsletters Photo Galleries SUPPORT FREE PRESS.SUPPORT THE AUSTIN CHRONICLE. For over 40 years, The Austin Chronicle has been the progressive voice of Austin.",
+          "icon": "https://imgs.search.brave.com/IIGvOiGOT-2BIUALAC8jt1l2gfEyH5C1RNDmZTaKBM8/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDQ5NWE3OTli/MzYxZmI5MTBmMTA4/MzNlOTI1NTY3M2Nm/ZTYyMWYyYWI5OTEz/MTJlYzAwNWJjNjg3/ZTZhOWQ4OC93d3cu/YXVzdGluY2hyb25p/Y2xlLmNvbS8",
+          "domain": "https://www.austinchronicle.com/",
+          "cited": true
+        },
+      ],
+      "xposts": [
+        {
+          "post_url": "https://x.com/EugeneAustin/status/1976621075090878962",
+          "username": "EugeneAustin",
+          "name": "Eugene Sepulveda",
+          "text": "👏🏽👏🏽👏🏽 Nobel Peace Prize 2025 live updates: Venezuelan opposition leader María Corina Machado wins  [She is standing up for the people of her country as opposed to Donald Trump who’s deploying troops against his own] https://t.co/tVQ2jxH41J",
+          "create_time": "2025-10-10T12:09:22Z",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/1908632830118068224/xO8hj6PK_normal.jpg",
+          "post_id": "1976621075090878962",
+          "view_count": 25
+        },
+        {
+          "post_url": "https://x.com/TheSteelersWire/status/1976608836657029234",
+          "username": "TheSteelersWire",
+          "name": "Steelers Wire",
+          "text": "Steelers injury update: Will Calvin Austin III play vs the Browns? https://t.co/1eGS7g2xYz https://t.co/17krn8un1N",
+          "create_time": "2025-10-10T11:20:44Z",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/1607062294046941191/UBv9QEQW_normal.jpg",
+          "post_id": "1976608836657029234",
+          "view_count": 462
+        },
+      ],
+      "model": "grok-4-auto"
     }
     ```
   </Tab>
