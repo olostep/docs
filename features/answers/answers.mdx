@@ -1,114 +1,194 @@
 ---
 sidebarTitle: 'Answers'
 title: 'Answers API'
-icon: 'question'
+icon: 'globe-pointer'
 ---
 
-The Answers API allows to search the web using natural language and get AI-powered answers. You can ask a question and specify the JSON format you want the answer in. It's useful to ground your AI products on real world data and facts.
-For a complete overview of the params see [here](/api-reference/answers/create).
+Through the Olostep `/v1/answers` endpoint you can search the web with natural language and return AI‑powered answers and data in the JSON shape you want. This lets you ground your products on real-world data and sources, enrich data points or spreadsheets
 
-## How to use the Answers API
+- Ask a question or give AI a data point you want to enrich
+- Optional: specify the JSON structure you want back
 
-In the example below, we will ask for the core value proposition of `olostep.com` and expect the response in a specific JSON format.
+It will:
+- Search, clean, validate and return the data it found on the Web 
+- Return sources used to generate the answer
+- Handle uncertainty with `NOT_FOUND` values when data cannot be verified 
+
+For details, see the [Answers Endpoint API Reference](/api-reference/answers/create).
+
+By default we use a generic web index and a cost‑efficient LLM validator.
+
+But enterprise customers have access to proprietary industry specific indexes, exclusive private data and custom LLM models most suited for their use case. Contact us for access: info@olostep.com
+
+
+
+## Use cases
+The answers endpoint can be used to:
+ - Ground AI applications on real world data and facts
+ - Enrich spreadsheets and data points for Recruting, Finance, Consulting, and Sales
+
+Here's a demo of an AI powered spreadsheet powered by the Answers endpoint:
+https://www.olostep.com/demos/spreadsheet-enrich
+
+
+
+## Installation
 
 <CodeGroup>
 
-```python answers.py
+```python Python
+# pip install requests
+
 import requests
-import json
+```
 
-endpoint = "https://api.olostep.com/v1/answers"
-payload = {
-  "task": "Please return the core value proposition for the company at the following domain: olostep.com",
-  "json": {
-    "mission": "",
-    "impact": "",
-    "ambition": ""
-  }
-}
-headers = {
-    "Authorization": "Bearer <YOUR_API_KEY>",
-    "Content-Type": "application/json"
-}
+```js Node
+// npm install node-fetch
 
-# Make the request
-response = requests.request("POST", endpoint, json=payload, headers=headers)
-print(json.dumps(response.json(), indent=4))
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: builtin curl is fine
 ```
 
 </CodeGroup>
 
-## Response Format
+## Usage
 
-When you run the above code, you will receive a `response.result.json_content` like below.
-
-```json
-{
-  "mission": "Olostep is on a mission to reshape how AI interacts with the web. At its core, it is building the Web Data API for AI.",
-  "impact": "Its powerful API allows AI startups and enterprises to access websites and extract clean, structured data in the format they prefer—HTML, Markdown, plain text, raw PDF, or structured JSON, enabling faster and more reliable AI-powered data extraction.",
-  "ambition": "Olostep aims to be for AI what traditional web APIs are for standard web development—the essential programmatic layer supplying AI with limitless web data, powering the fastest-growing AI companies globally."
-}
-```
-
-It will also return sources used in `response.result.sources`:
-
-```json
-[
-  "https://www.olostep.com/about",
-  "https://docs.olostep.com",
-  "https://www.olostep.com",
-  "https://theresanaiforthat.com/ai/olostep/",
-  ...
-]
-```
-
-
-### Flexible JSON Parameter
-
-The `json` parameter is highly flexible. You can provide a JSON object with empty values as a schema, or simply describe the data you want as a string.
-
-### Handling Uncertainty
-
-If the API is not confident about an answer, it will return `NOT_FOUND` as the value for the corresponding field.
+Ask a question and pass a JSON schema to guide the output. You can also not pass the `json` parameter and the API will return a json object with the answer text inside the `result` field.
 
 <CodeGroup>
 
-```python not_found_example.py
-import requests
-import json
+```python Python
+import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "how much did Olostep raise?",
+  "task": "What is the latest book by J.K. Rowling?",
+  "json": {"book_title": "", "author": "", "release_date": ""}
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/answers', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    task: 'What is the latest book by J.K. Rowling?',
+    json: { book_title: '', author: '', release_date: '' }
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/answers" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "What is the latest book by J.K. Rowling?",
+    "json": {"book_title": "", "author": "", "release_date": ""}
+  }'
+```
+
+</CodeGroup>
+
+## Response
+
+Like other Olostep endpoints, you will receive a `answer` object in response. The `answer` object has a few properties like `id` and `result`.
+
+```json
+{
+  "id": "answer_9bi0sbj9xa",
+  "object": "answer",
+  "created": 1760327323,
+  "metadata": {},
+  "task": "What is the latest book by J.K. Rowling?",
+  "result": {
+    "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
+    "sources": [
+      "https://strikefans.com/the-books/",
+      "https://www.facebook.com/groups/496943608606523/posts/1136830134617864/",
+      "https://robert-galbraith.com/strike-books/",
+      "https://www.novelsuspects.com/series-list/robert-galbraith-cormoran-strike-series-in-order/",
+      "https://www.reddit.com/r/books/comments/1na833a/jk_rowlings_new_strike_novel_900_pages_of_romance/",
+      "https://www.harrypotter.com/writing-by-jk-rowling",
+      "https://stories.jkrowling.com/book-news/",
+      "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+      "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+      "https://www.jkrowling.com/news/"
+    ]
+  }
+}
+```
+
+Your requested answer, formatted according to the `json` parameter, is in `response.result.json_content` and the list of sources in `response.result.sources`. You can parse the stringified JSON to access the structured data.
+
+```json
+{
+  "book_title": "The Hallmarked Man",
+  "author": "J.K. Rowling",
+  "release_date": "September 2, 2025"
+}
+```
+
+Sources example:
+
+```json
+[
+    "https://www.harrypotter.com/writing-by-jk-rowling",
+    "https://stories.jkrowling.com/book-news/",
+    "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+    "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+    "https://www.jkrowling.com/news/"
+]
+```
+
+When you don't pass the `json` parameter, the API will return a json object with the answer text inside the `result` field.
+
+```json
+{
+  "result": "The latest book by J.K. Rowling is The Hallmarked Man."
+}
+```
+
+### Flexible `json` parameter
+
+- Provide a JSON object with empty values as a schema, or a string describing the data you want.
+- If the agent isn’t confident, it returns `NOT_FOUND` for that field.
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "how much did Olostep raise?", 
   "json": {
     "amount": ""
   }
 }
 headers = {
-    "Authorization": "Bearer <YOUR_API_KEY>",
-    "Content-Type": "application/json"
+  "Authorization": "Bearer <YOUR_API_KEY>",
+  "Content-Type": "application/json"
 }
-
-# Make the request
-response = requests.request("POST", endpoint, json=payload, headers=headers)
-print(json.dumps(response.json(), indent=4))
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
 ```
 
-</CodeGroup>
-
 This would return:
+
 ```json
 {
   "amount": "NOT_FOUND"
-}
-```
-
-### Default Response
-
-If you don't pass a `json` parameter, the API will return a default JSON object with the answer.
-
-```json
-{
-    "result": "<The answer to your task>"
 }
 ```

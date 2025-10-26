@@ -2,43 +2,96 @@
 sidebarTitle: 'Map'
 icon: map
 title: Maps
-description: Get all the URLs on a website. Useful for site structure analysis or decide which url to scrape.
+description: Get all the URLs on a website.
 ---
-The maps endpoint allows you to get all URLs on a certain website. This is useful for content discovery, site structure analysis (e.g. for SEO) or decide which of those URLs you want to get the content from.
+Through the Olostep `/v1/maps` endpoint you can get all the URLs on a website. This is useful for content discovery, site structure analysis (e.g., SEO), or deciding which URLs you want to scrape next.
 
-The response time is typically within seconds but can take up to 120 seconds for more complex websites. It can extract all URLs from a website, even backlinks and those not present in the Sitemaps. You can also also decide the URLs paths you want to include or exclude from the response.
+- Get all URLs on a website (including sitemaps and discovered links)
+- Use special patterns to include/exclude paths (e.g. `/blog/**`)
+- Paginate large responses with `cursor` (up to 10MB per response)
+- Limit volume with `top_n`
 
+For details, see the [Map Endpoint API Reference](/api-reference/maps/create).
 
-By default the endpoint returns around 100k URLs in a single call (10MB max). If the response includes more data, the API returns a `cursor` parameter which can be used for pagination and getting the subsequent urls. For more details refer to the [API Reference](https://docs.olostep.com/api-reference/maps/create#body-cursor)
-
-## Extracting Sitemaps
-
-To extract URLs from a website, send a POST request with the **url** of the website to be processed. The endpoint typically responds within seconds, providing a comprehensive list of URLs.
+## Installation
 
 <CodeGroup>
 
-```python maps.py
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+</CodeGroup>
+
+## Usage
+
+Send a POST request with the website `url`. Optionally pass `include_urls`, `exclude_urls` (glob patterns), and `top_n`.
+
+<CodeGroup>
+
+```python Python
 import requests
 import json
 
-url = "https://api.olostep.com/v1/maps"
+endpoint = "https://api.olostep.com/v1/maps"
 
 payload = {
-    "url": "https://docs.olostep.com",
+    "url": "https://docs.olostep.com"
 }
 headers = {
     "Authorization": "Bearer <YOUR_API_KEY>",
     "Content-Type": "application/json"
 }
 
-response = requests.request("POST", url, json=payload, headers=headers)
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
 
-print(json.dumps(response.json(), indent=4))
+```js Node
+const res = await fetch('https://api.olostep.com/v1/maps', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ url: 'https://docs.olostep.com' })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/maps" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://docs.olostep.com"
+  }'
 ```
 
 </CodeGroup>
 
-The response will include all discovered URLs for the specified website. This endpoint is particularly useful when you need to:
+The response time is typically within seconds but can take up to 120 seconds for more complex websites. It can extract all URLs from a website, even backlinks and those not present in the Sitemaps. You can also also decide the URLs paths you want to include or exclude from the response.
+
+
+By default the endpoint returns around 100k URLs in a single call (10MB max). If the response includes more data, the API returns a `cursor` parameter which can be used for pagination and getting the subsequent URLs. For more details refer to the [API Reference](/api-reference/maps/create#body-cursor)
+
+This endpoint is particularly useful when you need to:
 - Discover all content pages on a website
 - Analyze site structure and hierarchy
 - Prepare URLs for batch processing
@@ -55,28 +108,56 @@ You can use the following code:
 
     ```python maps.py
     import requests
-
-    url = "https://api.olostep.com/v1/maps"
-
+    
+    endpoint = "https://api.olostep.com/v1/maps"
+    
     payload = {
         "url": "https://www.brex.com/",
         "include_urls": ["/product", "/product/**"],
         "top_n": 100000
     }
-
+    
     headers = {
         "Authorization": "Bearer <YOUR_API_KEY>",
         "Content-Type": "application/json"
     }
-
-    response = requests.request("POST", url, json=payload, headers=headers)
-
+    
+    response = requests.post(endpoint, json=payload, headers=headers)
+    
     print(response.text)
+    ```
+
+    ```js Node
+    const endpoint = 'https://api.olostep.com/v1/maps'
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer <YOUR_API_KEY>',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url: 'https://www.brex.com/',
+        include_urls: ['/product', '/product/**'],
+        top_n: 100000
+      })
+    })
+    console.log(await res.text())
+    ```
+
+    ```bash cURL
+    curl -s -X POST "https://api.olostep.com/v1/maps" \
+      -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://www.brex.com/",
+        "include_urls": ["/product", "/product/**"],
+        "top_n": 100000
+      }'
     ```
 
 </CodeGroup>
 
-For more details refer to the [API Reference](https://docs.olostep.com/api-reference/maps)
 
 ## How is it billed?
 Each request sent to the maps endpoint is billed as 1 credit. Then for every extra 1000 urls returned in the response an additional credit is used.
