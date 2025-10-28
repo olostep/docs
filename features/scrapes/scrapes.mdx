@@ -1,77 +1,375 @@
 ---
 sidebarTitle: 'Scrape'
 title: Scrape
+description: Turn any url into clean data
 icon: file-lines
 ---
 
-The Scrape endpoint allows to get the content from any publicly available web page. You can specify various params like the format in which you want the result to be returned (markdown, html, structured json, raw pdf, network calls), how much to wait before scraping or which actions to take before returning the content, etc. For a complete overview of the params see [here](/api-reference/scrapes/create)
+Through the Olostep `/v1/scrapes` endpoint you can extract LLM-friendly Markdown, HTML, text, screenshots, or structured JSON from any URL in real time.
 
-## How to use the Scrape endpoint
+- Outputs clean markdown, structured data, screenshots, or html
+- Extract JSON through [Parsers](/features/structured-content/parsers) or [LLM extraction](/features/structured-content/llm-extraction)
+- Handles dynamic content: js-rendered sites, login flows via actions, PDFs
 
-In the example below we will see how to scrape `https://en.wikipedia.org/wiki/Alexander_the_Great` and get back the html and markdown from the url.
+For details, see the [Scrape Endpoint API Reference](/api-reference/scrapes/create).
+
+## Scraping a URL
+
+Use the `/v1/scrapes` endpoint to scrape a single URL and choose output formats.
+
+### Installation
 
 <CodeGroup>
 
-```python scrape.py
+```python Python
+# pip install requests
+
 import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+</CodeGroup>
+
+### Usage
+
+You can use the endpoint to scrape a single URL and choose output formats. The mandatory parameters are `url_to_scrape` and `formats`.
+
+Some other common parameters are `wait_before_scraping` (in milliseconds), `remove_css_selectors` (default, none, or an array of selectors), and `country`.
+
+<CodeGroup>
+
+```python Python
 import json
 
 endpoint = "https://api.olostep.com/v1/scrapes"
 payload = {
-    "formats": [
-        "html", 
-        "markdown"
-    ],
     "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+    "formats": ["markdown", "html"]
 }
 headers = {
     "Authorization": "Bearer <YOUR_API_KEY>",
     "Content-Type": "application/json"
 }
 
-# Make the request
-response = requests.request("POST", endpoint, json=payload, headers=headers)
-print(json.dumps(response.json(), indent=4))
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const endpoint = 'https://api.olostep.com/v1/scrapes'
+const payload = {
+  url_to_scrape: 'https://en.wikipedia.org/wiki/Alexander_the_Great',
+  formats: ['markdown', 'html']
+}
+const res = await fetch(endpoint, {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+})
+const data = await res.json()
+console.log(data)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+    "formats": ["markdown", "html"]
+  }'
 ```
 
 </CodeGroup>
 
-## Response Format
+### Response
 
-When you run the above code, you will receive a response like the following
+The API returns a  `scrape` object in response. 
+
+The `scrape` has a few properties like `id` and `result`.
+
+The `result` object has the following fields (according to the `formats` parameter some might be null):
+- `html_content`: the HTML content of the page. Pass `formats: ["html"]` to get this.
+- `markdown_content`: the MD content of the page. Pass `formats: ["markdown"]` to get this.
+- `text_content`: the text content of the page. Pass `formats: ["text"]` to get this.
+- `json_content`: the JSON content of the page. Pass `formats: ["json"]` to get this and also provide a `parser` or `llm_extract` parameter.
+- `screenshot_hosted_url`: the hosted URL of the screenshot.
+- `html_hosted_url`: the hosted URL of the HTML content
+- `markdown_hosted_url`: the hosted URL of the Markdown content
+- `json_hosted_url`: the hosted URL of the JSON content
+- `text_hosted_url`: the hosted URL of the text content
+- `links_on_page`: the links on the page
+- `page_metadata`: the metadata of the page
 
 ```json
 {
-    "id": "scrape_6h89o8u1kt",
-    "object": "scrape",
-    "created": 1745673871,
-    "metadata": {},
-    "retrieve_id": "6h89o8u1kt",
-    "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
-    "result": {
-        "html_content": "<html...",
-        "markdown_content": "## Alexander the Great...",
-        "text_content": null,
-        "json_content": null,
-        "screenshot_hosted_url": null,
-        "html_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/text_6h89o8u1kt.txt",
-        "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_6h89o8u1kt.txt",
-        "json_hosted_url": null,
-        "text_hosted_url": null,
-        "network_calls": null,
-        "links_on_page": [],
-        "page_metadata": {
-            "status_code": 200,
-            "title": ""
-        }
-    }
+  "id": "scrape_6h89o8u1kt",
+  "object": "scrape",
+  "created": 1745673871,
+  "metadata": {},
+  "retrieve_id": "6h89o8u1kt",
+  "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+  "result": {
+    "html_content": "<html...",
+    "markdown_content": "## Alexander the Great...",
+    "text_content": null,
+    "json_content": null,
+    "screenshot_hosted_url": null,
+    "html_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/text_6h89o8u1kt.txt",
+    "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_6h89o8u1kt.txt",
+    "json_hosted_url": null,
+    "text_hosted_url": null,
+    "links_on_page": [],
+    "page_metadata": { "status_code": 200, "title": "" }
+  }
 }
 ```
 
-## Conclusion
+## Scrape Formats
 
-The scrape endpoint is useful when you need to extract html, markdown, text, raw pdf or structured data from a single website or page on demand. Here are a few practical applications for a Web Scraping Endpoint
+Choose one or more output formats via `formats`:
 
+- `markdown`: LLM-friendly markdown
+- `html`: cleaned HTML
+- `text`: plain text
+- `json`: structured output (via parser or llm_extract)
+- `raw_pdf`: raw PDF bytes extracted to hosted URL
+- `screenshot`: set via actions to capture a screenshot and return a hosted URL
+
+Output keys are returned inside `result` as `*_content` fields and a `*_hosted_url` as well.
+
+## Extract structured data
+
+You can extract structured JSON in two ways: using Parsers or LLM extraction.
+
+### Using a Parser (recommended for scale)
+
+Define `formats: ["json"]` and provide a parser `id`.
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+  "formats": ["json"],
+  "parser": { 
+    "id": "@olostep/google-search" 
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>", 
+    "Content-Type": "application/json"
+}
+
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://www.google.com/search?q=alexander+the+great&gl=us&hl=en',
+    formats: ['json'],
+    parser: { id: '@olostep/google-search' }
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "formats": ["json"],
+    "parser": {"id": "@olostep/google-search"}
+  }'
+```
+
+</CodeGroup>
+
+Olostep has a few pre-built parsers for [popular websites](https://www.olostep.com/store) but you can also create your own parsers through the dashboard or ask our team to do it for you.
+
+Parsers are self-healing and will update themselves to the latest version of the website.
+
+### Using LLM extraction (schema or prompt)
+
+Provide `llm_extract` with either a JSON Schema (`schema`) or a natural language instruction (`prompt`).
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+  "formats": ["markdown", "json"],
+  "llm_extract": {
+    "schema": {
+      "event": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "date": {"type": "string"},
+          "description": {"type": "string"},
+          "venue": {"type": "string"},
+          "address": {"type": "string"},
+          "start_time": {"type": "string"}
+        }
+      }
+    }
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```python Python (prompt only)
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+  "formats": ["json"],
+  "llm_extract": {
+    "prompt": "Extract the event title, date, description, venue, address, and start time from the page."
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://www.berklee.edu/events/stefano-marchese-friends',
+    formats: ['json'],
+    llm_extract: {
+      prompt: 'Extract the event title, date, description, venue, address, and start time from the page.'
+    }
+  })
+})
+console.log(await res.json())
+```
+
+</CodeGroup>
+
+Note: `result.json_content` returns a stringified JSON. Parse it in your code if you need an object.
+
+## Interacting with the page with Actions
+
+Perform actions before scraping to interact with dynamic sites. Supported actions:
+
+- `wait` with `milliseconds`
+- `click` with `selector`
+- `fill_input` with `selector` and `value`
+- `scroll` with `direction` and `amount`
+
+It is often useful to use `wait` before/after other actions to allow the page to load.
+
+### Example
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://example.com/login",
+  "formats": ["markdown"],
+  "actions": [
+    {"type": "fill_input", "selector": "input[type=email]", "value": "john@example.com"},
+    {"type": "wait", "milliseconds": 500},
+    {"type": "fill_input", "selector": "input[type=password]", "value": "secret"},
+    {"type": "click", "selector": "button[type=\"submit\"]"},
+    {"type": "wait", "milliseconds": 1500}
+  ]
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>", 
+    "Content-Type": "application/json"
+}
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://example.com/login',
+    formats: ['markdown'],
+    actions: [
+      { type: 'fill_input', selector: 'input[type=email]', value: 'john@example.com' },
+      { type: 'wait', milliseconds: 500 },
+      { type: 'fill_input', selector: 'input[type=password]', value: 'secret' },
+      { type: 'click', selector: 'button[type="submit"]' },
+      { type: 'wait', milliseconds: 1500 }
+    ]
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://example.com/login",
+    "formats": ["markdown"],
+    "actions": [
+      { "type": "fill_input", "selector": "input[type=email]", "value": "john@example.com" },
+      { "type": "wait", "milliseconds": 500 },
+      { "type": "fill_input", "selector": "input[type=password]", "value": "secret" },
+      { "type": "click", "selector": "button[type=\"submit\"]" },
+      { "type": "wait", "milliseconds": 1500 }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+The response will include any requested formats (e.g., `markdown_content`).
+
+## Use Cases
+
+Below are a few practical applications of customers using the `/scrapes` endpoint.
 ### Content Analysis & Research
 - **Competitive Analysis**: Extract product details, pricing, and features from competitor websites
 - **Market Research**: Analyze landing pages, product descriptions, and customer testimonials

@@ -3,20 +3,48 @@ sidebarTitle: 'Batch'
 title: Batch Endpoint
 icon: layer-group
 ---
-The Batch endpoint allows to process multiple URLs at the same time, making it easier to get content quickly from very large sets of urls. 
-You can start a batch of up to 10k urls at a time and retrieve the content after 5-8 mins. You can start many batches in parallel to do up to 1 million requests in around 30 minutes. 
+Through the Olostep `/v1/batches` endpoint you can process thousands of URLs in one job. Use it to extract content or structured data at scale.
 
-Note: Processing time is pretty constant (5-8 minutes) regardless of batch size (e.g. 1k requests or 10k requests)
+- Submit up to 10k URLs per batch; run many batches in parallel
+- Constant processing time (~5–8 minutes) regardless of batch size
+- Use parsers to return structured JSON, or retrieve markdown/html via `/v1/retrieve`
 
+For details, see the [Batch Endpoint API Reference](/api-reference/batches/create).
 
-## How to use the Batch endpoint
-
-To initiate a new batch, specify the **items** to be processed with their `custom_id` which is the unique identifier and `url` which is the url from which you want to get the content. You can also provide optional parameters such as the country and parser to be used for the batch.
-
-In the example below, we will create a batch of 10 Google Search URLs and retrieve the structured JSON of the search results with the pre-built parser `@olostep/google-search`
+## Installation
 
 <CodeGroup>
-```python batches.py
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+</CodeGroup>
+
+## Start a batch
+
+Provide an array of `items` with a `custom_id` and `url`. These are the URLs that will be processed in the batch, the `custom_id` is an internal unique identifier for the URL.
+
+Optionally pass `parser` or `country`. Through the `parser` parameter you can specify the parser to use for the batch, this will return structured JSON from the pages.
+
+<CodeGroup>
+```python Python
 import requests
 import hashlib
 import time
@@ -55,11 +83,9 @@ def compose_items_array():
     return items
 
 
-# Step 2: Start batch
 def start_batch(items):
     payload = {
         "items": items,
-        "country": "US",
         "parser": {"id": "@olostep/google-search"}
     }
     headers = {
@@ -74,7 +100,10 @@ def start_batch(items):
 # Step 3: Wait for completion
 def check_batch_status(batch_id):
     headers = {"Authorization": f"Bearer {API_KEY}"}
-    response = requests.get(f"{API_URL}/batches/{batch_id}", headers=headers)
+    response = requests.get(
+        f"{API_URL}/batches/{batch_id}", 
+        headers=headers
+    )
     response.raise_for_status()
     return response.json()["status"]
 
@@ -140,11 +169,167 @@ if __name__ == "__main__":
             print("\nParsed Content:")
             print(content["parsed_content"])
 ```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const payload = {
+  items: [
+    { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
+    { custom_id: 'item-2', url: 'https://www.google.com/search?q=paddle&gl=us&hl=en' },
+  ],
+  parser: { id: '@olostep/google-search' }
+}
+const res = await fetch(`${API_URL}/batches`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      { "custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en" },
+      { "custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en" }
+    ],
+    "parser": { "id": "@olostep/google-search" }
+  }'
+```
+
+</CodeGroup>
+
+Since Olostep follows an object-oriented approach, you will receive a `batch` object in response. The `batch` object has a few properties like `id` and `status`.
+
+```json
+{
+    "id": "batch_z7n7hwh45x",
+    "object": "batch",
+    "status": "in_progress",
+    "created": 1760329882951,
+    "total_urls": 10,
+    "completed_urls": 0,
+    "number_retried": 0,
+    "batch_parser": "@olostep/google-search",
+    "batch_country": "RANDOM",
+    "start_date": "2025-10-12"
+}
+```
+
+## Check batch status
+
+Poll until `status` is `completed`. You can also check the `completed_urls` property to see how many URLs have been processed.
+
+<CodeGroup>
+
+```python Python
+def get_batch_info(batch_id):
+    return requests.get(
+        f"{API_URL}/batches/{batch_id}",
+        headers={
+            "Authorization": f"Bearer {API_KEY}"
+        }
+    ).json()
+
+batch_id = '<BATCH_ID>'
+info = get_batch_info(batch_id)
+print(info['status'])
+```
+
+```js Node
+const batchId = '<BATCH_ID>'
+const info = await fetch(`${API_URL}/batches/${batchId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+}).then(r => r.json())
+console.log(info.status)
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/batches/<BATCH_ID>" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Retrieve content
+
+Use the `retrieve_id` from each item with `/v1/retrieve` to fetch `html_content`, `markdown_content`, or `json_content`.
+
+<CodeGroup>
+
+```python Python
+def retrieve_content(retrieve_id):
+    return requests.get(f"{API_URL}/retrieve", headers={"Authorization": f"Bearer {API_KEY}"}, params={"retrieve_id": retrieve_id}).json()
+
+items = list_items('<BATCH_ID>', limit=5)['items']
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content.get('json_content'))
+```
+
+```js Node
+const content = await fetch(`${API_URL}/retrieve?retrieve_id=<RETRIEVE_ID>`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+}).then(r => r.json())
+console.log(content.json_content)
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/retrieve" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "retrieve_id=<RETRIEVE_ID>"
+```
+
+</CodeGroup>
+
+## List items (paginate with cursor)
+
+Fetch items using `cursor` and `limit`. Prefer using `/v1/retrieve` with `retrieve_id` for content.
+
+<CodeGroup>
+
+```python Python
+def list_items(batch_id, cursor=None, limit=10):
+    params = { 'cursor': cursor, 'limit': limit }
+    return requests.get(f"{API_URL}/batches/{batch_id}/items", headers={"Authorization": f"Bearer {API_KEY}"}, params=params).json()
+
+cursor = 0
+while True:
+    result = list_items('<BATCH_ID>', cursor=cursor, limit=10)
+    for item in result['items']:
+        print(item['custom_id'], item['url'], item['retrieve_id'])
+    if 'cursor' not in result:
+        break
+    cursor = result['cursor']
+```
+
+```js Node
+let cursor = 0
+while (true) {
+  const result = await fetch(`${API_URL}/batches/<BATCH_ID>/items?cursor=${cursor}&limit=10`, {
+    headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+  }).then(r => r.json())
+  result.items.forEach(i => console.log(i.custom_id, i.url, i.retrieve_id))
+  if (result.cursor === undefined) break
+  cursor = result.cursor
+}
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/batches/<BATCH_ID>/items" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "cursor=0" \
+  --data-urlencode "limit=10"
+```
+
 </CodeGroup>
 
 ## Response Format
 
-When you run the above code, you will receive a response like the following
+When you run the provided example code, you will receive a response like the following
 
 ```json
 
@@ -259,7 +444,7 @@ If you don't want the structured JSON but simply the markdown or html you can re
 
 ## Important Notes
 
-If you want structured JSON you need to pass the specific parser to the API before making the requests. For example if you want to get the JSON from google search url you will pass this parser `"parser":  "@olostep/google-search"`
+If you want structured JSON you need to pass the specific parser to the API before making the requests. For example if you want to get the JSON from Google Search you will pass this parser `"parser": {"id": "@olostep/google-search"}`
 You can create your own parsers to retrieve the data you want from any page. Reach out to `info@olostep.com` to learn more.
 
 ## Conclusion
