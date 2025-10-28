@@ -57,7 +57,7 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
       });
     };
     ```
-  </Tab>
+ </Tab>
   
   <Tab title="ChatGPT">
     **Parser ID:** `@olostep/chatgpt-results`
@@ -74,6 +74,7 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
       });
     };
     ```
+    
   </Tab>
   
   <Tab title="Perplexity">
@@ -91,6 +92,7 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
       });
     };
     ```
+    
   </Tab>
   
   <Tab title="Google AI Overview">
@@ -102,14 +104,13 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
         const query = `${BASE_QUERY} ${city}`;
         const encodedQuery = encodeURIComponent(query);
         return {
-          url: `https://www.google.com/search?q=${encodedQuery}&gl=IN&hl=en`,
+          url: `https://www.google.com/search?q=${encodedQuery}`,
           custom_id: (index + 1).toString()
         };
       });
     };
     ```
-    
-    **Note:** The `gl` and `hl` parameters can be customized for different regions and languages.
+
   </Tab>
 
   <Tab title="Gemini">
@@ -127,6 +128,7 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
       });
     };
     ```
+    
   </Tab>
   
   <Tab title="Microsoft Copilot">
@@ -144,6 +146,7 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
       });
     };
     ```
+    
   </Tab>
    <Tab title="Grok">
     **Parser ID:** `@olostep/grok-results`
@@ -160,6 +163,7 @@ Each AI search tool requires a specific parser ID and URL structure. Below are t
       });
     };
     ```
+    
   </Tab>
 </Tabs>
 
@@ -467,5 +471,15 @@ After submitting a batch request and polling for completion, you'll receive resp
     ```
   </Tab>
 </Tabs>
+
+## Feature Support Matrix
+
+The following table outlines the support for country-specific search and the credits consumed by each parser.
+
+| Feature             | Google AI Mode | ChatGPT | Perplexity | Google AI Overview | Gemini | Microsoft Copilot | Grok |
+| ------------------- | :------------: | :-----: | :--------: | :----------------: | :----: | :---------------: | :--: |
+| **Country Supported** |       ✅       |    ✅     |     ❌     |         ✅         |   ✅   |        ✅         |  ✅  |
+| **Batch Size Limit** |       2500      |    2500     |     2500     |         2500         |   2500   |        1000         |  1000  
+| **Credits**         |       -        |    -    |     -      |         3          |   -    |         -         |  -   |
 
 Missing something? Reach out to `info@olostep.com` for support or custom implementation assistance.
