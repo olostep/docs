@@ -1,0 +1,557 @@
+---
+sidebarTitle: 'Relay'
+icon: bolt
+title: Relay Integration
+description: Automate web search, scraping and crawling with Relay.app's modern workflow builder featuring embedded AI and human-in-the-loop functionality
+---
+
+The Olostep Relay.app integration brings powerful web scraping capabilities to Relay's modern automation platform. Build automated workflows that extract, monitor, and process web data with Relay's user-friendly interface and advanced features like embedded AI and human-in-the-loop functionality.
+
+[Get started with Olostep on Relay.app →](https://www.relay.app/apps/olostep/integrations)
+
+## Features
+
+Relay.app offers a modern automation experience with deep integrations and powerful workflow capabilities:
+
+<CardGroup cols={2}>
+  <Card title="Deep Integrations" icon="link">
+    Comprehensive and easy-to-use integrations with numerous applications for seamless workflow automation
+  </Card>
+  
+  <Card title="Embedded AI" icon="brain">
+    Built-in AI features to enhance decision-making and automate tasks requiring human-like understanding
+  </Card>
+  
+  <Card title="Human-in-the-Loop" icon="users">
+    Add manual steps for tasks requiring human judgment, ensuring flexibility and quality control
+  </Card>
+  
+  <Card title="Powerful Workflows" icon="workflow">
+    Rich workflow essentials including conditional logic, error handling, and parallel processing
+  </Card>
+</CardGroup>
+
+## Installation
+
+### 1. Find Olostep in Relay.app
+
+Search for "Olostep" in Relay.app when creating a new workflow:
+
+1. Go to [Olostep on Relay.app](https://www.relay.app/apps/olostep/integrations)
+2. Click "Start for free" or "Create Workflow"
+3. Search for "Olostep" in the app selector
+4. Select the Olostep app
+
+Alternatively, visit the [Olostep integration page](https://www.relay.app/apps/olostep/integrations) directly to browse available actions and create your first workflow.
+
+### 2. Connect Your Account
+
+When you first use Olostep in a workflow, you'll be prompted to connect your account:
+
+1. Click "Connect Olostep"
+2. Enter your Olostep API key
+3. Authorize the connection
+
+Get your API key from the [Olostep Dashboard](https://olostep.com/dashboard).
+
+## Available Actions
+
+### Scrape URL
+
+Extract content from a single URL. Supports multiple formats and JavaScript rendering.
+
+**Use Cases:**
+- Monitor specific pages for changes
+- Extract product information from e-commerce sites
+- Gather data from news articles or blog posts
+- Pull content for content aggregation
+
+**Configuration:**
+
+<ParamField path="URL" type="string" required>
+  Website URL to scrape (must include http:// or https://)
+</ParamField>
+
+<ParamField path="Format" type="dropdown" default="Markdown">
+  Choose format: Markdown, HTML, JSON, or Plain Text
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  Country code for location-specific content (e.g., "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  Wait time in milliseconds for JavaScript rendering (0-10000)
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  Optional parser ID for specialized extraction (e.g., "@olostep/amazon-product")
+</ParamField>
+
+**Output Fields:**
+- Scrape ID
+- Scraped URL
+- Markdown Content
+- HTML Content
+- JSON Content
+- Text Content
+- Status
+- Timestamp
+- Screenshot URL (if available)
+- Page Metadata
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Monitor Competitor Pricing">
+    **Trigger:** Schedule (Every day at 9 AM)
+    
+    **Action:** Olostep - Scrape URL
+    - URL: Competitor product page
+    - Format: JSON
+    - Parser: @olostep/amazon-product
+    
+    **Action:** Google Sheets - Create Row
+    - Add price data to tracking spreadsheet
+    
+    **Human-in-the-Loop:** Review price changes
+    - Approve significant price drops
+    
+    **Action:** Slack - Send Message
+    - Alert team about approved price changes
+  </Accordion>
+
+  <Accordion title="Extract and Save Blog Posts">
+    **Trigger:** RSS Feed - New Item
+    
+    **Action:** Olostep - Scrape URL
+    - URL: \{\{Post URL\}\}
+    - Format: Markdown
+    
+    **Action:** Notion - Create Page
+    - Save article content to Notion database
+  </Accordion>
+
+  <Accordion title="Lead Enrichment with AI">
+    **Trigger:** Google Sheets - New Row
+    
+    **Action:** Olostep - Scrape URL
+    - URL: Company website from sheet
+    - Format: Markdown
+    
+    **AI Action:** OpenAI - Extract Data
+    - Extract: company size, industry, products
+    
+    **Action:** Google Sheets - Update Row
+    - Add enriched data back to sheet
+  </Accordion>
+</AccordionGroup>
+
+## Relay.app Advantages
+
+Relay.app offers several advantages over traditional automation platforms:
+
+### Human-in-the-Loop Workflows
+
+Add manual review steps directly in your workflows:
+
+```
+1. Olostep scrapes website
+2. Human Review Step ← Review and approve data
+3. Save to database only if approved
+```
+
+Perfect for:
+- Quality control before data processing
+- Human judgment on extracted content
+- Approval workflows for sensitive data
+- Review AI-generated summaries
+
+### Embedded AI Features
+
+Use AI directly in your workflows without external integrations:
+
+- **AI Decision Making**: Let AI decide workflow paths based on scraped content
+- **Smart Filtering**: Automatically filter and categorize scraped data
+- **Content Summarization**: Summarize long articles before storing
+- **Data Extraction**: Use AI to extract structured data from unstructured content
+
+### Better UX and Testing
+
+Relay.app's user-friendly interface makes workflow building easier:
+
+- Clear testing information
+- Helpful error messages
+- Visual workflow builder
+- Easy debugging and troubleshooting
+
+## Popular Workflow Examples
+
+### E-commerce Price Monitoring with Review
+
+Monitor competitor prices with human approval:
+
+```
+Trigger: Schedule (Hourly)
+↓
+Action: Olostep - Scrape URL
+  - URL: Competitor product page
+  - Format: JSON
+  - Parser: @olostep/amazon-product
+↓
+Human Review Step
+  - Review price change
+  - Approve or reject
+↓
+Action: Slack - Send Message (If approved)
+  - Alert: "Price changed to $\{\{price\}\}"
+```
+
+### Content Aggregation with AI
+
+Aggregate and enhance content from multiple sources:
+
+```
+Trigger: Google Sheets - New Row
+↓
+Action: Olostep - Scrape URL
+  - URL: \{\{URL from sheet\}\}
+  - Format: Markdown
+↓
+AI Action: Summarize Content
+  - Generate summary
+↓
+Action: Airtable - Create Record
+  - Store article with AI summary
+```
+
+### Lead Enrichment Pipeline
+
+Enrich lead data with web information and AI:
+
+```
+Trigger: HubSpot - New Contact
+↓
+Action: Olostep - Scrape URL
+  - URL: \{\{Company website\}\}
+  - Format: Markdown
+↓
+AI Action: Extract Company Info
+  - Extract: company size, industry, products
+↓
+Human Review Step
+  - Verify AI extraction accuracy
+↓
+Action: HubSpot - Update Contact
+  - Add verified enriched data
+```
+
+## Integration with Popular Apps
+
+### Google Sheets
+
+Perfect for data collection and tracking:
+
+```
+1. Olostep scrapes website
+2. AI - Process and format data
+3. Human Review (optional)
+4. Google Sheets - Create/Update Row
+```
+
+**Use Cases:**
+- Price tracking spreadsheets
+- Lead enrichment databases
+- Content inventory
+- Competitor analysis sheets
+
+### Airtable
+
+Build powerful databases with scraped data:
+
+```
+1. Olostep scrapes or crawls
+2. AI - Extract structured data
+3. Airtable - Create Records
+```
+
+**Use Cases:**
+- Product catalogs
+- Research databases
+- Content calendars
+- Link databases
+
+### Slack
+
+Get instant notifications with approval workflows:
+
+```
+1. Olostep monitors page
+2. Filter - Check for changes
+3. Human Approval Step
+4. Slack - Send Message (if approved)
+```
+
+**Use Cases:**
+- Price drop alerts (with approval)
+- Content update notifications
+- Error monitoring
+- Daily digests
+
+### HubSpot / Salesforce
+
+Enrich CRM data automatically:
+
+```
+1. New contact added
+2. Olostep scrapes company website
+3. AI extracts key info
+4. Human Review Step
+5. CRM - Update contact (if approved)
+```
+
+**Use Cases:**
+- Lead enrichment with quality control
+- Company research
+- Competitive intelligence
+- Account mapping
+
+### Notion
+
+Build knowledge bases with reviewed content:
+
+```
+1. Olostep crawls documentation
+2. AI - Parse and structure content
+3. Human Review Step
+4. Notion - Create Pages (approved content)
+```
+
+**Use Cases:**
+- Documentation mirrors
+- Research repositories
+- Content libraries
+- Team wikis
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Human-in-the-Loop for Quality Control">
+    Leverage Relay.app's human-in-the-loop feature for:
+    - Reviewing AI-generated summaries
+    - Approving sensitive data before storage
+    - Validating scraped content accuracy
+    - Making judgment calls on workflow paths
+  </Accordion>
+
+  <Accordion title="Combine with Embedded AI">
+    Use Relay.app's built-in AI features:
+    - Automatically categorize scraped content
+    - Generate summaries before storing
+    - Extract structured data from unstructured content
+    - Make smart decisions in workflows
+  </Accordion>
+
+  <Accordion title="Set Appropriate Wait Times">
+    For JavaScript-heavy sites, use the "Wait Before Scraping" parameter:
+    - Simple sites: 0-1000ms
+    - Dynamic sites: 2000-3000ms
+    - Heavy JavaScript: 5000-8000ms
+    
+    Test with different values to find the optimal wait time.
+  </Accordion>
+
+  <Accordion title="Use Specialized Parsers">
+    For popular websites (Amazon, LinkedIn, Google), use pre-built parsers:
+    - Get structured data automatically
+    - More reliable extraction
+    - No need for custom parsing
+    - Maintained by Olostep
+  </Accordion>
+
+  <Accordion title="Leverage Relay.app's Testing Features">
+    Use Relay.app's excellent testing capabilities:
+    - Clear testing information for each step
+    - Helpful error messages
+    - Easy debugging
+    - Test workflows before activating
+  </Accordion>
+
+  <Accordion title="Store Results Properly">
+    Choose the right storage based on your needs:
+    - **Google Sheets**: Simple tracking, team collaboration
+    - **Airtable**: Relational data, rich formatting
+    - **Database**: Large-scale, complex queries
+    - **Notion**: Knowledge base, documentation
+  </Accordion>
+</AccordionGroup>
+
+## Common Use Cases by Industry
+
+### E-commerce
+- **Price Monitoring**: Track competitor pricing with human approval workflows
+- **Product Research**: Discover trending products and market gaps
+- **Inventory Tracking**: Monitor stock availability
+- **Review Analysis**: Aggregate and analyze customer reviews with AI
+
+### Marketing & SEO
+- **Content Discovery**: Find content opportunities with AI assistance
+- **Competitor Analysis**: Track competitor strategies
+- **Backlink Research**: Discover link opportunities
+- **Keyword Research**: Extract keyword data from search results
+
+### Sales & Lead Generation
+- **Lead Enrichment**: Enhance CRM data with web information and human review
+- **Company Research**: Gather company intelligence
+- **Contact Discovery**: Find decision-makers
+- **Competitive Intelligence**: Track competitor moves
+
+### Research & Analytics
+- **Data Collection**: Gather data from multiple sources
+- **Market Research**: Track industry trends
+- **Academic Research**: Collect research data
+- **Price Intelligence**: Analyze pricing strategies
+
+### Media & Publishing
+- **Content Aggregation**: Curate content from multiple sites with AI summaries
+- **News Monitoring**: Track news and mentions
+- **Social Media**: Monitor social platforms
+- **Trend Detection**: Identify trending topics
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Authentication Failed">
+    **Error**: "Invalid API key"
+    
+    **Solutions**:
+    - Check API key from [dashboard](https://olostep.com/dashboard)
+    - Ensure no extra spaces in API key
+    - Reconnect your Olostep account in Relay.app
+    - Verify API key is active
+  </Accordion>
+
+  <Accordion title="Scrape Returns Empty Content">
+    **Error**: Content fields are empty
+    
+    **Solutions**:
+    - Increase "Wait Before Scraping" time
+    - Check if website requires login
+    - Try different format (HTML vs Markdown)
+    - Verify URL is accessible
+    - Check if site blocks automated access
+  </Accordion>
+
+  <Accordion title="Rate Limit Exceeded">
+    **Error**: "Rate limit exceeded"
+    
+    **Solutions**:
+    - Space out workflow runs with delays
+    - Use batch processing instead of individual scrapes
+    - Upgrade your Olostep plan
+    - Check rate limit in dashboard
+  </Accordion>
+
+  <Accordion title="URL Not Scraped">
+    **Error**: Specific URLs fail to scrape
+    
+    **Solutions**:
+    - Verify URL format (include http:// or https://)
+    - Check if URL requires authentication
+    - Test URL in browser first
+    - Try with country parameter
+    - Contact support for blocked domains
+  </Accordion>
+</AccordionGroup>
+
+## Relay.app vs Zapier
+
+Relay.app is a modern alternative to Zapier with several advantages:
+
+**Relay.app Advantages:**
+- **Human-in-the-Loop**: Built-in manual review steps
+- **Embedded AI**: AI features integrated into workflows
+- **Better UX**: More intuitive interface and clearer error messages
+- **Better Pricing**: More cost-effective for many use cases
+- **Deeper Integrations**: More comprehensive integrations with popular apps
+
+**When to Choose Zapier:**
+- Need integration with less commonly used apps
+- Prefer a more established platform
+- Require specific Zapier-only features
+
+For detailed comparisons, see [Relay.app's Zapier comparison](https://www.relay.app/blog/zapier-alternatives).
+
+## Pricing
+
+Olostep charges based on API usage, independent of Relay.app:
+
+- **Scrapes**: Pay per scrape
+- **Batches**: Pay per URL in batch
+- **Crawls**: Pay per page crawled
+- **Maps**: Pay per map operation
+
+Check current pricing at [olostep.com/pricing](https://olostep.com/pricing).
+
+**Relay.app Plan**: You also need an active Relay.app plan to run workflows.
+
+## Support
+
+Need help with the Relay.app integration?
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="https://docs.olostep.com">
+    Browse complete API docs
+  </Card>
+  
+  <Card title="Support Email" icon="envelope" href="mailto:info@olostep.com">
+    Email: info@olostep.com
+  </Card>
+  
+  <Card title="Relay.app Help Center" icon="help-circle" href="https://help.relay.app">
+    Visit Relay.app's help center
+  </Card>
+  
+  <Card title="Status Page" icon="signal" href="https://status.olostep.com">
+    Check API status
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Learn about the Scrapes endpoint
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Learn about the Batches endpoint
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Learn about the Crawls endpoint
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Learn about the Maps endpoint
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    Use Olostep with Python
+  </Card>
+  
+  <Card title="Zapier Integration" icon="bolt" href="/integrations/zapier">
+    Compare with Zapier integration
+  </Card>
+</CardGroup>
+
+## Get Started
+
+Ready to automate your web scraping workflows with Relay.app?
+
+<Card title="Create Your First Workflow" icon="bolt" href="https://www.relay.app/apps/olostep/integrations">
+  Start building automated workflows with Olostep and Relay.app
+</Card>
+
+Connect Olostep with Relay.app's modern automation platform and automate your web data extraction today!
+
