@@ -1,0 +1,963 @@
+---
+sidebarTitle: 'n8n'
+icon: code
+title: n8n Integration
+description: Automate web search, scraping and crawling with n8n's self-hosted workflow automation platform
+---
+
+The Olostep n8n integration brings powerful web scraping capabilities to n8n workflows. Build automated workflows that extract, monitor, and process web data from any website without writing code.
+
+[Get started with Olostep on n8n →](https://www.npmjs.com/package/n8n-nodes-olostep)
+
+## Features
+
+The integration provides 5 powerful operations for automated web data extraction:
+
+<CardGroup cols={2}>
+  <Card title="Scrape Website" icon="file-lines">
+    Extract content from any single URL in multiple formats (Markdown, HTML, JSON, text)
+  </Card>
+  
+  <Card title="Search" icon="search">
+    Perform Google searches and get structured results instantly
+  </Card>
+  
+  <Card title="Batch Scrape URLs" icon="layer-group">
+    Scrape up to 10k urls at the same time. Perfect for large-scale data extraction
+  </Card>
+  
+  <Card title="Create Crawl" icon="spider-web">
+    Get the content of subpages of a URL. Autonomously discover and scrape entire websites
+  </Card>
+  
+  <Card title="Create Map" icon="map">
+    Get all URLs on a website for site structure analysis and content discovery
+  </Card>
+</CardGroup>
+
+## Installation
+
+### 1. Install the Node
+
+Install the Olostep node package via npm:
+
+```bash
+npm install n8n-nodes-olostep
+```
+
+Then restart n8n to load the new node.
+
+Alternatively, follow the [n8n community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) for detailed instructions.
+
+### 2. Connect Your Account
+
+When you first use the Olostep node in a workflow, you'll need to configure credentials:
+
+1. Add the "Olostep Scrape" node to your workflow
+2. Click on the node to open its settings
+3. Click "Create New Credential" or select existing credentials
+4. Enter your Olostep API key
+5. Click "Save" to store the credential
+
+Get your API key from the [Olostep Dashboard](https://olostep.com/dashboard).
+
+## Available Actions
+
+### Scrape Website
+
+Extract content from a single URL. Supports multiple formats and JavaScript rendering.
+
+**Use Cases:**
+- Monitor specific pages for changes
+- Extract product information from e-commerce sites
+- Gather data from news articles or blog posts
+- Pull content for content aggregation
+
+**Configuration:**
+
+<ParamField path="URL to Scrape" type="string" required>
+  Website URL to scrape (must include http:// or https://)
+</ParamField>
+
+<ParamField path="Output Format" type="dropdown" default="Markdown">
+  Choose format: Markdown, HTML, JSON, or Plain Text
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  Country code for location-specific content (e.g., "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  Wait time in milliseconds for JavaScript rendering (0-10000)
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  Optional parser ID for specialized extraction (e.g., "@olostep/amazon-product")
+</ParamField>
+
+**Output Fields:**
+- Scrape ID
+- Scraped URL
+- Markdown Content
+- HTML Content
+- JSON Content
+- Text Content
+- Status
+- Timestamp
+- Screenshot URL (if available)
+- Page Metadata
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Monitor Competitor Pricing">
+    **Trigger:** Schedule (Every day at 9 AM)
+    
+    **Action:** Olostep - Scrape Website
+    - URL: Competitor product page
+    - Format: JSON
+    - Parser: @olostep/amazon-product
+    
+    **Action:** Google Sheets - Append Row
+    - Add price data to tracking spreadsheet
+    
+    **Action:** Email - Send Email (If price drops)
+    - Alert team about price changes
+  </Accordion>
+
+  <Accordion title="Extract and Save Blog Posts">
+    **Trigger:** RSS Feed - New Item
+    
+    **Action:** Olostep - Scrape Website
+    - URL: \{\{$json.link\}\}
+    - Format: Markdown
+    
+    **Action:** Notion - Create Page
+    - Save article content to Notion database
+  </Accordion>
+
+  <Accordion title="Lead Enrichment">
+    **Trigger:** Google Sheets - New Row
+    
+    **Action:** Olostep - Scrape Website
+    - URL: Company website from sheet
+    - Format: Markdown
+    
+    **Action:** OpenAI - Complete Text
+    - Extract company information using AI
+    
+    **Action:** Google Sheets - Update Row
+    - Add enriched data back to sheet
+  </Accordion>
+</AccordionGroup>
+
+### Search
+
+Perform a Google search for a given query and get structured results.
+
+**Use Cases:**
+- Automated research workflows
+- Lead discovery and enrichment
+- Competitive analysis
+- Content research
+
+**Configuration:**
+
+<ParamField path="Query" type="string" required>
+  Search query for Google
+</ParamField>
+
+**Output:** Returns structured search results as JSON with titles, URLs, snippets, and metadata.
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Automated Research">
+    **Trigger:** Schedule (Daily at 8 AM)
+    
+    **Action:** Olostep - Search
+    - Query: "latest AI developments"
+    
+    **Action:** Code - Process Results
+    - Extract and format key information
+    
+    **Action:** Notion - Create Pages
+    - Store research findings
+  </Accordion>
+
+  <Accordion title="Lead Discovery">
+    **Trigger:** Manual (Button)
+    
+    **Action:** Olostep - Search
+    - Query: "\{\{$json.searchTerm\}\}"
+    
+    **Action:** Airtable - Create Records
+    - Store leads with contact information
+  </Accordion>
+</AccordionGroup>
+
+### Batch Scrape URLs
+
+Scrape up to 10k urls at the same time. Perfect for large-scale data extraction.
+
+**Use Cases:**
+- Scrape entire product catalogs
+- Extract data from multiple search results
+- Process lists of URLs from spreadsheets
+- Bulk content extraction
+
+**Configuration:**
+
+<ParamField path="URLs to Scrape" type="text" required>
+  JSON array of objects with url and custom_id fields. 
+  
+  Example: `[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="Output Format" type="dropdown" default="Markdown">
+  Choose format for all URLs: Markdown, HTML, JSON, or Plain Text
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  Country code for location-specific scraping
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  Wait time in milliseconds for JavaScript rendering
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  Optional parser ID for specialized extraction
+</ParamField>
+
+**Output Fields:**
+- Batch ID (use this to retrieve results later)
+- Status
+- Total URLs
+- Created At
+- Requested Format
+- Country Code
+- Parser Used
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Scrape Product Catalog">
+    **Trigger:** Webhook - Receive POST Request
+    
+    **Action:** Code - Format URLs
+    - Convert CSV/list to JSON array format
+    
+    **Action:** Olostep - Batch Scrape URLs
+    - URLs: \{\{$json.urlArray\}\}
+    - Format: JSON
+    - Parser: @olostep/amazon-product
+    
+    **Action:** Webhook - POST
+    - Send batch ID to your system for retrieval
+  </Accordion>
+
+  <Accordion title="Daily Content Monitoring">
+    **Trigger:** Schedule - Every day at 6 AM
+    
+    **Action:** Google Sheets - Read Rows
+    - Fetch URLs to monitor
+    
+    **Action:** Code - Format URLs
+    - Convert to batch array format
+    
+    **Action:** Olostep - Batch Scrape URLs
+    - Process all URLs at once
+    
+    **Action:** Slack - Send Message
+    - Notify team that scraping is complete
+  </Accordion>
+</AccordionGroup>
+
+### Create Crawl
+
+Get the content of subpages of a URL. Autonomously discover and scrape entire websites by following links. Perfect for documentation sites, blogs, and content repositories.
+
+**Use Cases:**
+- Crawl and archive entire documentation sites
+- Extract all blog posts from a website
+- Build knowledge bases from web content
+- Monitor website structure changes
+
+**Configuration:**
+
+<ParamField path="Start URL" type="string" required>
+  Starting URL for the crawl (must include http:// or https://)
+</ParamField>
+
+<ParamField path="Maximum Pages" type="integer" default="10">
+  Maximum number of pages to crawl
+</ParamField>
+
+<ParamField path="Follow Links" type="boolean" default="true">
+  Whether to follow links found on pages
+</ParamField>
+
+<ParamField path="Output Format" type="dropdown" default="Markdown">
+  Format for scraped content
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  Optional country code for location-specific crawling
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  Optional parser ID for specialized content extraction
+</ParamField>
+
+**Output Fields:**
+- Crawl ID (use this to retrieve results later)
+- Object Type
+- Status
+- Start URL
+- Maximum Pages
+- Follow Links
+- Created Timestamp
+- Formats
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Archive Documentation Site">
+    **Trigger:** Schedule - Monthly on 1st at 12 AM
+    
+    **Action:** Olostep - Create Crawl
+    - Start URL: https://docs.example.com
+    - Max Pages: 500
+    - Follow Links: true
+    - Format: Markdown
+    
+    **Action:** Webhook - POST
+    - Send crawl ID to your archive system
+    
+    **Action:** Slack - Send Message
+    - Notify team that crawl is in progress
+  </Accordion>
+
+  <Accordion title="Competitor Content Analysis">
+    **Trigger:** Schedule - Weekly on Monday at 9 AM
+    
+    **Action:** Olostep - Create Crawl
+    - Start URL: Competitor blog URL
+    - Max Pages: 100
+    - Format: Markdown
+    
+    **Action:** Wait - For 10 minutes
+    - Wait for crawl to complete
+    
+    **Action:** Airtable - Create Records
+    - Store crawl data for analysis
+  </Accordion>
+</AccordionGroup>
+
+### Create Map
+
+Get all URLs on a website. Extract all URLs from a website for content discovery and site structure analysis.
+
+**Use Cases:**
+- Build sitemaps and site structure diagrams
+- Discover all pages before batch scraping
+- Find broken or missing pages
+- SEO audits and analysis
+
+**Configuration:**
+
+<ParamField path="Website URL" type="string" required>
+  Website URL to extract links from (must include http:// or https://)
+</ParamField>
+
+<ParamField path="Search Query" type="string">
+  Optional search query to filter URLs (e.g., "blog")
+</ParamField>
+
+<ParamField path="Top N URLs" type="integer">
+  Limit the number of URLs returned
+</ParamField>
+
+<ParamField path="Include URL Patterns" type="string">
+  Glob patterns to include specific paths (e.g., "/blog/**")
+</ParamField>
+
+<ParamField path="Exclude URL Patterns" type="string">
+  Glob patterns to exclude specific paths (e.g., "/admin/**")
+</ParamField>
+
+**Output Fields:**
+- Map ID
+- Object Type
+- Website URL
+- Total URLs Found
+- URLs (JSON array)
+- Search Query
+- Top N Limit
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Discover and Scrape">
+    **Trigger:** Manual (Button)
+    
+    **Action:** Olostep - Create Map
+    - URL: https://example.com
+    - Include Patterns: /products/**
+    - Top N: 500
+    
+    **Action:** Code - Extract URLs
+    - Parse URLs from map result
+    
+    **Action:** Olostep - Batch Scrape URLs
+    - URLs: \{\{$json.urls\}\}
+    - Format: JSON
+    
+    **Action:** Google Sheets - Append Rows
+    - Add all product data to spreadsheet
+  </Accordion>
+
+  <Accordion title="SEO Site Audit">
+    **Trigger:** Schedule - Monthly
+    
+    **Action:** Olostep - Create Map
+    - URL: Your website
+    - Top N: 1000
+    
+    **Action:** Airtable - Create Records
+    - Store all URLs for tracking
+    
+    **Action:** Slack - Send Message
+    - Report total pages found
+  </Accordion>
+</AccordionGroup>
+
+## Popular Workflow Examples
+
+### E-commerce Price Monitoring
+
+Monitor competitor prices and get instant alerts:
+
+```
+Trigger: Schedule (Hourly)
+↓
+Action: Olostep - Scrape Website
+  - URL: Competitor product page
+  - Format: JSON
+  - Parser: @olostep/amazon-product
+↓
+Action: IF - Check if price changed
+↓
+Action: Slack - Send Message
+  - Alert: "Price changed to $\{\{price\}\}"
+```
+
+### Content Aggregation
+
+Aggregate content from multiple sources:
+
+```
+Trigger: Google Sheets - New Row
+↓
+Action: Olostep - Scrape Website
+  - URL: \{\{$json.url\}\}
+  - Format: Markdown
+↓
+Action: OpenAI - Summarize
+  - Summarize the content
+↓
+Action: Airtable - Create Record
+  - Store article with summary
+```
+
+### Lead Enrichment Pipeline
+
+Enrich lead data with web information:
+
+```
+Trigger: HubSpot - New Contact
+↓
+Action: Olostep - Scrape Website
+  - URL: \{\{$json.companyWebsite\}\}
+  - Format: Markdown
+↓
+Action: OpenAI - Extract Data
+  - Extract: company size, industry, products
+↓
+Action: HubSpot - Update Contact
+  - Add enriched data to contact
+```
+
+### Research Automation
+
+Automate research from multiple sources:
+
+```
+Trigger: Airtable - New Record
+↓
+Action: Olostep - Create Map
+  - URL: Research target website
+  - Include: /research/**
+↓
+Action: Code - Parse URLs
+↓
+Action: Olostep - Batch Scrape URLs
+  - URLs: \{\{$json.discoveredUrls\}\}
+  - Format: Markdown
+↓
+Action: Notion - Create Pages
+  - Create research database
+```
+
+### Social Media Monitoring
+
+Track mentions and content:
+
+```
+Trigger: Schedule (Every 6 hours)
+↓
+Action: Olostep - Scrape Website
+  - URL: News site search page
+  - Format: HTML
+↓
+Action: Code - Extract Mentions
+  - Find brand mentions
+↓
+Action: Google Sheets - Append Row
+  - Log mentions with timestamp
+```
+
+## Multi-Step Workflows
+
+### Complete Product Scraping Pipeline
+
+Build a comprehensive product data pipeline:
+
+<Steps>
+  <Step title="Discover Product URLs">
+    Use **Create Map** to find all product pages on the target website
+    - Include patterns: `/products/**`
+    - Exclude patterns: `/cart/**`, `/checkout/**`
+  </Step>
+  
+  <Step title="Batch Process Products">
+    Use **Batch Scrape URLs** to extract all product data
+    - Format: JSON
+    - Parser: Product-specific parser if available
+  </Step>
+  
+  <Step title="Store in Database">
+    Send batch ID to your system or wait and retrieve results
+    - Use Airtable, Google Sheets, or your database
+  </Step>
+  
+  <Step title="Monitor for Changes">
+    Schedule daily scrapes to track price/availability changes
+    - Compare with existing data
+    - Alert on significant changes
+  </Step>
+</Steps>
+
+### SEO Content Strategy
+
+Analyze competitors and plan content:
+
+<Steps>
+  <Step title="Map Competitor Sites">
+    Use **Create Map** on competitor websites
+    - Extract all blog posts and content pages
+  </Step>
+  
+  <Step title="Scrape Content">
+    Use **Batch Scrape URLs** to get full content
+    - Format: Markdown for easy analysis
+  </Step>
+  
+  <Step title="AI Analysis">
+    Use OpenAI to analyze topics and keywords
+    - Identify content gaps
+    - Find trending topics
+  </Step>
+  
+  <Step title="Create Content Calendar">
+    Add insights to Notion or Airtable
+    - Plan your content strategy
+  </Step>
+</Steps>
+
+## Specialized Parsers
+
+Olostep provides pre-built parsers for popular websites. Use them with the `Parser` field:
+
+<CardGroup cols={2}>
+  <Card title="Amazon Product" icon="amazon">
+    `@olostep/amazon-product`
+    
+    Extract: title, price, rating, reviews, images, variants
+  </Card>
+  
+  <Card title="LinkedIn Profile" icon="linkedin">
+    `@olostep/linkedin-profile`
+    
+    Extract: name, title, company, location, experience
+  </Card>
+  
+  <Card title="LinkedIn Company" icon="building">
+    `@olostep/linkedin-company`
+    
+    Extract: company info, employee count, industry, description
+  </Card>
+  
+  <Card title="Google Search" icon="google">
+    `@olostep/google-search`
+    
+    Extract: search results, titles, snippets, URLs
+  </Card>
+  
+  <Card title="Google Maps" icon="map">
+    `@olostep/google-maps`
+    
+    Extract: business info, reviews, ratings, location
+  </Card>
+  
+  <Card title="Instagram Profile" icon="instagram">
+    `@olostep/instagram-profile`
+    
+    Extract: profile info, followers, posts, bio
+  </Card>
+</CardGroup>
+
+### Using Parsers
+
+Simply add the parser ID to the Parser field:
+
+```
+Action: Olostep - Scrape Website
+  - URL: https://www.amazon.com/dp/PRODUCT_ID
+  - Format: JSON
+  - Parser: @olostep/amazon-product
+```
+
+The parser automatically extracts structured data specific to that website type.
+
+## Integration with Popular Apps
+
+### Google Sheets
+
+Perfect for data collection and tracking:
+
+```
+1. Olostep scrapes website
+2. Filter or transform data
+3. Google Sheets - Append Row
+```
+
+**Use Cases:**
+- Price tracking spreadsheets
+- Lead enrichment databases
+- Content inventory
+- Competitor analysis sheets
+
+### Airtable
+
+Build powerful databases with scraped data:
+
+```
+1. Olostep scrapes or crawls
+2. Code - Format data
+3. Airtable - Create Records
+```
+
+**Use Cases:**
+- Product catalogs
+- Research databases
+- Content calendars
+- Link databases
+
+### Slack
+
+Get instant notifications:
+
+```
+1. Olostep monitors page
+2. IF - Check for changes
+3. Slack - Send Message
+```
+
+**Use Cases:**
+- Price drop alerts
+- Content update notifications
+- Error monitoring
+- Daily digests
+
+### HubSpot / Salesforce
+
+Enrich CRM data automatically:
+
+```
+1. New contact added
+2. Olostep scrapes company website
+3. OpenAI extracts key info
+4. CRM - Update contact
+```
+
+**Use Cases:**
+- Lead enrichment
+- Company research
+- Competitive intelligence
+- Account mapping
+
+### Notion
+
+Build knowledge bases:
+
+```
+1. Olostep crawls documentation
+2. Code - Parse content
+3. Notion - Create Pages
+```
+
+**Use Cases:**
+- Documentation mirrors
+- Research repositories
+- Content libraries
+- Team wikis
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Batch Processing for Multiple URLs">
+    When scraping more than 3-5 URLs, use **Batch Scrape URLs** instead of multiple **Scrape Website** actions. Batch processing is:
+    - Much faster (parallel processing)
+    - More cost-effective
+    - Easier to manage
+    - Better for rate limits
+  </Accordion>
+
+  <Accordion title="Set Appropriate Wait Times">
+    For JavaScript-heavy sites, use the "Wait Before Scraping" parameter:
+    - Simple sites: 0-1000ms
+    - Dynamic sites: 2000-3000ms
+    - Heavy JavaScript: 5000-8000ms
+    
+    Test with different values to find the optimal wait time.
+  </Accordion>
+
+  <Accordion title="Use Specialized Parsers">
+    For popular websites (Amazon, LinkedIn, Google), use pre-built parsers:
+    - Get structured data automatically
+    - More reliable extraction
+    - No need for custom parsing
+    - Maintained by Olostep
+  </Accordion>
+
+  <Accordion title="Filter Before Scraping">
+    Use n8n's IF node to avoid unnecessary scrapes:
+    - Check if URL has changed
+    - Verify data hasn't been scraped recently
+    - Apply business logic before scraping
+    
+    This saves API credits and execution time.
+  </Accordion>
+
+  <Accordion title="Handle Async Operations">
+    Batch, Crawl, and Map operations are asynchronous:
+    - Store the returned ID (batch_id, crawl_id, map_id)
+    - Use a Wait node if retrieving immediately
+    - Consider webhook callbacks for completion
+    - Set up separate workflows for retrieval
+  </Accordion>
+
+  <Accordion title="Store Results Properly">
+    Choose the right storage based on your needs:
+    - **Google Sheets**: Simple tracking, team collaboration
+    - **Airtable**: Relational data, rich formatting
+    - **Database**: Large-scale, complex queries
+    - **Notion**: Knowledge base, documentation
+  </Accordion>
+
+  <Accordion title="Monitor and Alert">
+    Set up monitoring for your scraping workflows:
+    - Use Error workflows in n8n
+    - Send alerts to Slack/Email on failures
+    - Track API usage in Olostep dashboard
+    - Log important metrics
+  </Accordion>
+</AccordionGroup>
+
+## Common Use Cases by Industry
+
+### E-commerce
+- **Price Monitoring**: Track competitor pricing in real-time
+- **Product Research**: Discover trending products and market gaps
+- **Inventory Tracking**: Monitor stock availability
+- **Review Analysis**: Aggregate and analyze customer reviews
+
+### Marketing & SEO
+- **Content Discovery**: Find content opportunities
+- **Competitor Analysis**: Track competitor strategies
+- **Backlink Research**: Discover link opportunities
+- **Keyword Research**: Extract keyword data from search results
+
+### Sales & Lead Generation
+- **Lead Enrichment**: Enhance CRM data with web information
+- **Company Research**: Gather company intelligence
+- **Contact Discovery**: Find decision-makers
+- **Competitive Intelligence**: Track competitor moves
+
+### Research & Analytics
+- **Data Collection**: Gather data from multiple sources
+- **Market Research**: Track industry trends
+- **Academic Research**: Collect research data
+- **Price Intelligence**: Analyze pricing strategies
+
+### Media & Publishing
+- **Content Aggregation**: Curate content from multiple sites
+- **News Monitoring**: Track news and mentions
+- **Social Media**: Monitor social platforms
+- **Trend Detection**: Identify trending topics
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Authentication Failed">
+    **Error**: "Invalid API key"
+    
+    **Solutions**:
+    - Check API key from [dashboard](https://olostep.com/dashboard)
+    - Ensure no extra spaces in API key
+    - Recreate the credential in n8n
+    - Verify API key is active
+  </Accordion>
+
+  <Accordion title="Scrape Returns Empty Content">
+    **Error**: Content fields are empty
+    
+    **Solutions**:
+    - Increase "Wait Before Scraping" time
+    - Check if website requires login
+    - Try different format (HTML vs Markdown)
+    - Verify URL is accessible
+    - Check if site blocks automated access
+  </Accordion>
+
+  <Accordion title="Batch Array Format Error">
+    **Error**: "Invalid JSON format for batch array"
+    
+    **Solutions**:
+    - Use format: `[{"url":"https://example.com","custom_id":"id1"}]`
+    - Ensure proper JSON syntax
+    - Use Code node to format URLs correctly
+    - Test JSON with online validator
+  </Accordion>
+
+  <Accordion title="Rate Limit Exceeded">
+    **Error**: "Rate limit exceeded"
+    
+    **Solutions**:
+    - Space out workflow executions with Wait nodes
+    - Use batch processing instead of individual scrapes
+    - Upgrade your Olostep plan
+    - Check rate limit in dashboard
+  </Accordion>
+
+  <Accordion title="URL Not Scraped">
+    **Error**: Specific URLs fail to scrape
+    
+    **Solutions**:
+    - Verify URL format (include http:// or https://)
+    - Check if URL requires authentication
+    - Test URL in browser first
+    - Try with country parameter
+    - Contact support for blocked domains
+  </Accordion>
+</AccordionGroup>
+
+## n8n Advantages
+
+### Self-Hosted
+n8n is self-hosted, giving you complete control over your workflows and data. No vendor lock-in, no data leaving your infrastructure.
+
+### No Task Limits
+Unlike cloud-based automation platforms, n8n doesn't impose task limits. Run as many workflows as you need without additional costs.
+
+### Open Source
+n8n is open source, allowing you to customize and extend it to fit your specific needs.
+
+### Cost-Effective
+Self-hosted n8n is free, with optional cloud hosting available. Only pay for the Olostep API usage.
+
+## Pricing
+
+Olostep charges based on API usage, independent of n8n:
+
+- **Scrapes**: Pay per scrape
+- **Batches**: Pay per URL in batch
+- **Crawls**: Pay per page crawled
+- **Maps**: Pay per map operation
+
+Check current pricing at [olostep.com/pricing](https://olostep.com/pricing).
+
+**n8n**: Self-hosted n8n is free. Cloud hosting available with optional paid plans.
+
+## Support
+
+Need help with the n8n integration?
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="https://docs.olostep.com">
+    Browse complete API docs
+  </Card>
+  
+  <Card title="Support Email" icon="envelope" href="mailto:info@olostep.com">
+    Email: info@olostep.com
+  </Card>
+  
+  <Card title="n8n Community" icon="users" href="https://community.n8n.io">
+    Ask in n8n Community
+  </Card>
+  
+  <Card title="Status Page" icon="signal" href="https://status.olostep.com">
+    Check API status
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Learn about the Scrapes endpoint
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Learn about the Batches endpoint
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Learn about the Crawls endpoint
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Learn about the Maps endpoint
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    Use Olostep with Python
+  </Card>
+  
+  <Card title="LangChain Integration" icon="link" href="/integrations/langchain">
+    Build AI agents with LangChain
+  </Card>
+</CardGroup>
+
+## Get Started
+
+Ready to automate your web scraping workflows?
+
+<Card title="Install the Node" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
+  Install n8n-nodes-olostep and start building automated workflows
+</Card>
+
+Connect Olostep with n8n and automate your web data extraction today!
+
