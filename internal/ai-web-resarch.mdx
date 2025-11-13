@@ -1,14 +1,14 @@
 ---
-title: 'Benchmark'
+title: 'Practical comparison'
 icon: 'bolt-lightning'
 ---
 
-A benchmark comparing the current Lite, Base and Core processors in the [AI Web Research node](https://docs.gumloop.com/nodes/using_ai/ai_web_research) with Olostep’s [Answers API](/features/answers/answers).
+A practical comparison of the current Lite, Base and Core processors in the Gumloop [AI Web Research node](https://docs.gumloop.com/nodes/using_ai/ai_web_research) with Olostep’s [Answers API](/features/answers/answers) for Gumloop customers.
 
 ### TL;DR
-- **Latency**: `/answers` averages ~5–7s; existing processor on average 60–120s+
+- **Latency**: `/answers` averages ~5–15s; existing processor on average 60–120s+
 - **Freshness**: `/answers` uses live scraping/crawling (no stale index) → more up-to-date.
-- **Accuracy**: `/answers` tends to be more accurate and precisethan the existing processors, especially for factual queries.
+- **Accuracy**: `/answers` tends to be more accurate and precise than the existing processors, especially for factual queries.
 - **Scope**: Great fit for `lite`/`base`/`core` factual lookups (not deep research - `pro`/`ultra`).
 - **Output**: Structured JSON with cited sources; easy to post-process.
 - **Integration idea**: Add a new processor (e.g., `core-fast`) that routes to `/answers`.
@@ -17,6 +17,7 @@ A benchmark comparing the current Lite, Base and Core processors in the [AI Web 
 - Reused example prompts from Gumloop docs across three categories: Lite, Base, Core.
 - Measured time-to-first-complete-answer and captured example outputs and sources.
 - Verified answers are grounded in real web data.
+- Compared the output with the existing processors in the Gumloop [AI Web Research node](https://docs.gumloop.com/nodes/using_ai/ai_web_research).
 
 ---
 
@@ -101,7 +102,7 @@ Prompt:
 - **Try it**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=w5WiM7rdqw88JtDGBxu5X3)
 
 **Olosep `/answers` result**:
-- **Latency**: 2.12 seconds
+- **Latency**: 2.12-15 seconds
 - **Output**:
 
 ```json
@@ -124,6 +125,11 @@ Prompt:
 />
 
 **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+
+### What improved for Gumloop users?
+
+- **Accuracy**: The answer also includes the street address, city, state, and country.
+- **Latency**
 
 ---
 
@@ -270,6 +276,12 @@ Prompt:
   className="rounded-lg"
 />
 - **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+
+### What improved for Gumloop users?
+
+- **Accuracy**: The answer reflects the actual cursor pricing tiers (cursor.com/pricing), by also including the Ultra tier which is not included in the existing processor.
+- **Latency**
+
 ---
 
 ## Detailed example (Core)
@@ -385,8 +397,25 @@ Prompt:
   className="rounded-lg"
 />
 - **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+
+### What improved for Gumloop users?
+
+- **Accuracy**: The answer includes the pricing tier numbers (e.g. "Free 100 tasks; Starter 750/≈$19.99...") and is more precise (e.g. "8000+ apps" vs "largest app catalog")
+- **Latency**
 ---
 
 ## Try it yourself
 - Playground: [`https://www.olostep.com/playground?q=answers`](https://www.olostep.com/playground?q=answers)
-- Suggested new processor for Gumloop: **`core-fast`** backed by `/answers` for factual, source-grounded queries where latency matters.
+
+
+## What's the reasoning behind this?
+The Olostep Answers API instead of using just a web index and referencing that, utilizes the Olostep infrastructure that has been optimized to search, crawl and extract the data in real time so it's more accurate and precise for these type of tasks. 
+
+It's not well suited for deep research tasks but it often outperforms the existing processors in the Lite, Base and Core categories.
+
+
+## Suggested next steps 
+
+If this is something relevant for Gumloop and your customers, please consider adding a new processor for Gumloop: **`core-fast`** backed by `/answers` for factual, source-grounded queries where latency matters.
+
+If we can be of any assistance, let us know. You know how to reach us. Thanks! 
