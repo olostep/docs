@@ -1,0 +1,392 @@
+---
+title: 'Benchmark'
+icon: 'bolt-lightning'
+---
+
+A benchmark comparing the current Lite, Base and Core processors in the [AI Web Research node](https://docs.gumloop.com/nodes/using_ai/ai_web_research) with Olostep’s [Answers API](/features/answers/answers).
+
+### TL;DR
+- **Latency**: `/answers` averages ~5–7s; existing processor on average 60–120s+
+- **Freshness**: `/answers` uses live scraping/crawling (no stale index) → more up-to-date.
+- **Accuracy**: `/answers` tends to be more accurate and precisethan the existing processors, especially for factual queries.
+- **Scope**: Great fit for `lite`/`base`/`core` factual lookups (not deep research - `pro`/`ultra`).
+- **Output**: Structured JSON with cited sources; easy to post-process.
+- **Integration idea**: Add a new processor (e.g., `core-fast`) that routes to `/answers`.
+
+### How we tested
+- Reused example prompts from Gumloop docs across three categories: Lite, Base, Core.
+- Measured time-to-first-complete-answer and captured example outputs and sources.
+- Verified answers are grounded in real web data.
+
+---
+
+## Gumloop Docs
+
+<AccordionGroup>
+  <Accordion title="Lite">
+  
+  Use cases:
+  - Company addresses and phone numbers
+  - Website URLs and social media handles
+  - Basic business information (founded date, CEO name)
+  - Simple yes/no verifications
+  
+  Example prompts:
+  - “Given a company name, find their headquarters address”
+  - “Given a website, extract the contact email”
+  - “Given a business name, find if they have a mobile app”
+  
+  </Accordion>
+  
+  <Accordion title="Base">
+  
+  Use cases:
+  - Product offerings and service descriptions
+  - Team size and office locations
+  - Industry classification and business model
+  - Recent announcements or updates
+  
+  Example prompts:
+  - “Given a company website, extract their main products and pricing tiers”
+  - “Given a startup name, find their target market and value proposition”
+  - “Given a business domain, identify their key partnerships”
+  
+  </Accordion>
+  
+  <Accordion title="Core">
+  
+  Use cases:
+  - Funding history, investors, valuation
+  - Competitor pricing strategies and differentiators
+  - Industry top players and market dynamics
+  
+  Example prompts:
+  - “Given a company, research their funding history, investors, and valuation”
+  - “Given a competitor list, analyze their pricing strategies and differentiators”
+  - “Given an industry, identify top players and market dynamics”
+  
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Detailed example (Lite)
+
+Prompt:
+- “Given a company name (Zecento), find their headquarters address”
+
+**Existing processor**:
+- **Latency**: 34.57 seconds
+- **Output**:
+```json
+{
+  "Headquarters Address": {
+    "Value #1": "Sassuolo, Emilia-Romagna, Italy"
+  }
+}
+```
+<img 
+  src="/images/gmlp_lite.png" 
+  alt="Gumloop Lite processor output"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/> 
+- **Try it**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=w5WiM7rdqw88JtDGBxu5X3)
+
+**Olosep `/answers` result**:
+- **Latency**: 2.12 seconds
+- **Output**:
+
+```json
+{
+  "result": "Viale San Carlo n.28 Primo Piano, 41049 Sassuolo (Modena) Italy"
+}
+```
+<img 
+  src="/images/olstp_lite_answer.png" 
+  alt="Olostep Lite processor output"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+**Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+
+---
+
+## Detailed example (Base)
+
+Prompt:
+- “Given a company website (https://cursor.com/), extract their main products and pricing tiers"
+
+**Existing processor**:
+- **Latency**: 37.74 seconds
+- **Output**:
+```json
+{
+  "Main Product Descriptions": {
+    "Value #1": "Cursor is an AI-powered code editor designed to significantly enhance developer productivity by integrating advanced artificial intelligence features directly into the coding workflow. It offers features like unlimited tab completions and agent usage, aiming to make users extraordinarily productive.",
+    "Value #2": "Bugbot is a separate product from Cursor subscriptions with its own pricing plan. It offers unlimited code reviews on up to 200 PRs per month, unlimited access to Cursor Ask, and integration with Cursor to fix bugs.",
+  },
+  "Main Product Names": {
+    "Value #1": "Cursor",
+    "Value #2": "Bugbot",
+  },
+  "Pricing Tier Details": {
+    "Value #1": "This is a free tier that offers a limited number of Agent requests and Tab completions.",
+    "Value #2": "Priced at $20/month, this tier includes $20 of API agent usage, unlimited tab completions, access to Bugbot, and access to Cloud Agents. Usage is credit-based and drawn from a pool.",
+    "Value #3": "This tier is reported by users to cost $60/month and includes $70 of API agent usage, along with additional bonus usage.",
+    "Value #4": "This plan costs $40/user/mo and provides additional features such as Privacy Mode enforcement, an Admin Dashboard with usage stats, centralized team billing, and SAML/OIDC SSO. Each seat includes $20/mo of included usage.",
+    "Value #5": "This is a custom-priced plan designed for customers who require priority support, pooled usage, invoicing, SCIM, or advanced security controls.",
+  },
+  "Pricing Tier Names": {
+    "Value #1": "Hobby",
+    "Value #2": "Pro",
+    "Value #3": "Pro Plus",
+    "Value #4": "Teams",
+    "Value #5": "Enterprise",
+  },    
+}
+```
+<img 
+  src="/images/gmlp_base.png" 
+  alt="Gumloop Base processor output"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**Try it**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=fcaRfMfZQt7ityXHPR1cNT)
+
+**Olosep `/answers` result**:
+- **Latency**: 11.97 seconds
+- **Output**:
+
+```json
+{
+  "result": {
+    "products": [
+      "Cursor IDE",
+      "Cursor Agent",
+      "Tab (AI autocomplete)",
+      "Cursor CLI",
+      "Cursor for Slack",
+      "BugBot"
+    ],
+    "pricing_tiers": [
+      {
+        "tier": "Hobby",
+        "price": "Free",
+        "features": [
+          "Unlimited Tab completions",
+          "Basic models access",
+          "Community support"
+        ]
+      },
+      {
+        "tier": "Pro",
+        "price": "$20/month",
+        "features": [
+          "Unlimited Tab completions",
+          "$20 monthly credit for premium models",
+          "Faster response times",
+          "Access to advanced models"
+        ]
+      },
+      {
+        "tier": "Pro+",
+        "price": "$60/month",
+        "features": [
+          "Everything in Pro",
+          "$70 monthly credit",
+          "Higher usage limits",
+          "Priority support"
+        ]
+      },
+      {
+        "tier": "Ultra",
+        "price": "$200/month",
+        "features": [
+          "Everything in Pro+",
+          "20× more usage than Pro",
+          "Best for daily power users"
+        ]
+      },
+      {
+        "tier": "Teams",
+        "price": "$40/user/month",
+        "features": [
+          "Everything in Pro",
+          "Centralized team billing",
+          "Usage analytics",
+          "Org-wide privacy controls",
+          "Role-based access",
+          "SSO integration"
+        ]
+      },
+      {
+        "tier": "Enterprise",
+        "price": "Custom",
+        "features": [
+          "Everything in Teams",
+          "Zero data retention",
+          "Premium support",
+          "Custom contracts"
+        ]
+      }
+    ]
+  }
+}
+```
+<img 
+  src="/images/olstp_base_answer.png" 
+  alt="Olostep Base processor output"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+---
+
+## Detailed example (Core)
+
+Prompt:
+- “Given a competitor list (Gumloop, Make, N8N, Zapier), analyze their pricing strategies and differentiators”
+
+**Existing processor**:
+- **Latency**: 2 minutes 47 seconds
+- **Output**:
+```json
+{
+  "Competitor Differentiators": {
+    "Value #1": "Gumloop differentiates as AI-native automation focusing on AI-first nodes (summarize/extract/categorize) and a visual flow canvas; it emphasizes a credit model that charges primarily for third-party/AI calls rather than for each internal step. It targets teams that want integrated AI workflows with BYO-model support, native model controls, and enterprise security features.",
+    "Value #2": "Make’s strengths are a powerful visual scenario builder and strong data-transformation capabilities, offering good cost-to-functionality for medium-complexity workflows. It balances accessibility and advanced features and positions itself as a value-focused alternative to task-based competitors.",
+    "Value #3": "n8n’s main differentiators are source-available licensing and self-hosting (full control), extensive coding/customization (JS/Python code nodes), and a pricing model that bills per workflow execution—making it cost-efficient for complex, high-volume workflows when self-hosted. It’s aimed at technical teams and organizations that need data sovereignty and deep customization.",
+    "Value #4": "Zapier’s advantages are simplicity, breadth of integrations (largest app catalog), and fast onboarding for non-technical users; itâ€ôs well-suited to quick, simple app-to-app automations and teams that prioritize ease-of-use over deep customization. Its task-based pricing and huge connector ecosystem make it the default for broad SaaS coverage.",
+  },
+  "Competitor Pricing Strategies": {
+    "Value #1": "Gumloop uses a credit-based, subscription model with a freemium entry tier and tiered paid plans (Solo, Team, Enterprise). Credits are consumed when workflows run and for AI/third-party calls, while many native nodes are free; enterprise customers can purchase custom credits and VPC/SSO options.",
+    "Value #2": "Make operates an operations/credits-style subscription model (free tier with limited operations, then paid blocks of operations). Pricing is tiered by monthly operation allotments and team/enterprise features; overages or add-on blocks can be purchased as usage grows.",
+    "Value #3": "n8n provides a hybrid model: an open-source self-hosted option (free) and a hosted subscription tier billed per workflow execution for the cloud offering. The primary pricing differentiator is that self-hosted users can run unlimited executions (subject to infra costs), while the n8n cloud charges by executions and offers enterprise hosted plans with added SLAs and security features.",
+    "Value #4": "Zapier uses a task-based, tiered subscription model with a modest free tier (limited tasks and simple Zaps) and paid plans charging per task; enterprise plans offer custom volume, SSO, and advanced support. Costs grow with the number of tasks/steps processed, making Zapier predictable for low-volume, simple automations but potentially expensive at scale.",
+  }
+}
+```
+<img 
+  src="/images/gmlp_core.png" 
+  alt="Gumloop Core processor output"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**Try it**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=mZ16mVvuqSgtLQNaKq55oF)
+
+**Olosep `/answers` result**:
+- **Latency**: 5.24 seconds
+- **Output**:
+
+```json
+{
+  "result": {
+    "Gumloop": {
+      "pricing": {
+        "model": "Credit-based (execution-volume)",
+        "tiers": "Free tier; paid tiers scale on credits consumed per workflow run.",
+        "differentiator": "Focused on AI-centric workflows; easy drag-and-drop UI for technical & non-technical users; credits consumed by workflow complexity rather than per-action."
+      },
+      "differentiators": [
+        "AI-first visual workflow builder",
+        "Credit model scales with complexity of run, not per step like tasks",
+        "New-player positioning vs established giants"
+      ]
+    },
+    "Make": {
+      "pricing": {
+        "model": "Operation-based (credits = 'Operations')",
+        "tiers": "Free 1,000 ops/mo; Core 10k ops≈$10.59; Pro 40k≈$18.82; higher enterprise plans.",
+        "differentiator": "Visually rich canvas; larger ops volume per dollar vs Zapier for complex flows."
+      },
+      "differentiators": [
+        "Visual workflow builder with live scenario preview",
+        "More cost-optimised operations pricing than Zapier",
+        "Best for SMBs that need cost-visibility on heavy workloads"
+      ]
+    },
+    "N8N": {
+      "pricing": {
+        "model": "Per-workflow-execution (cloud) or open-source self-host",
+        "tiers": "Cloud Starter free; cloud tiers scale by #executions. No per-step cost. Self-host free (MIT) – only pay server costs.",
+        "differentiator": "Open-source; pay-per-run not per-task; self-host unlimited."
+      },
+      "differentiators": [
+        "Open-source flexibility & self-hosting",
+        "Can run fully on-prem for data control",
+        "Node-based, code-friendly for developers",
+        "Cheapest long-term TCO if self-hosted"
+      ]
+    },
+    "Zapier": {
+      "pricing": {
+        "model": "Task-based",
+        "tiers": "Free 100 tasks; Starter 750/≈$19.99; Professional 2k/≈$49; Team 50k+ /$69; Enterprise unlimited.",
+        "differentiator": "Largest app marketplace (>8k) and broadest no-code ecosystem."
+      },
+      "differentiators": [
+        "Widest integration library (8000+ apps)",
+        "Enterprise-grade admin/SSO/audit & AI orchestration built-in",
+        "Transparent predictable per-task pricing",
+        "Easiest for non-technical users to get started"
+      ]
+    }
+  }
+}
+```
+<img 
+  src="/images/olstp_core_answer.png" 
+  alt="Olostep Core processor output"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+---
+
+## Try it yourself
+- Playground: [`https://www.olostep.com/playground?q=answers`](https://www.olostep.com/playground?q=answers)
+- Suggested new processor for Gumloop: **`core-fast`** backed by `/answers` for factual, source-grounded queries where latency matters.
