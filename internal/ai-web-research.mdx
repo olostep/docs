@@ -109,7 +109,7 @@ Given a company name (Zecento), find their headquarters address
 
 ```json
 {
-  "result": "Viale San Carlo n.28 Primo Piano, 41049 Sassuolo (Modena) Italy"
+  "headquarters_address": "Viale San Carlo n.28 Primo Piano, 41049 Sassuolo, Modena, Italy"
 }
 ```
 <img 
@@ -126,7 +126,7 @@ Given a company name (Zecento), find their headquarters address
   className="rounded-lg"
 />
 
-**Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+**Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20name%20%28Zecento%29,%20find%20their%20headquarters%20address&schema=%7B"headquarters_address":"The%20full,%20official%20street%20address%20of%20the%20company's%20primary%20headquarters,%20including%20street%20number,%20street%20name,%20city,%20state/province,%20postal%20code,%20and%20country.%20If%20the%20exact%20address%20cannot%20be%20determined,%20provide%20the%20most%20specific%20location%20available%20%28e.g.,%20city,%20state,%20country%29.%20If%20unavailable,%20return%20'Address%20unavailable'."%7D)
 
 ### What improved for Gumloop users?
 
@@ -192,78 +192,40 @@ Given a company website (https://cursor.com/), extract their main products and p
 
 ```json
 {
-  "result": {
-    "products": [
-      "Cursor IDE",
-      "Cursor Agent",
-      "Tab (AI autocomplete)",
-      "Cursor CLI",
-      "Cursor for Slack",
-      "BugBot"
-    ],
-    "pricing_tiers": [
-      {
-        "tier": "Hobby",
-        "price": "Free",
-        "features": [
-          "Unlimited Tab completions",
-          "Basic models access",
-          "Community support"
-        ]
-      },
-      {
-        "tier": "Pro",
-        "price": "$20/month",
-        "features": [
-          "Unlimited Tab completions",
-          "$20 monthly credit for premium models",
-          "Faster response times",
-          "Access to advanced models"
-        ]
-      },
-      {
-        "tier": "Pro+",
-        "price": "$60/month",
-        "features": [
-          "Everything in Pro",
-          "$70 monthly credit",
-          "Higher usage limits",
-          "Priority support"
-        ]
-      },
-      {
-        "tier": "Ultra",
-        "price": "$200/month",
-        "features": [
-          "Everything in Pro+",
-          "20x more usage than Pro",
-          "Best for daily power users"
-        ]
-      },
-      {
-        "tier": "Teams",
-        "price": "$40/user/month",
-        "features": [
-          "Everything in Pro",
-          "Centralized team billing",
-          "Usage analytics",
-          "Org-wide privacy controls",
-          "Role-based access",
-          "SSO integration"
-        ]
-      },
-      {
-        "tier": "Enterprise",
-        "price": "Custom",
-        "features": [
-          "Everything in Teams",
-          "Zero data retention",
-          "Premium support",
-          "Custom contracts"
-        ]
-      }
-    ]
-  }
+  "main_product_names": [
+    "Cursor IDE",
+    "Cursor Agent",
+    "Bugbot"
+  ],
+  "main_product_descriptions": [
+    "Cursor is a VS Code-based editor enhanced with AI coding features including agent-driven development and smart completions.",
+    "An autonomous agent that can handle entire development tasks from inception to completion across the full software development lifecycle.",
+    "An automated code review product that detects bugs directly in GitHub pull requests and suggests one-click fixes."
+  ],
+  "pricing_tier_names": [
+    "Hobby",
+    "Pro",
+    "Pro+",
+    "Ultra",
+    "Teams",
+    "Enterprise",
+    "Bugbot Free",
+    "Bugbot Pro",
+    "Bugbot Teams",
+    "Bugbot Enterprise"
+  ],
+  "pricing_tier_details": [
+    "Free entry tier with a one-week Pro trial, limited agent requests and tab completions.",
+    "$20 per user per month with unlimited tab completions, agent mode, background agents, and maximum context windows.",
+    "$60 per user per month offering everything in Pro plus 3x usage for all OpenAI, Claude, and Gemini models.",
+    "$200 per user per month providing 20x usage on all leading AI models and priority access to new features.",
+    "$40 per user per month with centralized billing, role-based access control, org-wide privacy controls, and SSO.",
+    "Custom pricing offering pooled usage, SCIM management, audit logs, granular admin controls, and priority support.",
+    "$0 free tier providing limited monthly code reviews, unlimited Cursor Ask access, and GitHub integration.",
+    "$40 per user per month for unlimited reviews on up to 200 pull requests per month and access to Bugbot Rules.",
+    "$40 per user per month featuring unlimited reviews on all pull requests, analytics dashboard, and advanced rules.",
+    "Custom pricing with enhanced analytics, org-wide trials, and priority support for large organizations."
+  ]
 }
 ```
 <img 
@@ -279,7 +241,7 @@ Given a company website (https://cursor.com/), extract their main products and p
   }}
   className="rounded-lg"
 />
-- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20website%20%28https://cursor.com/%29,%20extract%20their%20main%20products%20and%20pricing%20tiers&schema=%7B"main_product_names":"A%20list%20of%20the%20names%20of%20the%20primary%20products%20offered%20by%20the%20company.%20If%20no%20products%20are%20found,%20return%20an%20empty%20array.","main_product_descriptions":"A%20list%20of%201-3%20sentence%20descriptions%20for%20each%20corresponding%20product%20listed%20in%20'main_product_names'.%20The%20order%20of%20descriptions%20must%20match%20the%20order%20of%20product%20names.%20If%20a%20description%20is%20unavailable%20for%20a%20product,%20return%20'Description%20unavailable'%20for%20that%20specific%20index.","pricing_tier_names":"A%20list%20of%20the%20names%20of%20the%20pricing%20tiers%20or%20plans%20offered%20for%20the%20company's%20products%20or%20services.%20If%20no%20pricing%20tiers%20are%20found,%20return%20an%20empty%20array.","pricing_tier_details":"A%20list%20of%201-3%20sentence%20summaries%20of%20the%20key%20features,%20pricing,%20or%20benefits%20for%20each%20corresponding%20pricing%20tier%20listed%20in%20'pricing_tier_names'.%20The%20order%20of%20details%20must%20match%20the%20order%20of%20pricing%20tier%20names.%20If%20details%20are%20unavailable%20for%20a%20tier,%20return%20'Details%20unavailable'%20for%20that%20specific%20index."%7D)
 
 ### What improved for Gumloop users?
 
@@ -330,63 +292,23 @@ Given a competitor list (Gumloop, Make, N8N, Zapier), analyze their pricing stra
 **Try it**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=mZ16mVvuqSgtLQNaKq55oF)
 
 **Olosep `/answers` result**:
-- **Latency**: 5.24 seconds
+- **Latency**: 26.83 seconds
 - **Output**:
 
 ```json
 {
-  "result": {
-    "Gumloop": {
-      "pricing": {
-        "model": "Credit-based (execution-volume)",
-        "tiers": "Free tier; paid tiers scale on credits consumed per workflow run.",
-        "differentiator": "Focused on AI-centric workflows; easy drag-and-drop UI for technical & non-technical users; credits consumed by workflow complexity rather than per-action."
-      },
-      "differentiators": [
-        "AI-first visual workflow builder",
-        "Credit model scales with complexity of run, not per step like tasks",
-        "New-player positioning vs established giants"
-      ]
-    },
-    "Make": {
-      "pricing": {
-        "model": "Operation-based (credits = 'Operations')",
-        "tiers": "Free 1,000 ops/mo; Core 10k ops at $10.59; Pro 40k at $18.82; higher enterprise plans.",
-        "differentiator": "Visually rich canvas; larger ops volume per dollar vs Zapier for complex flows."
-      },
-      "differentiators": [
-        "Visual workflow builder with live scenario preview",
-        "More cost-optimised operations pricing than Zapier",
-        "Best for SMBs that need cost-visibility on heavy workloads"
-      ]
-    },
-    "N8N": {
-      "pricing": {
-        "model": "Per-workflow-execution (cloud) or open-source self-host",
-        "tiers": "Cloud Starter free; cloud tiers scale by #executions. No per-step cost. Self-host free (MIT) - only pay server costs.",
-        "differentiator": "Open-source; pay-per-run not per-task; self-host unlimited."
-      },
-      "differentiators": [
-        "Open-source flexibility & self-hosting",
-        "Can run fully on-prem for data control",
-        "Node-based, code-friendly for developers",
-        "Cheapest long-term TCO if self-hosted"
-      ]
-    },
-    "Zapier": {
-      "pricing": {
-        "model": "Task-based",
-        "tiers": "Free 100 tasks; Starter 750 at $19.99; Professional 2k at $49; Team 50k+ at $69; Enterprise unlimited.",
-        "differentiator": "Largest app marketplace (>8k) and broadest no-code ecosystem."
-      },
-      "differentiators": [
-        "Widest integration library (8000+ apps)",
-        "Enterprise-grade admin/SSO/audit & AI orchestration built-in",
-        "Transparent predictable per-task pricing",
-        "Easiest for non-technical users to get started"
-      ]
-    }
-  }
+  "competitor_pricing_strategies": [
+    "Gumloop uses a credit-based freemium model: free tier offers 2,000 monthly credits, Solo at $37/mo unlocks 10k+ credits and unlimited active workflows, and Team at $244/mo scales to 60k+ credits with 10 seats—positioning itself as an affordable, scalable option for small to mid-size teams.",
+    "Make employs a freemium subscription with per-credit billing: 1,000 credits free, Core at $9/mo for 10k credits, Pro at $16/mo for 10k credits with priority execution and variables, and Teams at $29/mo for 10k credits with team roles and templates—competing on low entry price and gradual pay-as-you-grow scaling.",
+    "N8N offers both open-source self-hosting and cloud tiers: Starter cloud at €20/mo for 2.5k executions, Pro at €50/mo for 10k executions (unlimited steps), Business at €667/mo for 40k executions with SSO/Git/versioning, and Enterprise custom—leveraging execution-based rather than step-based billing to attract technical teams seeking transparency and control.",
+    "Zapier runs a classic freemium subscription model: 100 tasks free, Professional at $19.99/mo for multi-step workflows, Team at $69/mo for 25 users and shared folders, and Enterprise custom with SSO and admin controls—emphasizing a large app ecosystem, predictable task pricing, and premium support to maintain market leadership."
+  ],
+  "competitor_differentiators": [
+    "Gumloop differentiates by combining no-code AI agents with an intuitive visual builder and the option to bring your own API keys, appealing to marketers and small teams that want AI-powered workflows without high cost or lock-in.",
+    "Make stands out with 3,000+ app integrations, robust multi-step scenario logic, and granular scheduling options, plus strong EU data-hosting presence and affordable entry pricing that attracts freelancers and European SMBs.",
+    "N8N’s key differentiator is its open-source DNA: users can self-host for free, inspect/extend code, use Git-based version control, and pay only for end-to-end executions—ideal for developers and privacy-conscious organizations.",
+    "Zapier’s primary differentiator is scale and ecosystem: 8,000+ app integrations, the largest marketplace of pre-built Zaps, enterprise-grade governance tools, and an AI orchestration layer (Tables, Interfaces, Agents, MCP) that lets non-technical users build end-to-end solutions quickly."
+  ]
 }
 ```
 <img 
@@ -402,7 +324,7 @@ Given a competitor list (Gumloop, Make, N8N, Zapier), analyze their pricing stra
   }}
   className="rounded-lg"
 />
-- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answers)
+- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20competitor%20list%20%28Gumloop,%20Make,%20N8N,%20Zapier%29,%20analyze%20their%20pricing%20strategies%20and%20Differentiators&schema=%7B"competitor_pricing_strategies":"A%20list%20of%20pricing%20strategies%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20primary%20pricing%20strategy%20%28e.g.,%20premium,%20competitive,%20value-based,%20freemium,%20subscription%29.%20If%20a%20pricing%20strategy%20cannot%20be%20determined,%20return%20'Pricing%20strategy%20unavailable'.","competitor_differentiators":"A%20list%20of%20key%20differentiators%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20main%20competitive%20advantages%20or%20unique%20selling%20propositions.%20If%20differentiators%20cannot%20be%20determined,%20return%20'Differentiators%20unavailable'."%7D)
 
 ### What improved for Gumloop users?
 
@@ -411,7 +333,7 @@ Given a competitor list (Gumloop, Make, N8N, Zapier), analyze their pricing stra
 ---
 
 ## Try it yourself
-- Playground: [`https://www.olostep.com/playground?q=answers`](https://www.olostep.com/playground?q=answers)
+- Playground: [`https://www.olostep.com/playground?q=answer`](https://www.olostep.com/playground?q=answer)
 
 
 ## What's the reasoning behind this?
