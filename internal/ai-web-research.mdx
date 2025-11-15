@@ -139,40 +139,32 @@ Given a company name (Zecento), find their headquarters address
 
 Prompt:
 ```
-Given a company website (https://cursor.com/), extract their main products and pricing tiers
+Given a company website (https://zecento.com/), extract their main products and pricing tiers
 ```
 
 **Existing processor**:
-- **Latency**: 37.74 seconds
+- **Latency**: 44.22 seconds
 - **Output**:
 ```json
 {
   "Main Product Descriptions": {
-    "Value #1": "Cursor is an AI-powered code editor designed to significantly enhance developer productivity by integrating advanced artificial intelligence features directly into the coding workflow. It offers features like unlimited tab completions and agent usage, aiming to make users extraordinarily productive.",
-    "Value #2": "Bugbot is a separate product from Cursor subscriptions with its own pricing plan. It offers unlimited code reviews on up to 200 PRs per month, unlimited access to Cursor Ask, and integration with Cursor to fix bugs.",
+    "Value #1": "Zecento is an AI-powered Chrome extension designed to help Amazon shoppers make better purchasing decisions. It analyzes historical product data to advise users on whether to buy now or wait for a better price, and it sends price drop notifications via email or WhatsApp. The extension aims to ensure users get the best possible deals by tracking prices and providing timely alerts."
   },
   "Main Product Names": {
-    "Value #1": "Cursor",
-    "Value #2": "Bugbot",
+    "Value #1": "Zecento Chrome Extension"
   },
   "Pricing Tier Details": {
-    "Value #1": "This is a free tier that offers a limited number of Agent requests and Tab completions.",
-    "Value #2": "Priced at $20/month, this tier includes $20 of API agent usage, unlimited tab completions, access to Bugbot, and access to Cloud Agents. Usage is credit-based and drawn from a pool.",
-    "Value #3": "This tier is reported by users to cost $60/month and includes $70 of API agent usage, along with additional bonus usage.",
-    "Value #4": "This plan costs $40/user/mo and provides additional features such as Privacy Mode enforcement, an Admin Dashboard with usage stats, centralized team billing, and SAML/OIDC SSO. Each seat includes $20/mo of included usage.",
-    "Value #5": "This is a custom-priced plan designed for customers who require priority support, pooled usage, invoicing, SCIM, or advanced security controls.",
+    "Value #1": "This tier likely offers basic price tracking and alerts for products, allowing users to monitor prices without cost.",
+    "Value #2": "This paid tier enhances the user experience with faster product monitoring (every 4 hours), automatic import of Amazon Wishlists, advanced filtering capabilities within the Droplist, and notifications delivered via WhatsApp in addition to email."
   },
   "Pricing Tier Names": {
-    "Value #1": "Hobby",
-    "Value #2": "Pro",
-    "Value #3": "Pro Plus",
-    "Value #4": "Teams",
-    "Value #5": "Enterprise",
+    "Value #1": "Free",
+    "Value #2": "Zecento Premium"
   },    
 }
 ```
 <img 
-  src="/images/gmlp_base.png" 
+  src="/images/gmlp_base_node.png" 
   alt="Gumloop Base processor output"
   style={{
     height: "auto", 
@@ -187,49 +179,33 @@ Given a company website (https://cursor.com/), extract their main products and p
 **Try it**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=fcaRfMfZQt7ityXHPR1cNT)
 
 **Olosep `/answers` result**:
-- **Latency**: 11.97 seconds
+- **Latency**: 11.37 seconds
 - **Output**:
 
 ```json
 {
+{
   "main_product_names": [
-    "Cursor IDE",
-    "Cursor Agent",
-    "Bugbot"
+    "Zecento"
   ],
   "main_product_descriptions": [
-    "Cursor is a VS Code-based editor enhanced with AI coding features including agent-driven development and smart completions.",
-    "An autonomous agent that can handle entire development tasks from inception to completion across the full software development lifecycle.",
-    "An automated code review product that detects bugs directly in GitHub pull requests and suggests one-click fixes."
+    "Zecento is an AI-powered Chrome extension that helps e-commerce shoppers make better purchase decisions by revealing the right time to buy on Amazon, tracking prices, and alerting on drops. It also includes a ChatGPT plugin offering real-time Amazon recommendations."
   ],
   "pricing_tier_names": [
-    "Hobby",
-    "Pro",
-    "Pro+",
-    "Ultra",
-    "Teams",
-    "Enterprise",
-    "Bugbot Free",
-    "Bugbot Pro",
-    "Bugbot Teams",
-    "Bugbot Enterprise"
+    "Gratuito",
+    "Basic",
+    "Standard"
   ],
   "pricing_tier_details": [
-    "Free entry tier with a one-week Pro trial, limited agent requests and tab completions.",
-    "$20 per user per month with unlimited tab completions, agent mode, background agents, and maximum context windows.",
-    "$60 per user per month offering everything in Pro plus 3x usage for all OpenAI, Claude, and Gemini models.",
-    "$200 per user per month providing 20x usage on all leading AI models and priority access to new features.",
-    "$40 per user per month with centralized billing, role-based access control, org-wide privacy controls, and SSO.",
-    "Custom pricing offering pooled usage, SCIM management, audit logs, granular admin controls, and priority support.",
-    "$0 free tier providing limited monthly code reviews, unlimited Cursor Ask access, and GitHub integration.",
-    "$40 per user per month for unlimited reviews on up to 200 pull requests per month and access to Bugbot Rules.",
-    "$40 per user per month featuring unlimited reviews on all pull requests, analytics dashboard, and advanced rules.",
-    "Custom pricing with enhanced analytics, org-wide trials, and priority support for large organizations."
+    "Gratuito is the free plan offering Zecento's AI comment on millions of products, up to 2 WhatsApp notifications per month, tracking items every 8 hours, unlimited e-mail notifications, and unlimited products in your Droplist.",
+    "Basic costs €3.99 monthly or €23.88 annually after a 30-day free trial and adds WhatsApp notifications, faster tracking every 4 hours, and automatic Amazon wishlist importing.",
+    "Standard costs €6.99 monthly or €59.88 annually after a 30-day free trial, with tracking updates every 2 hours, Priority List and early-access to upcoming features (shipped/alerts with coupons, reminders on recurring products, group-gathering tools)."
   ]
+}
 }
 ```
 <img 
-  src="/images/olstp_base_answer.png" 
+  src="/images/olostep_base_answer.png" 
   alt="Olostep Base processor output"
   style={{
     height: "auto", 
@@ -241,11 +217,11 @@ Given a company website (https://cursor.com/), extract their main products and p
   }}
   className="rounded-lg"
 />
-- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20website%20%28https://cursor.com/%29,%20extract%20their%20main%20products%20and%20pricing%20tiers&schema=%7B"main_product_names":"A%20list%20of%20the%20names%20of%20the%20primary%20products%20offered%20by%20the%20company.%20If%20no%20products%20are%20found,%20return%20an%20empty%20array.","main_product_descriptions":"A%20list%20of%201-3%20sentence%20descriptions%20for%20each%20corresponding%20product%20listed%20in%20'main_product_names'.%20The%20order%20of%20descriptions%20must%20match%20the%20order%20of%20product%20names.%20If%20a%20description%20is%20unavailable%20for%20a%20product,%20return%20'Description%20unavailable'%20for%20that%20specific%20index.","pricing_tier_names":"A%20list%20of%20the%20names%20of%20the%20pricing%20tiers%20or%20plans%20offered%20for%20the%20company's%20products%20or%20services.%20If%20no%20pricing%20tiers%20are%20found,%20return%20an%20empty%20array.","pricing_tier_details":"A%20list%20of%201-3%20sentence%20summaries%20of%20the%20key%20features,%20pricing,%20or%20benefits%20for%20each%20corresponding%20pricing%20tier%20listed%20in%20'pricing_tier_names'.%20The%20order%20of%20details%20must%20match%20the%20order%20of%20pricing%20tier%20names.%20If%20details%20are%20unavailable%20for%20a%20tier,%20return%20'Details%20unavailable'%20for%20that%20specific%20index."%7D)
+- **Try it**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20website%20%28https://zecento.com/%29,%20extract%20their%20main%20products%20and%20pricing%20tiers&schema=%7B"main_product_names":"A%20list%20of%20the%20names%20of%20the%20primary%20products%20offered%20by%20the%20company.%20If%20no%20products%20are%20found,%20return%20an%20empty%20array.","main_product_descriptions":"A%20list%20of%201-3%20sentence%20descriptions%20for%20each%20corresponding%20product%20listed%20in%20'main_product_names'.%20The%20order%20of%20descriptions%20must%20match%20the%20order%20of%20product%20names.%20If%20a%20description%20is%20unavailable%20for%20a%20product,%20return%20'Description%20unavailable'%20for%20that%20specific%20index.","pricing_tier_names":"A%20list%20of%20the%20names%20of%20the%20pricing%20tiers%20or%20plans%20offered%20for%20the%20company's%20products%20or%20services.%20If%20no%20pricing%20tiers%20are%20found,%20return%20an%20empty%20array.","pricing_tier_details":"A%20list%20of%201-3%20sentence%20summaries%20of%20the%20key%20features,%20pricing,%20or%20benefits%20for%20each%20corresponding%20pricing%20tier%20listed%20in%20'pricing_tier_names'.%20The%20order%20of%20details%20must%20match%20the%20order%20of%20pricing%20tier%20names.%20If%20details%20are%20unavailable%20for%20a%20tier,%20return%20'Details%20unavailable'%20for%20that%20specific%20index."%7D)
 
 ### What improved for Gumloop users?
 
-- **Accuracy**: The answer reflects the actual cursor pricing tiers (cursor.com/pricing), by also including the Ultra tier which is not included in the existing processor.
+- **Accuracy**: The answer reflects the actual Zecento Premium pricing tiers (zecento.com/zecento-premium), by including the correct pricing tier names and details.
 - **Latency**
 
 ---
