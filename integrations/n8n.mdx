@@ -11,7 +11,7 @@ The Olostep n8n integration brings powerful web search, scraping, and crawling c
 
 ## Features
 
-The integration provides 5 powerful operations for automated web data extraction:
+The integration provides 6 powerful operations for automated web data extraction:
 
 <CardGroup cols={2}>
   <Card title="Scrape Website" icon="file-lines">
@@ -19,7 +19,11 @@ The integration provides 5 powerful operations for automated web data extraction
   </Card>
   
   <Card title="Search" icon="search">
-    Search the Web with AI and get structured results with sources and citations
+    Search the Web and get structured results
+  </Card>
+  
+  <Card title="Answers (AI)" icon="globe-pointer">
+    Search the Web with AI and get structured answers with sources and citations
   </Card>
   
   <Card title="Batch Scrape URLs" icon="layer-group">
@@ -153,7 +157,7 @@ Extract content from a single URL. Supports multiple formats and JavaScript rend
 
 ### Search
 
-Perform a Google search for a given query and get structured results.
+Search the Web for a given query and get structured results (non-AI, parser-based search results).
 
 **Use Cases:**
 - Automated research workflows
@@ -164,7 +168,7 @@ Perform a Google search for a given query and get structured results.
 **Configuration:**
 
 <ParamField path="Query" type="string" required>
-  Search query for Google
+  Search query
 </ParamField>
 
 **Output:** Returns structured search results as JSON with titles, URLs, snippets, and metadata.
@@ -597,18 +601,6 @@ Olostep provides pre-built parsers for popular websites. Use them with the `Pars
     Extract: title, price, rating, reviews, images, variants
   </Card>
   
-  <Card title="LinkedIn Profile" icon="linkedin">
-    `@olostep/linkedin-profile`
-    
-    Extract: name, title, company, location, experience
-  </Card>
-  
-  <Card title="LinkedIn Company" icon="building">
-    `@olostep/linkedin-company`
-    
-    Extract: company info, employee count, industry, description
-  </Card>
-  
   <Card title="Google Search" icon="google">
     `@olostep/google-search`
     
@@ -620,17 +612,29 @@ Olostep provides pre-built parsers for popular websites. Use them with the `Pars
     
     Extract: business info, reviews, ratings, location
   </Card>
-  
-  <Card title="Instagram Profile" icon="instagram">
-    `@olostep/instagram-profile`
+
+  <Card title="Extract Emails" icon="envelope">
+    `@olostep/extract-emails`
     
-    Extract: profile info, followers, posts, bio
+    Extract: emails from pages, contact lists, and footers
+  </Card>
+
+  <Card title="Extract Socials" icon="users">
+    `@olostep/extract-socials`
+    
+    Extract: social profile links (X/Twitter, GitHub, etc.)
+  </Card>
+
+  <Card title="Extract Calendars" icon="calendar">
+    `@olostep/extract-calendars`
+    
+    Extract: calendar links (Google Calendar, ICS) from pages
   </Card>
 </CardGroup>
 
 ### Using Parsers
 
-Simply add the parser ID to the Parser field:
+Simply add the parser ID to the Parser field. Two examples:
 
 ```
 Action: Olostep - Scrape Website
@@ -639,7 +643,14 @@ Action: Olostep - Scrape Website
   - Parser: @olostep/amazon-product
 ```
 
-The parser automatically extracts structured data specific to that website type.
+```
+Action: Olostep - Scrape Website
+  - URL: https://example.com/contact
+  - Format: JSON
+  - Parser: @olostep/extract-emails
+```
+
+The parser automatically extracts structured data specific to the task.
 
 ## Integration with Popular Apps
 
@@ -745,7 +756,7 @@ Build knowledge bases:
   </Accordion>
 
   <Accordion title="Use Specialized Parsers">
-    For popular websites (Amazon, LinkedIn, Google), use pre-built parsers:
+    Use pre-built parsers (e.g., Amazon, Google, and task-specific parsers from the Olostep Store like emails, socials, calendars):
     - Get structured data automatically
     - More reliable extraction
     - No need for custom parsing
