@@ -1,0 +1,220 @@
+---
+title: 'Pay-per-use (x402)'
+icon: dollar-sign
+description: 'Pay-per-use API endpoints with stablecoin'
+---
+
+## Overview
+
+You can now use also use the Olostep API endpoints with pay-per-use payments using stablecoin.
+
+These endpoints use the x402 payment protocol, enabling pay-per-use access with stablecoin payments. Each request requires a payment header for authentication and payment.
+
+<Info>
+  **Pay-Per-Use Endpoints**
+  
+  All endpoints listed below accept stablecoin payments via the x402 protocol. No subscription required - pay only for what you use.
+</Info>
+
+## Authentication
+
+Include the payment header with your requests:
+
+```
+X-Payment: {{paymentHeader}}
+```
+
+The payment is automatically processed and verified before your request is fulfilled.
+
+---
+
+## Olostep API
+
+### Payment-Enabled Endpoints
+
+#### POST /v1/maps
+
+This endpoint allows users to get all the urls on a certain website. It can take up to 120 seconds for complex websites. For large websites, results are paginated using cursor-based pagination
+
+**Price:** $0.01 per request
+
+**Network:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/maps' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url": "example",
+    "search_query": "example",
+    "top_n": 123,
+    "include_subdomain": true,
+    "include_urls": "",
+    "exclude_urls": "",
+    "cursor": "example"
+  }'
+```
+
+#### POST /v1/scrapes
+
+Initiate a web page scrape
+
+**Price:** $0.01 per request
+
+**Network:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/scrapes' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url_to_scrape": "example",
+    "wait_before_scraping": "",
+    "formats": "",
+    "remove_css_selectors": "example",
+    "actions": "",
+    "country": "example",
+    "transformer": "example",
+    "remove_images": true,
+    "remove_class_names": "",
+    "parser": "",
+    "llm_extract": "",
+    "links_on_page": "",
+    "screen_size": "",
+    "metadata": ""
+  }'
+```
+
+#### POST /v1/crawls
+
+Starts a new crawl. You receive a `id` to track the progress. The operation may take 1-10 mins depending upon the site and depth and pages parameters.
+
+**Price:** Dynamic - calculated per request based on usage
+
+<Note>
+  This endpoint uses dynamic pricing. The actual cost is determined by your request parameters and will be shown in the 402 Payment Required response before processing.
+</Note>
+
+**Network:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/crawls' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "start_url": "example",
+    "max_pages": 123,
+    "include_urls": "",
+    "exclude_urls": "",
+    "max_depth": 123,
+    "include_external": true,
+    "include_subdomain": true,
+    "search_query": "example",
+    "top_n": 123,
+    "webhook_url": "example",
+    "timeout": 123
+  }'
+```
+
+#### POST /v1/answers
+
+The AI will perform actions like searching and browsing web pages to find the answer to the provided task. Execution time is 3-30s depending upon complexity. For longer tasks, use the agent endpoint instead.
+
+**Price:** $0.05 per request
+
+**Network:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/answers' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "task": "example",
+    "json_format": ""
+  }'
+```
+
+### Standard Endpoints
+
+These endpoints do not require payment:
+
+- **GET** `/v1/crawls/{crawl_id}` - Fetches information about a specific crawl.
+- **GET** `/v1/batches/{batch_id}/items` - Retrieves the list of items processed for a batch. You can then use the `retrieve_id` to get the content with the Retrieve Endpoint
+- **GET** `/v1/crawls/{crawl_id}/pages` - Fetches the list of pages for a specific crawl.
+- **GET** `/v1/batches/{batch_id}` - Retrieves the status and progress information about a batch. To retrieve the content for a batch, see here
+- **GET** `/v1/answers/{answer_id}` - This endpoint retrieves a previously completed answer by its ID.
+- **GET** `/v1/scrapes/{scrape_id}` - Can be used to retrieve response for a scrape.
+- **GET** `/v1/retrieve` - Retrieve page content of processed batches and crawls urls.
+
+---
+
+## How x402 Works
+
+The payment flow is handled automatically by the x402 SDK:
+
+1. **Make Request** - Send a request to the endpoint
+2. **Payment Required** - Server responds with payment requirements (402 status)
+3. **Auto-Payment** - SDK automatically creates and submits payment
+4. **Get Response** - Receive your API response
+
+## Getting Started
+
+Install the x402 SDK for your language:
+
+```bash
+# Node.js
+npm install x402-fetch viem
+
+# Python  
+pip install x402 eth-account
+```
+
+## Example Usage
+
+<CodeGroup>
+```javascript Node.js
+import { wrapFetchWithPayment } from "x402-fetch";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY);
+const fetchWithPayment = wrapFetchWithPayment(fetch, account);
+
+// Make a paid request - payment is automatic
+const response = await fetchWithPayment("https://api.olostep.com/x402/v1/maps", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ /* your data */ })
+});
+
+const result = await response.json();
+console.log(result);
+```
+
+```python Python
+import requests
+from eth_account import Account
+from x402.clients.requests import x402_http_adapter
+
+account = Account.from_key(os.getenv("PRIVATE_KEY"))
+session = requests.Session()
+adapter = x402_http_adapter(account)
+session.mount("https://", adapter)
+
+# Make a paid request - payment is automatic
+response = session.post(
+    "https://api.olostep.com/x402/v1/maps",
+    json={"key": "value"}
+)
+
+print(response.json())
+```
+</CodeGroup>
+
+## Learn More
+
+- [x402 Protocol Docs](https://x402.org)
+- [Coinbase x402 Guide](https://docs.cdp.coinbase.com/x402/)
+
+---
+
+Powered by [Orthogonal](https://orthogonal.sh)
