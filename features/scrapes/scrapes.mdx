@@ -214,9 +214,11 @@ Olostep has a few pre-built parsers for [popular websites](https://www.olostep.c
 
 Parsers are self-healing and will update themselves to the latest version of the website.
 
-### Using LLM extraction (schema or prompt)
+### Using LLM extraction (schema and/or prompt)
 
-Provide `llm_extract` with either a JSON Schema (`schema`) or a natural language instruction (`prompt`).
+Provide `llm_extract` with a JSON Schema (`schema`) and/or a natural language instruction (`prompt`). You can pass both parameters, but if both are provided, `schema` takes precedence.
+
+Instead, if you just pass a `prompt`, the LLM will extract the data based on the prompt and will decide the data structure on its own.
 
 <CodeGroup>
 
