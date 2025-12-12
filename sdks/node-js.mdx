@@ -1,6 +1,289 @@
 ---
 sidebarTitle: 'NodeJS'
 title: 'Olostep NodeJS SDK'
-icon: javascript
+icon: javascript | typescript
 description: 'Official NodeJS SDK to search, extract and structure data from the Web'
 ---
+
+**NPM Package**: [olostep](https://www.npmjs.com/package/olostep) 
+
+## Getting started
+
+```bash
+npm install olostep
+```
+
+```ts
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
+
+// Minimal scrape example
+const result = await client.scrapes.create('https://example.com');
+console.log(result.id, result.html_content);
+```
+
+## Usage
+
+### Scraping
+
+Scrape a single URL with various options:
+
+```ts
+import Olostep, {Format} from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// Simple scrape
+const scrape = await client.scrapes.create('https://example.com');
+
+// With multiple formats
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  formats: [Format.HTML, Format.MARKDOWN, Format.TEXT],
+  waitBeforeScraping: 1000,
+  removeImages: true
+});
+
+// Access the content
+console.log(scrape.html_content);
+console.log(scrape.markdown_content);
+
+// Get scrape by ID
+const fetched = await client.scrapes.get(scrape.id);
+```
+
+### Batch Processing
+
+Process multiple URLs in a single batch:
+
+```ts
+// Using URL strings (custom IDs auto-generated)
+const batch = await client.batches.create([
+  'https://example.com',
+  'https://example.org',
+  'https://example.net'
+]);
+
+// Or with explicit custom IDs
+const batch = await client.batches.create([
+  {url: 'https://example.com', customId: 'site-1'},
+  {url: 'https://example.org', customId: 'site-2'}
+]);
+
+console.log(`Batch ${batch.id} created with ${batch.total_urls} URLs`);
+
+// Wait for completion
+await batch.waitTillDone({
+  checkEveryNSecs: 5,
+  timeoutSeconds: 120
+});
+
+// Get batch info
+const info = await batch.info();
+console.log(info);
+
+// Stream individual results
+for await (const item of batch.items()) {
+  console.log(item.customId);
+}
+```
+
+### Crawling
+
+Crawl an entire website:
+
+```ts
+const crawl = await client.crawls.create({
+  url: 'https://example.com',
+  maxPages: 100,
+  maxDepth: 3,
+  includeUrls: ['*/blog/*'],
+  excludeUrls: ['*/admin/*']
+});
+
+console.log(`Crawl ${crawl.id} started`);
+
+// Wait for completion
+await crawl.waitTillDone({
+  checkEveryNSecs: 10,
+  timeoutSeconds: 300
+});
+
+// Get crawl info
+const info = await crawl.info();
+console.log(`Crawled ${info.pages_crawled} pages`);
+
+// Stream crawled pages
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.status_code);
+}
+```
+
+### Site Mapping
+
+Generate a sitemap of URLs from a website:
+
+```ts
+const map = await client.maps.create({
+  url: 'https://example.com',
+  topN: 100,
+  includeSubdomain: true,
+  searchQuery: 'blog posts'
+});
+
+console.log(`Map ${map.id} created`);
+
+// Stream URLs
+for await (const url of map.urls()) {
+  console.log(url);
+}
+
+// Get map info
+const info = await map.info();
+```
+
+### Content Retrieval
+
+Retrieve previously scraped content:
+
+```ts
+// Get content in specific format(s)
+const content = await client.retrieve(retrieveId, Format.MARKDOWN);
+console.log(content.markdown_content);
+
+// Multiple formats
+const content = await client.retrieve(retrieveId, [
+  Format.HTML,
+  Format.MARKDOWN
+]);
+```
+
+### Advanced Options
+
+#### Custom Actions
+
+Perform browser actions before scraping:
+
+```ts
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  actions: [
+    {type: 'wait', milliseconds: 2000},
+    {type: 'click', selector: '#load-more'},
+    {type: 'scroll', distance: 1000},
+    {type: 'fill_input', selector: '#search', value: 'query'}
+  ]
+});
+```
+
+#### Geographic Location
+
+Scrape from different countries using predefined country codes or any valid country code string:
+
+```ts
+import Olostep, {Country} from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// Using predefined enum values (US, DE, FR, GB, SG)
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  country: Country.DE  // Germany
+});
+
+// Or use any valid country code as a string
+const scrape2 = await client.scrapes.create({
+  url: 'https://example.com',
+  country: 'jp'  // Japan
+});
+```
+
+#### LLM Extraction
+
+Extract structured data using LLMs:
+
+```ts
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  llmExtract: {
+    schema: {
+      title: 'string',
+      price: 'number',
+      description: 'string'
+    },
+    // Optionally provide a prompt to guide extraction
+    prompt: 'Extract product information from this page'
+  }
+});
+```
+
+### Client Configuration
+
+```ts
+import Olostep from 'olostep';
+
+const client = new Olostep({
+  apiKey: 'your_api_key',
+  apiBaseUrl: 'https://api.olostep.com/v1',  // optional
+  timeoutMs: 150000,  // 150 seconds (optional)
+  retry: {
+    maxRetries: 3,
+    initialDelayMs: 1000
+  },
+  userAgent: 'MyApp/1.0'  // optional
+});
+```
+
+### Feature highlights
+
+- Async-first client with full TypeScript support.
+- Type-safe inputs using TypeScript enums and interfaces (Formats, Countries, Actions, etc.).
+- Rich resource namespaces with both shorthand calls (`client.scrapes.create()`) and explicit methods (`client.scrapes.get()`).
+- Shared transport layer with retries, timeouts, and JSON decoding.
+- Comprehensive error hierarchy aligned with the Python SDK.
+
+## Project structure
+
+```
+olostep/
+├─ src/
+│  ├─ client.ts              # Client + facade wiring
+│  ├─ config.ts              # Option resolution & defaults
+│  ├─ errors.ts              # Exception hierarchy
+│  ├─ http/transport.ts      # Fetch-based HTTP transport with retries
+│  ├─ resources/             # Namespaces (scrape, batch, crawl, map, retrieve)
+│  └─ types.ts               # Shared enums and DTOs
+├─ package.json              # NPM metadata + scripts
+├─ tsconfig*.json            # TypeScript build configs
+└─ README.md                 # You are here
+```
+
+## Scripts
+
+- `npm run build` – emit ESM to `dist/`.
+- `npm run lint` – lint the TypeScript sources with ESLint.
+- `npm run check:types` – type-check without emitting files.
+- `npm run clean` – remove the build output.
+
+## Examples
+
+Sample scripts live in `examples/`. Copy `.env.example` to `.env` and set your `OLOSTEP_API_KEY`:
+
+```bash
+cp .env.example .env
+# Edit .env and add your API key
+```
+
+Then run the examples:
+
+```bash
+npx tsx examples/scrape.ts
+npx tsx examples/batch.ts
+npx tsx examples/crawl.ts
+npx tsx examples/map.ts
+npx tsx examples/retrieve.ts <retrieve_id>
+```
+
+They exercise each namespace using the current SDK surface and are a quick way to verify changes manually.
+
