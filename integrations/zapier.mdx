@@ -11,7 +11,7 @@ The Olostep Zapier integration brings powerful web scraping capabilities to Zapi
 
 ## Features
 
-The integration provides 4 powerful actions for automated web data extraction:
+The integration provides 5 powerful actions for automated web data extraction and AI-powered research:
 
 <CardGroup cols={2}>
   <Card title="Scrape Website" icon="file-lines">
@@ -28,6 +28,10 @@ The integration provides 4 powerful actions for automated web data extraction:
   
   <Card title="Create Map" icon="map">
     Extract all URLs from a website for site structure analysis and content discovery
+  </Card>
+
+  <Card title="Ask AI Answer" icon="brain">
+    Get AI-powered answers with citations from web sources or your provided URLs
   </Card>
 </CardGroup>
 
@@ -378,6 +382,117 @@ Extract all URLs from a website for content discovery and site structure analysi
     
     **Action:** Slack - Send Message
     - Report total pages found
+  </Accordion>
+</AccordionGroup>
+
+### Ask AI Answer
+
+Get AI-powered answers to questions using web search or your provided context URLs. Perfect for research automation, content generation, and data analysis.
+
+**Use Cases:**
+- Research automation with citations
+- Summarize content from multiple URLs
+- Generate reports with source references
+- Answer questions using specific web pages
+- Content analysis and extraction
+
+**Configuration:**
+
+<ParamField path="Question" type="string" required>
+  The question you want Olostep Answers to respond to
+</ParamField>
+
+<ParamField path="Context URLs (JSON Array)" type="string">
+  Optional JSON array of URLs to ground the answer (e.g., ["https://example.com/page1", "https://example.com/page2"])
+</ParamField>
+
+<ParamField path="Search Query" type="string">
+  Optional query to retrieve sources from the web if no context URLs are provided (e.g., "site:example.com pricing")
+</ParamField>
+
+<ParamField path="Number of Sources" type="integer">
+  Limit the number of sources used for generating the answer
+</ParamField>
+
+<ParamField path="Format" type="dropdown" default="Markdown">
+  Choose answer format: Markdown, JSON, or Plain Text
+</ParamField>
+
+<ParamField path="Include Citations" type="boolean" default="true">
+  Whether to include citations/sources in the response
+</ParamField>
+
+**Output Fields:**
+- Answer ID
+- Object Type
+- Question
+- Answer (Text)
+- Answer (Markdown)
+- Answer (JSON)
+- Citations (JSON array with URLs, titles, snippets)
+- Created Timestamp
+- Format
+- Context URLs
+- Search Query
+- Number of Sources
+
+**Example Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Automated Research Report">
+    **Trigger:** Slack - New Message (containing research request)
+    
+    **Action:** Olostep - Ask AI Answer
+    - Question: \{\{Slack message\}\}
+    - Search Query: Related search terms
+    - Number of Sources: 5
+    - Format: Markdown
+    - Include Citations: true
+    
+    **Action:** Slack - Send Message
+    - Reply with AI-generated answer and citations
+  </Accordion>
+
+  <Accordion title="Content Summarization from URLs">
+    **Trigger:** Google Sheets - New Row (with URLs)
+    
+    **Action:** Olostep - Ask AI Answer
+    - Question: "Summarize the key points from these pages"
+    - Context URLs: \{\{URLs from sheet\}\}
+    - Format: Markdown
+    - Include Citations: true
+    
+    **Action:** Notion - Create Page
+    - Save summary with source links
+  </Accordion>
+
+  <Accordion title="Competitive Intelligence">
+    **Trigger:** Schedule - Weekly
+    
+    **Action:** Olostep - Ask AI Answer
+    - Question: "What are the latest product updates and pricing changes?"
+    - Search Query: site:competitor.com news OR updates
+    - Number of Sources: 10
+    - Format: JSON
+    
+    **Action:** Airtable - Create Record
+    - Store competitive insights
+    
+    **Action:** Email - Send Report
+    - Send weekly competitive analysis
+  </Accordion>
+
+  <Accordion title="FAQ Auto-Response">
+    **Trigger:** Typeform - New Response
+    
+    **Action:** Olostep - Ask AI Answer
+    - Question: \{\{Customer question\}\}
+    - Context URLs: ["https://yoursite.com/docs", "https://yoursite.com/faq"]
+    - Format: Text
+    - Include Citations: true
+    
+    **Action:** Gmail - Send Email
+    - Reply to customer with AI-generated answer
   </Accordion>
 </AccordionGroup>
 
