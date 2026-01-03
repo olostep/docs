@@ -1,0 +1,298 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Schedules API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "Create Schedule",
+        "description": "Creates a new schedule to execute API calls at specified times. Supports both one-time executions and recurring schedules using cron expressions. You can also use natural language text to generate cron expressions automatically. The endpoint can be any URL (not limited to Olostep endpoints), and the payload can contain any JSON structure you want to send.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": ["GET", "POST"],
+                    "description": "HTTP method for the scheduled API call. Must be either GET or POST."
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The endpoint URL to call when the schedule executes. Can be any URL - not limited to Olostep endpoints. For Olostep endpoints, you can use short form (e.g., 'v1/scrapes') or full URL."
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "The payload to send with the API call. Can contain any JSON structure you need. For GET requests, this is typically empty. For POST requests, this should contain the data you want to send to the endpoint.",
+                    "default": {}
+                  },
+                  "cronExpression": {
+                    "type": "string",
+                    "description": "Cron expression in AWS EventBridge format (6 fields: minute hour day month day-of-week year) for recurring schedules. Required for recurring schedules. Mutually exclusive with executeAt and text."
+                  },
+                  "executeAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 datetime string for one-time schedule execution. Must be a valid future datetime. Required for one-time schedules. Mutually exclusive with cronExpression."
+                  },
+                  "expressionTimezone": {
+                    "type": "string",
+                    "description": "IANA timezone identifier (e.g., 'UTC', 'America/New_York', 'Europe/London') for the schedule. Required for recurring schedules, optional for one-time schedules."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Natural language text to automatically generate a cron expression. The system will convert your text into a valid cron expression. Examples: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'. Mutually exclusive with cronExpression and executeAt."
+                  }
+                },
+                "required": ["method", "endpoint"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Schedule created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique schedule identifier"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": ["recurring", "onetime"],
+                      "description": "Type of schedule: 'recurring' for cron-based schedules, 'onetime' for single execution schedules"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": ["GET", "POST"],
+                      "description": "HTTP method for the scheduled call"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "The endpoint URL that will be called"
+                    },
+                    "cronExpression": {
+                      "type": "string",
+                      "description": "Cron expression (only present for recurring schedules)"
+                    },
+                    "executeAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Execution datetime (only present for one-time schedules)"
+                    },
+                    "expressionTimezone": {
+                      "type": "string",
+                      "description": "Timezone for the schedule"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "ISO 8601 datetime when the schedule was created"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to incorrect or missing parameters. Common errors: invalid method, missing endpoint, invalid cronExpression, invalid executeAt datetime, invalid timezone, or invalid schedule_id format."
+          },
+          "401": {
+            "description": "Invalid API key. Try double-checking it or reaching out to info@olostep.com if you're facing issues."
+          },
+          "500": {
+            "description": "Internal server error while creating schedule."
+          }
+        }
+      },
+      "get": {
+        "summary": "List Schedules",
+        "description": "Retrieves all schedules for your team. Returns a list of schedules with their configuration, status, and metadata.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with list of schedules.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "Team identifier"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "Unique schedule identifier"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": ["recurring", "onetime"],
+                            "description": "Type of schedule"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "The endpoint URL"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "The payload to send with the API call"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "Cron expression (only present for recurring schedules)"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Execution datetime (only present for one-time schedules)"
+                          },
+                          "expressionTimezone": {
+                            "type": "string",
+                            "description": "Timezone for the schedule"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Natural language text used to generate cron expression"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "Internal schedule name in EventBridge"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "Schedule group name"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 datetime when the schedule was created"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 datetime when the schedule was last updated"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": ["ENABLED", "DELETED"],
+                            "description": "Current state of the schedule"
+                          }
+                        }
+                      },
+                      "description": "Array of schedule objects"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Total number of schedules"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key."
+          },
+          "500": {
+            "description": "Internal server error while fetching schedules."
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "delete": {
+        "summary": "Delete Schedule",
+        "description": "Deletes a schedule by its ID. This will stop any future executions and remove the schedule from EventBridge.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the schedule to be deleted. Must start with 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "The ID of the deleted schedule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to invalid schedule_id format. Schedule ID must start with 'schedule_'."
+          },
+          "401": {
+            "description": "Invalid API key."
+          },
+          "404": {
+            "description": "Schedule not found for the provided ID."
+          },
+          "500": {
+            "description": "Internal server error while deleting schedule."
+          }
+        }
+      }
+    }
+  }
+}
+
