@@ -468,8 +468,8 @@
         },
         "/v1/batches/{batch_id}/items": {
             "get": {
-                "summary": "Retrieve batch items",
-                "description": "Fetches the list of items for a specific batch ID.",
+                "summary": "Retrieve completed or failed items list optionally with content for a specific batch",
+                "description": "Fetches the list of items and content that  as per the requested status for a specific batch ID.",
                 "security": [
                     {
                         "Authorization": []
@@ -491,14 +491,14 @@
                             "type": "string",
                             "enum": ["completed", "failed"]
                         },
-                        "description": "Status of items to retrieve."
+                        "description": "Status of the URLs to retrieve (completed or failed)."
                     },
                     {
                         "name": "cursor",
                         "in": "query",
                         "required": false,
                         "schema": { "type": "integer" },
-                        "description": "Pagination cursor. Start with 0."
+                        "description": "Pagination cursor. Omit this parameter on the first request. For subsequent requests, use the `cursor` value from the previous response. See [Pagination](/api-reference/common/pagination) for details."
                     },
                     {
                         "name": "limit",
@@ -532,7 +532,7 @@
                                             }
                                         },
                                         "items_count": { "type": "integer" },
-                                        "cursor": { "type": "integer" }
+                                        "cursor": { "type": "integer", "description": "Pagination cursor. Present when there are more results available. Use this value in the next request's `cursor` parameter. See [Pagination](/api-reference/common/pagination) for details." }
                                     }
                                 }
                             }

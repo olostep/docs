@@ -328,7 +328,7 @@
             "in": "query",
             "required": false,
             "schema": { "type": "integer" },
-            "description": "Pagination cursor."
+            "description": "Pagination cursor. Omit this parameter on the first request. For subsequent requests, use the `cursor` value from the previous response. See [Pagination](/api-reference/common/pagination) for details."
           },
           {
             "name": "limit",
@@ -361,7 +361,7 @@
                         }
                       }
                     },
-                    "cursor": { "type": "integer" }
+                    "cursor": { "type": "integer", "description": "Pagination cursor. Present when there are more results available. Use this value in the next request's `cursor` parameter. See [Pagination](/api-reference/common/pagination) for details." }
                   }
                 }
               }

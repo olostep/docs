@@ -1,0 +1,127 @@
+---
+title: 'Pagination'
+sidebarTitle: 'Pagination'
+description: 'How to paginate through large result sets using cursor-based pagination'
+icon: 'arrow-right'
+---
+
+Many endpoints return large datasets that are paginated using a **cursor-based pagination** mechanism. This allows you to efficiently retrieve all results by making multiple requests.
+
+## How It Works
+
+Pagination uses two query parameters:
+
+- **`cursor`**: A token that indicates where to start fetching results. On the first request, **omit the `cursor` parameter**. For subsequent requests, use the `cursor` value from the previous response. See the [`cursor` parameter](/api-reference/batches/items#query-cursor) documentation for details.
+- **`limit`**: The maximum number of results to return per request (recommended: 10-50 for batches/crawls).
+
+When there are more results available, the response includes a `cursor` field. Continue making requests with the new `cursor` value until the `cursor` field is absent, indicating all results have been retrieved.
+
+---
+
+## Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+API_URL = 'https://api.olostep.com/v1'
+API_KEY = '<your_token>'
+HEADERS = {'Authorization': f'Bearer {API_KEY}'}
+
+def get_batch_items(batch_id, cursor=None, limit=10):
+    params = {'limit': limit}
+    if cursor:
+        params['cursor'] = cursor
+    response = requests.get(
+        f'{API_URL}/batches/{batch_id}/items',
+        headers=HEADERS,
+        params=params
+    )
+    return response.json()
+
+# Paginate through all items
+cursor = None
+while True:
+    result = get_batch_items('batch_abc123', cursor=cursor, limit=10)
+    
+    for item in result['items']:
+        print(f"Custom ID: {item['custom_id']}, URL: {item['url']}")
+    
+    if 'cursor' not in result:
+        break
+    
+    cursor = result['cursor']
+```
+
+```js Node.js
+const API_URL = 'https://api.olostep.com/v1';
+const API_KEY = '<your_token>';
+
+async function getBatchItems(batchId, cursor = null, limit = 10) {
+  const params = new URLSearchParams();
+  if (cursor !== null) params.append('cursor', cursor);
+  params.append('limit', limit);
+  
+  const response = await fetch(
+    `${API_URL}/batches/${batchId}/items?${params}`,
+    { headers: { 'Authorization': `Bearer ${API_KEY}` } }
+  );
+  return response.json();
+}
+
+// Paginate through all items
+let cursor = null;
+while (true) {
+  const result = await getBatchItems('batch_abc123', cursor, 10);
+  
+  result.items.forEach(item => {
+    console.log(`Custom ID: ${item.custom_id}, URL: ${item.url}`);
+  });
+  
+  if (result.cursor === undefined) break;
+  cursor = result.cursor;
+}
+```
+
+```bash cURL
+# First request (omit cursor parameter)
+curl -G "https://api.olostep.com/v1/batches/batch_abc123/items" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "limit=10"
+
+# Subsequent requests use the cursor from previous response
+curl -G "https://api.olostep.com/v1/batches/batch_abc123/items" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "cursor=10" \
+  --data-urlencode "limit=10"
+```
+
+</CodeGroup>
+
+---
+
+## Best Practices
+
+1. **Omit `cursor` on first request**: For batches and crawls, omit the `cursor` parameter entirely on the first request. Only include it when continuing from a previous response.
+
+2. **Use appropriate limits**: 
+   - Batches/Crawls: 10-50 items per request
+   - Maps: Handled automatically (up to 10MB per response)
+
+3. **Check for cursor**: Always check if a `cursor` field exists in the response before making the next request. If it's absent, you've retrieved all results.
+
+4. **Handle errors**: Implement retry logic for network errors, but don't retry with the same cursor if you've already processed those results.
+
+5. **Streaming**: For crawls, you can start paginating while the crawl is `in_progress` to stream results as they become available. See the [`cursor` parameter](/api-reference/crawls/pages#query-cursor) documentation for details.
+
+---
+
+## Availability
+
+| Endpoint | Cursor Type | Limit Parameter | Notes |
+|----------|-------------|-----------------|-------|
+| [Batches Items](/api-reference/batches/items) | Integer | Yes (10-50 recommended) | See [`cursor` parameter](/api-reference/batches/items#query-cursor) |
+| [Crawl Pages](/api-reference/crawls/pages) | Integer | Yes (10-50 recommended) | See [`cursor` parameter](/api-reference/crawls/pages#query-cursor) |
+| [Maps](/api-reference/maps/create) | String | No (automatic) | Auto-paginates at 10MB |
+
