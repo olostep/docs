@@ -1,0 +1,68 @@
+---
+title: 'Too Many Requests'
+sidebarTitle: 'Too Many Requests'
+description: 'HTTP 429 - Rate limit exceeded'
+---
+
+<Info>
+This page documents the `too_many_requests` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 429
+
+Rate limit exceeded. You're making too many requests in a given time period.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `rate_limit_exceeded` | Request rate limit has been exceeded |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "rate_limit_exceeded",
+  "type": "https://docs.olostep.com/api-reference/errors/too_many_requests",
+  "status": 429,
+  "title": "Too Many Requests",
+  "detail": "You've reached your rate limits for this API. Please try again later.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Rate Limits
+
+Rate limits vary by plan. Check your current limits in your [dashboard](https://olostep.com/dashboard).
+
+## Resolution
+
+1. **Implement exponential backoff** - Wait and retry with increasing delays
+2. **Use batch processing** - Process multiple URLs in a single batch request
+3. **Spread requests over time** - Avoid bursting all requests at once
+4. **Contact support** - Request higher rate limits if needed
+
+## Example: Exponential Backoff
+
+```python
+import time
+import random
+
+def request_with_backoff(make_request, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            return make_request()
+        except RateLimitError:
+            if attempt == max_retries - 1:
+                raise
+            
+            # Exponential backoff with jitter
+            delay = (2 ** attempt) + random.uniform(0, 1)
+            time.sleep(delay)
+```
+

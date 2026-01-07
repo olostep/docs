@@ -15,6 +15,103 @@
         "type": "http",
         "scheme": "bearer"
       }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "description": "RFC 7807 Problem Details error response",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique error identifier (e.g., error_4z93xmi8vw)"
+          },
+          "object": {
+            "type": "string",
+            "enum": ["error"],
+            "description": "Always 'error'"
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code for programmatic handling"
+          },
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI reference identifying the problem type"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code"
+          },
+          "title": {
+            "type": "string",
+            "description": "Short, human-readable summary of the problem type"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Human-readable explanation of the specific error"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp when the error occurred"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Any user-provided metadata from the original request"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Field-level validation errors (only for validation errors)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "loc": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "type": "string" },
+                      { "type": "integer" }
+                    ]
+                  },
+                  "description": "Path to the field with the error"
+                },
+                "msg": {
+                  "type": "string",
+                  "description": "Error message"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Error type code"
+                }
+              }
+            }
+          }
+        },
+        "required": ["object", "id", "code", "type", "status", "title", "detail", "created"]
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Set of key-value pairs for storing additional information about an object. Follows Stripe's approach with validation rules: max 50 keys, key max 40 characters (no square brackets), value max 500 characters, all values stored as strings.",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Metadata value (max 500 characters). Numbers and booleans are automatically converted to strings."
+        },
+        "maxProperties": 50,
+        "example": {
+          "order_id": "12345",
+          "customer_name": "John Doe",
+          "priority": "high",
+          "processed": "true"
+        },
+        "x-validation-rules": {
+          "max_keys": 50,
+          "key_max_length": 40,
+          "key_forbidden_chars": ["[", "]"],
+          "value_max_length": 500,
+          "value_types": ["string", "number (coerced)", "boolean (coerced)"]
+        }
+      }
     }
   },
   "paths": {
@@ -288,8 +385,7 @@
                     }
                   },
                   "metadata": {
-                    "type": "object",
-                    "description": "User-defined metadata. Not supported yet"
+                    "$ref": "#/components/schemas/Metadata"
                   }
                 },
                 "required": [
@@ -320,8 +416,7 @@
                       "description": "Created epoch"
                     },
                     "metadata": {
-                      "type": "object",
-                      "description": "User-defined metadata."
+                      "$ref": "#/components/schemas/Metadata"
                     },
                     "url_to_scrape": {
                       "type": "string",
@@ -380,16 +475,193 @@
             }
           },
           "400": {
-            "description": "Bad request due to incorrect or missing parameters."
+            "description": "Bad request due to incorrect or missing parameters. See [Bad Request](/api-reference/errors/bad_request) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "The provided URL is invalid. This often means there's a white space or no protocol (http/https) was passed along",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Unauthorized",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "402": {
-            "description": "Payment required due to invalid API key."
+            "description": "Payment required due to invalid API key or exhausted credits. See [Payment Required](/api-reference/errors/payment_required) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "credits_exhausted",
+                  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+                  "status": 402,
+                  "title": "Payment Required",
+                  "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/dashboard/",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied due to restrictions (blacklisted domain, approval required, unsupported file type). See [Forbidden](/api-reference/errors/forbidden) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "blacklisted_domain",
+                  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+                  "status": 403,
+                  "title": "Forbidden",
+                  "detail": "The domain you're trying to scrape is currently blacklisted. This limitation can be removed for your account. Reach out to info@olostep.com to remove this limitation.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not found error when the requested scrape is not found."
+            "description": "Resource not found. The `detail` field specifies which resource was not found. See [Not Found](/api-reference/errors/not_found) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "parser_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "No parser with this name and/or version found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. See [Too Many Requests](/api-reference/errors/too_many_requests) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "rate_limit_exceeded",
+                  "type": "https://docs.olostep.com/api-reference/errors/too_many_requests",
+                  "status": 429,
+                  "title": "Too Many Requests",
+                  "detail": "You've reached your rate limits for this API. Please try again later.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Internal Server Error",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Service unavailable or at capacity. See [Service Unavailable](/api-reference/errors/service_unavailable) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "max_capacity_reached",
+                  "type": "https://docs.olostep.com/api-reference/errors/service_unavailable",
+                  "status": 501,
+                  "title": "Service Unavailable",
+                  "detail": "We have currently reached our maximum capacity for this feature flag. Consider retrying in a few minutes.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request timed out. See [Gateway Timeout](/api-reference/errors/gateway_timeout) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "request_timeout",
+                  "type": "https://docs.olostep.com/api-reference/errors/gateway_timeout",
+                  "status": 504,
+                  "title": "Gateway Timeout",
+                  "detail": "Your request timed out. Try increasing the timeout and making another request.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           }
         }
       }
@@ -435,8 +707,7 @@
                       "description": "Created epoch"
                     },
                     "metadata": {
-                      "type": "object",
-                      "description": "User-defined metadata."
+                      "$ref": "#/components/schemas/Metadata"
                     },
                     "url_to_scrape": {
                       "type": "string",
@@ -493,16 +764,88 @@
             }
           },
           "400": {
-            "description": "Bad request due to incorrect or missing parameters."
+            "description": "Bad request due to incorrect or missing parameters. See [Bad Request](/api-reference/errors/bad_request) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Invalid scrape ID format",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
-          "402": {
-            "description": "Payment required due to invalid API key."
+          "401": {
+            "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Unauthorized",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not found error when the requested scrape is not found."
+            "description": "Resource not found. The `detail` field specifies which resource was not found. See [Not Found](/api-reference/errors/not_found) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "scrape_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Scrape not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Internal Server Error",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           }
         }
       }

@@ -1,0 +1,51 @@
+---
+title: 'Internal Server Error'
+sidebarTitle: 'Internal Error'
+description: 'HTTP 500 - An unexpected error occurred on the server'
+---
+
+<Info>
+This page documents the `internal_error` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 500
+
+An unexpected error occurred on the server. This is not caused by your request but by an issue on our end.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `internal_server_error` | Generic internal server error |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "internal_server_error",
+  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+  "status": 500,
+  "title": "Internal Server Error",
+  "detail": "An unexpected error occurred",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Resolution
+
+1. **Retry the request** - Many internal errors are transient
+2. **Implement exponential backoff** - Wait before retrying
+3. **Contact support** - If the error persists, contact support with the error `id`
+
+## Reporting Issues
+
+When reporting an internal error, please include:
+- The error `id` from the response
+- The timestamp of the request
+- The endpoint and parameters used (excluding sensitive data)
+

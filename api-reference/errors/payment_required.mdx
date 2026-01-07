@@ -1,0 +1,70 @@
+---
+title: 'Payment Required'
+sidebarTitle: 'Payment Required'
+description: 'HTTP 402 - Valid credentials but payment/credits issue'
+---
+
+<Info>
+This page documents the `payment_required` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 402
+
+Valid credentials were provided but a payment or credits issue prevents the request from being processed.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_api_key` | API key is invalid or associated with an inactive account |
+| `credits_exhausted` | Account has consumed all available credits |
+
+## Example Responses
+
+### Credits Exhausted
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "credits_exhausted",
+  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+  "status": 402,
+  "title": "Payment Required",
+  "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/dashboard/",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+### Invalid API Key
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "invalid_api_key",
+  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+  "status": 402,
+  "title": "Payment Required",
+  "detail": "Your API key is invalid",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Common Causes
+
+- Account has no remaining credits
+- Subscription has expired
+- Payment method issues
+
+## Resolution
+
+1. Check your credit balance at [dashboard](https://olostep.com/dashboard)
+2. Upgrade your plan if credits are exhausted
+3. Update payment method if there are billing issues
+4. Contact support if you believe this is an error
+

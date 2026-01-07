@@ -1,0 +1,52 @@
+---
+title: 'Unauthorized'
+sidebarTitle: 'Unauthorized'
+description: 'HTTP 401 - Authentication credentials are missing or invalid'
+---
+
+<Info>
+This page documents the `unauthorized` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 401
+
+Authentication credentials are missing or invalid. The API could not verify your identity.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_api_key` | The API key provided is not valid |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "invalid_api_key",
+  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+  "status": 401,
+  "title": "Unauthorized",
+  "detail": "Your API key is invalid",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Common Causes
+
+- Missing `Authorization` header
+- Invalid API key format
+- Revoked or expired API key
+- Malformed bearer token
+
+## Resolution
+
+1. Check your API key at [dashboard](https://olostep.com/dashboard)
+2. Ensure the `Authorization` header uses the format: `Bearer YOUR_API_KEY`
+3. Verify there are no extra spaces or characters in your API key
+4. Generate a new API key if the current one is compromised
+
