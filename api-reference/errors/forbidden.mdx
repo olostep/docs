@@ -1,0 +1,87 @@
+---
+title: 'Forbidden'
+sidebarTitle: 'Forbidden'
+description: 'HTTP 403 - Request understood but refused due to access restrictions'
+---
+
+<Info>
+This page documents the `forbidden` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 403
+
+The request was understood but refused due to access restrictions. Your account may not have permission to access the requested resource or feature.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `approval_required` | Feature requires prior approval before use |
+| `blacklisted_domain` | The target domain is currently blocked |
+| `unsupported_file_type` | The file type is not supported for your account |
+
+## Example Responses
+
+### Blacklisted Domain
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "blacklisted_domain",
+  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+  "status": 403,
+  "title": "Forbidden",
+  "detail": "The domain you're trying to scrape is currently blacklisted. This limitation can be removed for your account. Reach out to info@olostep.com to remove this limitation.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+### Approval Required
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "approval_required",
+  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+  "status": 403,
+  "title": "Forbidden",
+  "detail": "You don't have access to this feature. Please reach out to info@olostep.com to get approved",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+### Unsupported File Type
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "unsupported_file_type",
+  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+  "status": 403,
+  "title": "Forbidden",
+  "detail": "This type of request is not currently supported for all accounts. Reach out to info@olostep.com to have it enabled for your account",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Common Causes
+
+- Attempting to scrape a blacklisted domain
+- Trying to use a feature that requires approval (e.g., Instagram, LinkedIn, Reddit)
+- Accessing restricted file types (e.g., certain PDFs)
+- Using a parser that requires special access
+
+## Resolution
+
+1. Contact support at info@olostep.com to request access
+2. Provide details about your use case
+3. Wait for approval before retrying the request
+

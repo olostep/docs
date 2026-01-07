@@ -9,15 +9,114 @@
             "url": "https://api.olostep.com"
         }
     ],
-    "components": {
-        "securitySchemes": {
-            "Authorization": {
-                "type": "http",
-                "scheme": "bearer"
-            }
-        }
-    },
     "paths": {
+        "/v1/batches/recent": {
+            "get": {
+                "summary": "List recent batches",
+                "description": "Fetches the list of recent batches for the authenticated user.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 50,
+                            "maximum": 100
+                        },
+                        "description": "Maximum number of batches to return (default 50, max 100)."
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by source (optional)."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with list of recent batches.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "object": {
+                                            "type": "string",
+                                            "enum": ["list"]
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": { "type": "string" },
+                                                    "object": { "type": "string" },
+                                                    "status": { "type": "string" },
+                                                    "created": { "type": "number" },
+                                                    "total_urls": { "type": "number" },
+                                                    "completed_urls": { "type": "number" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "invalid_api_key",
+                                    "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                                    "status": 401,
+                                    "title": "Unauthorized",
+                                    "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "internal_server_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                                    "status": 500,
+                                    "title": "Internal Server Error",
+                                    "detail": "An unexpected error occurred",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/batches": {
             "post": {
                 "summary": "Start a new batch",
@@ -86,17 +185,20 @@
                                                 "items": {
                                                     "type": "string"
                                                 },
-                                                "description": "Filter extracted links using glob patterns with `include_links`. Use patterns like \"*.pdf\" to match file extensions, \"/blog/*\" for specific paths, or full URLs like \"https://example.com/*\". Supports wildcards (*), character classes ([a-z]), and alternation ({pattern1,pattern2})."
+                                                "description": "Filter extracted links using glob patterns."
                                             },
                                             "exclude_links": {
                                                 "type": "array",
                                                 "items": {
                                                     "type": "string"
                                                 },
-                                                "description": "Filter extracted links using glob patterns with `exclude_links`. Use patterns like \"*.pdf\" to match file extensions, \"/blog/*\" for specific paths, or full URLs like \"https://example.com/*\". Supports wildcards (*), character classes ([a-z]), and alternation ({pattern1,pattern2})."
+                                                "description": "Filter extracted links using glob patterns."
                                             }
                                         },
                                         "description": "Get all the links present on each page in the batch."
+                                    },
+                                    "metadata": {
+                                        "$ref": "#/components/schemas/Metadata"
                                     }
                                 },
                                 "required": [
@@ -114,46 +216,152 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "id": {
-                                            "type": "string",
-                                            "description": "Batch ID"
-                                        },
-                                        "object": {
-                                            "type": "string",
-                                            "description": "The kind of object. \"batch\" for this endpoint."
-                                        },
-                                        "status": {
-                                            "type": "string",
-                                            "description": "`in_progress` or `completed`"
-                                        },
-                                        "created": {
-                                            "type": "number",
-                                            "description": "Created epoch"
-                                        },
-                                        "total_urls": {
-                                            "type": "number",
-                                            "description": "Count of URLs in the batch"
-                                        },
-                                        "completed_urls": {
-                                            "type": "number",
-                                            "description": "Count of completed URLs"
-                                        },
-                                        "parser": {
-                                            "type": "string"
-                                        },
-                                        "country": {
-                                            "type": "string"
-                                        }
+                                        "id": { "type": "string", "description": "Batch ID" },
+                                        "object": { "type": "string", "description": "The kind of object. \"batch\" for this endpoint." },
+                                        "status": { "type": "string", "description": "`in_progress` or `completed`" },
+                                        "created": { "type": "number", "description": "Created epoch" },
+                                        "total_urls": { "type": "number", "description": "Count of URLs in the batch" },
+                                        "completed_urls": { "type": "number", "description": "Count of completed URLs" },
+                                        "parser": { "type": "string" },
+                                        "country": { "type": "string" },
+                                        "metadata": { "$ref": "#/components/schemas/Metadata" }
                                     }
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Bad request due to incorrect or missing parameters."
+                        "description": "Bad request due to incorrect or missing parameters. See [Bad Request](/api-reference/errors/bad_request) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "validation_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                                    "status": 400,
+                                    "title": "Bad Request",
+                                    "detail": "The 'items' array is required and must contain at least one item.",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "invalid_api_key",
+                                    "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                                    "status": 401,
+                                    "title": "Unauthorized",
+                                    "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "402": {
+                        "description": "Payment required - credits exhausted. See [Payment Required](/api-reference/errors/payment_required) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "credits_exhausted",
+                                    "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+                                    "status": 402,
+                                    "title": "Payment Required",
+                                    "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/auth/",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - access denied to this feature. See [Forbidden](/api-reference/errors/forbidden) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "access_denied",
+                                    "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+                                    "status": 403,
+                                    "title": "Forbidden",
+                                    "detail": "You don't have access to this feature. Please reach out to info@olostep.com to get approved",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency conflict - a request with this key is in progress. See [Idempotency Error](/api-reference/errors/idempotency_error) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "idempotency_key_in_progress",
+                                    "type": "https://docs.olostep.com/api-reference/errors/idempotency_error",
+                                    "status": 409,
+                                    "title": "Idempotency Error",
+                                    "detail": "A request with this idempotency key is currently being processed. Please wait and retry.",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity - business rule violation. See [Unprocessable Entity](/api-reference/errors/unprocessable_entity) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "idempotency_key_reuse",
+                                    "type": "https://docs.olostep.com/api-reference/errors/unprocessable_entity",
+                                    "status": 422,
+                                    "title": "Unprocessable Entity",
+                                    "detail": "A request with this idempotency key was already made with different parameters. Idempotency keys must be unique per request.",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     },
                     "500": {
-                        "description": "Internal server error."
+                        "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "internal_server_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                                    "status": 500,
+                                    "title": "Internal Server Error",
+                                    "detail": "An unexpected error occurred",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -172,9 +380,7 @@
                         "name": "batch_id",
                         "in": "path",
                         "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
+                        "schema": { "type": "string" },
                         "description": "The ID of the batch to retrieve information for."
                     }
                 ],
@@ -186,49 +392,76 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "id": {
-                                            "type": "string",
-                                            "description": "Batch ID"
-                                        },
-                                        "object": {
-                                            "type": "string",
-                                            "description": "The kind of object. \"batch\" for this endpoint."
-                                        },
-                                        "status": {
-                                            "type": "string",
-                                            "description": "`in_progress` or `completed`"
-                                        },
-                                        "created": {
-                                            "type": "number",
-                                            "description": "Created epoch"
-                                        },
-                                        "total_urls": {
-                                            "type": "number",
-                                            "description": "Count of URLs in the batch"
-                                        },
-                                        "completed_urls": {
-                                            "type": "number",
-                                            "description": "Count of completed URLs"
-                                        },
-                                        "parser": {
-                                            "type": "string"
-                                        },
-                                        "country": {
-                                            "type": "string"
-                                        }
+                                        "id": { "type": "string", "description": "Batch ID" },
+                                        "object": { "type": "string", "description": "The kind of object. \"batch\" for this endpoint." },
+                                        "status": { "type": "string", "description": "`in_progress` or `completed`" },
+                                        "created": { "type": "number", "description": "Created epoch" },
+                                        "total_urls": { "type": "number", "description": "Count of URLs in the batch" },
+                                        "completed_urls": { "type": "number", "description": "Count of completed URLs" },
+                                        "parser": { "type": "string" },
+                                        "country": { "type": "string" },
+                                        "metadata": { "$ref": "#/components/schemas/Metadata" }
                                     }
                                 }
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad request due to incorrect or missing parameters."
+                    "401": {
+                        "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "invalid_api_key",
+                                    "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                                    "status": 401,
+                                    "title": "Unauthorized",
+                                    "detail": "Your API key is invalid",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Batch not found for the provided ID."
+                        "description": "Batch not found for the provided ID. See [Not Found](/api-reference/errors/not_found) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "batch_not_found",
+                                    "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                                    "status": 404,
+                                    "title": "Not Found",
+                                    "detail": "Batch not found",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     },
                     "500": {
-                        "description": "Internal server error."
+                        "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "internal_server_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                                    "status": 500,
+                                    "title": "Internal Server Error",
+                                    "detail": "An unexpected error occurred",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -247,10 +480,8 @@
                         "name": "batch_id",
                         "in": "path",
                         "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "The ID of the batch to retrieve the list of URLs and retrieve_id for."
+                        "schema": { "type": "string" },
+                        "description": "The ID of the batch to retrieve items for."
                     },
                     {
                         "name": "status",
@@ -258,10 +489,7 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "enum": [
-                                "completed",
-                                "failed"
-                            ]
+                            "enum": ["completed", "failed"]
                         },
                         "description": "Status of the URLs to retrieve (completed or failed)."
                     },
@@ -269,116 +497,177 @@
                         "name": "cursor",
                         "in": "query",
                         "required": false,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "description": "Optional integer representing the index to start fetching content from. Useful to paginate until all URLs are fetched. \n\n Start with 0, then provide `response['cursor']` value of the last request."
+                        "schema": { "type": "integer" },
+                        "description": "Pagination cursor. Omit this parameter on the first request. For subsequent requests, use the `cursor` value from the previous response. See [Pagination](/api-reference/common/pagination) for details."
                     },
                     {
                         "name": "limit",
                         "in": "query",
                         "required": false,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*.\n\nMaximum 10MB of content can be fetched in a single request."
-                    },
-                    {
-                        "name": "formats",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "enum": [
-                                    "html",
-                                    "markdown",
-                                    "json"
-                                ]
-                            }
-                        },
-                        "description": "**Deprecated:** Use `/retrieve` endpoint with `retrieve_id`.\n\nArray of formats to fetch (e.g., [\"html\", \"markdown\"])."
+                        "schema": { "type": "integer" },
+                        "description": "Number of results to return (recommended 10-50)."
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful response with the list of URLs.",
+                        "description": "Successful response with batch items.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "batch_id": {
-                                            "type": "string",
-                                            "description": "Batch ID"
-                                        },
-                                        "object": {
-                                            "type": "string",
-                                            "description": "The kind of object. \"batch\" for this endpoint."
-                                        },
-                                        "status": {
-                                            "type": "string",
-                                            "description": "`in_progress` or `completed`"
-                                        },
+                                        "batch_id": { "type": "string" },
+                                        "object": { "type": "string" },
+                                        "status": { "type": "string" },
                                         "items": {
                                             "type": "array",
                                             "items": {
                                                 "type": "object",
                                                 "properties": {
-                                                    "custom_id": {
-                                                        "type": "string"
-                                                    },
-                                                    "retrieve_id": {
-                                                        "type": "string",
-                                                        "description": "To fetch content from the `/retrieve` API"
-                                                    },
-                                                    "url": {
-                                                        "type": "string"
-                                                    },
-                                                    "html_content": {
-                                                        "type": "string",
-                                                        "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
-                                                    },
-                                                    "markdown_content": {
-                                                        "type": "string",
-                                                        "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
-                                                    },
-                                                    "json_content": {
-                                                        "type": "string",
-                                                        "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
-                                                    },
-                                                    "links_on_page": {
-                                                        "type": "array",
-                                                        "description": "All links on that page`.",
-                                                        "items": {
-                                                            "type": "string"
-                                                        }
-                                                    }
+                                                    "custom_id": { "type": "string" },
+                                                    "retrieve_id": { "type": "string" },
+                                                    "url": { "type": "string" },
+                                                    "links_on_page": { "type": "array", "items": { "type": "string" } }
                                                 }
                                             }
                                         },
-                                        "items_count": {
-                                            "type": "integer"
-                                        },
-                                        "cursor": {
-                                            "type": "integer",
-                                            "description": "To be passed in the query in next request to get the next items."
-                                        }
+                                        "items_count": { "type": "integer" },
+                                        "cursor": { "type": "integer", "description": "Pagination cursor. Present when there are more results available. Use this value in the next request's `cursor` parameter. See [Pagination](/api-reference/common/pagination) for details." }
                                     }
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Bad request due to incorrect or missing parameters."
+                        "description": "Bad request due to incorrect parameters. See [Bad Request](/api-reference/errors/bad_request) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "validation_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                                    "status": 400,
+                                    "title": "Bad Request",
+                                    "detail": "Status must be either 'completed' or 'failed'",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "invalid_api_key",
+                                    "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                                    "status": 401,
+                                    "title": "Unauthorized",
+                                    "detail": "Your API key is invalid",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Batch not found for the provided ID."
+                        "description": "Batch not found for the provided ID. See [Not Found](/api-reference/errors/not_found) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "batch_not_found",
+                                    "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                                    "status": 404,
+                                    "title": "Not Found",
+                                    "detail": "Batch not found",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     },
                     "500": {
-                        "description": "Internal server error."
+                        "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "internal_server_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                                    "status": 500,
+                                    "title": "Internal Server Error",
+                                    "detail": "An unexpected error occurred",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
                     }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "Authorization": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "description": "RFC 7807 Problem Details error response",
+                "properties": {
+                    "id": { "type": "string", "description": "Unique error identifier" },
+                    "object": { "type": "string", "enum": ["error"], "description": "Always 'error'" },
+                    "code": { "type": "string", "description": "Machine-readable error code" },
+                    "type": { "type": "string", "format": "uri", "description": "URI reference identifying the problem type" },
+                    "status": { "type": "integer", "description": "HTTP status code" },
+                    "title": { "type": "string", "description": "Short, human-readable summary" },
+                    "detail": { "type": "string", "description": "Human-readable explanation" },
+                    "created": { "type": "integer", "description": "Unix timestamp" },
+                    "metadata": { "$ref": "#/components/schemas/Metadata" },
+                    "errors": {
+                        "type": "array",
+                        "description": "Optional array of additional error details",
+                        "items": {}
+                    }
+                },
+                "required": ["id", "object", "code", "type", "status", "title", "detail", "created"]
+            },
+            "Metadata": {
+                "type": "object",
+                "description": "Set of key-value pairs for storing additional information about an object. Follows Stripe's approach with validation rules: max 50 keys, key max 40 characters (no square brackets), value max 500 characters, all values stored as strings.",
+                "additionalProperties": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Metadata value (max 500 characters). Numbers and booleans are automatically converted to strings."
+                },
+                "maxProperties": 50,
+                "example": {
+                    "order_id": "12345",
+                    "customer_name": "John Doe",
+                    "priority": "high",
+                    "processed": "true"
+                },
+                "x-validation-rules": {
+                    "max_keys": 50,
+                    "key_max_length": 40,
+                    "key_forbidden_chars": ["[", "]"],
+                    "value_max_length": 500,
+                    "value_types": ["string", "number (coerced)", "boolean (coerced)"]
                 }
             }
         }

@@ -1,0 +1,90 @@
+---
+title: 'Bad Request'
+sidebarTitle: 'Bad Request'
+description: 'HTTP 400 - Request is syntactically broken or structurally invalid'
+---
+
+<Info>
+This page documents the `bad_request` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 400
+
+The request is syntactically broken or structurally invalid. This typically occurs when required parameters are missing or have invalid formats.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `validation_error` | Request validation failed (often includes field-level errors) |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "validation_error",
+  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+  "status": 400,
+  "title": "Bad Request",
+  "detail": "The provided URL is invalid. This often means there's a white space or no protocol (http/https) was passed along",
+  "created": 1704067200,
+  "metadata": {},
+  "errors": [
+    {
+      "loc": ["url_to_scrape"],
+      "msg": "Invalid URL. Must start with http:// or https://",
+      "type": "invalid_string"
+    }
+  ]
+}
+```
+
+## Common Causes
+
+- Missing required `url_to_scrape` parameter
+- Invalid URL format (missing `http://` or `https://` protocol)
+- Invalid JSON body structure
+- Invalid parameter values or types
+- Whitespace in URLs
+- Invalid metadata (see below)
+
+## Metadata Validation Errors
+
+When providing `metadata`, the following rules apply:
+
+| Constraint | Limit |
+|------------|-------|
+| Maximum keys | 50 |
+| Key length | 40 characters |
+| Key format | No square brackets (`[` or `]`) |
+| Value length | 500 characters |
+| Value type | Strings only (numbers/booleans auto-converted) |
+
+**Example metadata error:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "validation_error",
+  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+  "status": 400,
+  "title": "Bad Request",
+  "detail": "Metadata key \"my_very_long_key_name_that_exceeds...\" exceeds 40 character limit.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Resolution
+
+1. Ensure all required parameters are provided
+2. Verify URL format includes protocol (`http://` or `https://`)
+3. Check JSON body for syntax errors
+4. Review the `errors` array for field-specific issues
+5. For metadata errors, ensure keys are ≤40 chars, values are ≤500 chars, and all values are strings
+

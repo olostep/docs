@@ -1,0 +1,540 @@
+---
+title: 'Errors'
+sidebarTitle: 'Overview'
+description: 'Error codes and responses returned by the Olostep API'
+---
+
+The Olostep API uses standard HTTP response codes and returns structured error responses following [RFC 7807](https://tools.ietf.org/html/rfc7807) (Problem Details for HTTP APIs).
+
+## Error Response Format
+
+All error responses follow this structure:
+
+```json
+{
+  "object": "error",
+  "id": "error_4z93xmi8vw",
+  "code": "validation_error",
+  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+  "status": 400,
+  "title": "Bad Request",
+  "detail": "Request validation failed",
+  "created": 1704067200,
+  "metadata": {},
+  "errors": [
+    {
+      "loc": ["url_to_scrape"],
+      "msg": "Required",
+      "type": "invalid_type"
+    }
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `object` | string | Always `"error"` |
+| `id` | string | Unique error identifier (e.g., `error_4z93xmi8vw`) |
+| `code` | string | Machine-readable error code for programmatic handling |
+| `type` | string | URI reference identifying the problem type |
+| `status` | number | HTTP status code |
+| `title` | string | Short, human-readable summary of the problem type |
+| `detail` | string | Human-readable explanation of the specific error |
+| `created` | number | Unix timestamp when the error occurred |
+| `metadata` | object | Any user-provided metadata from the original request |
+| `errors` | array | Field-level validation errors (only for validation errors) |
+
+---
+
+## HTTP Status Codes
+
+### Client Errors (4xx)
+
+<AccordionGroup>
+
+<Accordion title="400 - Bad Request" id="bad_request">
+
+The request is syntactically broken or structurally invalid. This typically occurs when required parameters are missing or have invalid formats.
+
+**Error Codes:**
+- `validation_error` - Request validation failed (often includes field-level errors)
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "validation_error",
+  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+  "status": 400,
+  "title": "Bad Request",
+  "detail": "The provided URL is invalid. This often means there's a white space or no protocol (http/https) was passed along",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Common Causes:**
+- Missing required `url_to_scrape` parameter
+- Invalid URL format (missing `http://` or `https://` protocol)
+- Invalid JSON body
+- Invalid parameter values
+- Invalid metadata (see [Metadata Validation](#metadata-validation) section below)
+
+</Accordion>
+
+<Accordion title="401 - Unauthorized" id="unauthorized">
+
+Authentication credentials are missing or invalid.
+
+**Error Codes:**
+- `invalid_api_key` - The API key provided is not valid
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "invalid_api_key",
+  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+  "status": 401,
+  "title": "Unauthorized",
+  "detail": "Your API key is invalid",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Common Causes:**
+- Missing `Authorization` header
+- Invalid or revoked API key
+- Malformed bearer token
+
+</Accordion>
+
+<Accordion title="402 - Payment Required" id="payment_required">
+
+Valid credentials but a payment or credits issue prevents the request from being processed.
+
+**Error Codes:**
+- `credits_exhausted` - Account has no remaining credits
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "credits_exhausted",
+  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+  "status": 402,
+  "title": "Payment Required",
+  "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/dashboard/",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Check your credit balance at [dashboard](https://olostep.com/dashboard)
+- Upgrade your plan if credits are exhausted
+
+</Accordion>
+
+<Accordion title="403 - Forbidden" id="forbidden">
+
+The request was understood but refused due to access restrictions.
+
+**Error Codes:**
+- `approval_required` - Feature requires approval before use
+- `blacklisted_domain` - The target domain is blocked
+- `unsupported_file_type` - File type not supported for your account
+
+**Example Responses:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "blacklisted_domain",
+  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+  "status": 403,
+  "title": "Forbidden",
+  "detail": "The domain you're trying to scrape is currently blacklisted. This limitation can be removed for your account. Reach out to info@olostep.com to remove this limitation.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "approval_required",
+  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+  "status": 403,
+  "title": "Forbidden",
+  "detail": "You don't have access to this feature. Please reach out to info@olostep.com to get approved",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Contact support at info@olostep.com to request access
+- Some domains and features require prior approval
+
+</Accordion>
+
+<Accordion title="404 - Not Found" id="not_found">
+
+The requested resource does not exist. The `detail` field specifies which resource was not found.
+
+**Error Codes:**
+- `batch_not_found` - No batch exists with the given ID
+- `scrape_not_found` - No scrape exists with the given ID
+- `parser_not_found` - The specified parser does not exist
+- `pursuit_file_not_found` - Batch data file not found (for retry operations)
+- `crawl_not_found` - No crawl exists with the given ID
+- `map_not_found` - No map exists with the given ID
+- `no_urls_found` - No URLs found during crawl
+- `sitemap_error` - Could not retrieve page URLs from sitemap
+- `file_not_found` - No file exists with the given ID
+- `schedule_not_found` - No schedule exists with the given ID
+- `agent_not_found` - No agent exists with the given ID
+- `answer_not_found` - No answer exists with the given ID
+
+**Example Responses:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "scrape_not_found",
+  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+  "status": 404,
+  "title": "Not Found",
+  "detail": "Scrape not found",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "not_found",
+  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+  "status": 404,
+  "title": "Not Found",
+  "detail": "Batch not found",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Common Causes:**
+- Using an incorrect or expired resource ID
+- Resource has been deleted
+- Referencing a parser that doesn't exist
+
+</Accordion>
+
+<Accordion title="422 - Unprocessable Entity" id="unprocessable_entity">
+
+The server understands the request but rejects its meaning due to business logic rules.
+
+**Error Codes:**
+- `invalid_parser_input` - Parser input validation failed
+- `idempotency_key_reuse` - Idempotency key was already used with different parameters
+
+**Example Responses:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "invalid_parser_input",
+  "type": "https://docs.olostep.com/api-reference/errors/unprocessable_entity",
+  "status": 422,
+  "title": "Unprocessable Entity",
+  "detail": "The parser object must contain an input object with 'profile_id' field",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "idempotency_key_reuse",
+  "type": "https://docs.olostep.com/api-reference/errors/unprocessable_entity",
+  "status": 422,
+  "title": "Unprocessable Entity",
+  "detail": "A request with this idempotency key was already made with different parameters. Idempotency keys must be unique per request.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- For parser input errors, check the required fields for the parser you're using
+- For idempotency key errors, use a new unique key for different request parameters
+
+</Accordion>
+
+<Accordion title="409 - Idempotency Error" id="idempotency_error">
+
+The request conflicts with an in-progress or completed idempotent request. This occurs when using idempotency keys to ensure exactly-once processing.
+
+**Error Codes:**
+- `idempotency_key_in_progress` - A request with this idempotency key is currently being processed
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "idempotency_key_in_progress",
+  "type": "https://docs.olostep.com/api-reference/errors/idempotency_error",
+  "status": 409,
+  "title": "Idempotency Error",
+  "detail": "A request with this idempotency key is currently being processed. Please wait and retry.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Wait for the in-progress request to complete (1-5 seconds)
+- Retry the request with exponential backoff
+- Poll for the original request's result if you have the batch ID
+
+</Accordion>
+
+<Accordion title="429 - Too Many Requests" id="too_many_requests">
+
+Rate limit exceeded. You're making too many requests in a given time period.
+
+**Error Codes:**
+- `rate_limit_exceeded` - Request rate limit has been exceeded
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "rate_limit_exceeded",
+  "type": "https://docs.olostep.com/api-reference/errors/too_many_requests",
+  "status": 429,
+  "title": "Too Many Requests",
+  "detail": "You've reached your rate limits for this API. Please try again later.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Implement exponential backoff in your requests
+- Use batch processing for multiple URLs
+- Contact support if you need higher rate limits
+
+</Accordion>
+
+</AccordionGroup>
+
+### Server Errors (5xx)
+
+<AccordionGroup>
+
+<Accordion title="500 - Internal Server Error" id="internal_error">
+
+An unexpected error occurred on the server.
+
+**Error Codes:**
+- `internal_server_error` - Generic internal error
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "internal_server_error",
+  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+  "status": 500,
+  "title": "Internal Server Error",
+  "detail": "An unexpected error occurred",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Retry the request after a short delay
+- If the error persists, contact support
+
+</Accordion>
+
+<Accordion title="501 - Service Unavailable" id="service_unavailable">
+
+The service is temporarily unavailable or at capacity.
+
+**Error Codes:**
+- `max_capacity_reached` - Service is at maximum capacity
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "max_capacity_reached",
+  "type": "https://docs.olostep.com/api-reference/errors/service_unavailable",
+  "status": 501,
+  "title": "Service Unavailable",
+  "detail": "We have currently reached our maximum capacity for this feature flag. Consider retrying in a few minutes.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Retry the request after a few minutes
+- Use exponential backoff
+
+</Accordion>
+
+<Accordion title="504 - Gateway Timeout" id="gateway_timeout">
+
+The request timed out before completing.
+
+**Error Codes:**
+- `request_timeout` - Request exceeded the timeout limit
+
+**Example Response:**
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "request_timeout",
+  "type": "https://docs.olostep.com/api-reference/errors/gateway_timeout",
+  "status": 504,
+  "title": "Gateway Timeout",
+  "detail": "Your request timed out. Try increasing the timeout and making another request.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+**Resolution:**
+- Increase the timeout value in your request
+- For complex scrapes, consider using async patterns
+- Simplify the request (fewer actions, simpler targets)
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+## Error Code Reference
+
+Quick reference table of all error codes:
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `validation_error` | 400 | Request validation failed |
+| `invalid_api_key` | 401 | API key is invalid |
+| `credits_exhausted` | 402 | Account has no remaining credits |
+| `approval_required` | 403 | Feature requires approval |
+| `access_denied` | 403 | Access denied to this feature |
+| `blacklisted_domain` | 403 | Target domain is blocked |
+| `unsupported_file_type` | 403 | File type not supported |
+| `batch_not_found` | 404 | Batch ID not found |
+| `scrape_not_found` | 404 | Scrape ID not found |
+| `parser_not_found` | 404 | Parser not found |
+| `pursuit_file_not_found` | 404 | Batch data file not found |
+| `crawl_not_found` | 404 | Crawl ID not found |
+| `map_not_found` | 404 | Map ID not found |
+| `no_urls_found` | 404 | No URLs found during crawl |
+| `sitemap_error` | 404 | Could not retrieve page URLs from sitemap |
+| `file_not_found` | 404 | File ID not found |
+| `schedule_not_found` | 404 | Schedule ID not found |
+| `agent_not_found` | 404 | Agent ID not found |
+| `answer_not_found` | 404 | Answer ID not found |
+| `idempotency_key_in_progress` | 409 | Idempotency key request still processing (see [Idempotency Error](#idempotency_error)) |
+| `idempotency_key_reuse` | 422 | Idempotency key reused with different parameters |
+| `invalid_parser_input` | 422 | Parser input validation failed |
+| `rate_limit_exceeded` | 429 | Rate limit exceeded |
+| `internal_server_error` | 500 | Internal server error |
+| `max_capacity_reached` | 501 | Service at capacity |
+| `request_timeout` | 504 | Request timed out |
+
+---
+
+## Handling Errors
+
+### Best Practices
+
+1. **Always check the `code` field** for programmatic error handling
+2. **Display the `detail` field** to users for helpful error messages
+3. **Log the `id` field** for debugging and support tickets
+4. **Implement retry logic** for 429, 500, 501, and 504 errors with exponential backoff
+5. **Check the `errors` array** for field-level validation details on 400 errors
+
+### Example Error Handling
+
+<CodeGroup>
+
+```python Python
+from olostep import Olostep, Olostep_BaseError
+
+client = Olostep(api_key="your-api-key")
+
+try:
+    result = client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Error: {type(e).__name__}")
+    print(f"Message: {e}")
+```
+
+```javascript Node.js
+import Olostep from 'olostep';
+
+const client = new Olostep({ apiKey: 'your-api-key' });
+
+try {
+  const result = await client.scrapes.create('https://example.com');
+} catch (error) {
+  console.error('Error:', error.code);
+  console.error('Message:', error.detail);
+}
+```
+
+```bash cURL
+curl -X POST https://api.olostep.com/v1/scrapes \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url_to_scrape": "https://example.com"}'
+
+# Check HTTP status code and parse error response
+```
+
+</CodeGroup>
+
+### SDK Error Hierarchies
+
+For detailed SDK-specific error handling, see:
+- [Python SDK Error Handling](/sdks/python#detailed-error-handling)
+- [Node.js SDK Documentation](/sdks/node-js)
+

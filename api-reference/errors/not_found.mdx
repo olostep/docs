@@ -1,0 +1,107 @@
+---
+title: 'Not Found'
+sidebarTitle: 'Not Found'
+description: 'HTTP 404 - The requested resource does not exist'
+---
+
+<Info>
+This page documents the `not_found` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 404
+
+The requested resource does not exist. The `detail` field specifies which resource was not found.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `not_found` | Generic resource not found |
+| `scrape_not_found` | No scrape exists with the given ID |
+| `parser_not_found` | The specified parser does not exist |
+
+<Note>
+The `detail` field in the response provides specifics about which resource was not found (e.g., "Scrape not found", "Batch not found", "Crawl not found", "Map not found").
+</Note>
+
+## Example Responses
+
+### Scrape Not Found
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "scrape_not_found",
+  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+  "status": 404,
+  "title": "Not Found",
+  "detail": "Scrape not found",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+### Batch Not Found
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "not_found",
+  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+  "status": 404,
+  "title": "Not Found",
+  "detail": "Batch not found",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+### Crawl Not Found
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "not_found",
+  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+  "status": 404,
+  "title": "Not Found",
+  "detail": "Crawl not found",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+### Parser Not Found
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "parser_not_found",
+  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+  "status": 404,
+  "title": "Not Found",
+  "detail": "No parser with this name and/or version found",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Common Causes
+
+- Using an incorrect resource ID
+- Resource has expired or been deleted
+- Typo in the parser name or version
+- Referencing a resource from a different account
+
+## Resolution
+
+1. Verify the resource ID is correct
+2. Check that the resource exists and hasn't expired
+3. For parsers, verify the parser name and version are correct
+4. Review available parsers in the [Parsers documentation](/features/structured-content/parsers)

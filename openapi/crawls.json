@@ -15,6 +15,52 @@
         "type": "http",
         "scheme": "bearer"
       }
+    },
+    "schemas": {
+      "Metadata": {
+        "type": "object",
+        "description": "Set of key-value pairs for storing additional information about an object. Follows Stripe's approach with validation rules: max 50 keys, key max 40 characters (no square brackets), value max 500 characters, all values stored as strings.",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Metadata value (max 500 characters). Numbers and booleans are automatically converted to strings."
+        },
+        "maxProperties": 50,
+        "example": {
+          "order_id": "12345",
+          "customer_name": "John Doe",
+          "priority": "high",
+          "processed": "true"
+        },
+        "x-validation-rules": {
+          "max_keys": 50,
+          "key_max_length": 40,
+          "key_forbidden_chars": ["[", "]"],
+          "value_max_length": 500,
+          "value_types": ["string", "number (coerced)", "boolean (coerced)"]
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "RFC 7807 Problem Details error response",
+        "properties": {
+          "id": { "type": "string" },
+          "object": { "type": "string", "enum": ["error"] },
+          "code": { "type": "string" },
+          "type": { "type": "string", "format": "uri" },
+          "status": { "type": "integer" },
+          "title": { "type": "string" },
+          "detail": { "type": "string" },
+          "created": { "type": "integer" },
+          "metadata": { "$ref": "#/components/schemas/Metadata" },
+          "errors": {
+            "type": "array",
+            "description": "Optional array of additional error details",
+            "items": {}
+          }
+        },
+        "required": ["id", "object", "code", "type", "status", "title", "detail", "created"]
+      }
     }
   },
   "paths": {
@@ -22,11 +68,7 @@
       "post": {
         "summary": "Start a new crawl",
         "description": "Initiates a new crawl process with the specified parameters.",
-        "security": [
-          {
-            "Authorization": []
-          }
-        ],
+        "security": [{ "Authorization": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -34,66 +76,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "start_url": {
-                    "type": "string",
-                    "description": "The starting point of the crawl."
-                  },
-                  "include_urls": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "URL path patterns to include in the crawl using glob syntax.\n\nDefaults to `/**` which includes all URLs. Use patterns like `/blog/**` to crawl specific sections (e.g., only blog pages), `/products/*.html` for product pages, or multiple patterns for different sections. Supports standard glob features like * (any characters) and ** (recursive matching)."
-                  },
-                  "exclude_urls": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "URL path names in glob pattern to exclude. For example: `/careers/**`. Excluded URLs will supersede included URLs."
-                  },
-                  "max_pages": {
-                    "type": "number",
-                    "description": "Maximum number of pages to crawl. Recommended for most use cases like crawling an entire website."
-                  },
-                  "max_depth": {
-                    "type": "number",
-                    "description": "Maximum depth of the crawl. Useful to extract only up to n-degree of links."
-                  },
-                  "include_external": {
-                    "type": "boolean",
-                    "description": "Crawl first-degree external links."
-                  },
-                  "include_subdomain": {
-                    "type": "boolean",
-                    "description": "Include subdomains of the website. `false` by default."
-                  },
-                  "search_query": {
-                    "type": "string",
-                    "description": "An optional search query to find specific links and also sort the results by relevance."
-                  },
-                  "top_n": {
-                    "type": "number",
-                    "description": "An optional number to only crawl the top N most relevant links on every page as per search query."
-                  },
-                  "webhook_url": {
-                    "type": "string",
-                    "description": "An optional POST request endpoint called when this crawl is completed. The body of the request will be same as the response of this [`v1/crawls/{crawl_id}`](./info#response-created) endpoint."
-                  },
-                  "timeout": {
-                    "type": "number",
-                    "description": "End the crawl after n seconds with the pages completed until then. May take ~10s extra from provided timeout."
-                  },
-                  "follow_robots_txt": {
-                    "type": "boolean",
-                    "description": "Whether to respect robots.txt rules. If set to `false`, the crawler will scrape the website regardless of robots.txt disallow directives. `true` by default.",
-                    "default": true
-                  }
+                  "start_url": { "type": "string", "description": "The starting point of the crawl." },
+                  "include_urls": { "type": "array", "items": { "type": "string" }, "description": "URL path patterns to include." },
+                  "exclude_urls": { "type": "array", "items": { "type": "string" }, "description": "URL path patterns to exclude." },
+                  "max_pages": { "type": "number", "description": "Maximum number of pages to crawl." },
+                  "max_depth": { "type": "number", "description": "Maximum depth of the crawl." },
+                  "include_external": { "type": "boolean", "description": "Crawl first-degree external links." },
+                  "include_subdomain": { "type": "boolean", "description": "Include subdomains." },
+                  "search_query": { "type": "string", "description": "Search query to find specific links." },
+                  "top_n": { "type": "number", "description": "Only crawl top N relevant links." },
+                  "webhook_url": { "type": "string", "description": "Webhook URL called on completion." },
+                  "timeout": { "type": "number", "description": "End crawl after n seconds." },
+                  "follow_robots_txt": { "type": "boolean", "default": true, "description": "Respect robots.txt rules." },
+                  "metadata": { "$ref": "#/components/schemas/Metadata" }
                 },
-                "required": [
-                  "start_url",
-                  "max_pages"
-                ]
+                "required": ["start_url", "max_pages"]
               }
             }
           }
@@ -106,80 +103,114 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Crawl ID"
-                    },
-                    "object": {
-                      "type": "string",
-                      "description": "The kind of object. \"crawl\" for this endpoint."
-                    },
-                    "status": {
-                      "type": "string",
-                      "description": "`in_progress` or `completed`"
-                    },
-                    "created": {
-                      "type": "number",
-                      "description": "Created time in epoch"
-                    },
-                    "start_date": {
-                      "type": "string",
-                      "description": "Created time in date"
-                    },
-                    "start_url": {
-                      "type": "string"
-                    },
-                    "max_pages": {
-                      "type": "number"
-                    },
-                    "max_depth": {
-                      "type": "number"
-                    },
-                    "exclude_urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "include_urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "include_external": {
-                      "type": "boolean"
-                    },
-                    "search_query": {
-                      "type": "string"
-                    },
-                    "top_n": {
-                      "type": "number"
-                    },
-                    "current_depth": {
-                      "type": "number",
-                      "description": "The current depth of the crawl process."
-                    },
-                    "pages_count": {
-                      "type": "number",
-                      "description": "Count of pages crawled"
-                    },
-                    "webhook_url": {
-                      "type": "string"
-                    },
-                    "follow_robots_txt": {
-                      "type": "boolean"
-                    }
+                    "id": { "type": "string", "description": "Crawl ID" },
+                    "object": { "type": "string" },
+                    "status": { "type": "string" },
+                    "created": { "type": "number" },
+                    "start_url": { "type": "string" },
+                    "max_pages": { "type": "number" },
+                    "max_depth": { "type": "number" },
+                    "pages_count": { "type": "number" },
+                    "metadata": { "$ref": "#/components/schemas/Metadata" }
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request due to incorrect or missing parameters."
+            "description": "Bad request due to incorrect or missing parameters. See [Bad Request](/api-reference/errors/bad_request) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "start_url is required",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Unauthorized",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required - credits exhausted. See [Payment Required](/api-reference/errors/payment_required) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "credits_exhausted",
+                  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+                  "status": 402,
+                  "title": "Payment Required",
+                  "detail": "You have consumed all available credits.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - access denied. See [Forbidden](/api-reference/errors/forbidden) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "approval_required",
+                  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+                  "status": 403,
+                  "title": "Forbidden",
+                  "detail": "You don't have access to this feature.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Internal Server Error",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           }
         }
       }
@@ -187,21 +218,15 @@
     "/v1/crawls/{crawl_id}": {
       "get": {
         "summary": "Retrieve crawl information",
-        "description": "Fetches information about a specific crawl using its `crawl_id`.",
-        "security": [
-          {
-            "Authorization": []
-          }
-        ],
+        "description": "Fetches information about a specific crawl.",
+        "security": [{ "Authorization": [] }],
         "parameters": [
           {
             "name": "crawl_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The ID of the crawl to retrieve information for."
+            "schema": { "type": "string" },
+            "description": "The ID of the crawl."
           }
         ],
         "responses": {
@@ -212,241 +237,211 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Crawl ID"
-                    },
-                    "object": {
-                      "type": "string",
-                      "description": "The kind of object. \"crawl\" for this endpoint."
-                    },
-                    "status": {
-                      "type": "string",
-                      "description": "`in_progress` or `completed`"
-                    },
-                    "created": {
-                      "type": "number",
-                      "description": "Created time in epoch"
-                    },
-                    "start_date": {
-                      "type": "string",
-                      "description": "Created time in date"
-                    },
-                    "start_url": {
-                      "type": "string"
-                    },
-                    "max_pages": {
-                      "type": "number"
-                    },
-                    "max_depth": {
-                      "type": "number"
-                    },
-                    "exclude_urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "include_urls": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "include_external": {
-                      "type": "boolean"
-                    },
-                    "search_query": {
-                      "type": "string"
-                    },
-                    "top_n": {
-                      "type": "number"
-                    },
-                    "current_depth": {
-                      "type": "number",
-                      "description": "The current depth of the crawl process."
-                    },
-                    "pages_count": {
-                      "type": "number",
-                      "description": "Count of pages crawled"
-                    },
-                    "webhook_url": {
-                      "type": "string"
-                    },
-                    "follow_robots_txt": {
-                      "type": "boolean"
-                    }
+                    "id": { "type": "string" },
+                    "object": { "type": "string" },
+                    "status": { "type": "string" },
+                    "created": { "type": "number" },
+                    "start_url": { "type": "string" },
+                    "max_pages": { "type": "number" },
+                    "pages_count": { "type": "number" },
+                    "metadata": { "$ref": "#/components/schemas/Metadata" }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad request due to incorrect or missing parameters."
+          "401": {
+            "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Unauthorized",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "404": {
-            "description": "Crawl not found for the provided ID."
+            "description": "Crawl not found. See [Not Found](/api-reference/errors/not_found) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "crawl_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Crawl not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Internal Server Error",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/crawls/{crawl_id}/pages": {
       "get": {
-        "summary": "Retrieve list of crawled pages optionally with content",
-        "description": "Fetches the list of crawled pages and content that have been processed for a specific crawl ID.",
-        "security": [
-          {
-            "Authorization": []
-          }
-        ],
+        "summary": "Retrieve crawled pages",
+        "description": "Fetches the list of crawled pages for a specific crawl.",
+        "security": [{ "Authorization": [] }],
         "parameters": [
           {
             "name": "crawl_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The ID of the crawl to retrieve the list of URLs for."
+            "schema": { "type": "string" },
+            "description": "The ID of the crawl."
           },
           {
             "name": "cursor",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Optional integer representing the index to start fetching content from. Useful to paginate until all URLs are fetched. Start with 0, then provide `response['cursor']` value of the last request."
+            "schema": { "type": "integer" },
+            "description": "Pagination cursor. Omit this parameter on the first request. For subsequent requests, use the `cursor` value from the previous response. See [Pagination](/api-reference/common/pagination) for details."
           },
           {
             "name": "limit",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*. Maximum 10MB of content can be fetched in a single request."
-          },
-          {
-            "name": "search_query",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "An optional search query to sort the results by relevance. Uses the original search_query by default if provided."
-          },
-          {
-            "name": "formats",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "html",
-                  "markdown"
-                ]
-              }
-            },
-            "description": "**Deprecated:** Use `/retrieve` endpoint with `retrieve_id`.\n\nArray of formats to fetch (e.g., [\"html\", \"markdown\"])."
+            "schema": { "type": "integer" },
+            "description": "Number of results to return."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with the list of URLs.",
+            "description": "Successful response with crawled pages.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "crawl_id": {
-                      "type": "string",
-                      "description": "Crawl ID"
-                    },
-                    "object": {
-                      "type": "string",
-                      "description": "The kind of object. \"crawl\" for this endpoint."
-                    },
-                    "status": {
-                      "type": "string",
-                      "description": "`in_progress` or `completed`"
-                    },
-                    "search_query": {
-                      "type": "string"
-                    },
-                    "pages_count": {
-                      "type": "number"
-                    },
+                    "crawl_id": { "type": "string" },
+                    "object": { "type": "string" },
+                    "status": { "type": "string" },
+                    "pages_count": { "type": "number" },
                     "pages": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "retrieve_id": {
-                            "type": "string",
-                            "description": "To fetch content from the `/retrieve` endpoint"
-                          },
-                          "url": {
-                            "type": "string"
-                          },
-                          "is_external": {
-                            "type": "boolean"
-                          },
-                          "html_content": {
-                            "type": "string",
-                            "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
-                          },
-                          "markdown_content": {
-                            "type": "string",
-                            "description": "Deprecated: Use `/retrieve` endpoint with `retrieve_id`."
-                          }
+                          "id": { "type": "string" },
+                          "retrieve_id": { "type": "string" },
+                          "url": { "type": "string" }
                         }
                       }
                     },
-                    "metadata": {
-                      "type": "object",
-                      "properties": {
-                        "external_urls": {
-                          "type": "array",
-                          "description": "External URLs that were found during crawl",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "failed_urls": {
-                          "type": "array",
-                          "description": "URLs that were found but couldn't be scraped",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    },
-                    "cursor": {
-                      "type": "integer",
-                      "description": "To be passed in the query in next request to get the next items."
-                    }
+                    "cursor": { "type": "integer", "description": "Pagination cursor. Present when there are more results available. Use this value in the next request's `cursor` parameter. See [Pagination](/api-reference/common/pagination) for details." }
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request due to incorrect or missing parameters."
+            "description": "Bad request due to incorrect or missing parameters. See [Bad Request](/api-reference/errors/bad_request) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Invalid parameter format",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Unauthorized",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "404": {
-            "description": "Crawl not found for the provided ID."
+            "description": "Crawl not found or no pages found. See [Not Found](/api-reference/errors/not_found) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "crawl_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Crawl not found or no pages found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+            "content": {
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Internal Server Error",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
           }
         }
       }

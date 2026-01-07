@@ -1,0 +1,56 @@
+---
+title: 'Idempotency Error'
+sidebarTitle: 'Idempotency Error'
+description: 'HTTP 409 - Request conflicts with an idempotent operation'
+---
+
+<Info>
+This page documents the `idempotency_error` type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 409
+
+The request conflicts with an in-progress or completed idempotent request. This occurs when using idempotency keys to ensure exactly-once processing of requests.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `idempotency_key_in_progress` | A request with this idempotency key is currently being processed |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "idempotency_key_in_progress",
+  "type": "https://docs.olostep.com/api-reference/errors/idempotency_error",
+  "status": 409,
+  "title": "Idempotency Error",
+  "detail": "A request with this idempotency key is currently being processed. Please wait and retry.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Common Causes
+
+- Sending duplicate requests with the same idempotency key before the first request completes
+- Network timeouts causing client retries while the original request is still processing
+- Race conditions when multiple clients attempt the same operation
+
+## Resolution
+
+1. Wait for the in-progress request to complete (typically 1-5 seconds)
+2. Retry the request after a short delay with exponential backoff
+3. Poll for the result of the original request if you have the batch ID
+
+## Related Errors
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `idempotency_key_reuse` | 422 | Same key used with different parameters (see [Unprocessable Entity](/api-reference/errors/unprocessable_entity)) |
+

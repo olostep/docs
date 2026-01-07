@@ -1,0 +1,45 @@
+---
+title: 'Service Unavailable'
+sidebarTitle: 'Service Unavailable'
+description: 'HTTP 501 - The service is temporarily unavailable'
+---
+
+<Info>
+This page documents the `service_unavailable` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 501
+
+The service is temporarily unavailable or at maximum capacity. This is typically a temporary condition.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `max_capacity_reached` | Service is at maximum capacity |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "max_capacity_reached",
+  "type": "https://docs.olostep.com/api-reference/errors/service_unavailable",
+  "status": 501,
+  "title": "Service Unavailable",
+  "detail": "We have currently reached our maximum capacity for this feature flag. Consider retrying in a few minutes.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Resolution
+
+1. **Wait and retry** - Capacity issues are typically temporary
+2. **Implement exponential backoff** - Gradually increase wait times between retries
+3. **Use batch processing** - Reduce the number of concurrent requests
+4. **Contact support** - If you consistently hit capacity limits
+

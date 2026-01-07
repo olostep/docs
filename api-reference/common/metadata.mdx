@@ -1,0 +1,52 @@
+---
+title: 'Metadata'
+sidebarTitle: 'Metadata'
+description: 'Attach custom key-value pairs to API requests'
+icon: 'tag'
+---
+
+Many endpoints accept a `metadata` parameter for storing additional information with your requests. Metadata is returned in responses and can be used for tracking, filtering, or storing context.
+
+## Usage
+
+```json
+{
+  "url_to_scrape": "https://example.com",
+  "metadata": {
+    "order_id": "12345",
+    "customer_name": "John Doe",
+    "priority": "high"
+  }
+}
+```
+
+Metadata follows [Stripe's approach](https://stripe.com/docs/api/metadata) — simple, flexible, and consistent across all endpoints.
+
+---
+
+## Validation Rules
+
+| Constraint | Limit | Error Example |
+|------------|-------|---------------|
+| Maximum keys | 50 | `"Metadata can have a maximum of 50 keys. You provided 51 keys."` |
+| Key length | 40 characters | `"Metadata key \"my_very_long_key_name...\" exceeds 40 character limit."` |
+| Key format | No square brackets | `"Metadata key \"items[0]\" cannot contain square brackets ([ or ])."` |
+| Value length | 500 characters | `"Metadata value for key \"description\" exceeds 500 character limit (got 523 characters)."` |
+| Value type | Strings only | `"Metadata value for key \"count\" must be a string. Got object."` |
+
+<Note>
+Numbers and booleans are automatically converted to strings. Objects and arrays are rejected.
+</Note>
+
+---
+
+## Availability
+
+| Endpoint | Status |
+|----------|--------|
+| [Batches](/api-reference/batches/create) | <Icon icon="check" color="green" /> Available |
+| [Crawls](/api-reference/crawls/create) | <Icon icon="check" color="green" /> Available |
+| [Maps](/api-reference/maps/create) | <Icon icon="check" color="green" /> Available |
+| [Scrapes](/api-reference/scrapes/create) | <Icon icon="clock" /> Coming Soon |
+| [Answers](/api-reference/answers/create) | <Icon icon="clock" /> Coming Soon |
+

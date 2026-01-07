@@ -1,0 +1,54 @@
+---
+title: 'Gateway Timeout'
+sidebarTitle: 'Gateway Timeout'
+description: 'HTTP 504 - The request timed out before completing'
+---
+
+<Info>
+This page documents the `gateway_timeout` error type. For a complete overview of all error types, see [Errors](/api-reference/errors).
+</Info>
+
+## Overview
+
+**HTTP Status Code:** 504
+
+The request timed out before completing. This can happen with complex scrapes or slow-loading websites.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `request_timeout` | Request exceeded the timeout limit |
+
+## Example Response
+
+```json
+{
+  "object": "error",
+  "id": "error_abc123",
+  "code": "request_timeout",
+  "type": "https://docs.olostep.com/api-reference/errors/gateway_timeout",
+  "status": 504,
+  "title": "Gateway Timeout",
+  "detail": "Your request timed out. Try increasing the timeout and making another request.",
+  "created": 1704067200,
+  "metadata": {}
+}
+```
+
+## Common Causes
+
+- Complex page with many resources
+- Slow website response
+- Too many browser actions
+- Large file downloads
+- Geographic routing delays
+
+## Resolution
+
+1. **Increase timeout** - Extend the request timeout in your client
+2. **Simplify the request** - Reduce the number of actions
+3. **Use wait_before_scraping** - Give the page more time to load
+4. **Try a different country** - Geographic location can affect load times
+5. **Retry the request** - Timeouts are often transient
+
