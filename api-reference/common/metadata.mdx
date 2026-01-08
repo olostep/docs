@@ -1,26 +1,95 @@
 ---
 title: 'Metadata'
 sidebarTitle: 'Metadata'
-description: 'Attach custom key-value pairs to API requests'
+description: 'Attach custom key-value pairs to API resources'
 icon: 'tag'
 ---
 
-Many endpoints accept a `metadata` parameter for storing additional information with your requests. Metadata is returned in responses and can be used for tracking, filtering, or storing context.
+<Check>
+**All endpoints now support metadata** on create and read operations.
+</Check>
 
-## Usage
+Metadata allows you to attach custom key-value pairs to Olostep resources like scrapes, batches, crawls, maps, and answers. This is useful for tracking, filtering, organizing, and storing context alongside your API requests.
 
-```json
+Metadata follows [Stripe's approach](https://stripe.com/docs/api/metadata) — simple, flexible, and consistent across all endpoints.
+
+---
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Tracking & Organization" icon="folder">
+    Link resources to internal systems with order IDs, customer IDs, or project names.
+  </Card>
+  <Card title="Filtering & Search" icon="magnifying-glass">
+    Tag resources for easy retrieval and filtering in your application.
+  </Card>
+  <Card title="Workflow Context" icon="diagram-project">
+    Store pipeline stage, priority level, or processing instructions.
+  </Card>
+  <Card title="Audit Trail" icon="clock-rotate-left">
+    Record who initiated a request, timestamps, or version information.
+  </Card>
+</CardGroup>
+
+---
+
+## Adding Metadata on Create
+
+Include the `metadata` parameter when creating a resource:
+
+<CodeGroup>
+
+```json Request Body
 {
-  "url_to_scrape": "https://example.com",
+  "url": "https://example.com",
   "metadata": {
     "order_id": "12345",
     "customer_name": "John Doe",
-    "priority": "high"
+    "priority": "high",
+    "internal_ref": "proj-2024-001"
   }
 }
 ```
 
-Metadata follows [Stripe's approach](https://stripe.com/docs/api/metadata) — simple, flexible, and consistent across all endpoints.
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <your_token>"},
+    json={
+        "items": [{"custom_id": "1", "url": "https://example.com"}],
+        "metadata": {
+            "project": "q4-analysis",
+            "team": "data-ops",
+            "priority": "high"
+        }
+    }
+)
+```
+
+```javascript Node.js
+const response = await fetch("https://api.olostep.com/v1/batches", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <your_token>",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    items: [{ custom_id: "1", url: "https://example.com" }],
+    metadata: {
+      project: "q4-analysis",
+      team: "data-ops",
+      priority: "high"
+    }
+  })
+});
+```
+
+</CodeGroup>
+
+Metadata is returned in all subsequent GET responses for that resource.
 
 ---
 
@@ -31,22 +100,121 @@ Metadata follows [Stripe's approach](https://stripe.com/docs/api/metadata) — s
 | Maximum keys | 50 | `"Metadata can have a maximum of 50 keys. You provided 51 keys."` |
 | Key length | 40 characters | `"Metadata key \"my_very_long_key_name...\" exceeds 40 character limit."` |
 | Key format | No square brackets | `"Metadata key \"items[0]\" cannot contain square brackets ([ or ])."` |
-| Value length | 500 characters | `"Metadata value for key \"description\" exceeds 500 character limit (got 523 characters)."` |
+| Value length | 500 characters | `"Metadata value for key \"description\" exceeds 500 character limit."` |
 | Value type | Strings only | `"Metadata value for key \"count\" must be a string. Got object."` |
 
 <Note>
-Numbers and booleans are automatically converted to strings. Objects and arrays are rejected.
+**Type Coercion**: Numbers and booleans are automatically converted to strings.
+- `42` → `"42"`
+- `true` → `"true"`
+- `3.14` → `"3.14"`
+
+Objects and arrays are rejected.
 </Note>
 
 ---
 
-## Availability
+## Updating Metadata (PATCH)
 
-| Endpoint | Status |
-|----------|--------|
-| [Batches](/api-reference/batches/create) | <Icon icon="check" color="green" /> Available |
-| [Crawls](/api-reference/crawls/create) | <Icon icon="check" color="green" /> Available |
-| [Maps](/api-reference/maps/create) | <Icon icon="check" color="green" /> Available |
-| [Scrapes](/api-reference/scrapes/create) | <Icon icon="clock" /> Coming Soon |
-| [Answers](/api-reference/answers/create) | <Icon icon="clock" /> Coming Soon |
+<Info>
+**Currently available for:** [Batches](/api-reference/batches/create) only.
+
+Crawls, Scrapes, Maps, and Answers do not yet support updating metadata after creation.
+</Info>
+
+You can update metadata on existing batches using the PATCH endpoint. This follows Stripe's metadata update semantics with merge behavior.
+
+### Endpoint
+
+```
+PATCH /v1/batches/{batch_id}
+```
+
+### Update Operations
+
+<AccordionGroup>
+
+<Accordion title="Add new keys" icon="plus">
+New keys are added while preserving existing ones.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"new_key": "new_value"}}'
+```
+
+**Before:** `{"project": "alpha"}`  
+**After:** `{"project": "alpha", "new_key": "new_value"}`
+</Accordion>
+
+<Accordion title="Update existing keys" icon="pen">
+Existing keys are overwritten with new values.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "beta"}}'
+```
+
+**Before:** `{"project": "alpha", "priority": "high"}`  
+**After:** `{"project": "beta", "priority": "high"}`
+</Accordion>
+
+<Accordion title="Delete specific keys" icon="trash">
+Set a key to `null` or `""` (empty string) to delete it.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"priority": null}}'
+```
+
+**Before:** `{"project": "alpha", "priority": "high"}`  
+**After:** `{"project": "alpha"}`
+</Accordion>
+
+<Accordion title="Clear all metadata" icon="eraser">
+Set the entire metadata field to `null` or `""` to remove all keys.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": null}'
+```
+
+**Before:** `{"project": "alpha", "priority": "high"}`  
+**After:** `{}`
+</Accordion>
+
+<Accordion title="Mixed operations" icon="shuffle">
+Add, update, and delete keys in a single request.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "gamma", "new_field": "value", "old_field": null}}'
+```
+
+**Before:** `{"project": "alpha", "old_field": "remove_me"}`  
+**After:** `{"project": "gamma", "new_field": "value"}`
+</Accordion>
+
+</AccordionGroup>
+
+### PATCH Behavior Summary
+
+| Operation | Request | Result |
+|-----------|---------|--------|
+| Add key | `{"metadata": {"new": "value"}}` | Key added, others preserved |
+| Update key | `{"metadata": {"existing": "new_value"}}` | Key updated, others preserved |
+| Delete key | `{"metadata": {"key": null}}` | Key removed, others preserved |
+| Delete key | `{"metadata": {"key": ""}}` | Key removed, others preserved |
+| Clear all | `{"metadata": null}` | All keys removed |
+| Clear all | `{"metadata": ""}` | All keys removed |
+| No-op | `{"metadata": {}}` | No changes |
 
