@@ -1,0 +1,506 @@
+---
+title: 'Idempotency'
+description: 'Safely retry requests without creating duplicate resources'
+icon: 'repeat'
+---
+
+## Overview
+
+Sending the same request together with the same `Idempotency-Key` header within 24 hours, will cause the API to immediately return a cached response instead of reprocessing the request.
+
+This can reduce integration complexity, saves time and credits.
+### Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Network Failures" icon="wifi-slash">
+    Retry after timeouts without creating duplicate batches or crawls
+  </Card>
+  <Card title="Distributed Systems" icon="diagram-project">
+    Handle at-least-once delivery from queues safely
+  </Card>
+  <Card title="Client Retries" icon="mobile">
+    Mobile apps and unreliable connections can retry freely
+  </Card>
+  <Card title="Webhook Reliability" icon="webhook">
+    Safely re-process webhook events without side effects
+  </Card>
+</CardGroup>
+
+## Supported Methods
+
+Idempotency keys apply to POST requests since they create new resources. Other HTTP methods are naturally idempotent and don't require keys.
+
+| Method | Idempotency Support |
+|--------|---------------------|
+| `POST` | ✅ Use `Idempotency-Key` header |
+| `GET` | Naturally idempotent (no key needed) |
+| `PUT` | Naturally idempotent (no key needed) |
+| `DELETE` | Naturally idempotent (no key needed) |
+
+## How It Works
+
+The `Idempotency-Key` header (case-insensitive) controls how repeated requests are handled. Here's what happens in each scenario:
+
+### Request without header
+
+Each request creates a new resource. Retrying creates duplicates.
+
+```bash
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $API_KEY" \
+  -d '{"items": [{"url": "https://example.com"}]}'
+# → Creates batch_abc123
+
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $API_KEY" \
+  -d '{"items": [{"url": "https://example.com"}]}'
+# → Creates batch_def456 (duplicate!)
+```
+
+### First request with header
+
+The request is processed normally. The response is cached with your key for 24 hours.
+
+```bash
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -d '{"items": [{"url": "https://example.com"}]}'
+# → Creates batch_abc123, caches response
+```
+
+### Retry with same key and same body
+
+Returns the cached response. No new resource is created.
+
+```bash
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -d '{"items": [{"url": "https://example.com"}]}'
+# → Returns cached batch_abc123 (no duplicate)
+```
+
+### Retry while original is still processing
+
+Returns a [409 error](/api-reference/errors/idempotency_error). Wait and retry. If the original request has been processing for more than 30 minutes, the lock is considered stale and will be automatically released, allowing the retry to proceed.
+
+```bash
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -d '{"items": [{"url": "https://example.com"}]}'
+# → 409: "A request with this idempotency key is currently being processed"
+```
+
+### Same key with different body
+
+Returns a [422 error](/api-reference/errors/unprocessable_entity). You cannot reuse a key with different parameters.
+
+```bash
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -d '{"items": [{"url": "https://different-url.com"}]}'
+# → 422: "A request with this idempotency key was already made with different parameters"
+```
+
+### Full example
+
+<CodeGroup>
+
+```python Python
+import requests
+import uuid
+
+API_KEY = "<YOUR_API_KEY>"
+idempotency_key = str(uuid.uuid4())  # Generate unique key per logical operation
+
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotency_key
+    },
+    json={
+        "items": [
+            {"custom_id": "item-1", "url": "https://example.com/page1"},
+            {"custom_id": "item-2", "url": "https://example.com/page2"}
+        ]
+    }
+)
+
+# Safe to retry with the same idempotency_key on failure
+```
+
+```js Node
+const crypto = require('crypto');
+
+const idempotencyKey = crypto.randomUUID();
+
+const response = await fetch('https://api.olostep.com/v1/batches', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json',
+    'Idempotency-Key': idempotencyKey
+  },
+  body: JSON.stringify({
+    items: [
+      { custom_id: 'item-1', url: 'https://example.com/page1' },
+      { custom_id: 'item-2', url: 'https://example.com/page2' }
+    ]
+  })
+});
+
+// Safe to retry with the same idempotencyKey on failure
+```
+
+```bash cURL
+IDEMPOTENCY_KEY=$(uuidgen)
+
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $IDEMPOTENCY_KEY" \
+  -d '{
+    "items": [
+      {"custom_id": "item-1", "url": "https://example.com/page1"},
+      {"custom_id": "item-2", "url": "https://example.com/page2"}
+    ]
+  }'
+```
+
+</CodeGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Retry with exponential backoff">
+    Combine idempotency keys with exponential backoff for robust error handling.
+    
+    <CodeGroup>
+
+```python Python
+import requests
+import uuid
+import time
+
+def create_batch_with_retry(items, max_retries=3):
+    idempotency_key = str(uuid.uuid4())
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                "https://api.olostep.com/v1/batches",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                    "Idempotency-Key": idempotency_key
+                },
+                json={"items": items},
+                timeout=30
+            )
+            
+            if response.status_code == 409:
+                # Request is being processed - wait and retry
+                time.sleep(2 ** attempt)
+                continue
+                
+            return response.json()
+            
+        except requests.exceptions.Timeout:
+            # Safe to retry - idempotency key ensures no duplicates
+            time.sleep(2 ** attempt)
+            continue
+    
+    raise Exception("Max retries exceeded")
+```
+
+```js Node
+async function createBatchWithRetry(items, maxRetries = 3) {
+  const idempotencyKey = crypto.randomUUID();
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch('https://api.olostep.com/v1/batches', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer <YOUR_API_KEY>',
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
+        },
+        body: JSON.stringify({ items }),
+        signal: AbortSignal.timeout(30000)
+      });
+      
+      if (response.status === 409) {
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+        continue;
+      }
+      
+      return await response.json();
+      
+    } catch (error) {
+      if (error.name === 'TimeoutError') {
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+        continue;
+      }
+      throw error;
+    }
+  }
+  
+  throw new Error('Max retries exceeded');
+}
+```
+
+</CodeGroup>
+  </Accordion>
+  
+  <Accordion title="Store keys with your operations">
+    Save the idempotency key alongside your operation record. If you need to retry later (e.g., after a crash), you can recover the key.
+    
+    ```python
+    # Store in your database
+    operation = {
+        "id": "op_123",
+        "items": [...],
+        "idempotency_key": str(uuid.uuid4()),
+        "status": "pending"
+    }
+    db.save(operation)
+    
+    # Use stored key for request (and retries)
+    create_batch(operation["items"], idempotency_key=operation["idempotency_key"])
+    ```
+  </Accordion>
+  
+  <Accordion title="Use deterministic keys for queue processing">
+    When processing from a queue, derive the idempotency key from the message ID to ensure exactly-once processing.
+    
+    ```python
+    def process_queue_message(message):
+        # Derive key from message ID - same message always gets same key
+        idempotency_key = f"queue-{message.id}"
+        create_batch(message.items, idempotency_key=idempotency_key)
+    ```
+  </Accordion>
+  
+  <Accordion title="Handle 409 errors gracefully">
+    A [409 error](/api-reference/errors/idempotency_error) means your request is being processed. Instead of failing, implement a polling strategy.
+    
+    ```python
+    response = create_batch(items, idempotency_key=key)
+    
+    if response.status_code == 409:
+        # Original request is in progress - poll for completion
+        time.sleep(2)
+        # Retry with same key - will return cached result when done
+        response = create_batch(items, idempotency_key=key)
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Key Rules
+
+### 1. One Key Per Logical Operation
+
+Generate a new idempotency key for each distinct operation. Don't reuse keys across different requests.
+
+```python
+# ✅ Correct: New key for each batch
+batch1_key = str(uuid.uuid4())
+batch2_key = str(uuid.uuid4())
+
+create_batch(items_a, idempotency_key=batch1_key)
+create_batch(items_b, idempotency_key=batch2_key)
+
+# ❌ Wrong: Same key for different operations
+shared_key = str(uuid.uuid4())
+create_batch(items_a, idempotency_key=shared_key)
+create_batch(items_b, idempotency_key=shared_key)  # Will fail!
+```
+
+### 2. Same Key = Same Parameters
+
+If you retry with the same idempotency key, the request body must be identical. Changing parameters with the same key returns a [422 error](/api-reference/errors/unprocessable_entity).
+
+```python
+key = str(uuid.uuid4())
+
+# First request
+create_batch(items=[{"url": "https://a.com"}], idempotency_key=key)
+
+# ❌ Same key with different items → 422 error
+create_batch(items=[{"url": "https://b.com"}], idempotency_key=key)
+```
+
+### 3. Keys Expire After 24 Hours
+
+Idempotency keys are valid for 24 hours. After expiration, the same key can be reused (though generating fresh keys is recommended).
+
+### 4. Stale Lock Recovery
+
+If a request with an idempotency key has been processing for more than 30 minutes, the lock is considered stale and will be automatically released. This allows retries to proceed even if the original request crashed or was abandoned. The stale lock threshold prevents indefinite blocking when processes fail unexpectedly.
+
+### 5. Key Format
+
+- **Max length:** 255 characters
+- **Recommended:** UUIDs, ULIDs, or `{operation}-{timestamp}-{random}`
+- **Examples:**
+  - `550e8400-e29b-41d4-a716-446655440000` (UUID)
+  - `batch-20240115-a1b2c3d4` (descriptive)
+  - `order_12345_batch_attempt_1` (domain-specific)
+
+## Transient vs Permanent Errors
+
+Not all errors are treated the same by the idempotency system. We distinguish between **transient errors** (temporary, retryable) and **permanent errors** (won't change on retry).
+
+### Why this matters
+
+Consider what would happen if we cached *all* errors:
+
+1. You send a request with `Idempotency-Key: abc123`
+2. Our servers are temporarily overloaded → `503 Service Unavailable`
+3. The `503` response is cached with your key
+4. You wait for our servers to recover and retry with the same key
+5. You get the cached `503` response forever ❌
+
+This would be frustrating — you did nothing wrong, but your idempotency key is now "stuck" returning an error for 24 hours.
+
+### How we handle it
+
+**Transient errors do not consume your idempotency key.** If a request fails with a temporary error, we delete the key reservation so you can retry with the same key once the issue is resolved.
+
+**Permanent errors are cached.** If a request fails due to invalid parameters or business rules, retrying with the same key returns the cached error (since the same request would fail again anyway).
+
+### Error classification
+
+| Error Type | Key Consumed? | Can Retry Same Key? | Example |
+|------------|---------------|---------------------|---------|
+| **Success** (2xx) | ✅ Yes | ✅ Yes (returns cached response) | Batch created successfully |
+| **Transient** (429, 503) | ❌ No | ✅ Yes (fresh attempt) | Rate limited, service unavailable |
+| **Validation** (400) | ❌ No | ✅ Yes (after fixing request) | Malformed request body, validation errors |
+| **Permanent** (402, 403, 422) | ✅ Yes | ✅ Yes (returns cached error) | Insufficient credits, forbidden |
+| **In Progress** (409) | N/A | ✅ Yes (wait and retry, or after 30 min stale lock) | Original request still processing |
+
+<Tip>
+The key insight: **idempotency protects against duplicate operations, not against retrying failed ones.** Transient errors mean the operation never started, so there's nothing to deduplicate.
+</Tip>
+
+### Practical example
+
+```python
+import time
+
+def create_batch_with_retry(items, max_retries=3):
+    # Use the SAME key for all retries — that's the point
+    idempotency_key = str(uuid.uuid4())
+    
+    for attempt in range(max_retries):
+        response = requests.post(
+            "https://api.olostep.com/v1/batches",
+            headers={
+                "Authorization": f"Bearer {API_KEY}",
+                "Idempotency-Key": idempotency_key
+            },
+            json={"items": items}
+        )
+        
+        if response.status_code == 200:
+            return response.json()  # Success!
+        
+        if response.status_code == 429:
+            # Transient: Rate limited
+            # Key was NOT consumed — safe to retry with same key
+            time.sleep(2 ** attempt)
+            continue
+        
+        if response.status_code == 503:
+            # Transient: Service unavailable  
+            # Key was NOT consumed — safe to retry with same key
+            time.sleep(2 ** attempt)
+            continue
+        
+        if response.status_code == 409:
+            # Previous request still processing
+            # Wait and retry — will get cached result when done
+            time.sleep(2)
+            continue
+        
+        if response.status_code == 422:
+            # Permanent: Business rule violation
+            # Key IS consumed — must use new key for different params
+            raise BusinessError(response.json())
+        
+        raise APIError(response.status_code, response.text)
+    
+    raise MaxRetriesExceeded()
+```
+
+## Error Responses
+
+### 409 - Request In Progress
+
+Returned when a request with the same idempotency key is currently being processed. See [Idempotency Error](/api-reference/errors/idempotency_error) for details.
+
+```json
+{
+  "object": "error",
+  "code": "idempotency_key_in_progress",
+  "status": 409,
+  "title": "Idempotency Error",
+  "detail": "A request with this idempotency key is currently being processed. Please wait and retry."
+}
+```
+
+**Resolution:** Wait 1-5 seconds and retry. The original request will complete soon. If a request has been processing for more than 30 minutes, the lock is automatically released (stale lock recovery), allowing the retry to proceed.
+
+### 422 - Key Reuse with Different Parameters
+
+Returned when attempting to use an existing idempotency key with different request parameters. See [Unprocessable Entity](/api-reference/errors/unprocessable_entity) for details.
+
+```json
+{
+  "object": "error",
+  "code": "idempotency_key_reuse",
+  "status": 422,
+  "title": "Unprocessable Entity",
+  "detail": "A request with this idempotency key was already made with different parameters. Idempotency keys must be unique per request."
+}
+```
+
+**Resolution:** Generate a new idempotency key for the new request.
+
+### 429 - Rate Limit (Transient)
+
+Rate limit errors are transient — your idempotency key is **not consumed**. Wait and retry with the same key.
+
+```json
+{
+  "object": "error",
+  "code": "rate_limit_exceeded",
+  "status": 429,
+  "title": "Too Many Requests",
+  "detail": "You've exceeded your rate limit. Please wait and retry."
+}
+```
+
+**Resolution:** Wait (check `Retry-After` header if present) and retry with the **same** idempotency key.
+
+### 503 - Service Unavailable (Transient)
+
+Service unavailable errors are transient — your idempotency key is **not consumed**. Wait and retry with the same key.
+
+```json
+{
+  "object": "error",
+  "code": "service_unavailable",
+  "status": 503,
+  "title": "Service Unavailable",
+  "detail": "The service is temporarily unavailable. Please try again later."
+}
+```
+
+**Resolution:** Wait a few seconds and retry with the **same** idempotency key.
