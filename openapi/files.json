@@ -41,7 +41,8 @@
                   },
                   "purpose": {
                     "type": "string",
-                    "description": "The purpose of the file. Defaults to 'context'.",
+                    "description": "The purpose of the file. Supported values: 'context' or 'batch'. Defaults to 'context'.",
+                    "enum": ["context", "batch"],
                     "default": "context"
                   }
                 },
@@ -111,9 +112,10 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": ["context", "batch"]
             },
-            "description": "Filter files by purpose (e.g., 'context')."
+            "description": "Filter files by purpose. Supported values: 'context' or 'batch'."
           }
         ],
         "responses": {
@@ -256,7 +258,7 @@
     },
     "/v1/files/{file_id}": {
       "get": {
-        "summary": "Get File",
+        "summary": "Get File Metadata by ID",
         "description": "Retrieve metadata for a file by its ID.",
         "security": [
           {
@@ -384,8 +386,8 @@
     },
     "/v1/files/{file_id}/content": {
       "get": {
-        "summary": "Get File Content",
-        "description": "Download the content of a completed file. Returns the JSON file content directly.",
+        "summary": "Get File Object by ID",
+        "description": "Get a pre-signed URL to download the content of a completed file. Optionally specify the expiration time for the download URL using the expires_in query parameter (defaults to 600 seconds / 10 minutes).",
         "security": [
           {
             "Authorization": []
@@ -400,33 +402,57 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Number of seconds until the download URL expires. Defaults to 600 seconds (10 minutes).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with file content.",
+            "description": "Successful response with download URL.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "description": "The JSON content of the file. The structure depends on what was uploaded."
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"file\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Created epoch timestamp"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "The filename of the uploaded file"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "File size in bytes"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Pre-signed URL for downloading the file. Expires after the specified expires_in time."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Number of seconds until the download URL expires"
+                    }
+                  }
                 }
-              }
-            },
-            "headers": {
-              "Content-Type": {
-                "schema": {
-                  "type": "string",
-                  "example": "application/json"
-                },
-                "description": "Content type of the response"
-              },
-              "Content-Disposition": {
-                "schema": {
-                  "type": "string",
-                  "example": "attachment; filename=\"my-data.json\""
-                },
-                "description": "Content disposition header with filename"
               }
             }
           },

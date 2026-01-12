@@ -124,7 +124,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ### Recurring schedule with cron expression
 
-Create a recurring schedule using a cron expression. Cron expressions use AWS EventBridge format (6 fields): minute hour day month day-of-week year.
+Create a recurring schedule using a cron expression. Cron expressions use 6 fields format: minute hour day month day-of-week year.
 
 <CodeGroup>
 
@@ -273,6 +273,7 @@ When you create a schedule, you'll receive a schedule object with the following 
 ```json
 {
   "id": "schedule_abc123xyz",
+  "object": "schedule"
   "type": "recurring",
   "method": "POST",
   "endpoint": "v1/scrapes",
@@ -287,6 +288,7 @@ For one-time schedules, the response includes `executeAt` instead of `cronExpres
 ```json
 {
   "id": "schedule_abc123xyz",
+  "object": "schedule"
   "type": "onetime",
   "method": "POST",
   "endpoint": "v1/scrapes",
@@ -472,7 +474,7 @@ The `payload` field accepts any JSON object - you can structure it however you n
 
 ## Cron expression format
 
-Cron expressions use AWS EventBridge format with 6 fields:
+Cron expressions use 6 fields format:
 
 ```
 minute hour day month day-of-week year

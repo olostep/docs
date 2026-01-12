@@ -49,7 +49,7 @@ The file upload process consists of two steps:
 
 ### Step 1: Create upload URL
 
-First, create an upload URL by providing the filename and optional purpose.
+First, create an upload URL by providing the filename and optional purpose. The `purpose` parameter supports only two values: `"context"` (default) or `"batch"`.
 
 <CodeGroup>
 
@@ -63,7 +63,7 @@ API_URL = "https://api.olostep.com/v1"
 # Step 1: Create upload URL
 payload = {
     "filename": "my-data.json",
-    "purpose": "context"  # Optional, defaults to "context"
+    "purpose": "context"  # Optional, defaults to "context". Supported values: "context" or "batch"
 }
 
 headers = {
@@ -86,7 +86,7 @@ const res = await fetch(`${API_URL}/files`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
     filename: 'my-data.json',
-    purpose: 'context'  // Optional, defaults to "context"
+    purpose: 'context'  // Optional, defaults to "context". Supported values: "context" or "batch"
   })
 })
 const uploadData = await res.json()
@@ -100,6 +100,15 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
   -d '{
     "filename": "my-data.json",
     "purpose": "context"
+  }'
+
+# Example with "batch" purpose:
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-data.json",
+    "purpose": "batch"
   }'
 ```
 
@@ -218,7 +227,7 @@ The complete endpoint validates the JSON file and returns file metadata:
 }
 ```
 
-## Get file metadata
+## Retrieve file metadata by ID
 
 Retrieve metadata for a file by its ID.
 
@@ -250,41 +259,91 @@ curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## Download file content
+## Retrieve file object by ID
 
-Download the JSON content of a completed file.
+Get a pre-signed URL to download the JSON content of a completed file. Optionally specify the expiration time for the download URL using the `expires_in` query parameter (defaults to 600 seconds / 10 minutes).
 
 <CodeGroup>
 
 ```python Python
 file_id = "file_abc123xyz789"
+# Get download URL (default expiration: 600 seconds)
 response = requests.get(
     f"{API_URL}/files/{file_id}/content",
     headers={"Authorization": f"Bearer {API_KEY}"}
 )
-file_content = response.json()  # Returns the JSON content directly
+download_info = response.json()
+download_url = download_info["download_url"]
+
+# Download the file content using the pre-signed URL
+file_response = requests.get(download_url)
+file_content = file_response.json()
 print(json.dumps(file_content, indent=2))
+
+# Example with custom expiration (3600 seconds = 1 hour)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content?expires_in=3600",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+print(f"Download URL expires in: {download_info['expires_in']} seconds")
 ```
 
 ```js Node
 const fileId = 'file_abc123xyz789'
+
+// Get download URL (default expiration: 600 seconds)
 const res = await fetch(`${API_URL}/files/${fileId}/content`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
-const fileContent = await res.json()
+const downloadInfo = await res.json()
+const downloadUrl = downloadInfo.download_url
+
+// Download the file content using the pre-signed URL
+const fileRes = await fetch(downloadUrl)
+const fileContent = await fileRes.json()
 console.log(fileContent)
+
+// Example with custom expiration (3600 seconds = 1 hour)
+const customRes = await fetch(`${API_URL}/files/${fileId}/content?expires_in=3600`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const customDownloadInfo = await customRes.json()
+console.log(`Download URL expires in: ${customDownloadInfo.expires_in} seconds`)
 ```
 
 ```bash cURL
+# Get download URL (default expiration: 600 seconds)
 curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Get download URL with custom expiration (3600 seconds = 1 hour)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content?expires_in=3600" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Download the file using the pre-signed URL
+curl -s "$DOWNLOAD_URL"
 ```
 
 </CodeGroup>
 
+The response includes a pre-signed `download_url` that expires after the specified time:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "my-data.json",
+  "bytes": 1024,
+  "download_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
 ## List files
 
-List all completed files for your team. Optionally filter by purpose.
+List all completed files for your team. Optionally filter by purpose (supported values: `"context"` or `"batch"`).
 
 <CodeGroup>
 
@@ -386,9 +445,9 @@ curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## Complete upload example
+## Complete upload example (context purpose)
 
-Here's a complete example that uploads a JSON file and uses it:
+Here's a complete example that uploads a JSON file with `purpose="context"`:
 
 <CodeGroup>
 
@@ -475,12 +534,148 @@ console.log(`File size: ${fileInfo.bytes} bytes`)
 
 </CodeGroup>
 
+## Upload batch file example
+
+Here's an example that uploads a JSON file with `purpose="batch"` containing valid batch data that can be used with the `/v1/batches` endpoint:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Step 1: Create upload URL with purpose="batch"
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "batch-items.json", "purpose": "batch"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Step 2: Prepare batch JSON data (valid format for /v1/batches endpoint)
+batch_data = {
+    "items": [
+        {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+        {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+        {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+    ],
+    "parser": {"id": "@olostep/google-search"},
+    "country": "US"
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(batch_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Step 3: Complete the upload
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Batch file uploaded successfully: {file_info['id']}")
+print(f"File size: {file_info['bytes']} bytes")
+print(f"Purpose: {file_info['purpose']}")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Step 1: Create upload URL with purpose="batch"
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'batch-items.json', purpose: 'batch' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Step 2: Prepare batch JSON data (valid format for /v1/batches endpoint)
+const batchData = {
+  items: [
+    { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
+    { custom_id: 'item-2', url: 'https://www.google.com/search?q=paddle&gl=us&hl=en' },
+    { custom_id: 'item-3', url: 'https://www.google.com/search?q=payment+gateway&gl=us&hl=en' }
+  ],
+  parser: { id: '@olostep/google-search' },
+  country: 'US'
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(batchData)
+})
+
+// Step 3: Complete the upload
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Batch file uploaded successfully: ${fileInfo.id}`)
+console.log(`File size: ${fileInfo.bytes} bytes`)
+console.log(`Purpose: ${fileInfo.purpose}`)
+```
+
+```bash cURL
+# Step 1: Create upload URL with purpose="batch"
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-items.json",
+    "purpose": "batch"
+  }'
+
+# Step 2: Upload batch JSON data (save to batch-items.json first)
+# batch-items.json content:
+# {
+#   "items": [
+#     {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+#     {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+#     {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+#   ],
+#   "parser": {"id": "@olostep/google-search"},
+#   "country": "US"
+# }
+
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @batch-items.json
+
+# Step 3: Complete the upload
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+The uploaded batch file contains a valid JSON structure that matches the `/v1/batches` endpoint format:
+- `items`: Array of objects with `custom_id` and `url` fields
+- `parser`: Optional parser configuration
+- `country`: Optional country code
+
+This file can be used as input for batch processing operations.
+
 ## File requirements
 
 - **File format**: Only JSON files are supported (`.json` extension required)
 - **File size**: Maximum 200MB per file
 - **Expiration**: Files expire after 30 days
 - **Upload URL**: Pre-signed URLs expire after 10 minutes
+- **Purpose parameter**: Only supports `"context"` or `"batch"` values (defaults to `"context"`)
 
 ## Pricing
 
