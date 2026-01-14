@@ -1,43 +1,12 @@
 ---
-title: 'Get Batch Status'
+title: 'Get AirOps Batch Status'
 description: 'Retrieve the current status and unified status object for an AirOps batch'
-openapi: GET /batches-airops/{batchId}
+openapi: GET /v1/airops-batches/{batch_id}
 ---
 
 ## Overview
 
 Returns the high-level configuration and current progress of an AirOps batch. Use this endpoint for polling if you are not using webhooks.
-
-### Response
-
-The response includes the `status` object which tracks the progress of both the scraping and extraction stages.
-
-```json
-{
-  "id": "batch_x7f2k",
-  "object": "batch",
-  "created": 1736676000000,
-  "total_urls": 1,
-  "status": {
-    "overall": "in_progress",
-    "scraping": {
-      "status": "completed",
-      "started_at": 1736676000000,
-      "completed_at": 1736676045000,
-      "result": {
-        "completed_urls": 1,
-        "failed_urls": 0
-      }
-    },
-    "extraction": {
-      "status": "in_progress",
-      "started_at": 1736676045000,
-      "completed_at": null,
-      "result": null
-    }
-  }
-}
-```
 
 ## Stage Statuses
 

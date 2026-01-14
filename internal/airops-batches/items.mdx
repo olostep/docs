@@ -1,45 +1,12 @@
 ---
-title: 'Get Batch Items'
+title: 'Get AirOps Batch Items'
 description: 'Retrieve the detailed results for each item in an AirOps batch'
-openapi: GET /batches-airops/{batchId}/items
+openapi: GET /v1/airops-batches/{batch_id}/items
 ---
 
 ## Overview
 
 Returns the list of items in the batch, including both the scraping (rule-based) and extraction (LLM-based) results for each item.
-
-### Response Structure
-
-Each item contains two result objects:
-- `scraping`: Data returned by the standard Olostep parser.
-- `extraction`: Data returned by the LLM fallback for missing fields.
-
-```json
-{
-  "id": "batch_x7f2k",
-  "items": [
-    {
-      "custom_id": "p1",
-      "url": "https://example.com/page",
-      "scraping": {
-        "status": "completed",
-        "parser_data": { 
-          "title": "Example Domain", 
-          "content": "..." 
-        }
-      },
-      "extraction": {
-        "status": "completed",
-        "extracted_data": { 
-          "citations": ["https://source.com/1"],
-          "summary": "This is a summary."
-        }
-      }
-    }
-  ],
-  "items_count": 1
-}
-```
 
 ## Data Merging
 

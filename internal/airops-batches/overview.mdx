@@ -1,6 +1,6 @@
 ---
 title: 'Overview'
-description: 'Understanding the AirOps Batches lifecycle and architecture'
+description: 'Understanding the AirOps Batches lifecycle and user-facing events'
 icon: 'diagram-project'
 ---
 
@@ -8,60 +8,79 @@ icon: 'diagram-project'
 
 AirOps Batches is a high-level wrapper around the standard `/batches` endpoint. It adds automated LLM-based field extraction for items that cannot be fully parsed by standard scrapers, providing a "best-of-both-worlds" approach: fast rule-based parsing combined with high-accuracy LLM fallback.
 
-## Architecture
+## Lifecycle Flow
 
-The system follows a staged execution model where each stage is monitored via a unified status object.
+The lifecycle of an AirOps batch is managed through a series of stages. As a user, you interact with the system by sending an initial request and receiving webhooks as the batch progresses through these stages.
 
 ```mermaid
 graph TD
-    A[Client Request] --> B[AirOps Workflow]
-    B --> C[Stage 1: Scraping]
-    C --> D{All URLs processed?}
-    D -- No --> E[Poll SQS]
-    E --> C
-    D -- Yes --> F[Stage 2: Extraction Planning]
-    F --> G[Phase 1: Gap Analysis]
-    G --> H[Phase 2: Prompt Building]
-    H --> I[Phase 3: OpenAI Batch Submit]
-    I --> J[Stage 3: Extraction]
-    J --> K{Batch Complete?}
-    K -- No --> L[Poll SQS]
-    L --> J
-    K -- Yes --> M[Merge & Final Webhook]
+    A[Client Request] -- "POST /batches-airops" --> B[Batch Created]
+    B -- "Webhook #1" --> C[Stage 1: Scraping]
+    C -- "Webhook #2" --> D[Stage 2: Extraction Planning]
+    D -- "Webhook #3" --> E[Stage 3: LLM Extraction]
+    E -- "Webhook #4" --> F[Batch Completed]
+    
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style D fill:#f9f,stroke:#333,stroke-width:2px
+    style F fill:#9f9,stroke:#333,stroke-width:2px
 ```
+
+## Input & Output
+
+### Your Input
+To start the process, you provide:
+1.  **Items**: A list of URLs and your own `custom_id` for each.
+2.  **Schema**: A JSON Schema defining the fields you want to extract.
+3.  **Webhook**: A single URL to receive all progress updates for this request.
+
+### Our Output
+The system provides:
+1.  **Unified Status Object**: A comprehensive view of the batch progress, included in every API response and webhook payload.
+2.  **Merged Data**: The final result combines the speed of rule-based parsing with the intelligence of LLM extraction.
+
+## Webhooks
+
+All updates for a specific batch are sent to the **same webhook destination** provided in your initial `POST /batches-airops` request. AirOps fires four distinct webhook events during the lifecycle:
+
+<AccordionGroup>
+  <Accordion title="1. Batch Created (batch.created)" icon="file-plus">
+    Fired immediately after the initial `/batches` call confirms the request is accepted.
+    
+    **Payload Highlights:**
+    - `status.overall`: `in_progress`
+    - `status.scraping.status`: `in_progress`
+    - `status.extraction.status`: `pending`
+  </Accordion>
+
+  <Accordion title="2. Scraping Complete (scraping.complete)" icon="broom">
+    Sent when the initial rule-based parsing phase is finished for all items.
+    
+    **Payload Highlights:**
+    - `status.scraping.status`: `completed`
+    - `status.scraping.result`: Summary of completed vs failed URLs.
+    - `status.extraction.status`: `in_progress`
+  </Accordion>
+
+  <Accordion title="3. Enrichment Planned (enrichment.planned)" icon="map">
+    Sent after the system identifies missing fields and plans the LLM extraction.
+    
+    **Payload Highlights:**
+    - `enrichment_plan`: Contains `total_items`, `items_needing_enrichment`, and a `field_gap_counts` map showing which fields require LLM extraction.
+  </Accordion>
+
+  <Accordion title="4. Extraction Complete (batch.completed)" icon="check-double">
+    The final notification sent after LLM results are merged.
+    
+    **Payload Highlights:**
+    - `status.overall`: `completed`
+    - `status.extraction.status`: `completed`
+    - `status.extraction.result`: Detailed stats including `items_processed`, `items_extracted`, and the `model` used.
+  </Accordion>
+</AccordionGroup>
 
 ## Unified Status Object
 
-Every response and webhook contains a **unified status object** showing all stages and their states. This provides a complete view of the batch at any point in time.
-
-### Structure
-
-```json
-{
-  "id": "batch_x7f2k",
-  "object": "batch",
-  "created": 1736676000000,
-  "total_urls": 100,
-  "status": {
-    "overall": "in_progress",
-    "scraping": {
-      "status": "completed",
-      "started_at": 1736676000000,
-      "completed_at": 1736676045000,
-      "result": {
-        "completed_urls": 98,
-        "failed_urls": 2
-      }
-    },
-    "extraction": {
-      "status": "in_progress",
-      "started_at": 1736676045000,
-      "completed_at": null,
-      "result": null
-    }
-  }
-}
-```
+Every response and webhook contains a **unified status object** showing all stages and their current states.
 
 ### Status Values
 
@@ -72,22 +91,4 @@ Every response and webhook contains a **unified status object** showing all stag
 | `completed` | Finished successfully |
 | `failed` | Finished with error |
 | `cancelled` | Skipped due to upstream failure |
-
-## Polling & Stage Detection
-
-Since AirOps Batches wraps the existing batches codebase without modifying it, it uses **SQS-based polling** to detect stage completion.
-
-1.  **Scraping Poll**: Triggers every 2 minutes. Checks DynamoDB for item count vs `total_urls`.
-2.  **Extraction Poll**: Triggers every 5 minutes. Checks OpenAI Batch API status.
-
-If a stage is not complete, the poller self-schedules another check with a delay.
-
-## Webhooks
-
-AirOps fires four distinct webhook events during the lifecycle:
-
-1.  **Batch Created**: Fired immediately after the initial `/batches` call.
-2.  **Scraping Complete**: Fired when all URLs have been scraped and parsed.
-3.  **Enrichment Planned**: Fired after gap analysis completes, containing the `enrichment_plan`.
-4.  **Extraction Complete**: Fired after LLM results are merged (Final).
 

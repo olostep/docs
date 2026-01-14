@@ -1,38 +1,12 @@
 ---
 title: 'Create AirOps Batch'
 description: 'Starts a new AirOps batch with automated LLM extraction fallback'
-openapi: POST /batches-airops
+openapi: POST /v1/airops-batches
 ---
 
 ## Overview
 
 Starts a batch process that combines standard scraping with LLM-based field extraction. You provide a target `schema`, and the system will automatically identify missing fields after scraping and use an LLM to extract them from the page markdown.
-
-### Body Parameters
-
-<ParamField body="items" type="array" required>
-  An array of objects containing the URLs to process.
-  <Expandable title="item">
-    <ParamField body="url" type="string" required>
-      The URL to scrape.
-    </ParamField>
-    <ParamField body="custom_id" type="string" required>
-      A unique identifier for this item within the batch.
-    </ParamField>
-  </Expandable>
-</ParamField>
-
-<ParamField body="schema" type="object" required>
-  A JSON Schema defining the fields you want to extract.
-</ParamField>
-
-<ParamField body="model" type="string" default="gpt-4o-mini">
-  The OpenAI model to use for extraction.
-</ParamField>
-
-<ParamField body="webhook" type="string">
-  The URL where webhook notifications will be sent.
-</ParamField>
 
 ## How it works
 
@@ -40,25 +14,3 @@ Starts a batch process that combines standard scraping with LLM-based field extr
 2.  **Scraping**: Standard Olostep scrapers attempt to parse the page using rule-based logic.
 3.  **Gap Analysis**: After scraping, the system compares the parser output with your requested `schema`.
 4.  **Extraction**: Any missing fields are extracted using the specified LLM via the OpenAI Batch API.
-
-## Example Request
-
-```bash
-curl -X POST https://api.olostep.com/batches-airops \
-  -H "Authorization: Bearer $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items": [
-      { "url": "https://example.com/page", "custom_id": "item_1" }
-    ],
-    "schema": {
-      "type": "object",
-      "properties": {
-        "citations": { "type": "array", "items": { "type": "string" } },
-        "summary": { "type": "string" }
-      }
-    },
-    "webhook": "https://myapp.com/callback"
-  }'
-```
-
