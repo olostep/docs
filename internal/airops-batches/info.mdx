@@ -1,16 +1,96 @@
 ---
-title: 'Get AirOps Batch Status'
-description: 'Retrieve the current status and unified status object for an AirOps batch'
-openapi: GET /v1/airops-batches/{batch_id}
+title: 'Get Batch Status'
+description: 'Retrieve the current status and progress of an AirOps batch'
+openapi: GET /v1/batches-airops/{batch_id}
 ---
 
 ## Overview
 
-Returns the high-level configuration and current progress of an AirOps batch. Use this endpoint for polling if you are not using webhooks.
+Returns the current phase and progress metrics for an AirOps batch. Use this for polling if you're not using webhooks.
 
-## Stage Statuses
+## Response Fields
 
-- **overall**: The master status of the entire workflow.
-- **scraping**: Status of the initial rule-based parsing phase.
-- **extraction**: Status of the LLM-based fallback extraction phase.
+<ResponseField name="id" type="string">
+  The batch identifier.
+</ResponseField>
 
+<ResponseField name="object" type="string">
+  Always `"batch"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+  Unix timestamp (milliseconds) when the batch was created.
+</ResponseField>
+
+<ResponseField name="total_urls" type="integer">
+  Total number of URLs submitted.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Overall workflow status: `pending`, `in_progress`, `completed`, or `failed`.
+</ResponseField>
+
+<ResponseField name="batch_mode" type="boolean">
+  Whether async LLM batch mode is enabled (`true`) or sync mode (`false`).
+</ResponseField>
+
+<ResponseField name="scraping" type="object">
+  Full scraping phase status object (see [Webhooks](/internal/airops-batches/webhooks#scraping-status)).
+</ResponseField>
+
+<ResponseField name="analyzing" type="object">
+  Full analyzing phase status object (see [Webhooks](/internal/airops-batches/webhooks#analyzing-status)).
+</ResponseField>
+
+<ResponseField name="enriching" type="object">
+  Full enriching phase status object (see [Webhooks](/internal/airops-batches/webhooks#enriching-status)).
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch",
+  "created_at": 1705315200000,
+  "total_urls": 100,
+  "status": "completed",
+  "batch_mode": true,
+  "scraping": {
+    "state": "completed",
+    "submitted": 100,
+    "valid": 100,
+    "succeeded": 98,
+    "failed": 2,
+    "started_at": 1705315200000,
+    "completed_at": 1705315500000,
+    "error": null
+  },
+  "analyzing": {
+    "state": "completed",
+    "items_analyzed": 98,
+    "items_needing_enrichment": 45,
+    "items_complete": 53,
+    "fields_to_enrich": {
+      "page_type": 98,
+      "author": 12,
+      "date_published": 8,
+      "date_modified": 25,
+      "brand_mentions": 98
+    },
+    "started_at": 1705315500000,
+    "completed_at": 1705315502000
+  },
+  "enriching": {
+    "state": "completed",
+    "items_to_enrich": 45,
+    "items_enriched": 44,
+    "items_failed": 1,
+    "llm_batch_id": "batch_xyz789def",
+    "batch_mode": true,
+    "started_at": 1705315505000,
+    "completed_at": 1705316800000,
+    "error": null
+  }
+}
+```

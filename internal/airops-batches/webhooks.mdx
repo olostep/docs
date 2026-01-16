@@ -1,0 +1,522 @@
+---
+title: 'Webhooks'
+description: 'Webhook events and payload schemas for AirOps Batches'
+icon: 'webhook'
+---
+
+## Overview
+
+AirOps Batches sends webhook notifications at each stage of the workflow. All events include a unified `status` object that shows the complete state of all three phases.
+
+## Event Types
+
+| Event | Description |
+|-------|-------------|
+| `event.batch.airops.scraping_started` | Batch created, scraping has begun |
+| `event.batch.airops.scraping_completed` | All URLs scraped, analysis starting |
+| `event.batch.airops.scraping_failed` | Scraping phase failed |
+| `event.batch.airops.analyzing_completed` | Gap analysis finished, enrichment plan ready |
+| `event.batch.airops.enriching_started` | LLM enrichment submitted |
+| `event.batch.airops.enriching_completed` | LLM extraction finished |
+| `event.batch.airops.enriching_failed` | LLM enrichment failed |
+| `event.batch.airops.completed` | Entire workflow completed successfully |
+| `event.batch.airops.failed` | Workflow failed at any stage |
+
+## Webhook Payload Schema
+
+Every webhook follows this structure:
+
+```json
+{
+  "object": "event.batch.airops.scraping_started",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705315201000,
+  "status": {
+    "overall": "in_progress",
+    "scraping": { ... },
+    "analyzing": { ... },
+    "enriching": { ... }
+  }
+}
+```
+
+<ResponseField name="object" type="string" required>
+  Event type identifier (e.g., `event.batch.airops.scraping_started`).
+</ResponseField>
+
+<ResponseField name="id" type="string" required>
+  The batch ID.
+</ResponseField>
+
+<ResponseField name="created" type="integer" required>
+  Unix timestamp (ms) when the batch was created.
+</ResponseField>
+
+<ResponseField name="timestamp" type="integer" required>
+  Unix timestamp (ms) when this webhook was sent.
+</ResponseField>
+
+<ResponseField name="status" type="object" required>
+  Unified status object with all three workflow phases.
+</ResponseField>
+
+---
+
+## Status Object
+
+The `status` object is present in every webhook and shows the complete state.
+
+### Overall Status
+
+The `overall` field provides a single aggregate state:
+
+| Value | Description |
+|-------|-------------|
+| `pending` | All steps are pending |
+| `in_progress` | At least one step is running or completed (but not final) |
+| `completed` | Enriching is completed or skipped |
+| `failed` | Any step has failed |
+
+### Scraping Status
+
+```json
+{
+  "scraping": {
+    "state": "completed",
+    "submitted": 100,
+    "valid": 100,
+    "succeeded": 98,
+    "failed": 2,
+    "started_at": 1705315200000,
+    "completed_at": 1705315500000,
+    "error": null
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `state` | string | `pending`, `started`, `completed`, `failed` |
+| `submitted` | integer | URLs submitted to scraper |
+| `valid` | integer | Valid URLs after validation |
+| `succeeded` | integer | Successfully scraped |
+| `failed` | integer | Failed scrapes |
+| `started_at` | integer | Unix timestamp (ms) |
+| `completed_at` | integer | Unix timestamp (ms) |
+| `error` | object | Error details if `state: failed` |
+
+### Analyzing Status
+
+```json
+{
+  "analyzing": {
+    "state": "completed",
+    "items_analyzed": 98,
+    "items_needing_enrichment": 45,
+    "items_complete": 53,
+    "fields_to_enrich": {
+      "page_type": 98,
+      "author": 12,
+      "date_published": 8,
+      "date_modified": 25,
+      "brand_mentions": 98
+    },
+    "started_at": 1705315500000,
+    "completed_at": 1705315502000
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `state` | string | `pending`, `started`, `completed`, `failed` |
+| `items_analyzed` | integer | Total items analyzed |
+| `items_needing_enrichment` | integer | Items requiring LLM |
+| `items_complete` | integer | Items with all fields already extracted |
+| `fields_to_enrich` | object | Per-field counts of missing data |
+| `started_at` | integer | Unix timestamp (ms) |
+| `completed_at` | integer | Unix timestamp (ms) |
+
+### Enriching Status
+
+```json
+{
+  "enriching": {
+    "state": "completed",
+    "items_to_enrich": 45,
+    "items_enriched": 44,
+    "items_failed": 1,
+    "llm_batch_id": "batch_xyz789",
+    "batch_mode": true,
+    "llm": {
+      "provider": "olostep",
+      "model": "default",
+      "usage": {
+        "prompt_tokens": 125000,
+        "completion_tokens": 8500,
+        "total_tokens": 133500
+      },
+      "completion_time_ms": 45000
+    },
+    "started_at": 1705315502000,
+    "completed_at": 1705316800000,
+    "error": null
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `state` | string | `pending`, `started`, `completed`, `failed`, `skipped` |
+| `items_to_enrich` | integer | Items sent to LLM |
+| `items_enriched` | integer | Successfully enriched |
+| `items_failed` | integer | Failed enrichments |
+| `llm_batch_id` | string | LLM Batch API ID (if batch_mode is true) |
+| `batch_mode` | boolean | Whether async batch API was used |
+| `llm` | object | LLM provider details and usage stats (see below) |
+| `started_at` | integer | Unix timestamp (ms) |
+| `completed_at` | integer | Unix timestamp (ms) |
+| `error` | object | Error details if `state: failed` |
+
+#### LLM Object
+
+Present when enrichment completes:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provider` | string | Processing provider |
+| `model` | string | Model used for extraction |
+| `usage` | object | Token usage: `prompt_tokens`, `completion_tokens`, `total_tokens` |
+| `completion_time_ms` | integer | Processing time in milliseconds |
+
+<Note>
+  When `state: skipped`, enrichment was not needed because all items already had complete data.
+</Note>
+
+---
+
+## Example Payloads
+
+### event.batch.airops.scraping_started
+
+Sent immediately when the batch is created:
+
+```json
+{
+  "object": "event.batch.airops.scraping_started",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705315200500,
+  "status": {
+    "overall": "in_progress",
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```
+
+### event.batch.airops.scraping_completed
+
+Sent when scraping finishes, analysis begins:
+
+```json
+{
+  "object": "event.batch.airops.scraping_completed",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705315500000,
+  "status": {
+    "overall": "in_progress",
+    "scraping": {
+      "state": "completed",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 98,
+      "failed": 2,
+      "started_at": 1705315200000,
+      "completed_at": 1705315500000,
+      "error": null
+    },
+    "analyzing": {
+      "state": "started",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": 1705315500000,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```
+
+### event.batch.airops.analyzing_completed
+
+Sent when gap analysis is done with enrichment plan:
+
+```json
+{
+  "object": "event.batch.airops.analyzing_completed",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705315502000,
+  "status": {
+    "overall": "in_progress",
+    "scraping": {
+      "state": "completed",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 98,
+      "failed": 2,
+      "started_at": 1705315200000,
+      "completed_at": 1705315500000,
+      "error": null
+    },
+    "analyzing": {
+      "state": "completed",
+      "items_analyzed": 98,
+      "items_needing_enrichment": 45,
+      "items_complete": 53,
+      "fields_to_enrich": {
+        "page_type": 98,
+        "author": 12,
+        "date_published": 8,
+        "date_modified": 25,
+        "brand_mentions": 98
+      },
+      "started_at": 1705315500000,
+      "completed_at": 1705315502000
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 45,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```
+
+### event.batch.airops.enriching_started
+
+Sent when LLM enrichment batch is submitted:
+
+```json
+{
+  "object": "event.batch.airops.enriching_started",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705315505000,
+  "status": {
+    "overall": "in_progress",
+    "scraping": {
+      "state": "completed",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 98,
+      "failed": 2,
+      "started_at": 1705315200000,
+      "completed_at": 1705315500000,
+      "error": null
+    },
+    "analyzing": {
+      "state": "completed",
+      "items_analyzed": 98,
+      "items_needing_enrichment": 45,
+      "items_complete": 53,
+      "fields_to_enrich": {
+        "page_type": 98,
+        "author": 12,
+        "date_published": 8,
+        "date_modified": 25,
+        "brand_mentions": 98
+      },
+      "started_at": 1705315500000,
+      "completed_at": 1705315502000
+    },
+    "enriching": {
+      "state": "started",
+      "items_to_enrich": 45,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": "batch_xyz789def",
+      "started_at": 1705315505000,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```
+
+### event.batch.airops.completed
+
+Final webhook when everything is done:
+
+```json
+{
+  "object": "event.batch.airops.completed",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705316800000,
+  "status": {
+    "overall": "completed",
+    "scraping": {
+      "state": "completed",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 98,
+      "failed": 2,
+      "started_at": 1705315200000,
+      "completed_at": 1705315500000,
+      "error": null
+    },
+    "analyzing": {
+      "state": "completed",
+      "items_analyzed": 98,
+      "items_needing_enrichment": 45,
+      "items_complete": 53,
+      "fields_to_enrich": {
+        "page_type": 98,
+        "author": 12,
+        "date_published": 8,
+        "date_modified": 25,
+        "brand_mentions": 98
+      },
+      "started_at": 1705315500000,
+      "completed_at": 1705315502000
+    },
+    "enriching": {
+      "state": "completed",
+      "items_to_enrich": 45,
+      "items_enriched": 44,
+      "items_failed": 1,
+      "llm_batch_id": "batch_xyz789def",
+      "started_at": 1705315505000,
+      "completed_at": 1705316800000,
+      "error": null
+    }
+  }
+}
+```
+
+### event.batch.airops.failed
+
+Sent when the workflow fails at any stage:
+
+```json
+{
+  "object": "event.batch.airops.failed",
+  "id": "batch_abc123xyz",
+  "created": 1705315200000,
+  "timestamp": 1705316000000,
+  "status": {
+    "overall": "failed",
+    "scraping": {
+      "state": "completed",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 98,
+      "failed": 2,
+      "started_at": 1705315200000,
+      "completed_at": 1705315500000,
+      "error": null
+    },
+    "analyzing": {
+      "state": "completed",
+      "items_analyzed": 98,
+      "items_needing_enrichment": 45,
+      "items_complete": 53,
+      "fields_to_enrich": {
+        "page_type": 98,
+        "author": 12,
+        "date_published": 8,
+        "date_modified": 25,
+        "brand_mentions": 98
+      },
+      "started_at": 1705315500000,
+      "completed_at": 1705315502000
+    },
+    "enriching": {
+      "state": "failed",
+      "items_to_enrich": 45,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": "batch_xyz789def",
+      "started_at": 1705315505000,
+      "completed_at": 1705316000000,
+      "error": {
+        "code": "LLM_BATCH_FAILED",
+        "message": "LLM batch processing failed with status: expired"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Error Object
+
+When a phase fails, the `error` object contains:
+
+```json
+{
+  "error": {
+    "code": "SCRAPING_ERROR",
+    "message": "All URLs failed to scrape"
+  }
+}
+```
+
+### Error Codes
+
+| Code | Phase | Description |
+|------|-------|-------------|
+| `SCRAPING_ERROR` | Scraping | Scraping phase failure |
+| `ENRICHING_ERROR` | Enriching | General enrichment failure |
+| `LLM_BATCH_FAILED` | Enriching | LLM batch processing failure |
+| `LLM_BATCH_EXPIRED` | Enriching | LLM batch timed out |
+
+
