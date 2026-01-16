@@ -1,0 +1,165 @@
+---
+title: 'Get Batch Items'
+description: 'Retrieve all items with their extracted metadata'
+openapi: GET /v1/batches-airops/{batch_id}/items
+---
+
+## Overview
+
+Returns all items in the batch with their extracted metadata. Items include both successful extractions and failures from any stage.
+
+<Note>
+  This endpoint only returns complete results when the batch `status` is `"completed"`. If the batch is still processing, you'll receive an empty `items` array with a message.
+</Note>
+
+## Response Structure
+
+<ResponseField name="batch_id" type="string">
+  The batch identifier.
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  ISO 8601 timestamp when the batch completed.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Batch status: `"completed"` or `"in_progress"`.
+</ResponseField>
+
+<ResponseField name="counts" type="object">
+  Summary counts:
+  - `total` - Total items in batch
+  - `succeeded` - Successfully processed
+  - `failed` - Failed at any stage
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array of all items with their results.
+</ResponseField>
+
+---
+
+## Item Schema
+
+### Successful Items
+
+Completed items have extracted fields at the root level:
+
+```json
+{
+  "custom_id": "post-1",
+  "url": "https://example.com/blog/post-1",
+  "status": "completed",
+  "page_type": "informational_article",
+  "author": "John Doe",
+  "date_published": "2024-01-15",
+  "date_modified": null,
+  "brand_mentions": ["Acme Corp", "TechBrand"]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `custom_id` | string | Your identifier from the request |
+| `url` | string | The scraped URL |
+| `status` | string | `"completed"` for successful items |
+| `page_type` | string | Classified page type (see [Overview](/internal/airops-batches/overview#page-types)) |
+| `author` | string \| null | Author of the content |
+| `date_published` | string \| null | Publication date (ISO 8601 when available) |
+| `date_modified` | string \| null | Last modification date |
+| `brand_mentions` | array | Brands from your input list found on the page |
+
+### Failed Items
+
+Items that failed during any stage have an error structure:
+
+```json
+{
+  "custom_id": "post-failed",
+  "url": "https://example.com/broken-page",
+  "status": "failed",
+  "failed_stage": "scraping",
+  "error": {
+    "code": "SCRAPE_FAILED",
+    "message": "Connection timeout after 30s"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | `"failed"` for failed items |
+| `failed_stage` | string | Stage where failure occurred: `scraping`, `analyzing`, or `enriching` |
+| `error` | object | Error details with `code` and `message` |
+
+---
+
+## Extraction Sources
+
+Fields are extracted using multiple methods in priority order:
+
+1. **Classifier** - URL pattern analysis (instant)
+2. **Parser** - Structured metadata extraction
+3. **LLM** - AI-powered extraction for missing fields
+
+---
+
+## Example Response
+
+### Completed Batch
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "completed_at": "2024-01-15T12:30:00.000Z",
+  "status": "completed",
+  "counts": {
+    "total": 100,
+    "succeeded": 98,
+    "failed": 2
+  },
+  "items": [
+    {
+      "custom_id": "post-1",
+      "url": "https://example.com/blog/post-1",
+      "status": "completed",
+      "page_type": "informational_article",
+      "author": "John Doe",
+      "date_published": "2024-01-15",
+      "date_modified": null,
+      "brand_mentions": ["OpenAI", "Google"]
+    },
+    {
+      "custom_id": "post-2",
+      "url": "https://example.com/pricing",
+      "status": "completed",
+      "page_type": "pricing_page",
+      "author": null,
+      "date_published": null,
+      "date_modified": null,
+      "brand_mentions": []
+    },
+    {
+      "custom_id": "post-3",
+      "url": "https://example.com/broken",
+      "status": "failed",
+      "failed_stage": "scraping",
+      "error": {
+        "code": "SCRAPE_FAILED",
+        "message": "URL failed to scrape"
+      }
+    }
+  ]
+}
+```
+
+### In-Progress Batch
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "status": "in_progress",
+  "items": [],
+  "message": "Batch is still processing. Items will be available when status is \"completed\"."
+}
+```
