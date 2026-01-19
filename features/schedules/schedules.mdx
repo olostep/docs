@@ -70,8 +70,8 @@ payload = {
         "url_to_scrape": "https://example.com",
         "formats": ["markdown"]
     },
-    "executeAt": execute_at,
-    "expressionTimezone": "UTC"
+    "execute_at": execute_at,
+    "expression_timezone": "UTC"
 }
 
 headers = {
@@ -85,7 +85,7 @@ print(json.dumps(response.json(), indent=2))
 
 ```js Node
 const API_URL = 'https://api.olostep.com/v1'
-const executeAt = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour from now
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour from now
 
 const res = await fetch(`${API_URL}/schedules`, {
   method: 'POST',
@@ -97,8 +97,8 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    executeAt: executeAt,
-    expressionTimezone: 'UTC'
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
   })
 })
 console.log(await res.json())
@@ -115,8 +115,8 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "url_to_scrape": "https://example.com",
       "formats": ["markdown"]
     },
-    "executeAt": "2025-01-15T10:00:00Z",
-    "expressionTimezone": "UTC"
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
   }'
 ```
 
@@ -143,8 +143,8 @@ payload = {
         "url_to_scrape": "https://example.com",
         "formats": ["markdown"]
     },
-    "cronExpression": "0 10 * * ? *",
-    "expressionTimezone": "UTC"
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
 }
 
 headers = {
@@ -169,8 +169,8 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    cronExpression: '0 10 * * ? *', // Every day at 10am UTC
-    expressionTimezone: 'UTC'
+    cron_expression: '0 10 * * ? *', // Every day at 10am UTC
+    expression_timezone: 'UTC'
   })
 })
 console.log(await res.json())
@@ -187,8 +187,8 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "url_to_scrape": "https://example.com",
       "formats": ["markdown"]
     },
-    "cronExpression": "0 10 * * ? *",
-    "expressionTimezone": "UTC"
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
   }'
 ```
 
@@ -216,7 +216,7 @@ payload = {
         "formats": ["markdown"]
     },
     "text": "every 3 minutes",
-    "expressionTimezone": "UTC"
+    "expression_timezone": "UTC"
 }
 
 headers = {
@@ -242,7 +242,7 @@ const res = await fetch(`${API_URL}/schedules`, {
       formats: ['markdown']
     },
     text: 'every Monday at 9am',
-    expressionTimezone: 'UTC'
+    expression_timezone: 'UTC'
   })
 })
 console.log(await res.json())
@@ -260,7 +260,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "formats": ["markdown"]
     },
     "text": "every day at 10am",
-    "expressionTimezone": "UTC"
+    "expression_timezone": "UTC"
   }'
 ```
 
@@ -277,13 +277,13 @@ When you create a schedule, you'll receive a schedule object with the following 
   "type": "recurring",
   "method": "POST",
   "endpoint": "v1/scrapes",
-  "cronExpression": "0 10 * * ? *",
-  "expressionTimezone": "UTC",
+  "cron_expression": "0 10 * * ? *",
+  "expression_timezone": "UTC",
   "created": "2025-01-15T10:00:00.000Z"
 }
 ```
 
-For one-time schedules, the response includes `executeAt` instead of `cronExpression`:
+For one-time schedules, the response includes `execute_at` instead of `cron_expression`:
 
 ```json
 {
@@ -292,8 +292,8 @@ For one-time schedules, the response includes `executeAt` instead of `cronExpres
   "type": "onetime",
   "method": "POST",
   "endpoint": "v1/scrapes",
-  "executeAt": "2025-01-15T10:00:00.000Z",
-  "expressionTimezone": "UTC",
+  "execute_at": "2025-01-15T10:00:00.000Z",
+  "expression_timezone": "UTC",
   "created": "2025-01-15T09:00:00.000Z"
 }
 ```
@@ -417,8 +417,8 @@ payload = {
         "data": {"nested": "structure"},
         "timestamp": datetime.now().isoformat()
     },
-    "executeAt": (datetime.now() + timedelta(hours=1)).isoformat(),
-    "expressionTimezone": "UTC"
+    "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "expression_timezone": "UTC"
 }
 
 headers = {
@@ -432,7 +432,7 @@ print(json.dumps(response.json(), indent=2))
 
 ```js Node
 const API_URL = 'https://api.olostep.com/v1'
-const executeAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
 const res = await fetch(`${API_URL}/schedules`, {
   method: 'POST',
@@ -445,8 +445,8 @@ const res = await fetch(`${API_URL}/schedules`, {
       data: { nested: 'structure' },
       timestamp: new Date().toISOString()
     },
-    executeAt: executeAt,
-    expressionTimezone: 'UTC'
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
   })
 })
 console.log(await res.json())
@@ -463,8 +463,8 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "custom_field": "any value",
       "data": {"nested": "structure"}
     },
-    "executeAt": "2025-01-15T10:00:00Z",
-    "expressionTimezone": "UTC"
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
   }'
 ```
 
@@ -503,7 +503,7 @@ You can use natural language to describe schedules. The system will automaticall
 - One-time schedules are automatically deleted after execution
 - Recurring schedules continue until manually deleted
 - Timezone must be a valid IANA timezone identifier (e.g., "UTC", "America/New_York", "Europe/London")
-- The `executeAt` datetime must be in the future
+- The `execute_at` datetime must be in the future
 - Natural language conversion may require retries; the system will attempt up to 3 times
 - Schedules execute the API call with the provided payload exactly as specified - you can pass any JSON structure you need
 - The `endpoint` can be any URL - it doesn't have to be an Olostep endpoint

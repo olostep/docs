@@ -49,22 +49,22 @@
                     "description": "The payload to send with the API call. Can contain any JSON structure you need. For GET requests, this is typically empty. For POST requests, this should contain the data you want to send to the endpoint.",
                     "default": {}
                   },
-                  "cronExpression": {
+                  "cron_expression": {
                     "type": "string",
-                    "description": "Cron expression in 6 fields format (minute hour day month day-of-week year) for recurring schedules. Required for recurring schedules. Mutually exclusive with executeAt and text."
+                    "description": "Cron expression in 6 fields format (minute hour day month day-of-week year) for recurring schedules. Required for recurring schedules. Mutually exclusive with execute_at and text."
                   },
-                  "executeAt": {
+                  "execute_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "ISO 8601 datetime string for one-time schedule execution. Must be a valid future datetime. Required for one-time schedules. Mutually exclusive with cronExpression."
+                    "description": "ISO 8601 datetime string for one-time schedule execution. Must be a valid future datetime. Required for one-time schedules. Mutually exclusive with cron_expression."
                   },
-                  "expressionTimezone": {
+                  "expression_timezone": {
                     "type": "string",
                     "description": "IANA timezone identifier (e.g., 'UTC', 'America/New_York', 'Europe/London') for the schedule. Required for recurring schedules, optional for one-time schedules."
                   },
                   "text": {
                     "type": "string",
-                    "description": "Natural language text to automatically generate a cron expression. The system will convert your text into a valid cron expression. Examples: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'. Mutually exclusive with cronExpression and executeAt."
+                    "description": "Natural language text to automatically generate a cron expression. The system will convert your text into a valid cron expression. Examples: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'. Mutually exclusive with cron_expression and execute_at."
                   }
                 },
                 "required": ["method", "endpoint"]
@@ -98,16 +98,16 @@
                       "type": "string",
                       "description": "The endpoint URL that will be called"
                     },
-                    "cronExpression": {
+                    "cron_expression": {
                       "type": "string",
                       "description": "Cron expression (only present for recurring schedules)"
                     },
-                    "executeAt": {
+                    "execute_at": {
                       "type": "string",
                       "format": "date-time",
                       "description": "Execution datetime (only present for one-time schedules)"
                     },
-                    "expressionTimezone": {
+                    "expression_timezone": {
                       "type": "string",
                       "description": "Timezone for the schedule"
                     },
@@ -122,7 +122,7 @@
             }
           },
           "400": {
-            "description": "Bad request due to incorrect or missing parameters. Common errors: invalid method, missing endpoint, invalid cronExpression, invalid executeAt datetime, invalid timezone, or invalid schedule_id format."
+            "description": "Bad request due to incorrect or missing parameters. Common errors: invalid method, missing endpoint, invalid cron_expression, invalid execute_at datetime, invalid timezone, or invalid schedule_id format."
           },
           "401": {
             "description": "Invalid API key. Try double-checking it or reaching out to info@olostep.com if you're facing issues."
@@ -183,7 +183,7 @@
                             "format": "date-time",
                             "description": "Execution datetime (only present for one-time schedules)"
                           },
-                          "expressionTimezone": {
+                          "expression_timezone": {
                             "type": "string",
                             "description": "Timezone for the schedule"
                           },
