@@ -10,7 +10,8 @@ Through the Olostep `/v1/schedules` endpoint you can schedule API calls to execu
 - Schedule one-time executions at a specific datetime
 - Create recurring schedules using cron expressions
 - Use natural language text to automatically generate cron expressions
-- Schedule any HTTP endpoint (GET or POST) - works with any URL, not just Olostep endpoints
+- Schedule HTTP endpoints (GET or POST)
+- For POST requests, use short-form Olostep endpoints (automatically prefixed) or full URLs
 - Pass any payload you want - the payload is sent exactly as you specify it
 - Automatically manage schedule lifecycle
 
@@ -300,7 +301,7 @@ For one-time schedules, the response includes `execute_at` instead of `cron_expr
 
 ## List schedules
 
-Retrieve all schedules for your team.
+Retrieve all schedules for your team. By default, deleted schedules are filtered out. Use the `include_deleted` query parameter to include them.
 
 <CodeGroup>
 
@@ -320,6 +321,9 @@ result = response.json()
 print(f"Total schedules: {result['count']}")
 for schedule in result['schedules']:
     print(json.dumps(schedule, indent=2))
+
+# To include deleted schedules:
+# response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
 ```
 
 ```js Node
@@ -331,10 +335,56 @@ const res = await fetch(`${API_URL}/schedules`, {
 const result = await res.json()
 console.log(`Total schedules: ${result.count}`)
 result.schedules.forEach(s => console.log(s))
+
+// To include deleted schedules:
+// const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
 ```
 
 ```bash cURL
 curl -s -X GET "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# To include deleted schedules:
+# curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
+#   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Get a schedule
+
+Retrieve a single schedule by its ID.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
 
@@ -382,11 +432,9 @@ curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ## Supported endpoints
 
-You can schedule **any HTTP endpoint** - it's not limited to Olostep endpoints. The `endpoint` field accepts any URL, and you can pass any `payload` you want.
-
 ### Olostep endpoints (short form)
 
-For convenience, you can use short forms for common Olostep endpoints. The system will automatically prepend `https://api.olostep.com/` for these:
+For POST requests, you can use short forms for Olostep endpoints. The system will automatically prepend `https://api.olostep.com/` for these:
 
 - `v1/scrapes` - Schedule web scraping tasks
 - `v1/batches` - Schedule batch processing jobs
@@ -394,9 +442,9 @@ For convenience, you can use short forms for common Olostep endpoints. The syste
 - `v1/maps` - Schedule map data extraction
 - `v1/answers` - Schedule answer generation
 
-### Any external URL
+### Full URLs
 
-You can also schedule calls to any external API or webhook. Just provide the full URL:
+You can also provide full URLs for your endpoints. This is required for external APIs or webhooks:
 
 <CodeGroup>
 
@@ -408,7 +456,7 @@ from datetime import datetime, timedelta
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Schedule a call to any external API
+# Schedule a call to an external API
 payload = {
     "method": "POST",
     "endpoint": "https://api.example.com/webhook",
@@ -505,9 +553,12 @@ You can use natural language to describe schedules. The system will automaticall
 - Timezone must be a valid IANA timezone identifier (e.g., "UTC", "America/New_York", "Europe/London")
 - The `execute_at` datetime must be in the future
 - Natural language conversion may require retries; the system will attempt up to 3 times
+- When using natural language text (`text` parameter), the timezone defaults to "UTC"
 - Schedules execute the API call with the provided payload exactly as specified - you can pass any JSON structure you need
-- The `endpoint` can be any URL - it doesn't have to be an Olostep endpoint
+- For POST requests, short-form Olostep endpoints (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) are automatically prefixed with `https://api.olostep.com/`
+- For other endpoints, provide the full URL
 - The `payload` can contain any data structure - it's sent as-is to your target endpoint
+- Deleting an already deleted schedule will return a 400 error
 
 ## Pricing
 

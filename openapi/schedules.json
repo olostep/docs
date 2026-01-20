@@ -21,7 +21,7 @@
     "/v1/schedules": {
       "post": {
         "summary": "Create Schedule",
-        "description": "Creates a new schedule to execute API calls at specified times. Supports both one-time executions and recurring schedules using cron expressions. You can also use natural language text to generate cron expressions automatically. The endpoint can be any URL (not limited to Olostep endpoints), and the payload can contain any JSON structure you want to send.",
+        "description": "Creates a new schedule to execute API calls at specified times. Supports both one-time executions and recurring schedules using cron expressions. You can also use natural language text to generate cron expressions automatically. For POST requests, you can use short form Olostep endpoints (e.g., 'v1/scrapes') which will be automatically prefixed, or provide a full URL. The payload can contain any JSON structure you want to send.",
         "security": [
           {
             "Authorization": []
@@ -41,8 +41,7 @@
                   },
                   "endpoint": {
                     "type": "string",
-                    "format": "uri",
-                    "description": "The endpoint URL to call when the schedule executes. Can be any URL - not limited to Olostep endpoints. For Olostep endpoints, you can use short form (e.g., 'v1/scrapes') or full URL."
+                    "description": "The endpoint URL to call when the schedule executes. For POST requests with Olostep endpoints, you can use short form (e.g., 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') which will be automatically prefixed with 'https://api.olostep.com/'. For other endpoints, provide the full URL."
                   },
                   "payload": {
                     "type": "object",
@@ -60,11 +59,11 @@
                   },
                   "expression_timezone": {
                     "type": "string",
-                    "description": "IANA timezone identifier (e.g., 'UTC', 'America/New_York', 'Europe/London') for the schedule. Required for recurring schedules, optional for one-time schedules."
+                    "description": "IANA timezone identifier (e.g., 'UTC', 'America/New_York', 'Europe/London') for the schedule. Required for recurring schedules, optional for one-time schedules. When using natural language text, this defaults to 'UTC'."
                   },
                   "text": {
                     "type": "string",
-                    "description": "Natural language text to automatically generate a cron expression. The system will convert your text into a valid cron expression. Examples: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'. Mutually exclusive with cron_expression and execute_at."
+                    "description": "Natural language text to automatically generate a cron expression. The system will convert your text into a valid cron expression. Examples: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'. Mutually exclusive with cron_expression and execute_at. When used, expression_timezone defaults to 'UTC'."
                   }
                 },
                 "required": ["method", "endpoint"]
@@ -134,10 +133,23 @@
       },
       "get": {
         "summary": "List Schedules",
-        "description": "Retrieves all schedules for your team. Returns a list of schedules with their configuration, status, and metadata.",
+        "description": "Retrieves all schedules for your team. Returns a list of schedules with their configuration, status, and metadata. By default, deleted schedules are filtered out.",
         "security": [
           {
             "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "Set to 'true' to include deleted schedules in the response. By default, deleted schedules are filtered out.",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"],
+              "default": "false"
+            }
           }
         ],
         "responses": {
@@ -213,6 +225,11 @@
                             "type": "string",
                             "enum": ["ENABLED", "DELETED"],
                             "description": "Current state of the schedule"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": ["GET", "POST"],
+                            "description": "HTTP method for the scheduled call"
                           }
                         }
                       },
@@ -237,6 +254,124 @@
       }
     },
     "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "Get Schedule",
+        "description": "Retrieves a single schedule by its ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the schedule. Must start with 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "Team identifier"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "Unique schedule identifier"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": ["recurring", "onetime"],
+                          "description": "Type of schedule"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": ["GET", "POST"],
+                          "description": "HTTP method for the scheduled call"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "The endpoint URL"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "The payload to send with the API call"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "Cron expression (only present for recurring schedules)"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Execution datetime (only present for one-time schedules)"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "Timezone for the schedule"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "Natural language text used to generate cron expression"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "Internal schedule name in EventBridge"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "Schedule group name"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 datetime when the schedule was created"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 datetime when the schedule was last updated"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": ["ENABLED", "DELETED"],
+                          "description": "Current state of the schedule"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to invalid schedule_id format. Schedule ID must start with 'schedule_'."
+          },
+          "401": {
+            "description": "Invalid API key."
+          },
+          "404": {
+            "description": "Schedule not found for the provided ID."
+          },
+          "500": {
+            "description": "Internal server error while fetching schedule."
+          }
+        }
+      },
       "delete": {
         "summary": "Delete Schedule",
         "description": "Deletes a schedule by its ID. This will stop any future executions and remove the schedule from EventBridge.",
@@ -279,7 +414,7 @@
             }
           },
           "400": {
-            "description": "Bad request due to invalid schedule_id format. Schedule ID must start with 'schedule_'."
+            "description": "Bad request due to invalid schedule_id format or schedule already deleted. Schedule ID must start with 'schedule_'."
           },
           "401": {
             "description": "Invalid API key."
