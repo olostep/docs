@@ -1,0 +1,476 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Files API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "Create File Upload",
+        "description": "Generate a pre-signed URL for uploading a JSON file. After uploading, you must call the complete endpoint to finalize the upload. The upload URL expires in 10 minutes.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "The filename for the file. Must end with .json extension.",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "The purpose of the file. Supported values: 'context' or 'batch'. Defaults to 'context'.",
+                    "enum": ["context", "batch"],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with upload URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"file.upload\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Created epoch timestamp"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Pre-signed URL for uploading the file. Expires in 10 minutes."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Number of seconds until the upload URL expires (600 seconds = 10 minutes)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Missing filename or invalid file type (only .json files are supported)."
+          },
+          "401": {
+            "description": "Invalid API key"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Files",
+        "description": "List all completed files for your team. Optionally filter by purpose. Only returns files with status 'completed'.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["context", "batch"]
+            },
+            "description": "Filter files by purpose. Supported values: 'context' or 'batch'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with list of files.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"list\" for this endpoint."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "File ID"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "The kind of object. \"file\" for this endpoint."
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Created epoch timestamp"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "The filename of the uploaded file"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "File size in bytes"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "The purpose of the file"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "File status. Always 'completed' for listed files."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "Complete File Upload",
+        "description": "Complete the file upload process and validate the uploaded JSON file. This endpoint verifies the file exists, validates its JSON format, checks file size (max 200MB), and updates the file status to completed.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the file to complete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File upload completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"file\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Created epoch timestamp"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "The filename of the uploaded file"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "File size in bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "The purpose of the file"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "File status. Will be 'completed' after successful completion."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. File already completed, invalid status, file too large (max 200MB), or invalid JSON format."
+          },
+          "401": {
+            "description": "Invalid API key"
+          },
+          "404": {
+            "description": "File not found or file not uploaded to S3"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "Get File Metadata by ID",
+        "description": "Retrieve metadata for a file by its ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the file to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with file metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"file\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Created epoch timestamp"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "The filename of the uploaded file"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "File size in bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "The purpose of the file"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "File status (e.g., 'pending', 'completed')"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key"
+          },
+          "404": {
+            "description": "File not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete File",
+        "description": "Delete a file and its associated data from storage.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the file to delete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"file\" for this endpoint."
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "Indicates the file was successfully deleted"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key"
+          },
+          "404": {
+            "description": "File not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "Get File Object by ID",
+        "description": "Get a pre-signed URL to download the content of a completed file. Optionally specify the expiration time for the download URL using the expires_in query parameter (defaults to 600 seconds / 10 minutes).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the file to download.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Number of seconds until the download URL expires. Defaults to 600 seconds (10 minutes).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with download URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The kind of object. \"file\" for this endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Created epoch timestamp"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "The filename of the uploaded file"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "File size in bytes"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Pre-signed URL for downloading the file. Expires after the specified expires_in time."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Number of seconds until the download URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. File not completed."
+          },
+          "401": {
+            "description": "Invalid API key"
+          },
+          "404": {
+            "description": "File not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  }
+}
+
