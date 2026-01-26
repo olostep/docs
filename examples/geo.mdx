@@ -226,34 +226,74 @@ After submitting a batch request and polling for completion, you'll receive resp
   <Tab title="ChatGPT">
     ```json
     {
-      "url": "https://chatgpt.com/?model=gpt-4&q=what%20are%20some%20good%20restraunts%20to%20eat%20today%20in%20Los%20Angeles",
-      "prompt": "what are some good restraunts to eat today in Los Angeles",
-      "answer_markdown": "That depends a little on what part of Los Angeles you’re in and what kind of food you’re craving (sushi, Mexican, fine dining, casual, etc.), but here are some standout options across different styles:\n\n---\n\n## 🍽️ Top Restaurant Picks in LA (2025)\n\n### Fine Dining / Special Occasion\n\n* **Somni** (West Hollywood) — recently awarded **three Michelin stars**. Creative, high-end tasting menus..."
-      "web_searched": true,
-      "sources": [
+      "url": "https://chatgpt.com/?model=auto&q=what%20is%20the%20news%20today%20in%20Austin",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Here's a roundup of **today's top news in Austin, Texas**:\n\n---\n\n## 🏛️ Local Government\n\n* **New Homeless Navigation Center Approved:** The Austin City Council approved the purchase of a commercial property on South Interstate 35...\n\n[Council OKs purchase of site - Austin Monitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n\n## 📚 Education\n\n* **Austin ISD Consolidation:** Families rally at Austin ISD headquarters to oppose consolidation plan...\n\n[Austin's Leading Local News - KVUE](https://www.kvue.com/)",
+      "inline_references": [
         {
-          "url": "https://www.latimes.com/food/story/2025-05-14/michelin-adds-3-los-angeles-restaurants-to-its-2025-california-guide-reveals-announcement-date?utm_source=chatgpt.com",
-          "title": "Michelin adds 3 Los Angeles restaurants to its 2025 California guide - Los Angeles Times",
-          "snippet": "MICHELIN ADDS 15 RESTAURANTS TO ITS CALIFORNIA GUIDE. NEARLY HALF ARE IN LOS ANGELES  Here are the 15 new restaurants that will appear in Michelin’s 2025 California Guide, including seven found in Los...",
-          "rank": 0,
-          "date_published": null
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "text": "Council OKs purchase of site - Austin Monitor",
+          "position": 1
         },
         {
-          "url": "https://www.latimes.com/00000193-b340-dcae-aff3-fb5cfd260000-123?utm_source=chatgpt.com",
-          "title": "LA Times Today: These are some of the 101 best restaurants in Los Angeles - Los Angeles Times",
-          "snippet": "Copyright © 2025, Los Angeles Times | Terms of Service | Privacy Policy | CA Notice of Collection | Do Not Sell or Share My Personal Information  VIDEO | 06:47  LA Times Today: These are some of the 1...",
-          "rank": 13,
-          "date_published": null
+          "url": "https://www.kvue.com/",
+          "text": "Austin's Leading Local News - KVUE",
+          "position": 2
         },
         ...
       ],
-      "web_search_query": [
-        "good restaurants Los Angeles today",
-        "top restaurants Los Angeles 2025"
-      ]
+      "sources": [
+        {
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "title": "Council OKs purchase of site for new homeless navigation center - Austin Monitor",
+          "snippet": "City Council voted 8–3 on Thursday to purchase a commercial property on South Interstate 35...",
+          "cited": true,
+          "date_published": "2025-10-10T12:00:00.000Z",
+          "attribution": "austinmonitor.com"
+        },
+        {
+          "url": "https://www.kvue.com/",
+          "title": "Austin's Leading Local News - KVUE",
+          "snippet": "Families rally at Austin ISD headquarters to oppose consolidation plan...",
+          "cited": true,
+          "date_published": null,
+          "attribution": "www.kvue.com"
+        },
+        ...
+      ],
+      "products": [],
+      "network_search_calls": {
+        "user_query": "what is the news today in Austin",
+        "default_model_slug": "auto",
+        "model_slug": "gpt-5-2",
+        "search_triggered": true,
+        "search_queries": [
+          {
+            "query": "Austin Texas news today October 2025",
+            "type": "model_query"
+          },
+          ...
+        ],
+        "search_result_groups": [
+          {
+            "domain": "austinmonitor.com",
+            "entries": [
+              {
+                "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+                "title": "Council OKs purchase of site for new homeless navigation center",
+                "snippet": "City Council voted 8–3 on Thursday to purchase a commercial property...",
+                "pub_date": "2025-10-10T12:00:00.000Z",
+                "attribution": "austinmonitor.com",
+                "ref_type": "news",
+                "ref_index": 1
+              }
+            ]
+          },
+          ...
+        ]
+      }
     }
     ```
-    Note: We're sharing JSON for a different query since ChatGPT is not triggering web search for the original query.
   </Tab>
   
   <Tab title="Perplexity">
@@ -268,16 +308,18 @@ After submitting a batch request and polling for completion, you'll receive resp
       ],
       "sources": [
         {
-          "title": "KUT Homepage | KUT Radio, Austin's NPR Station",
+          "position": 1,
+          "label": "KUT Homepage | KUT Radio, Austin's NPR Station",
           "url": "https://www.kut.org/",
-          "description": "News stories for Austin and Central Texas from the local KUT newsroom, National Public Radio NPR, the BBC and public radio. K-U-T 90.5 FM",
-          "position": 1
+          "description": "News stories for Austin and Central Texas from the local KUT newsroom, National Public Radio NPR, the BBC and public radio. K-U-T 90.5 FM"
+          
         },
         {
-          "title": "Austin News, Weather, Sports, Breaking News",
+          "position": 2,
+          "label": "Austin News, Weather, Sports, Breaking News",
           "url": "https://cbsaustin.com/",
-          "description": "KEYE TV CBS Austin is the news, sports and weather leader for the Texas Capitol Region, covering events in the surrounding area including Round Rock Pflugerville, Georgetown, Belton, Killeen, Taylor, Lakeway, Buda, Kyle, San Marcos, Wyldwood, Bastrop, Elgin, Bartlett, Jarrell, Bertram, Burnet and Salado.",
-          "position": 2
+          "description": "KEYE TV CBS Austin is the news, sports and weather leader for the Texas Capitol Region, covering events in the surrounding area including Round Rock Pflugerville, Georgetown, Belton, Killeen, Taylor, Lakeway, Buda, Kyle, San Marcos, Wyldwood, Bastrop, Elgin, Bartlett, Jarrell, Bertram, Burnet and Salado."
+          
         },
         ...
       ],
@@ -298,7 +340,7 @@ After submitting a batch request and polling for completion, you'll receive resp
       ],
       "is_shopping_data": false,
       "shopping_data": null,
-      "related_prompts": [
+      "related_queries": [
         "Show top local headlines in Austin right now"
       ]
     }
@@ -315,15 +357,11 @@ After submitting a batch request and polling for completion, you'll receive resp
         {
           "title": "Austin News, Weather, Sports, Breaking News",
           "url": "https://cbsaustin.com/#:~:text=%22I%20feel%20sad%2C%22%20Austin,Roberson%20in%20shaken%20baby%20case",
-          "snippet": "\"I feel sad,\" Austin ISD faces backlash over plan to close 13 schools. Federal judge temporarily blocks Texas National Guard deplo...",
-          "source": "KEYE",
           "index": 0
         },
         {
           "title": "News - FOX 7 Austin",
           "url": "https://www.fox7austin.com/news#:~:text=Concerned%20community%20members%20protest%20proposed,multiple%20break%2Dins%20in%20custody",
-          "snippet": "Concerned community members protest proposed Austin ISD school closures. October 9, 2025 10:15pm CDT. 2 teens arrested after found...",
-          "source": "FOX 7 Austin",
           "index": 1
         },
         ...
@@ -365,32 +403,28 @@ After submitting a batch request and polling for completion, you'll receive resp
   <Tab title="Gemini">
     ```json
     {
-      "url": "https://gemini.google.com/app/08383c6592b48ec3",
+      "url": "https://gemini.google.com/",
       "prompt": "what is the news today in Austin",
-      "answer_markdown": "As of today, Friday, October 10, 2025, here are some of the top local news headlines in Austin, Texas:\n\n**Local Government and Community** \n\n* **New Homeless Navigation Center Approved:**  The Austin City Council approved the purchase of a ...",
+      "answer_markdown": "Here are some of the top local news headlines in Austin, Texas:\n\n### Local Government and Community\n\n* **New Homeless Navigation Center Approved:** The Austin City Council approved the purchase of a commercial property on South Interstate 35...\n\n[Council OKs purchase of site for new homeless navigation center - Austin Monitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n\n* **Austin ISD Consolidation:** Families rally at Austin ISD headquarters to oppose consolidation plan...\n\n[Austin's Leading Local News - KVUE](https://www.kvue.com/)",
       "sources": [
         {
+          "position": 1,
+          "label": "Council OKs purchase of site for new homeless navigation center - Austin Monitor",
           "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
-          "title": "Council OKs purchase of site for new homeless navigation center - Austin Monitor",
-          "description": "​​City Council voted 8–3 on Thursday to purchase a commercial property on South Interstate 35 to serve as the city's first housing navigation center for people ...",
-          "icon": "https://encrypted-tbn2.gstatic.com/favicon-tbn?q=tbn:ANd9GcTvzUggudhKAFP21uoN6vQ1_hmo45uUEPVPyiPOp8I8q0_84o3TX7lffvJzfJ2HH5nDFyhXjX9H2WrPjt9Qb8iBwsjRUTWI95tIV8k",
-          "domain": "austinmonitor.com",
-          "cited": true,
-          "position": 374
+          "description": "City Council voted 8–3 on Thursday to purchase a commercial property on South Interstate 35 to serve as the city's first housing navigation center...",
+          "confidence_level": 0.9781935
         },
         {
+          "position": 2,
+          "label": "Austin's Leading Local News - KVUE",
           "url": "https://www.kvue.com/",
-          "title": "Austin's Leading Local News: Weather, Traffic, Sports and more | Austin, Texas | kvue.com",
-          "description": "- 'My kids are coming home crying' | Families rally at Austin ISD headquarters to oppose consolidation plan. Parents are urging Austin ISD leaders to ...",
-          "icon": "https://encrypted-tbn2.gstatic.com/favicon-tbn?q=tbn:ANd9GcTr7k3t2Txwv0jrnijg0HjGl_JvWzyEQiSFbeNQ31lZNJ5tWchaHI6JKb71b0M_dubvwFywV5q1uGdCLHAoCBAOFn3pUEMN",
-          "domain": "www.kvue.com",
-          "cited": true,
-          "position": 547
+          "description": "Families rally at Austin ISD headquarters to oppose consolidation plan. Parents are urging Austin ISD leaders to...",
+          "confidence_level": 0.9623676
         },
         ...
       ],
-      "links_attached": [],
-      "model": "2.5 Flash"
+      "links_attached": true,
+      "model": "gemini"
     }
     ```
   </Tab>
@@ -400,19 +434,19 @@ After submitting a batch request and polling for completion, you'll receive resp
     {
       "url": "https://copilot.microsoft.com/chats/G7TZeFAA3dMces2Cb5J3N",
       "prompt": "what is the news today in Austin",
-      "answer_markdown": "Here’s a roundup of today’s top stories from Austin: 🕵️‍♀️ \\*\\*Homicide Investigation in North Austin\\*\\* Police have identified 43-year-old Mary Gonzales as the woman found dead behind a business on Research Boulevard. A suspect, 21-year-old ...",
+      "answer_markdown": "Here's a roundup of today's top stories from Austin:\n\n## 🕵️ Crime & Safety\n\n**Homicide Investigation in North Austin** Police have identified 43-year-old Mary Gonzales as the woman found dead behind a business on Research Boulevard. A suspect, 21-year-old, has been arrestedMSN News.\n\n**Suspicious Package at Airport** Police investigated after a suspicious package was found at Austin's airport, which has since been clearedMSN News.\n\n## 🏛️ Local Government\n\n**Homeless Navigation Center** The city council has approved the purchase of a new property for a homeless navigation centerAustin Monitor.\n\n[MSN NewsWoman found dead behind North Austin business identified; suspect arrested](https://www.msn.com/en-us/news/crime/woman-found-dead-behind-north-austin-business-identified-suspect-arrested/ar-AA1ObaMU)\n[MSN NewsPolice investigating after suspicious package found at Austin's airport](https://www.msn.com/en-us/news/crime/police-investigating-after-suspicious-package-found-at-austins-airport/ar-AA1Ob39x)",
       "sources": [
         {
           "url": "https://www.msn.com/en-us/news/crime/woman-found-dead-behind-north-austin-business-identified-suspect-arrested/ar-AA1ObaMU",
           "title": "Woman found dead behind North Austin business identified; suspect arrested",
           "position": 319,
-          "icon_url": "https://bing.com/th?id=ODF.OqKj0UXQrBuruO-UTVHpog&pid=news"
+          "icon_url": "https://services.bingapis.com/favicon?url=www.msn.com"
         },
         {
           "url": "https://www.msn.com/en-us/news/crime/police-investigating-after-suspicious-package-found-at-austins-airport/ar-AA1Ob39x",
           "title": "Police investigating after suspicious package found at Austin's airport",
           "position": 555,
-          "icon_url": "https://bing.com/th?id=ODF.gqIzXwnbG1WCLoQ1tpisag&pid=news"
+          "icon_url": "https://services.bingapis.com/favicon?url=www.msn.com"
         },
         ...
       ]
