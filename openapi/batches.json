@@ -262,6 +262,11 @@
                                     },
                                     "metadata": {
                                         "$ref": "#/components/schemas/Metadata"
+                                    },
+                                    "webhook": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "HTTPS URL to receive a POST request when the batch completes. Must be a publicly accessible URL using `http://` or `https://` protocol. Cannot point to localhost or private IP addresses. See [Webhooks](/api-reference/common/webhooks) for payload format and retry behavior."
                                     }
                                 },
                                 "required": [
@@ -287,7 +292,8 @@
                                         "completed_urls": { "type": "number", "description": "Count of completed URLs" },
                                         "parser": { "type": "string" },
                                         "country": { "type": "string" },
-                                        "metadata": { "$ref": "#/components/schemas/Metadata" }
+                                        "metadata": { "$ref": "#/components/schemas/Metadata" },
+                                        "webhook": { "type": "string", "description": "Webhook URL to receive completion notification" }
                                     }
                                 }
                             }
@@ -463,7 +469,8 @@
                                         "completed_urls": { "type": "number", "description": "Count of completed URLs" },
                                         "parser": { "type": "string" },
                                         "country": { "type": "string" },
-                                        "metadata": { "$ref": "#/components/schemas/Metadata" }
+                                        "metadata": { "$ref": "#/components/schemas/Metadata" },
+                                        "webhook": { "type": "string", "description": "Webhook URL to receive completion notification" }
                                     }
                                 }
                             }

@@ -76,9 +76,10 @@
                     "type": "number",
                     "description": "An optional number to only crawl the top N most relevant links on every page as per search query."
                   },
-                  "webhook_url": {
+                  "webhook": {
                     "type": "string",
-                    "description": "An optional POST request endpoint called when this crawl is completed. The body of the request will be same as the response of this [`v1/crawls/{crawl_id}`](./info#response-created) endpoint."
+                    "format": "uri",
+                    "description": "HTTPS URL to receive a POST request when the crawl completes. Must be a publicly accessible URL using `http://` or `https://` protocol. Cannot point to localhost or private IP addresses. See [Webhooks](/api-reference/common/webhooks) for payload format and retry behavior."
                   },
                   "timeout": {
                     "type": "number",
@@ -164,7 +165,7 @@
                       "type": "number",
                       "description": "Count of pages crawled"
                     },
-                    "webhook_url": {
+                    "webhook": {
                       "type": "string"
                     },
                     "follow_robots_txt": {
@@ -270,7 +271,7 @@
                       "type": "number",
                       "description": "Count of pages crawled"
                     },
-                    "webhook_url": {
+                    "webhook": {
                       "type": "string"
                     },
                     "follow_robots_txt": {
