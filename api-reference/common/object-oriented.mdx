@@ -1,0 +1,148 @@
+---
+title: 'Object-Oriented API'
+sidebarTitle: 'Object-Oriented API'
+description: 'Understanding how Olostep API objects work together'
+icon: 'cube'
+---
+
+Olostep's API is designed around objects. Understanding this design helps you build more effective integrations.
+
+<Info>
+This design is inspired by [Stripe's API philosophy](https://docs.stripe.com/payments-api/tour#everything-is-an-object) — everything is an object with a lifecycle.
+</Info>
+
+---
+
+## Everything is an Object
+
+Every resource in Olostep is an object with a unique identifier. Whether you create it via the API, SDK, or dashboard — you get back an object you can reference, update, and query.
+
+| Resource | Object ID Format | Example |
+|----------|------------------|---------|
+| Scrape | `scrape_*` | `scrape_abc123` |
+| Batch | `batch_*` | `batch_xyz789` |
+| Crawl | `crawl_*` | `crawl_def456` |
+| Map | `map_*` | `map_ghi012` |
+| Answer | `answer_*` | `answer_jkl345` |
+| File | `file_*` | `file_mno678` |
+| Schedule | `schedule_*` | `schedule_pqr901` |
+
+---
+
+## Objects Can Have Lifecycles
+
+Some Olostep objects track state through a `status` field. This state machine pattern lets you know exactly where each resource is in its lifecycle.
+
+### Batches
+
+Batches have two levels of status: the **batch** itself and individual **items**.
+
+**Batch Status:**
+
+```
+in_progress → completed
+```
+
+| Status | Description |
+|--------|-------------|
+| `in_progress` | URLs are being scraped |
+| `completed` | Processing finished |
+
+<Note>
+**Batch-level failures are extremely rare.** Batches almost always complete — even if some URLs fail, the batch itself reaches `completed` status. In the rare case of a catastrophic infrastructure failure (e.g., LLM service outage during enrichment), the batch may fail. This affects less than 0.01% of batches.
+</Note>
+
+**Item Status:**
+
+Each URL in a batch is tracked as an individual item with its own status:
+
+| Status | Description |
+|--------|-------------|
+| `success` | URL scraped successfully |
+| `failed` | URL could not be scraped |
+
+Items can fail due to:
+- URL is blocked or returns an error
+- Parser output missing
+- Network/fetch errors
+
+Failed items include an `error` object with `code` and `message` explaining the failure. The batch still completes — check each item's status when processing results.
+
+### Crawls
+
+```
+in_progress → completed
+```
+
+| Status | Description |
+|--------|-------------|
+| `in_progress` | Actively discovering and processing URLs |
+| `completed` | Crawling finished |
+
+<Note>
+**Crawls always complete.** Even if a crawl finds 0 URLs (due to robots.txt blocking or invalid start URL), the crawl status will be `completed`. Check the `pages_count` field to verify results.
+</Note>
+
+---
+
+## Retrieve Pattern
+
+Many objects produce content that can be retrieved later. The `retrieve_id` pattern lets you fetch content without re-processing.
+
+```bash
+# Get content using retrieve_id
+curl "https://api.olostep.com/v1/retrieve?retrieve_id=6h89o8u1kt" \
+  -H "Authorization: Bearer <your_token>"
+```
+
+This pattern is used by:
+- **Batch items** — Each processed URL gets a `retrieve_id`
+- **Crawl pages** — Each crawled page gets a `retrieve_id`
+
+The `/v1/retrieve` endpoint accepts `formats` parameter to specify which content types to return (`html`, `markdown`, `json`, `text`).
+
+---
+
+## Webhooks: Event-Driven Updates
+
+Instead of polling for status changes, configure [webhooks](/api-reference/common/webhooks) to receive events when objects change state.
+
+```json
+{
+  "event": "batch.completed",
+  "data": {
+    "id": "batch_xyz789",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 100
+  }
+}
+```
+
+---
+
+## Metadata: Your Data Alongside Ours
+
+Attach custom key-value pairs to objects using [metadata](/api-reference/common/metadata). This lets you link Olostep resources to your internal systems.
+
+```json
+{
+  "items": [{"url": "https://example.com"}],
+  "metadata": {
+    "order_id": "12345",
+    "customer": "acme-corp"
+  }
+}
+```
+
+---
+
+## Summary
+
+| Concept | Description |
+|---------|-------------|
+| **Objects** | Every resource has a unique ID and is queryable |
+| **Lifecycles** | Track progress via `status` field |
+| **Retrieve** | Fetch content later with `retrieve_id` |
+| **Webhooks** | Get notified when state changes |
+| **Metadata** | Attach your own data to any object |
