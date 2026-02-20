@@ -89,6 +89,26 @@
                     "type": "boolean",
                     "description": "Whether to respect robots.txt rules. If set to `false`, the crawler will scrape the website regardless of robots.txt disallow directives. `true` by default.",
                     "default": true
+                  },
+                  "scrape_options": {
+                    "type": "object",
+                    "description": "Controls what each individual page scrape requests from the Olostep API. All fields are optional.",
+                    "properties": {
+                      "formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": ["html", "markdown", "text", "json", "screenshot", "raw_pdf"]
+                        },
+                        "description": "Output formats to request for each scraped page. Defaults to `[\"html\", \"markdown\"]` when omitted. `html` is always included automatically. `json` is automatically added when a `parser` is provided. The raw HTML scrape used internally for link extraction is always `html`-only regardless of this setting.",
+                        "example": ["markdown", "screenshot"]
+                      },
+                      "parser": {
+                        "type": "string",
+                        "description": "Parser name to run on each page and produce structured `json` output (e.g. `\"@olostep/extract-emails\"`). Automatically adds `json` to `formats` when set.",
+                        "example": "@olostep/extract-emails"
+                      },
+                    }
                   }
                 },
                 "required": [
