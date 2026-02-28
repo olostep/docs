@@ -209,6 +209,10 @@
                                                     "type": "string",
                                                     "format": "uri",
                                                     "description": "URL of the item."
+                                                },
+                                                "metadata": {
+                                                    "allOf": [{ "$ref": "#/components/schemas/Metadata" }],
+                                                    "description": "Item-level metadata. Attach key-value pairs to individual items for tracking, filtering, or correlation with your internal systems."
                                                 }
                                             },
                                             "required": [
@@ -272,6 +276,27 @@
                                 "required": [
                                     "items"
                                 ]
+                            },
+                            "example": {
+                                "items": [
+                                    {
+                                        "custom_id": "product-123",
+                                        "url": "https://example.com/product/123",
+                                        "metadata": {
+                                            "source": "catalog_sync",
+                                            "priority": "high"
+                                        }
+                                    },
+                                    {
+                                        "custom_id": "product-456",
+                                        "url": "https://example.com/product/456"
+                                    }
+                                ],
+                                "country": "US",
+                                "metadata": {
+                                    "batch_name": "Q1 Product Sync",
+                                    "initiated_by": "automation"
+                                }
                             }
                         }
                     }
@@ -294,6 +319,19 @@
                                         "country": { "type": "string" },
                                         "metadata": { "$ref": "#/components/schemas/Metadata" },
                                         "webhook": { "type": "string", "description": "Webhook URL to receive completion notification" }
+                                    }
+                                },
+                                "example": {
+                                    "id": "batch_abc123def456",
+                                    "object": "batch",
+                                    "status": "in_progress",
+                                    "created": 1704067200,
+                                    "total_urls": 2,
+                                    "completed_urls": 0,
+                                    "country": "US",
+                                    "metadata": {
+                                        "batch_name": "Q1 Product Sync",
+                                        "initiated_by": "automation"
                                     }
                                 }
                             }
@@ -534,6 +572,156 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "summary": "Update batch metadata",
+                "description": "Updates the metadata for a specific batch. Only the `metadata` field can be updated. Follows Stripe's merge semantics: new keys are added, existing keys are updated, and keys set to empty string are deleted.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "batch_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "The ID of the batch to update."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "metadata": {
+                                        "$ref": "#/components/schemas/Metadata"
+                                    }
+                                },
+                                "required": ["metadata"]
+                            },
+                            "example": {
+                                "metadata": {
+                                    "status": "reviewed",
+                                    "reviewer": "jane@example.com"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Batch metadata updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": { "type": "string", "description": "Batch ID" },
+                                        "object": { "type": "string", "description": "The kind of object. \"batch\" for this endpoint." },
+                                        "status": { "type": "string", "description": "`in_progress` or `completed`" },
+                                        "created": { "type": "number", "description": "Created epoch" },
+                                        "total_urls": { "type": "number", "description": "Count of URLs in the batch" },
+                                        "completed_urls": { "type": "number", "description": "Count of completed URLs" },
+                                        "metadata": { "$ref": "#/components/schemas/Metadata" }
+                                    }
+                                },
+                                "example": {
+                                    "id": "batch_abc123def456",
+                                    "object": "batch",
+                                    "status": "completed",
+                                    "created": 1704067200,
+                                    "total_urls": 10,
+                                    "completed_urls": 10,
+                                    "metadata": {
+                                        "batch_name": "Q1 Product Sync",
+                                        "status": "reviewed",
+                                        "reviewer": "jane@example.com"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - missing or invalid metadata. See [Bad Request](/api-reference/errors/bad_request) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "invalid_metadata",
+                                    "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                                    "status": 400,
+                                    "title": "Bad Request",
+                                    "detail": "No metadata field provided. Only metadata can be updated.",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication credentials are missing or invalid. See [Unauthorized](/api-reference/errors/unauthorized) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "invalid_api_key",
+                                    "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                                    "status": 401,
+                                    "title": "Unauthorized",
+                                    "detail": "Your API key is invalid",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Batch not found for the provided ID. See [Not Found](/api-reference/errors/not_found) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "batch_not_found",
+                                    "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                                    "status": 404,
+                                    "title": "Not Found",
+                                    "detail": "Batch not found",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error. See [Internal Error](/api-reference/errors/internal_error) for details.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": { "$ref": "#/components/schemas/Error" },
+                                "example": {
+                                    "id": "error_abc123",
+                                    "object": "error",
+                                    "code": "internal_server_error",
+                                    "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                                    "status": 500,
+                                    "title": "Internal Server Error",
+                                    "detail": "An unexpected error occurred",
+                                    "created": 1704067200,
+                                    "metadata": {}
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/v1/batches/{batch_id}/items": {
@@ -597,6 +785,10 @@
                                                     "custom_id": { "type": "string" },
                                                     "retrieve_id": { "type": "string" },
                                                     "url": { "type": "string" },
+                                                    "metadata": { 
+                                                        "allOf": [{ "$ref": "#/components/schemas/Metadata" }],
+                                                        "description": "Item-level metadata if provided during batch creation."
+                                                    },
                                                     "links_on_page": { "type": "array", "items": { "type": "string" } }
                                                 }
                                             }
@@ -604,6 +796,28 @@
                                         "items_count": { "type": "integer" },
                                         "cursor": { "type": "integer", "description": "Pagination cursor. Present when there are more results available. Use this value in the next request's `cursor` parameter. See [Pagination](/api-reference/common/pagination) for details." }
                                     }
+                                },
+                                "example": {
+                                    "batch_id": "batch_abc123def456",
+                                    "object": "list",
+                                    "status": "completed",
+                                    "items": [
+                                        {
+                                            "custom_id": "product-123",
+                                            "retrieve_id": "ret_xyz789",
+                                            "url": "https://example.com/product/123",
+                                            "metadata": {
+                                                "source": "catalog_sync",
+                                                "priority": "high"
+                                            }
+                                        },
+                                        {
+                                            "custom_id": "product-456",
+                                            "retrieve_id": "ret_abc456",
+                                            "url": "https://example.com/product/456"
+                                        }
+                                    ],
+                                    "items_count": 2
                                 }
                             }
                         }
