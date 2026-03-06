@@ -212,7 +212,7 @@
                                                 },
                                                 "metadata": {
                                                     "allOf": [{ "$ref": "#/components/schemas/Metadata" }],
-                                                    "description": "Item-level metadata. Attach key-value pairs to individual items for tracking, filtering, or correlation with your internal systems."
+                                                    "description": "Item-level key-value pairs for tracking or filtering individual URLs. Also supported at the batch level — see top-level `metadata`. See [Metadata](/api-reference/common/metadata) for validation rules."
                                                 }
                                             },
                                             "required": [
@@ -265,17 +265,29 @@
                                         "description": "Get all the links present on each page in the batch."
                                     },
                                     "metadata": {
-                                        "$ref": "#/components/schemas/Metadata"
+                                        "allOf": [{ "$ref": "#/components/schemas/Metadata" }],
+                                        "description": "Batch-level key-value pairs for tracking, filtering, or correlation with your internal systems. Also supported at the item level — see `items[].metadata`. See [Metadata](/api-reference/common/metadata) for validation rules."
                                     },
                                     "webhook": {
                                         "type": "string",
                                         "format": "uri",
-                                        "description": "HTTPS URL to receive a POST request when the batch completes. Must be a publicly accessible URL using `http://` or `https://` protocol. Cannot point to localhost or private IP addresses. See [Webhooks](/api-reference/common/webhooks) for payload format and retry behavior."
+                                        "description": "HTTPS URL to receive a POST when the batch completes. See [Webhooks](/api-reference/common/webhooks) for payload format and retry behavior."
+                                    },
+                                    "file_id": {
+                                        "type": "string",
+                                        "description": "ID of a completed file uploaded via [/v1/files](/features/files/files) with `purpose: \"batch\"`. Use instead of `items` for large workloads (10k+ URLs). Requires `async: true` and `completion_window`."
+                                    },
+                                    "async": {
+                                        "type": "boolean",
+                                        "description": "Set to `true` to enable long-running mode. Required when using `file_id`. The batch will run for up to `completion_window` and notify via `webhook` on completion."
+                                    },
+                                    "completion_window": {
+                                        "type": "string",
+                                        "description": "Maximum time allowed for the batch to complete, e.g. `\"1h\"` to `\"12h\"`. Required when `async: true`. See [Long-Running Batches](/features/batches/batches#long-running-batches) for the full guide.",
+                                        "example": "12h"
                                     }
                                 },
-                                "required": [
-                                    "items"
-                                ]
+                                "required": []
                             },
                             "example": {
                                 "items": [

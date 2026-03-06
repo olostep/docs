@@ -536,6 +536,8 @@ console.log(`File size: ${fileInfo.bytes} bytes`)
 
 ## Upload batch file example
 
+Files with `purpose="batch"` are the recommended way to provide URL lists to [long-running batches](/features/batches/batches#long-running-batches) — large workloads (10,000+ URLs) that run asynchronously for up to 12 hours.
+
 Here's an example that uploads a JSON file with `purpose="batch"` containing valid batch data that can be used with the `/v1/batches` endpoint:
 
 <CodeGroup>
@@ -663,11 +665,11 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 </CodeGroup>
 
 The uploaded batch file contains a valid JSON structure that matches the `/v1/batches` endpoint format:
-- `items`: Array of objects with `custom_id` and `url` fields
+- `items`: Array of objects with `custom_id` and `url` fields (a plain array is also accepted)
 - `parser`: Optional parser configuration
 - `country`: Optional country code
 
-This file can be used as input for batch processing operations.
+Once uploaded and completed, pass the `file_id` to `/v1/batches` with `async: true` and a `completion_window` to start a [long-running batch](/features/batches/batches#long-running-batches).
 
 ## File requirements
 

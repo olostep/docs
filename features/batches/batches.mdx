@@ -477,6 +477,157 @@ Common applications can be:
 
  It's better to use the batch endpoint if you want the content from 100 to 10k urls at a time. If you need to scrape less than 50 urls at a time we recommended using the scrape endpoint and submit the urls in parallel since it's faster than the batch endpoint. 
 
+## Long-Running Batches
+
+For very large workloads (10,000+ URLs) that need more than the standard ~5–8 minute window, use the **long-running batch** mode. Long-running batches accept a `file_id` instead of an inline `items` array, and can run for up to 12 hours.
+
+### How it works
+
+1. **Upload your URLs** as a JSON file using the [Files API](/features/files/files) with `purpose: "batch"`
+2. **Start the batch** by passing the `file_id` along with `async: true` and a `completion_window`
+3. **Poll or receive a webhook** when the batch completes
+
+### File format
+
+Your file can be either a plain array or an object with an `items` key:
+
+```json
+[
+  { "url": "https://example.com/page-1", "custom_id": "item-1" },
+  { "url": "https://example.com/page-2", "custom_id": "item-2" }
+]
+```
+
+or equivalently:
+
+```json
+{
+  "items": [
+    { "url": "https://example.com/page-1", "custom_id": "item-1" },
+    { "url": "https://example.com/page-2", "custom_id": "item-2" }
+  ]
+}
+```
+
+### Example
+
+<CodeGroup>
+
+```python Python
+import requests, json, time
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+
+# Step 1: Create file upload URL
+upload_data = requests.post(f"{API_URL}/files", headers=headers,
+    json={"filename": "urls.json", "purpose": "batch"}).json()
+
+# Step 2: Upload URLs to S3
+requests.put(upload_data["upload_url"],
+    data=json.dumps([
+        {"url": "https://example.com/page-1", "custom_id": "item-1"},
+        {"url": "https://example.com/page-2", "custom_id": "item-2"},
+        # ... thousands more
+    ]),
+    headers={"Content-Type": "application/json"})
+
+# Step 3: Finalize the file
+requests.post(f"{API_URL}/files/{upload_data['id']}/complete", headers=headers)
+
+# Step 4: Start the long-running batch
+batch = requests.post(f"{API_URL}/batches", headers=headers, json={
+    "file_id": upload_data["id"],
+    "async": True,
+    "completion_window": "12h",
+    "country": "us",
+}).json()
+
+print("Batch ID:", batch["id"])
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const headers = { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' }
+
+// Step 1: Create file upload URL
+const uploadData = await fetch(`${API_URL}/files`, {
+  method: 'POST', headers,
+  body: JSON.stringify({ filename: 'urls.json', purpose: 'batch' })
+}).then(r => r.json())
+
+// Step 2: Upload URLs to S3
+await fetch(uploadData.upload_url, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify([
+    { url: 'https://example.com/page-1', custom_id: 'item-1' },
+    { url: 'https://example.com/page-2', custom_id: 'item-2' },
+    // ... thousands more
+  ])
+})
+
+// Step 3: Finalize the file
+await fetch(`${API_URL}/files/${uploadData.id}/complete`, { method: 'POST', headers })
+
+// Step 4: Start the long-running batch
+const batch = await fetch(`${API_URL}/batches`, {
+  method: 'POST', headers,
+  body: JSON.stringify({
+    file_id: uploadData.id,
+    async: true,
+    completion_window: '12h',
+    country: 'us',
+  })
+}).then(r => r.json())
+
+console.log('Batch ID:', batch.id)
+```
+
+```bash cURL
+# Step 1: Create file upload URL
+UPLOAD=$(curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "urls.json", "purpose": "batch"}')
+
+FILE_ID=$(echo $UPLOAD | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+UPLOAD_URL=$(echo $UPLOAD | python3 -c "import sys,json; print(json.load(sys.stdin)['upload_url'])")
+
+# Step 2: Upload URLs to S3
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d '[{"url":"https://example.com/page-1","custom_id":"item-1"}]'
+
+# Step 3: Finalize the file
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Step 4: Start the long-running batch
+curl -s -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"file_id\": \"$FILE_ID\", \"async\": true, \"completion_window\": \"12h\", \"country\": \"us\"}"
+```
+
+</CodeGroup>
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `file_id` | string | ID of a completed file with `purpose: "batch"` (from `/v1/files`) |
+| `async` | boolean | Must be `true` to enable long-running mode |
+| `completion_window` | string | Max time to complete, e.g. `"1h"` to `"12h"` |
+| `country` | string | Optional country code |
+| `parser` | object | Optional parser, e.g. `{"id": "@olostep/google-search"}` |
+| `webhook` | string | Optional URL to notify on completion |
+
+<Note>
+Long-running batches are designed for **10,000+ URL** workloads. For smaller batches, use the standard `items` array approach — it's faster and simpler.
+</Note>
+
 ## Pricing
 
 Batch costs 1 credit per URL.
