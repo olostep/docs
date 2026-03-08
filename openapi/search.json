@@ -1,0 +1,222 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Search API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "Get Search",
+        "description": "Retrieve a previously completed search by its ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the search to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the search object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API Key"
+          },
+          "404": {
+            "description": "Search Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "Create Search",
+        "description": "Search the web with a natural language query and get back a list of relevant links with titles and descriptions.\nExecution time is typically 2-5s.\n\nSee [Search feature](/features/search/search).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The search query in natural language."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with search results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "Stringified JSON of the full search result."
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "URL to the hosted JSON file on S3.",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Deduplicated list of relevant links found across multiple searches.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "The URL of the result."
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "The title of the result page."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "A short snippet or description of the result."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (Missing query)"
+          },
+          "401": {
+            "description": "Invalid API Key"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}
