@@ -18,6 +18,71 @@
     }
   },
   "paths": {
+    "/v1/maps/{map_id}": {
+      "get": {
+        "summary": "Get Map",
+        "description": "Retrieve a previously completed map by its ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the map to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the map object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for this map"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "Number of URLs in the current response"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array of URLs found on the page"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Pagination cursor to retrieve the next set of URLs. If null, all URLs have been retrieved."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API Key"
+          },
+          "404": {
+            "description": "Map Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/v1/maps": {
       "post": {
         "summary": "Get all the urls on a certain website",
