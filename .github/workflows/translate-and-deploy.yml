@@ -1,3 +1,6 @@
+# Note: Node 20 deprecation warnings from checkout/setup-node/artifact actions are a known
+# runner bug (warning fires before FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 is read). Using Node 24-
+# native action versions below to avoid the warning.
 name: Translate and Deploy Docs
 
 on:
@@ -42,7 +45,7 @@ jobs:
     
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 2
@@ -264,7 +267,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 1
