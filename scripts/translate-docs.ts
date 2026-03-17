@@ -236,7 +236,12 @@ CRITICAL RULES:
 8. Translate naturally for the target audience - don't be overly literal
 9. Maintain the same markdown formatting (headers, lists, bold, italic, etc.)
 
-Output ONLY the translated MDX content, nothing else.`;
+CRITICAL OUTPUT RULES:
+- Output ONLY the raw translated MDX content
+- Do NOT wrap the output in markdown code fences (\`\`\`mdx or \`\`\`)
+- Do NOT add any prefix or suffix
+- Start directly with --- for the frontmatter
+- The output should be valid MDX that can be saved directly to a .mdx file`;
 
   let lastError: Error | undefined;
   
@@ -255,10 +260,24 @@ Output ONLY the translated MDX content, nothing else.`;
         max_tokens: 16000,
       });
 
-      const translated = response.choices[0]?.message?.content?.trim();
+      let translated = response.choices[0]?.message?.content?.trim();
 
       if (!translated) {
         throw new Error("LLM returned empty translation");
+      }
+
+      // Strip code fences if LLM wrapped the output (common issue)
+      if (translated.startsWith("```")) {
+        // Remove opening fence (```mdx, ```markdown, or just ```)
+        translated = translated.replace(/^```(?:mdx|markdown)?\n?/, "");
+        // Remove closing fence
+        translated = translated.replace(/\n?```\s*$/, "");
+        translated = translated.trim();
+      }
+
+      // Ensure file starts with frontmatter
+      if (!translated.startsWith("---")) {
+        throw new Error("Translation missing frontmatter (must start with ---)");
       }
 
       // Basic sanity check: translated content should have reasonable length

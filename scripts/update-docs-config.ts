@@ -2,12 +2,14 @@
 /**
  * Updates docs.json to include language configurations for i18n.
  * Transforms the existing navigation structure into a multi-language format.
+ * Translates navigation labels (tab names, group names) using OpenAI.
  *
  * @module update-docs-config
  */
 
 import * as fs from "fs";
 import * as path from "path";
+import OpenAI from "openai";
 
 interface LanguageInfo {
   name: string;
@@ -53,35 +55,110 @@ const LANGUAGES: Record<string, LanguageInfo> = {
 const DOCS_ROOT = path.resolve(__dirname, "..");
 const DOCS_CONFIG_PATH = path.join(DOCS_ROOT, "docs.json");
 
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Cache for translated labels to avoid redundant API calls
+const translationCache: Map<string, Map<string, string>> = new Map();
+
 /**
- * Prefixes all page paths in a navigation structure with a language code
+ * Translates a navigation label to the target language.
+ * Uses a simple prompt optimized for short UI strings.
+ * 
+ * @param label - The English label to translate
+ * @param lang - Target language code
+ * @returns Translated label
  */
-function prefixPagesWithLang(
-  pages: (string | NavGroup)[],
-  lang: string
-): (string | NavGroup)[] {
-  return pages.map((page) => {
-    if (typeof page === "string") {
-      return `${lang}/${page}`;
-    }
-    // Nested group
-    return {
-      ...page,
-      pages: prefixPagesWithLang(page.pages, lang),
-    };
-  });
+async function translateLabel(label: string, lang: string): Promise<string> {
+  // Check cache first
+  if (!translationCache.has(lang)) {
+    translationCache.set(lang, new Map());
+  }
+  const langCache = translationCache.get(lang)!;
+  if (langCache.has(label)) {
+    return langCache.get(label)!;
+  }
+
+  const langInfo = LANGUAGES[lang];
+  if (!langInfo) {
+    return label;
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      temperature: 0.1,
+      max_tokens: 100,
+      messages: [
+        {
+          role: "system",
+          content: `You are a translator. Translate the following navigation label to ${langInfo.name} (${langInfo.nativeName}). 
+Keep it concise and natural for UI navigation. 
+Do NOT translate brand names like "Olostep".
+Output ONLY the translated text, nothing else.`,
+        },
+        {
+          role: "user",
+          content: label,
+        },
+      ],
+    });
+
+    const translated = response.choices[0]?.message?.content?.trim() || label;
+    langCache.set(label, translated);
+    return translated;
+  } catch (error) {
+    console.warn(`Warning: Failed to translate "${label}" to ${lang}, using original`);
+    return label;
+  }
 }
 
 /**
- * Creates a language-specific navigation tab
+ * Translates a navigation group and its nested groups
  */
-function createLangTab(tab: NavTab, lang: string): NavTab {
+async function translateGroup(group: NavGroup, lang: string): Promise<NavGroup> {
+  const translatedGroupName = await translateLabel(group.group, lang);
+  const translatedPages = await translatePages(group.pages, lang);
+
+  return {
+    ...group,
+    group: translatedGroupName,
+    pages: translatedPages,
+  };
+}
+
+/**
+ * Translates page references (handles nested groups)
+ */
+async function translatePages(
+  pages: (string | NavGroup)[],
+  lang: string
+): Promise<(string | NavGroup)[]> {
+  const results: (string | NavGroup)[] = [];
+  for (const page of pages) {
+    if (typeof page === "string") {
+      results.push(`${lang}/${page}`);
+    } else {
+      results.push(await translateGroup(page, lang));
+    }
+  }
+  return results;
+}
+
+/**
+ * Creates a language-specific navigation tab with translated labels
+ */
+async function createLangTab(tab: NavTab, lang: string): Promise<NavTab> {
+  const translatedTabName = await translateLabel(tab.tab, lang);
+  const translatedGroups: NavGroup[] = [];
+
+  for (const group of tab.groups) {
+    translatedGroups.push(await translateGroup(group, lang));
+  }
+
   return {
     ...tab,
-    groups: tab.groups.map((group) => ({
-      ...group,
-      pages: prefixPagesWithLang(group.pages, lang),
-    })),
+    tab: translatedTabName,
+    groups: translatedGroups,
   };
 }
 
@@ -99,7 +176,7 @@ function hasTranslations(lang: string): boolean {
   return files.some((f) => f.endsWith(".mdx"));
 }
 
-function main(): void {
+async function main(): Promise<void> {
   console.log("Updating docs.json with language configurations...\n");
 
   // Read current config
@@ -132,11 +209,17 @@ function main(): void {
     },
   ];
 
-  // Add each available language
+  // Add each available language with translated labels
+  console.log("\nTranslating navigation labels...");
   for (const lang of availableLangs) {
+    console.log(`  Translating labels for ${lang}...`);
+    const translatedTabs: NavTab[] = [];
+    for (const tab of englishTabs) {
+      translatedTabs.push(await createLangTab(tab, lang));
+    }
     languages.push({
       language: lang,
-      tabs: englishTabs.map((tab) => createLangTab(tab, lang)),
+      tabs: translatedTabs,
     });
   }
 
@@ -159,4 +242,7 @@ function main(): void {
   });
 }
 
-main();
+main().catch((err) => {
+  console.error("Error:", err);
+  process.exit(1);
+});
