@@ -141,11 +141,15 @@ Output ONLY the translated text, nothing else.`,
 }
 
 /**
- * Translates a navigation group and its nested groups, prefixing page paths
+ * Translates a navigation group and its nested groups, with optional page path prefix
  */
-async function translateGroup(group: NavGroup, lang: string): Promise<NavGroup> {
+async function translateGroupWithPrefix(
+  group: NavGroup,
+  lang: string,
+  addLangPrefix: boolean
+): Promise<NavGroup> {
   const translatedGroupName = await translateLabel(group.group, lang);
-  const translatedPages = await translatePages(group.pages, lang);
+  const translatedPages = await translatePages(group.pages, lang, addLangPrefix);
 
   return {
     ...group,
@@ -157,21 +161,20 @@ async function translateGroup(group: NavGroup, lang: string): Promise<NavGroup> 
 /**
  * Translates page references (handles nested groups).
  * 
- * # Note: Page paths are NOT prefixed with lang code.
- * Mintlify handles the lang prefix via URL routing automatically.
- * The files live at fr/get-started/welcome.mdx but nav uses get-started/welcome.
+ * # Note: For non-English languages, page paths MUST be prefixed with lang code.
+ * Per Mintlify docs: `"pages": ["es/index", "es/quickstart"]`
  */
 async function translatePages(
   pages: (string | NavGroup)[],
-  lang: string
+  lang: string,
+  addLangPrefix: boolean
 ): Promise<(string | NavGroup)[]> {
   const results: (string | NavGroup)[] = [];
   for (const page of pages) {
     if (typeof page === "string") {
-      // Keep page path as-is - Mintlify resolves based on URL lang prefix
-      results.push(page);
+      results.push(addLangPrefix ? `${lang}/${page}` : page);
     } else {
-      results.push(await translateGroup(page, lang));
+      results.push(await translateGroupWithPrefix(page, lang, addLangPrefix));
     }
   }
   return results;
@@ -234,16 +237,18 @@ function flattenTabsToGroups(tabs: NavTab[]): NavGroup[] {
 
 /**
  * Flattens and translates tabs into groups for a language.
+ * Non-English languages get page paths prefixed with lang code.
  */
 async function flattenAndTranslateTabsToGroups(
   tabs: NavTab[],
   lang: string
 ): Promise<NavGroup[]> {
   const groups: NavGroup[] = [];
+  const addLangPrefix = lang !== "en";
   for (const tab of tabs) {
     if (tab.hidden) continue;
     for (const group of tab.groups) {
-      groups.push(await translateGroup(group, lang));
+      groups.push(await translateGroupWithPrefix(group, lang, addLangPrefix));
     }
   }
   return groups;
