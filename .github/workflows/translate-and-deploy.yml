@@ -300,6 +300,8 @@ jobs:
         run: npm ci
 
       - name: Update docs.json with languages
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: npx ts-node scripts/update-docs-config.ts
 
       - name: Verify translations
