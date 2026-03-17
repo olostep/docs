@@ -19,7 +19,7 @@ You can either use our remote hosted URL or run the server locally
 ### Remote hosted URL
 
 ```bash
-coming soon
+https://mpc.olostep.com/mcp
 ```
 
 ### Running with npx
@@ -45,7 +45,7 @@ Add this to your claude_desktop_config.json:
       "command": "npx",
       "args": ["-y", "olostep-mcp"],
       "env": {
-        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
+        "OLOSTEP_API_KEY": "YOUR_API_KEY"
       }
     }
   }
@@ -54,6 +54,21 @@ Add this to your claude_desktop_config.json:
 
 ```bash
 npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
+```
+
+### Running on Claude Code
+
+Run this in your terminal
+
+```bash
+claude mcp add --transport http secure-api https://mpc.olostep.com/mcp \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+Alternative (local / stdio)
+```bash
+claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
+  -- npx -y olostep-mcp
 ```
 
 ### Running on Cursor
@@ -70,7 +85,21 @@ To configure Olostep MCP in Cursor:
 - Click on MCP
 - Click on "+ Add new global MCP Server"
  - Enter the following in the mcp.json file:
+```bash
+{
+  "mcpServers": {
+    "olostep": {
+      "url": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
 ```
+
+Alternative (local / stdio)
+```bash
 {
   "mcpServers": {
     "olostep-web": {
@@ -99,11 +128,25 @@ Add this to your ./codeium/windsurf/model_config.json:
 ```bash
 {
   "mcpServers": {
+    "olostep": {
+      "serverUrl": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Alternative (local / stdio)
+```bash
+{
+  "mcpServers": {
     "mcp-server-olostep": {
       "command": "npx",
       "args": ["-y", "olostep-mcp"],
       "env": {
-        "OLOSTEP_API_KEY": "YOUR_API_KEY_HERE"
+        "OLOSTEP_API_KEY": "YOUR_API_KEY"
       }
     }
   }
@@ -111,10 +154,16 @@ Add this to your ./codeium/windsurf/model_config.json:
 ```
 
 ## Available Tools
-- **get_webpage_content**: Retrieves webpage content in clean markdown format with support for JavaScript rendering
-- **search_google**: Searches Google for the given query and returns the search results
-- **get_website_urls**: Retrieves all URLs from a website and filters out the irrelevant ones
-- **crawl_tool**: **Coming soon** Systematically crawls websites following links and extracting content
+- **scrape_website**: Extract content from a single URL. Supports multiple formats and JavaScript rendering.
+- **search_web**: Search the web for a given query and return structured results (non-AI, parser-based).
+- **answers**: Search the web and return AI-powered answers in the JSON structure you want, with sources and citations.
+- **batch_scrape_urls**: Scrape up to 10k URLs at the same time. Perfect for large-scale data extraction.
+- **get_batch_results**: Retrieve the status and scraped content for a batch job. If completed, fetches items and retrieves content for each URL.
+- **create_crawl**: Autonomously discover and scrape entire websites by following links from a start URL.
+- **create_map**: Get all URLs on a website. Extract URLs for discovery and site analysis.
+- **get_webpage_content**: Retrieve content of a webpage in markdown format.
+- **get_website_urls**: Search and retrieve relevant URLs from a website.
+- **google_search**: Retrieve structured data from Google search results.
 
 ## Conclusion
 You can find complete details about Olostep MCP [here](https://github.com/olostep/olostep-mcp-server).
