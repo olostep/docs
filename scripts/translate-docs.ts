@@ -40,11 +40,31 @@ const LANGUAGES: Record<string, LanguageInfo> = {
 };
 
 const DOCS_ROOT = path.resolve(__dirname, "..");
+const DOCS_CONFIG_PATH = path.join(DOCS_ROOT, "docs.json");
 
 const SKIP_DIRS = ["node_modules", ".git", ".github", "scripts"];
 
 // All translations must succeed - zero tolerance for errors
 const MAX_ALLOWED_ERRORS = 0;
+
+interface NavGroup {
+  group: string;
+  pages: (string | NavGroup)[];
+}
+
+interface NavTab {
+  tab: string;
+  groups: NavGroup[];
+  hidden?: boolean;
+}
+
+interface DocsConfig {
+  navigation: {
+    tabs?: NavTab[];
+    languages?: unknown[];
+    global?: unknown;
+  };
+}
 
 // Retry configuration for transient failures
 const MAX_RETRIES = 3;
@@ -54,6 +74,50 @@ const RETRY_DELAY_MS = 2000;
 const PARALLEL_FILES = 50;
 
 let openai: OpenAI;
+
+/**
+ * Extracts all page paths from a navigation group (recursively).
+ * Only returns string pages (file paths), not nested group objects.
+ */
+function extractPagesFromGroup(group: NavGroup): string[] {
+  const pages: string[] = [];
+  for (const page of group.pages) {
+    if (typeof page === "string") {
+      pages.push(page);
+    } else {
+      // Nested group
+      pages.push(...extractPagesFromGroup(page));
+    }
+  }
+  return pages;
+}
+
+/**
+ * Gets all page paths referenced in docs.json navigation.
+ * This ensures we only translate files that are actually in the nav.
+ *
+ * # Note: This prevents translating orphan files like concepts/, orbit/, parsers/
+ * that exist but are not in the navigation.
+ */
+function getNavReferencedPages(): Set<string> {
+  const configContent = fs.readFileSync(DOCS_CONFIG_PATH, "utf8");
+  const config: DocsConfig = JSON.parse(configContent);
+
+  const pages = new Set<string>();
+
+  // Extract from tabs (English source config)
+  if (config.navigation.tabs) {
+    for (const tab of config.navigation.tabs) {
+      for (const group of tab.groups) {
+        for (const page of extractPagesFromGroup(group)) {
+          pages.add(page);
+        }
+      }
+    }
+  }
+
+  return pages;
+}
 
 /**
  * Validates the OpenAI API key by making a test request
@@ -109,31 +173,27 @@ async function validateApiKey(): Promise<void> {
 }
 
 /**
- * Finds all English MDX files (not in language directories)
+ * Finds English MDX files that are referenced in the navigation.
+ *
+ * # Note: Only returns files actually in docs.json navigation to prevent
+ * translating orphan files (e.g. deprecated concepts/, orbit/, parsers/).
  */
 function findEnglishMdxFiles(): string[] {
+  const navPages = getNavReferencedPages();
   const files: string[] = [];
-  const langDirs = Object.keys(LANGUAGES);
 
-  function walk(dir: string, relativePath: string = ""): void {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const page of navPages) {
+    // Pages in docs.json don't have .mdx extension
+    const filePath = `${page}.mdx`;
+    const fullPath = path.join(DOCS_ROOT, filePath);
 
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      const relPath = path.join(relativePath, entry.name);
-
-      if (entry.isDirectory()) {
-        if (langDirs.includes(entry.name) || SKIP_DIRS.includes(entry.name)) {
-          continue;
-        }
-        walk(fullPath, relPath);
-      } else if (entry.isFile() && entry.name.endsWith(".mdx")) {
-        files.push(relPath);
-      }
+    if (fs.existsSync(fullPath)) {
+      files.push(filePath);
+    } else {
+      console.warn(`Warning: Nav references non-existent file: ${filePath}`);
     }
   }
 
-  walk(DOCS_ROOT);
   return files;
 }
 
