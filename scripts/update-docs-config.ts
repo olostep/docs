@@ -2,7 +2,10 @@
 /**
  * Updates docs.json to include language configurations for i18n.
  * Transforms the existing navigation structure into a multi-language format.
- * Translates navigation labels (tab names, group names) using OpenAI.
+ * Translates navigation labels (group names) using OpenAI.
+ *
+ * # Note: Mintlify i18n expects `groups` at the language level, NOT `tabs`.
+ * We flatten all tabs into a single groups array per language.
  *
  * @module update-docs-config
  */
@@ -39,10 +42,12 @@ interface DocsConfig {
   [key: string]: unknown;
 }
 
+/** Mintlify i18n expects `groups` at language level, not `tabs`. */
 interface LanguageConfig {
   language: string;
   default?: boolean;
-  tabs: NavTab[];
+  groups: NavGroup[];
+  openapi?: string[];
 }
 
 const LANGUAGES: Record<string, LanguageInfo> = {
@@ -68,9 +73,10 @@ function getOpenApiFiles(): string[] {
   if (!fs.existsSync(OPENAPI_DIR)) {
     return [];
   }
-  return fs.readdirSync(OPENAPI_DIR)
-    .filter(f => f.endsWith(".json"))
-    .map(f => `openapi/${f}`);
+  return fs
+    .readdirSync(OPENAPI_DIR)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => `openapi/${f}`);
 }
 
 /**
@@ -80,15 +86,16 @@ function getOpenApiFiles(): string[] {
 function getLangOpenApiFiles(lang: string): string[] {
   const langOpenApiDir = path.join(DOCS_ROOT, lang, "openapi");
   const englishFiles = getOpenApiFiles();
-  
+
   if (!fs.existsSync(langOpenApiDir)) {
     return englishFiles;
   }
-  
-  const langFiles = fs.readdirSync(langOpenApiDir)
-    .filter(f => f.endsWith(".json"))
-    .map(f => `${lang}/openapi/${f}`);
-  
+
+  const langFiles = fs
+    .readdirSync(langOpenApiDir)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => `${lang}/openapi/${f}`);
+
   return langFiles.length > 0 ? langFiles : englishFiles;
 }
 
@@ -98,7 +105,7 @@ const translationCache: Map<string, Map<string, string>> = new Map();
 /**
  * Translates a navigation label to the target language.
  * Uses a simple prompt optimized for short UI strings.
- * 
+ *
  * @param label - The English label to translate
  * @param lang - Target language code
  * @returns Translated label
@@ -142,7 +149,9 @@ Output ONLY the translated text, nothing else.`,
     langCache.set(label, translated);
     return translated;
   } catch (error) {
-    console.warn(`Warning: Failed to translate "${label}" to ${lang}, using original`);
+    console.warn(
+      `Warning: Failed to translate "${label}" to ${lang}, using original`
+    );
     return label;
   }
 }
@@ -180,39 +189,46 @@ async function translatePages(
 }
 
 /**
- * Creates a language-specific navigation tab with translated labels
- * Also adds language-specific OpenAPI files for API reference tabs
+ * Flattens tabs into a single groups array.
+ * Mintlify i18n expects groups at the language level, not tabs.
+ *
+ * @param tabs - Array of navigation tabs
+ * @returns Flattened array of groups from all non-hidden tabs
  */
-async function createLangTab(
-  tab: NavTab,
-  lang: string,
-  rootOpenApi?: string[]
-): Promise<NavTab> {
-  const translatedTabName = await translateLabel(tab.tab, lang);
-  const translatedGroups: NavGroup[] = [];
-
-  for (const group of tab.groups) {
-    translatedGroups.push(await translateGroup(group, lang));
+function flattenTabsToGroups(tabs: NavTab[]): NavGroup[] {
+  const groups: NavGroup[] = [];
+  for (const tab of tabs) {
+    // Skip hidden tabs (internal, developer guides, etc.)
+    if (tab.hidden) {
+      continue;
+    }
+    groups.push(...tab.groups);
   }
+  return groups;
+}
 
-  const result: NavTab = {
-    ...tab,
-    tab: translatedTabName,
-    groups: translatedGroups,
-  };
-
-  // Add language-specific OpenAPI for API-related tabs
-  const isApiTab = tab.tab.toLowerCase().includes("api") || 
-                   tab.tab.toLowerCase().includes("reference");
-  
-  if (isApiTab && rootOpenApi && rootOpenApi.length > 0) {
-    const langOpenApi = getLangOpenApiFiles(lang);
-    if (langOpenApi.length > 0) {
-      result.openapi = langOpenApi;
+/**
+ * Creates translated groups for a language from English tabs.
+ *
+ * @param tabs - English tabs to translate
+ * @param lang - Target language code
+ * @returns Translated and flattened groups
+ */
+async function createLangGroups(
+  tabs: NavTab[],
+  lang: string
+): Promise<NavGroup[]> {
+  const translatedGroups: NavGroup[] = [];
+  for (const tab of tabs) {
+    // Skip hidden tabs
+    if (tab.hidden) {
+      continue;
+    }
+    for (const group of tab.groups) {
+      translatedGroups.push(await translateGroup(group, lang));
     }
   }
-
-  return result;
+  return translatedGroups;
 }
 
 /**
@@ -238,7 +254,9 @@ async function main(): Promise<void> {
 
   // Check which languages have translations
   const availableLangs = Object.keys(LANGUAGES).filter(hasTranslations);
-  console.log(`Languages with translations: ${availableLangs.join(", ") || "none"}`);
+  console.log(
+    `Languages with translations: ${availableLangs.join(", ") || "none"}`
+  );
 
   if (availableLangs.length === 0) {
     console.log("No translations found, keeping original config");
@@ -256,13 +274,15 @@ async function main(): Promise<void> {
   const rootOpenApi = config.openapi || [];
   console.log(`OpenAPI specs: ${rootOpenApi.length} files`);
 
-  // Build languages array
+  // Flatten English tabs into groups (Mintlify i18n needs groups, not tabs)
+  const englishGroups = flattenTabsToGroups(englishTabs);
+
+  // Build languages array with groups (not tabs)
   const languages: LanguageConfig[] = [
-    // English (default) - keep original tabs with root OpenAPI
     {
       language: "en",
       default: true,
-      tabs: englishTabs,
+      groups: englishGroups,
     },
   ];
 
@@ -272,18 +292,23 @@ async function main(): Promise<void> {
     console.log(`  Translating labels for ${lang}...`);
     const langOpenApi = getLangOpenApiFiles(lang);
     console.log(`    OpenAPI specs: ${langOpenApi.length} files`);
-    
-    const translatedTabs: NavTab[] = [];
-    for (const tab of englishTabs) {
-      translatedTabs.push(await createLangTab(tab, lang, rootOpenApi));
-    }
-    languages.push({
+
+    const translatedGroups = await createLangGroups(englishTabs, lang);
+
+    const langConfig: LanguageConfig = {
       language: lang,
-      tabs: translatedTabs,
-    });
+      groups: translatedGroups,
+    };
+
+    // Add lang-specific OpenAPI if available
+    if (langOpenApi.length > 0) {
+      langConfig.openapi = langOpenApi;
+    }
+
+    languages.push(langConfig);
   }
 
-  // Update config
+  // Update config - keep openapi at root for English, languages handle their own
   const newConfig: DocsConfig = {
     ...config,
     navigation: {
