@@ -51,7 +51,7 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
 // Parallel processing - number of files to translate simultaneously
-const PARALLEL_FILES = 5;
+const PARALLEL_FILES = 30;
 
 let openai: OpenAI;
 
@@ -290,20 +290,18 @@ OUTPUT FORMAT:
 }
 
 /**
- * Writes translated content to the appropriate language directory
+ * Writes translated content to the appropriate language directory (async)
  */
-function writeTranslation(
+async function writeTranslation(
   englishFile: string,
   lang: string,
   content: string
-): void {
+): Promise<void> {
   const targetPath = path.join(DOCS_ROOT, lang, englishFile);
   const targetDir = path.dirname(targetPath);
 
   fs.mkdirSync(targetDir, { recursive: true });
-  fs.writeFileSync(targetPath, content, "utf8");
-
-  console.log(`  ✓ Written: ${lang}/${englishFile}`);
+  await fs.promises.writeFile(targetPath, content, "utf8");
 }
 
 /**
@@ -324,21 +322,18 @@ async function processInBatches<T, R>(
 }
 
 /**
- * Translates a file to a specific language, returning result
+ * Translates a file to a specific language, returning result with translated content
  */
 async function translateFileToLang(
   file: string,
   lang: string,
   content: string
-): Promise<{ success: boolean; lang: string; error?: string }> {
+): Promise<{ success: boolean; lang: string; translated?: string; error?: string }> {
   try {
-    console.log(`  → ${LANGUAGES[lang].name}...`);
     const translated = await translateContent(content, lang, file);
-    writeTranslation(file, lang, translated);
-    return { success: true, lang };
+    return { success: true, lang, translated };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`  ✗ ${LANGUAGES[lang].name}: ${message}`);
     
     // Check for fatal API errors
     const error = err as Error & { status?: number };
@@ -364,27 +359,33 @@ async function translateFileToAllLangs(
 ): Promise<{ file: string; results: { success: boolean; lang: string; error?: string }[] }> {
   const content = fs.readFileSync(path.join(DOCS_ROOT, file), "utf8");
   
-  console.log(`  [${file}] → ${langs.length} languages`);
-  
-  // Translate to all languages in parallel
+  // Translate to all languages in parallel (no logging during translation)
   const results = await Promise.all(
     langs.map((lang) => translateFileToLang(file, lang, content))
   );
   
-  const successCount = results.filter(r => r.success).length;
-  const failCount = results.filter(r => !r.success).length;
+  // Write all successful translations in parallel (async)
+  await Promise.all(
+    results
+      .filter((r) => r.success && r.translated)
+      .map((r) => writeTranslation(file, r.lang, r.translated!))
+  );
   
-  if (failCount > 0) {
-    console.log(`  [${file}] ✓ ${successCount} | ✗ ${failCount}`);
-  } else {
-    console.log(`  [${file}] ✓ ${successCount}`);
-  }
+  // Build single-line log: [file.mdx] es✓ nl✓ fr✗ de✓ zh✓ it✓ ja✓
+  const langStatus = langs
+    .map((lang) => {
+      const result = results.find((r) => r.lang === lang);
+      return result?.success ? `${lang}✓` : `${lang}✗`;
+    })
+    .join(" ");
+  
+  console.log(`[${file}] ${langStatus}`);
   
   return { file, results };
 }
 
 /**
- * Phase 1: Catch-up - translate all missing pages (5 files × 6 languages in parallel)
+ * Phase 1: Catch-up - translate all missing pages
  */
 async function runCatchup(): Promise<TranslationResult> {
   console.log("\n=== PHASE 1: CATCH-UP ===\n");
@@ -435,7 +436,7 @@ async function runCatchup(): Promise<TranslationResult> {
 }
 
 /**
- * Phase 2: Incremental - translate only changed files (5 files × 6 languages in parallel)
+ * Phase 2: Incremental - translate only changed files
  */
 async function runIncremental(files: string[]): Promise<TranslationResult> {
   console.log("\n=== PHASE 2: INCREMENTAL ===\n");

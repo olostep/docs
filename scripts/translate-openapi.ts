@@ -294,7 +294,8 @@ function applyTranslations(
 }
 
 /**
- * Translates a single OpenAPI spec file to all languages.
+ * Translates a single OpenAPI spec file to all languages (all languages in parallel).
+ * Logs a single line per file with results for all languages.
  */
 async function translateOpenApiFile(filename: string): Promise<void> {
   const filepath = path.join(OPENAPI_DIR, filename);
@@ -303,30 +304,44 @@ async function translateOpenApiFile(filename: string): Promise<void> {
 
   // Extract all translatable strings
   const strings = extractTranslatableStrings(spec);
-  console.log(`  Found ${strings.size} unique translatable strings`);
-
   const stringArray = Array.from(strings);
 
-  // Translate to each language
-  for (const lang of Object.keys(LANGUAGES)) {
-    console.log(`  Translating to ${lang}...`);
+  const langs = Object.keys(LANGUAGES);
+  
+  // Translate all languages in parallel
+  const results = await Promise.all(
+    langs.map(async (lang) => {
+      try {
+        // Batch translate all strings
+        const translations = await batchTranslateStrings(stringArray, lang);
 
-    // Batch translate all strings
-    const translations = await batchTranslateStrings(stringArray, lang);
+        // Apply translations to create new spec
+        const translatedSpec = applyTranslations(spec, translations);
 
-    // Apply translations to create new spec
-    const translatedSpec = applyTranslations(spec, translations);
+        // Write to language-specific directory (async)
+        const langDir = path.join(DOCS_ROOT, lang, "openapi");
+        fs.mkdirSync(langDir, { recursive: true });
+        await fs.promises.writeFile(
+          path.join(langDir, filename),
+          JSON.stringify(translatedSpec, null, 2),
+          "utf8"
+        );
+        return { lang, success: true };
+      } catch (err) {
+        return { lang, success: false, error: err };
+      }
+    })
+  );
 
-    // Write to language-specific directory
-    const langDir = path.join(DOCS_ROOT, lang, "openapi");
-    fs.mkdirSync(langDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(langDir, filename),
-      JSON.stringify(translatedSpec, null, 2),
-      "utf8"
-    );
-  }
+  // Log single line: [file.json] (N strings) es✓ nl✓ fr✓ de✓ zh✓ it✓ ja✓
+  const langStatus = results
+    .map((r) => (r.success ? `${r.lang}✓` : `${r.lang}✗`))
+    .join(" ");
+  console.log(`[${filename}] (${strings.size} strings) ${langStatus}`);
 }
+
+// Process multiple files in parallel
+const PARALLEL_FILES = 5;
 
 async function main(): Promise<void> {
   console.log("OpenAPI Translation");
@@ -339,15 +354,16 @@ async function main(): Promise<void> {
 
   // Get all OpenAPI spec files
   const files = fs.readdirSync(OPENAPI_DIR).filter((f) => f.endsWith(".json"));
-  console.log(`Found ${files.length} OpenAPI spec files\n`);
+  console.log(`Found ${files.length} OpenAPI spec files`);
+  console.log(`Parallelism: ${PARALLEL_FILES} files × ${Object.keys(LANGUAGES).length} languages\n`);
 
-  for (const file of files) {
-    console.log(`Processing ${file}...`);
-    await translateOpenApiFile(file);
-    console.log(`  Done\n`);
+  // Process files in batches
+  for (let i = 0; i < files.length; i += PARALLEL_FILES) {
+    const batch = files.slice(i, i + PARALLEL_FILES);
+    await Promise.all(batch.map((file) => translateOpenApiFile(file)));
   }
 
-  console.log("✓ OpenAPI translation complete");
+  console.log("\n✓ OpenAPI translation complete");
 }
 
 main().catch((err) => {
