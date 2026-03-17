@@ -49,6 +49,7 @@ const LANGUAGES: Record<string, LanguageInfo> = {
   es: { name: "Spanish", nativeName: "Español" },
   nl: { name: "Dutch", nativeName: "Nederlands" },
   fr: { name: "French", nativeName: "Français" },
+  de: { name: "German", nativeName: "Deutsch" },
   zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
   it: { name: "Italian", nativeName: "Italiano" },
   ja: { name: "Japanese", nativeName: "日本語" },

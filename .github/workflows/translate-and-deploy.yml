@@ -53,7 +53,7 @@ jobs:
             echo "force_full=true" >> $GITHUB_OUTPUT
           else
             if git rev-parse HEAD~1 >/dev/null 2>&1; then
-              files=$(git diff --name-only HEAD~1 HEAD -- '*.mdx' | grep -v '^es/' | grep -v '^nl/' | grep -v '^fr/' | grep -v '^zh/' | grep -v '^it/' | grep -v '^ja/' | tr '\n' ',' | sed 's/,$//')
+              files=$(git diff --name-only HEAD~1 HEAD -- '*.mdx' | grep -v '^es/' | grep -v '^nl/' | grep -v '^fr/' | grep -v '^de/' | grep -v '^zh/' | grep -v '^it/' | grep -v '^ja/' | tr '\n' ',' | sed 's/,$//')
               echo "files=$files" >> $GITHUB_OUTPUT
             else
               echo "files=" >> $GITHUB_OUTPUT
@@ -74,7 +74,7 @@ jobs:
           git fetch origin prod:prod 2>/dev/null || true
           if git rev-parse prod >/dev/null 2>&1; then
             echo "Copying existing translations from prod branch..."
-            for lang in es nl fr zh it ja; do
+            for lang in es nl fr de zh it ja; do
               git checkout prod -- "$lang/" 2>/dev/null || echo "No existing $lang translations"
             done
           fi
@@ -130,6 +130,7 @@ jobs:
             es/openapi/
             nl/openapi/
             fr/openapi/
+            de/openapi/
             zh/openapi/
             it/openapi/
             ja/openapi/
@@ -185,6 +186,7 @@ jobs:
             es/
             nl/
             fr/
+            de/
             zh/
             it/
             ja/
@@ -238,6 +240,7 @@ jobs:
             es/
             nl/
             fr/
+            de/
             zh/
             it/
             ja/
@@ -298,7 +301,7 @@ jobs:
           echo "::group::Translation Counts"
           echo "=== MDX Files ==="
           total_mdx=0
-          for lang in es nl fr zh it ja; do
+          for lang in es nl fr de zh it ja; do
             count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
             echo "$lang: $count MDX files"
             total_mdx=$((total_mdx + count))
@@ -307,7 +310,7 @@ jobs:
           echo ""
           echo "=== OpenAPI Files ==="
           total_openapi=0
-          for lang in es nl fr zh it ja; do
+          for lang in es nl fr de zh it ja; do
             count=$(find "$lang/openapi" -name "*.json" 2>/dev/null | wc -l || echo "0")
             echo "$lang: $count OpenAPI files"
             total_openapi=$((total_openapi + count))
@@ -348,12 +351,12 @@ jobs:
           echo "| MDX Catch-up (Phase 1) | ${{ needs.translate-catchup.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| MDX Incremental (Phase 2) | ${{ needs.translate-incremental.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Languages:** Spanish, Dutch, French, Chinese, Italian, Japanese" >> $GITHUB_STEP_SUMMARY
+          echo "**Languages:** Spanish, Dutch, French, German, Chinese, Italian, Japanese" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Translation Counts" >> $GITHUB_STEP_SUMMARY
           echo "| Language | MDX | OpenAPI |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-----|---------|" >> $GITHUB_STEP_SUMMARY
-          for lang in es nl fr zh it ja; do
+          for lang in es nl fr de zh it ja; do
             mdx_count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
             openapi_count=$(find "$lang/openapi" -name "*.json" 2>/dev/null | wc -l || echo "0")
             echo "| $lang | $mdx_count | $openapi_count |" >> $GITHUB_STEP_SUMMARY
