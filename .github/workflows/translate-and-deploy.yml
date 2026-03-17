@@ -299,10 +299,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Update docs.json with languages
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: npx ts-node scripts/update-docs-config.ts
+      # DISABLED: This script changes navigation structure from tabs to groups
+      # which breaks the site. Mintlify i18n with tabs needs investigation.
+      # - name: Update docs.json with languages
+      #   env:
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #   run: npx ts-node scripts/update-docs-config.ts
 
       - name: Verify translations
         run: |
