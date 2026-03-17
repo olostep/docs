@@ -55,6 +55,9 @@ const MAX_ALLOWED_ERRORS = 0;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
+// Parallel processing - translate multiple languages concurrently
+const PARALLEL_LANGUAGES = 3;
+
 function loadGlossary(): Glossary {
   try {
     return JSON.parse(fs.readFileSync(GLOSSARY_PATH, "utf8"));
@@ -304,7 +307,56 @@ function writeTranslation(
 }
 
 /**
- * Phase 1: Catch-up - translate all missing pages
+ * Process items in batches with limited concurrency
+ */
+async function processInBatches<T, R>(
+  items: T[],
+  batchSize: number,
+  processor: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(processor));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
+/**
+ * Translates a file to a specific language, returning result
+ */
+async function translateFileToLang(
+  file: string,
+  lang: string,
+  content: string
+): Promise<{ success: boolean; lang: string; error?: string }> {
+  try {
+    console.log(`  → ${LANGUAGES[lang].name}...`);
+    const translated = await translateContent(content, lang, file);
+    writeTranslation(file, lang, translated);
+    return { success: true, lang };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`  ✗ ${LANGUAGES[lang].name}: ${message}`);
+    
+    // Check for fatal API errors
+    const error = err as Error & { status?: number };
+    if (error.status === 401 || error.status === 403) {
+      console.error("\n::error::API authentication failed - stopping");
+      process.exit(1);
+    }
+    if (error.status === 429) {
+      console.error("\n::error::Rate limit exceeded - stopping");
+      process.exit(1);
+    }
+    
+    return { success: false, lang, error: message };
+  }
+}
+
+/**
+ * Phase 1: Catch-up - translate all missing pages (parallel per file)
  */
 async function runCatchup(): Promise<TranslationResult> {
   console.log("\n=== PHASE 1: CATCH-UP ===\n");
@@ -314,7 +366,6 @@ async function runCatchup(): Promise<TranslationResult> {
 
   let totalTranslations = 0;
   const errors: TranslationError[] = [];
-  let totalAttempts = 0;
 
   for (const file of englishFiles) {
     const missingLangs = getMissingTranslations(file);
@@ -323,35 +374,22 @@ async function runCatchup(): Promise<TranslationResult> {
       continue;
     }
 
-    console.log(`\n${file} - missing: ${missingLangs.join(", ")}`);
+    console.log(`\n${file} - translating to ${missingLangs.length} languages (parallel)`);
 
     const content = fs.readFileSync(path.join(DOCS_ROOT, file), "utf8");
 
-    for (const lang of missingLangs) {
-      totalAttempts++;
-      try {
-        console.log(`  Translating to ${LANGUAGES[lang].name}...`);
-        const translated = await translateContent(content, lang, file);
-        writeTranslation(file, lang, translated);
+    // Translate to all missing languages in parallel batches
+    const results = await processInBatches(
+      missingLangs,
+      PARALLEL_LANGUAGES,
+      (lang) => translateFileToLang(file, lang, content)
+    );
+
+    for (const result of results) {
+      if (result.success) {
         totalTranslations++;
-
-        // Rate limiting
-        await new Promise((r) => setTimeout(r, 200));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error(`  ✗ Failed to translate ${file} to ${lang}: ${message}`);
-        errors.push({ file, lang, error: message });
-
-        // Check for fatal API errors that should stop the entire process
-        const error = err as Error & { status?: number };
-        if (error.status === 401 || error.status === 403) {
-          console.error("\n::error::API authentication failed - stopping");
-          process.exit(1);
-        }
-        if (error.status === 429) {
-          console.error("\n::error::Rate limit exceeded - stopping to prevent further failures");
-          process.exit(1);
-        }
+      } else {
+        errors.push({ file, lang: result.lang, error: result.error || "Unknown error" });
       }
     }
   }
@@ -362,7 +400,7 @@ async function runCatchup(): Promise<TranslationResult> {
 }
 
 /**
- * Phase 2: Incremental - translate only changed files
+ * Phase 2: Incremental - translate only changed files (parallel per file)
  */
 async function runIncremental(files: string[]): Promise<TranslationResult> {
   console.log("\n=== PHASE 2: INCREMENTAL ===\n");
@@ -370,6 +408,7 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
 
   let totalTranslations = 0;
   const errors: TranslationError[] = [];
+  const allLangs = Object.keys(LANGUAGES);
 
   for (const file of files) {
     const fullPath = path.join(DOCS_ROOT, file);
@@ -379,28 +418,21 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
       continue;
     }
 
-    console.log(`\n${file}`);
+    console.log(`\n${file} - translating to ${allLangs.length} languages (parallel)`);
     const content = fs.readFileSync(fullPath, "utf8");
 
-    for (const lang of Object.keys(LANGUAGES)) {
-      try {
-        console.log(`  Translating to ${LANGUAGES[lang].name}...`);
-        const translated = await translateContent(content, lang, file);
-        writeTranslation(file, lang, translated);
+    // Translate to all languages in parallel batches
+    const results = await processInBatches(
+      allLangs,
+      PARALLEL_LANGUAGES,
+      (lang) => translateFileToLang(file, lang, content)
+    );
+
+    for (const result of results) {
+      if (result.success) {
         totalTranslations++;
-
-        await new Promise((r) => setTimeout(r, 200));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error(`  ✗ Failed to translate ${file} to ${lang}: ${message}`);
-        errors.push({ file, lang, error: message });
-
-        // Check for fatal API errors
-        const error = err as Error & { status?: number };
-        if (error.status === 401 || error.status === 403 || error.status === 429) {
-          console.error("\n::error::Fatal API error - stopping");
-          process.exit(1);
-        }
+      } else {
+        errors.push({ file, lang: result.lang, error: result.error || "Unknown error" });
       }
     }
   }
