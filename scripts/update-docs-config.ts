@@ -2,12 +2,14 @@
 /**
  * Updates docs.json to include language configurations for i18n.
  * Transforms the existing navigation structure into a multi-language format.
+ * Translates navigation labels (tab names, group names) using OpenAI.
  *
  * @module update-docs-config
  */
 
 import * as fs from "fs";
 import * as path from "path";
+import OpenAI from "openai";
 
 interface LanguageInfo {
   name: string;
@@ -24,6 +26,7 @@ interface NavTab {
   tab: string;
   groups: NavGroup[];
   hidden?: boolean;
+  openapi?: string | string[];
 }
 
 interface DocsConfig {
@@ -32,6 +35,7 @@ interface DocsConfig {
     languages?: LanguageConfig[];
     global?: Record<string, unknown>;
   };
+  openapi?: string[];
   [key: string]: unknown;
 }
 
@@ -45,6 +49,7 @@ const LANGUAGES: Record<string, LanguageInfo> = {
   es: { name: "Spanish", nativeName: "Español" },
   nl: { name: "Dutch", nativeName: "Nederlands" },
   fr: { name: "French", nativeName: "Français" },
+  de: { name: "German", nativeName: "Deutsch" },
   zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
   it: { name: "Italian", nativeName: "Italiano" },
   ja: { name: "Japanese", nativeName: "日本語" },
@@ -52,37 +57,162 @@ const LANGUAGES: Record<string, LanguageInfo> = {
 
 const DOCS_ROOT = path.resolve(__dirname, "..");
 const DOCS_CONFIG_PATH = path.join(DOCS_ROOT, "docs.json");
+const OPENAPI_DIR = path.join(DOCS_ROOT, "openapi");
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
- * Prefixes all page paths in a navigation structure with a language code
+ * Gets the list of OpenAPI spec files from the openapi directory
  */
-function prefixPagesWithLang(
-  pages: (string | NavGroup)[],
-  lang: string
-): (string | NavGroup)[] {
-  return pages.map((page) => {
-    if (typeof page === "string") {
-      return `${lang}/${page}`;
-    }
-    // Nested group
-    return {
-      ...page,
-      pages: prefixPagesWithLang(page.pages, lang),
-    };
-  });
+function getOpenApiFiles(): string[] {
+  if (!fs.existsSync(OPENAPI_DIR)) {
+    return [];
+  }
+  return fs.readdirSync(OPENAPI_DIR)
+    .filter(f => f.endsWith(".json"))
+    .map(f => `openapi/${f}`);
 }
 
 /**
- * Creates a language-specific navigation tab
+ * Gets language-specific OpenAPI paths.
+ * If translated OpenAPI files exist, use them; otherwise fall back to English.
  */
-function createLangTab(tab: NavTab, lang: string): NavTab {
+function getLangOpenApiFiles(lang: string): string[] {
+  const langOpenApiDir = path.join(DOCS_ROOT, lang, "openapi");
+  const englishFiles = getOpenApiFiles();
+  
+  if (!fs.existsSync(langOpenApiDir)) {
+    return englishFiles;
+  }
+  
+  const langFiles = fs.readdirSync(langOpenApiDir)
+    .filter(f => f.endsWith(".json"))
+    .map(f => `${lang}/openapi/${f}`);
+  
+  return langFiles.length > 0 ? langFiles : englishFiles;
+}
+
+// Cache for translated labels to avoid redundant API calls
+const translationCache: Map<string, Map<string, string>> = new Map();
+
+/**
+ * Translates a navigation label to the target language.
+ * Uses a simple prompt optimized for short UI strings.
+ * 
+ * @param label - The English label to translate
+ * @param lang - Target language code
+ * @returns Translated label
+ */
+async function translateLabel(label: string, lang: string): Promise<string> {
+  // Check cache first
+  if (!translationCache.has(lang)) {
+    translationCache.set(lang, new Map());
+  }
+  const langCache = translationCache.get(lang)!;
+  if (langCache.has(label)) {
+    return langCache.get(label)!;
+  }
+
+  const langInfo = LANGUAGES[lang];
+  if (!langInfo) {
+    return label;
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      temperature: 0.1,
+      max_tokens: 100,
+      messages: [
+        {
+          role: "system",
+          content: `You are a translator. Translate the following navigation label to ${langInfo.name} (${langInfo.nativeName}). 
+Keep it concise and natural for UI navigation. 
+Do NOT translate brand names like "Olostep".
+Output ONLY the translated text, nothing else.`,
+        },
+        {
+          role: "user",
+          content: label,
+        },
+      ],
+    });
+
+    const translated = response.choices[0]?.message?.content?.trim() || label;
+    langCache.set(label, translated);
+    return translated;
+  } catch (error) {
+    console.warn(`Warning: Failed to translate "${label}" to ${lang}, using original`);
+    return label;
+  }
+}
+
+/**
+ * Translates a navigation group and its nested groups
+ */
+async function translateGroup(group: NavGroup, lang: string): Promise<NavGroup> {
+  const translatedGroupName = await translateLabel(group.group, lang);
+  const translatedPages = await translatePages(group.pages, lang);
+
   return {
-    ...tab,
-    groups: tab.groups.map((group) => ({
-      ...group,
-      pages: prefixPagesWithLang(group.pages, lang),
-    })),
+    ...group,
+    group: translatedGroupName,
+    pages: translatedPages,
   };
+}
+
+/**
+ * Translates page references (handles nested groups)
+ */
+async function translatePages(
+  pages: (string | NavGroup)[],
+  lang: string
+): Promise<(string | NavGroup)[]> {
+  const results: (string | NavGroup)[] = [];
+  for (const page of pages) {
+    if (typeof page === "string") {
+      results.push(`${lang}/${page}`);
+    } else {
+      results.push(await translateGroup(page, lang));
+    }
+  }
+  return results;
+}
+
+/**
+ * Creates a language-specific navigation tab with translated labels
+ * Also adds language-specific OpenAPI files for API reference tabs
+ */
+async function createLangTab(
+  tab: NavTab,
+  lang: string,
+  rootOpenApi?: string[]
+): Promise<NavTab> {
+  const translatedTabName = await translateLabel(tab.tab, lang);
+  const translatedGroups: NavGroup[] = [];
+
+  for (const group of tab.groups) {
+    translatedGroups.push(await translateGroup(group, lang));
+  }
+
+  const result: NavTab = {
+    ...tab,
+    tab: translatedTabName,
+    groups: translatedGroups,
+  };
+
+  // Add language-specific OpenAPI for API-related tabs
+  const isApiTab = tab.tab.toLowerCase().includes("api") || 
+                   tab.tab.toLowerCase().includes("reference");
+  
+  if (isApiTab && rootOpenApi && rootOpenApi.length > 0) {
+    const langOpenApi = getLangOpenApiFiles(lang);
+    if (langOpenApi.length > 0) {
+      result.openapi = langOpenApi;
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -99,7 +229,7 @@ function hasTranslations(lang: string): boolean {
   return files.some((f) => f.endsWith(".mdx"));
 }
 
-function main(): void {
+async function main(): Promise<void> {
   console.log("Updating docs.json with language configurations...\n");
 
   // Read current config
@@ -122,9 +252,13 @@ function main(): void {
     process.exit(1);
   }
 
+  // Get root-level OpenAPI config
+  const rootOpenApi = config.openapi || [];
+  console.log(`OpenAPI specs: ${rootOpenApi.length} files`);
+
   // Build languages array
   const languages: LanguageConfig[] = [
-    // English (default)
+    // English (default) - keep original tabs with root OpenAPI
     {
       language: "en",
       default: true,
@@ -132,11 +266,20 @@ function main(): void {
     },
   ];
 
-  // Add each available language
+  // Add each available language with translated labels
+  console.log("\nTranslating navigation labels...");
   for (const lang of availableLangs) {
+    console.log(`  Translating labels for ${lang}...`);
+    const langOpenApi = getLangOpenApiFiles(lang);
+    console.log(`    OpenAPI specs: ${langOpenApi.length} files`);
+    
+    const translatedTabs: NavTab[] = [];
+    for (const tab of englishTabs) {
+      translatedTabs.push(await createLangTab(tab, lang, rootOpenApi));
+    }
     languages.push({
       language: lang,
-      tabs: englishTabs.map((tab) => createLangTab(tab, lang)),
+      tabs: translatedTabs,
     });
   }
 
@@ -159,4 +302,7 @@ function main(): void {
   });
 }
 
-main();
+main().catch((err) => {
+  console.error("Error:", err);
+  process.exit(1);
+});

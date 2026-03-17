@@ -18,11 +18,6 @@ interface LanguageInfo {
   nativeName: string;
 }
 
-interface Glossary {
-  keepEnglish: string[];
-  brandTerms: string[];
-}
-
 interface TranslationError {
   file: string;
   lang: string;
@@ -38,13 +33,13 @@ const LANGUAGES: Record<string, LanguageInfo> = {
   es: { name: "Spanish", nativeName: "Español" },
   nl: { name: "Dutch", nativeName: "Nederlands" },
   fr: { name: "French", nativeName: "Français" },
+  de: { name: "German", nativeName: "Deutsch" },
   zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
   it: { name: "Italian", nativeName: "Italiano" },
   ja: { name: "Japanese", nativeName: "日本語" },
 };
 
 const DOCS_ROOT = path.resolve(__dirname, "..");
-const GLOSSARY_PATH = path.join(__dirname, "glossary.json");
 
 const SKIP_DIRS = ["node_modules", ".git", ".github", "scripts"];
 
@@ -57,31 +52,6 @@ const RETRY_DELAY_MS = 2000;
 
 // Parallel processing - number of files to translate simultaneously
 const PARALLEL_FILES = 5;
-
-function loadGlossary(): Glossary {
-  try {
-    return JSON.parse(fs.readFileSync(GLOSSARY_PATH, "utf8"));
-  } catch {
-    console.log("No glossary found, using defaults");
-    return {
-      keepEnglish: [
-        "API",
-        "SDK",
-        "JSON",
-        "MDX",
-        "URL",
-        "HTTP",
-        "REST",
-        "OAuth",
-        "webhook",
-        "endpoint",
-      ],
-      brandTerms: ["Olostep", "Mintlify"],
-    };
-  }
-}
-
-const glossary = loadGlossary();
 
 let openai: OpenAI;
 
@@ -225,18 +195,29 @@ async function translateContent(
 
   const systemPrompt = `You are a professional technical documentation translator. Translate the following MDX documentation from English to ${langInfo.name} (${langInfo.nativeName}).
 
-CRITICAL RULES:
-1. PRESERVE ALL MDX/JSX syntax exactly as-is (components like <Card>, <Tabs>, <CodeGroup>, etc.)
-2. PRESERVE ALL code blocks exactly as-is (content between \`\`\` markers)
-3. PRESERVE ALL frontmatter structure (YAML between --- markers) - only translate the 'title' and 'description' values
-4. PRESERVE ALL URLs, links, and file paths exactly as-is
-5. PRESERVE ALL variable names, function names, and technical identifiers
-6. Keep these terms in English: ${glossary.keepEnglish.join(", ")}
-7. Keep brand names as-is: ${glossary.brandTerms.join(", ")}
-8. Translate naturally for the target audience - don't be overly literal
-9. Maintain the same markdown formatting (headers, lists, bold, italic, etc.)
+WHAT TO TRANSLATE:
+- Prose text, headings, descriptions
+- UI labels and button text in examples
+- Alt text for images
 
-Output ONLY the translated MDX content, nothing else.`;
+WHAT TO PRESERVE EXACTLY (do not translate):
+- All MDX/JSX syntax and component names (<Card>, <Tabs>, <CodeGroup>, etc.)
+- All code blocks (content between \`\`\` markers)
+- All inline code (content in backticks)
+- All URLs, links, file paths
+- All variable names, function names, identifiers
+- Frontmatter keys (only translate 'title' and 'description' values)
+- Brand names (Olostep, etc.)
+- Standard technical acronyms that are universally used in English (API, SDK, JSON, HTTP, etc.)
+
+STYLE:
+- Translate naturally for native speakers - don't be overly literal
+- Maintain the same markdown formatting (headers, lists, bold, italic)
+
+OUTPUT FORMAT:
+- Output ONLY the raw translated MDX content
+- Do NOT wrap in code fences (\`\`\`mdx or \`\`\`)
+- Start directly with --- for the frontmatter`;
 
   let lastError: Error | undefined;
   
@@ -255,10 +236,24 @@ Output ONLY the translated MDX content, nothing else.`;
         max_tokens: 16000,
       });
 
-      const translated = response.choices[0]?.message?.content?.trim();
+      let translated = response.choices[0]?.message?.content?.trim();
 
       if (!translated) {
         throw new Error("LLM returned empty translation");
+      }
+
+      // Strip code fences if LLM wrapped the output (common issue)
+      if (translated.startsWith("```")) {
+        // Remove opening fence (```mdx, ```markdown, or just ```)
+        translated = translated.replace(/^```(?:mdx|markdown)?\n?/, "");
+        // Remove closing fence
+        translated = translated.replace(/\n?```\s*$/, "");
+        translated = translated.trim();
+      }
+
+      // Ensure file starts with frontmatter
+      if (!translated.startsWith("---")) {
+        throw new Error("Translation missing frontmatter (must start with ---)");
       }
 
       // Basic sanity check: translated content should have reasonable length

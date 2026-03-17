@@ -18,6 +18,7 @@ on:
 
 env:
   DEPLOY_BRANCH: prod
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: translate-deploy
@@ -52,7 +53,7 @@ jobs:
             echo "force_full=true" >> $GITHUB_OUTPUT
           else
             if git rev-parse HEAD~1 >/dev/null 2>&1; then
-              files=$(git diff --name-only HEAD~1 HEAD -- '*.mdx' | grep -v '^es/' | grep -v '^nl/' | grep -v '^fr/' | grep -v '^zh/' | grep -v '^it/' | grep -v '^ja/' | tr '\n' ',' | sed 's/,$//')
+              files=$(git diff --name-only HEAD~1 HEAD -- '*.mdx' | grep -v '^es/' | grep -v '^nl/' | grep -v '^fr/' | grep -v '^de/' | grep -v '^zh/' | grep -v '^it/' | grep -v '^ja/' | tr '\n' ',' | sed 's/,$//')
               echo "files=$files" >> $GITHUB_OUTPUT
             else
               echo "files=" >> $GITHUB_OUTPUT
@@ -73,7 +74,7 @@ jobs:
           git fetch origin prod:prod 2>/dev/null || true
           if git rev-parse prod >/dev/null 2>&1; then
             echo "Copying existing translations from prod branch..."
-            for lang in es nl fr zh it ja; do
+            for lang in es nl fr de zh it ja; do
               git checkout prod -- "$lang/" 2>/dev/null || echo "No existing $lang translations"
             done
           fi
@@ -92,7 +93,52 @@ jobs:
           if-no-files-found: warn
 
   # ============================================
-  # JOB 2: Phase 1 - Catch up missing translations
+  # JOB 2: Translate OpenAPI specs
+  # ============================================
+  translate-openapi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: setup
+    
+    steps:
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace-setup
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Translate OpenAPI specs
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "::group::OpenAPI Translation"
+          npx ts-node scripts/translate-openapi.ts
+          echo "::endgroup::"
+
+      - name: Upload translated OpenAPI
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-translations
+          path: |
+            es/openapi/
+            nl/openapi/
+            fr/openapi/
+            de/openapi/
+            zh/openapi/
+            it/openapi/
+            ja/openapi/
+          retention-days: 1
+          if-no-files-found: ignore
+
+  # ============================================
+  # JOB 3: Phase 1 - Catch up missing MDX translations
   # ============================================
   translate-catchup:
     runs-on: ubuntu-latest
@@ -140,6 +186,7 @@ jobs:
             es/
             nl/
             fr/
+            de/
             zh/
             it/
             ja/
@@ -147,7 +194,7 @@ jobs:
           if-no-files-found: ignore
 
   # ============================================
-  # JOB 3: Phase 2 - Translate changed files
+  # JOB 4: Phase 2 - Translate changed files
   # ============================================
   translate-incremental:
     runs-on: ubuntu-latest
@@ -193,6 +240,7 @@ jobs:
             es/
             nl/
             fr/
+            de/
             zh/
             it/
             ja/
@@ -200,13 +248,13 @@ jobs:
           if-no-files-found: ignore
 
   # ============================================
-  # JOB 4: Deploy to prod branch
+  # JOB 5: Deploy to prod branch
   # ============================================
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [setup, translate-catchup, translate-incremental]
-    if: always() && needs.translate-catchup.result == 'success'
+    needs: [setup, translate-openapi, translate-catchup, translate-incremental]
+    if: always() && needs.translate-catchup.result == 'success' && needs.translate-openapi.result == 'success'
     
     steps:
       - name: Checkout main branch
@@ -214,6 +262,13 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+
+      - name: Download OpenAPI translations
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-translations
+          path: .
+        continue-on-error: true
 
       - name: Download catchup translations
         uses: actions/download-artifact@v4
@@ -244,17 +299,27 @@ jobs:
       - name: Verify translations
         run: |
           echo "::group::Translation Counts"
-          total=0
-          for lang in es nl fr zh it ja; do
+          echo "=== MDX Files ==="
+          total_mdx=0
+          for lang in es nl fr de zh it ja; do
             count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
-            echo "$lang: $count files"
-            total=$((total + count))
+            echo "$lang: $count MDX files"
+            total_mdx=$((total_mdx + count))
           done
-          echo "Total: $total files"
+          echo "Total MDX: $total_mdx files"
+          echo ""
+          echo "=== OpenAPI Files ==="
+          total_openapi=0
+          for lang in es nl fr de zh it ja; do
+            count=$(find "$lang/openapi" -name "*.json" 2>/dev/null | wc -l || echo "0")
+            echo "$lang: $count OpenAPI files"
+            total_openapi=$((total_openapi + count))
+          done
+          echo "Total OpenAPI: $total_openapi files"
           echo "::endgroup::"
           
-          if [ "$total" -eq 0 ]; then
-            echo "::warning::No translations found"
+          if [ "$total_mdx" -eq 0 ]; then
+            echo "::warning::No MDX translations found"
           fi
 
       - name: Deploy to prod branch
@@ -282,13 +347,17 @@ jobs:
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Setup | ${{ needs.setup.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Catch-up (Phase 1) | ${{ needs.translate-catchup.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Incremental (Phase 2) | ${{ needs.translate-incremental.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OpenAPI Translation | ${{ needs.translate-openapi.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| MDX Catch-up (Phase 1) | ${{ needs.translate-catchup.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| MDX Incremental (Phase 2) | ${{ needs.translate-incremental.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Languages:** Spanish, Dutch, French, Chinese, Italian, Japanese" >> $GITHUB_STEP_SUMMARY
+          echo "**Languages:** Spanish, Dutch, French, German, Chinese, Italian, Japanese" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Translation Counts" >> $GITHUB_STEP_SUMMARY
-          for lang in es nl fr zh it ja; do
-            count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
-            echo "- **$lang**: $count files" >> $GITHUB_STEP_SUMMARY
+          echo "| Language | MDX | OpenAPI |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-----|---------|" >> $GITHUB_STEP_SUMMARY
+          for lang in es nl fr de zh it ja; do
+            mdx_count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
+            openapi_count=$(find "$lang/openapi" -name "*.json" 2>/dev/null | wc -l || echo "0")
+            echo "| $lang | $mdx_count | $openapi_count |" >> $GITHUB_STEP_SUMMARY
           done
