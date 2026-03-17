@@ -181,34 +181,6 @@ async function translatePages(
 }
 
 /**
- * Creates a translated tab with all groups and page paths prefixed
- */
-async function translateTab(tab: NavTab, lang: string): Promise<NavTab> {
-  const translatedTabName = await translateLabel(tab.tab, lang);
-  const translatedGroups: NavGroup[] = [];
-
-  for (const group of tab.groups) {
-    translatedGroups.push(await translateGroup(group, lang));
-  }
-
-  const result: NavTab = {
-    ...tab,
-    tab: translatedTabName,
-    groups: translatedGroups,
-  };
-
-  // Add language-specific OpenAPI for API tabs
-  if (tab.tab.toLowerCase().includes("api") || tab.tab.toLowerCase().includes("reference")) {
-    const langOpenApi = getLangOpenApiFiles(lang);
-    if (langOpenApi.length > 0) {
-      result.openapi = langOpenApi;
-    }
-  }
-
-  return result;
-}
-
-/**
  * Checks if translations exist for a language
  */
 function hasTranslations(lang: string): boolean {
