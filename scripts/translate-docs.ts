@@ -204,6 +204,11 @@ function isRetryableError(err: unknown): boolean {
     return true;
   }
   
+  // Bad request (400) - sometimes OpenAI has transient JSON parsing issues
+  if (error.status === 400) {
+    return true;
+  }
+  
   return false;
 }
 
@@ -443,9 +448,13 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
 }
 
 /**
- * Checks if all translations succeeded - fails if ANY error occurred
+ * Checks translation results and handles errors appropriately
+ * 
+ * @param result - Translation results
+ * @param phase - Phase name for logging
+ * @param allowPartialFailure - If true, log errors but don't fail (for catch-up phase)
  */
-function checkErrors(result: TranslationResult, phase: string): void {
+function checkErrors(result: TranslationResult, phase: string, allowPartialFailure: boolean = false): void {
   const total = result.totalTranslations + result.errors.length;
   
   if (total === 0) {
@@ -458,13 +467,22 @@ function checkErrors(result: TranslationResult, phase: string): void {
   console.log(`  Total errors: ${result.errors.length}`);
 
   if (result.errors.length > 0) {
-    console.error("\n::error::Translation failures detected - ALL translations must succeed");
-    console.error("\nFailed translations:");
+    console.log("\nFailed translations (will be retried on next run):");
     result.errors.forEach((e) => {
-      console.error(`  ::error file=${e.file}::Failed to translate to ${e.lang}: ${e.error}`);
+      console.log(`  ::warning file=${e.file}::Failed to translate to ${e.lang}: ${e.error}`);
     });
-    console.error(`\n${result.errors.length} translation(s) failed. Build cannot continue.`);
-    process.exit(1);
+
+    if (allowPartialFailure) {
+      // For catch-up: just warn, don't fail. Failed files will be picked up next time
+      // since they weren't written to disk
+      console.log(`\n⚠ ${result.errors.length} translation(s) failed but will be retried on next run.`);
+      console.log("Continuing with deployment of successful translations...");
+    } else {
+      // For incremental: fail the build since these are user-changed files
+      console.error(`\n::error::${result.errors.length} translation(s) failed. Build cannot continue.`);
+      console.error("Incremental translations must all succeed.");
+      process.exit(1);
+    }
   }
 }
 
@@ -505,19 +523,21 @@ async function main(): Promise<void> {
 
   if (phase === "catchup") {
     const result = await runCatchup();
-    checkErrors(result, "Catch-up");
+    // Allow partial failure for catch-up - failed files will be retried next run
+    checkErrors(result, "Catch-up", true);
   } else if (phase === "incremental" && filesArg) {
     const files = filesArg.split(",").filter((f) => f.trim());
     if (files.length > 0) {
       const result = await runIncremental(files);
-      checkErrors(result, "Incremental");
+      // Incremental must succeed - these are user-changed files
+      checkErrors(result, "Incremental", false);
     } else {
       console.log("No files to translate");
     }
   } else {
     // Default: run catchup only
     const result = await runCatchup();
-    checkErrors(result, "Catch-up");
+    checkErrors(result, "Catch-up", true);
   }
 
   console.log("\n✓ Translation completed successfully");
