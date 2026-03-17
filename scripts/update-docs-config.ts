@@ -155,7 +155,11 @@ async function translateGroup(group: NavGroup, lang: string): Promise<NavGroup> 
 }
 
 /**
- * Translates page references (handles nested groups)
+ * Translates page references (handles nested groups).
+ * 
+ * # Note: Page paths are NOT prefixed with lang code.
+ * Mintlify handles the lang prefix via URL routing automatically.
+ * The files live at fr/get-started/welcome.mdx but nav uses get-started/welcome.
  */
 async function translatePages(
   pages: (string | NavGroup)[],
@@ -164,7 +168,8 @@ async function translatePages(
   const results: (string | NavGroup)[] = [];
   for (const page of pages) {
     if (typeof page === "string") {
-      results.push(`${lang}/${page}`);
+      // Keep page path as-is - Mintlify resolves based on URL lang prefix
+      results.push(page);
     } else {
       results.push(await translateGroup(page, lang));
     }
