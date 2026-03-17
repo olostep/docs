@@ -1,0 +1,186 @@
+name: Translate and Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.mdx'
+      - 'docs.json'
+      - 'openapi/**'
+      - 'images/**'
+  workflow_dispatch:
+    inputs:
+      force_full_translation:
+        description: 'Force full re-translation of all files'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  TARGET_LANGUAGES: 'es,nl,fr,zh,it,ja'
+  DEPLOY_BRANCH: prod
+
+concurrency:
+  group: translate-deploy
+  cancel-in-progress: false
+
+jobs:
+  translate-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate OpenAI API key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -e
+          
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY secret is not set. Please add it to repository secrets."
+            echo ""
+            echo "To fix this:"
+            echo "1. Go to https://github.com/olostep/docs/settings/secrets/actions"
+            echo "2. Add a new secret named 'OPENAI_API_KEY'"
+            echo "3. Set its value to your OpenAI API key"
+            exit 1
+          fi
+          
+          # Validate the key format (should start with sk-)
+          if [[ ! "$OPENAI_API_KEY" =~ ^sk- ]]; then
+            echo "::error::OPENAI_API_KEY appears to be invalid (should start with 'sk-')"
+            exit 1
+          fi
+          
+          echo "✓ OpenAI API key is configured"
+
+      - name: Get changed files
+        id: changed
+        run: |
+          if [ "${{ github.event.inputs.force_full_translation }}" = "true" ]; then
+            echo "files=" >> $GITHUB_OUTPUT
+            echo "force_full=true" >> $GITHUB_OUTPUT
+          else
+            # Get MDX files changed in this commit
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              files=$(git diff --name-only HEAD~1 HEAD -- '*.mdx' | grep -v '^es/' | grep -v '^nl/' | grep -v '^fr/' | grep -v '^zh/' | grep -v '^it/' | grep -v '^ja/' | tr '\n' ',' | sed 's/,$//')
+              echo "files=$files" >> $GITHUB_OUTPUT
+            else
+              echo "files=" >> $GITHUB_OUTPUT
+            fi
+            echo "force_full=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout prod branch content
+        run: |
+          # Fetch prod branch if it exists
+          git fetch origin prod:prod 2>/dev/null || true
+          
+          # If prod exists, copy existing translations to preserve them
+          if git rev-parse prod >/dev/null 2>&1; then
+            echo "Copying existing translations from prod branch..."
+            for lang in es nl fr zh it ja; do
+              git checkout prod -- "$lang/" 2>/dev/null || echo "No existing $lang translations"
+            done
+          fi
+
+      - name: Phase 1 - Catch up missing translations
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "Running catch-up translation for missing pages..."
+          npx ts-node scripts/translate-docs.ts --phase=catchup
+
+      - name: Phase 2 - Translate changed files
+        if: steps.changed.outputs.files != '' && steps.changed.outputs.force_full != 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "Translating changed files: ${{ steps.changed.outputs.files }}"
+          npx ts-node scripts/translate-docs.ts --phase=incremental --files="${{ steps.changed.outputs.files }}"
+
+      - name: Update docs.json with languages
+        run: npx ts-node scripts/update-docs-config.ts
+
+      - name: Verify translations were created
+        run: |
+          set -e
+          
+          echo "Verifying translations..."
+          
+          total_translations=0
+          for lang in es nl fr zh it ja; do
+            count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
+            echo "  $lang: $count files"
+            total_translations=$((total_translations + count))
+          done
+          
+          if [ "$total_translations" -eq 0 ]; then
+            echo "::error::No translations were created. Check the translation logs above."
+            exit 1
+          fi
+          
+          echo ""
+          echo "✓ Total translations: $total_translations files across 6 languages"
+
+      - name: Deploy to prod branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add all files including translations
+          git add -A
+          
+          # Check if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+            exit 0
+          fi
+          
+          # Commit
+          git commit -m "chore: auto-translated docs from ${{ github.sha }}"
+          
+          # Force push to prod (this overwrites prod with main + translations)
+          git push -f origin HEAD:${{ env.DEPLOY_BRANCH }}
+          
+          echo "Deployed to ${{ env.DEPLOY_BRANCH }} branch"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Translation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Source commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy branch:** \`${{ env.DEPLOY_BRANCH }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Languages:** Spanish, Dutch, French, Chinese, Italian, Japanese" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count translations
+          echo "### Translation Counts" >> $GITHUB_STEP_SUMMARY
+          for lang in es nl fr zh it ja; do
+            count=$(find "$lang" -name "*.mdx" 2>/dev/null | wc -l || echo "0")
+            echo "- **$lang**: $count files" >> $GITHUB_STEP_SUMMARY
+          done
+          
+          if [ "${{ job.status }}" = "failure" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ⚠️ Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Check the workflow logs above for error details." >> $GITHUB_STEP_SUMMARY
+          fi
