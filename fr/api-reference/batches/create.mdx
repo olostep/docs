@@ -1,0 +1,17 @@
+---
+title: 'Create Batch'
+description: 'Starts a new batch. You receive an `id` that you can use to track the progress of the batch as shown [here](/api-reference/batches/info). Note: Processing time is constant regardless of batch size'
+openapi: POST /v1/batches
+---
+
+<TIP>
+**GET NOTIFIED ON COMPLETION:** PASS THE `WEBHOOK` PARAMETER WITH YOUR ENDPOINT URL TO RECEIVE AN HTTP POST WHEN THE BATCH COMPLETES. SEE [WEBHOOKS](/API-REFERENCE/COMMON/WEBHOOKS) FOR DETAILS.
+</TIP>
+
+<TIP>
+**ATTACH CUSTOM DATA:** USE THE `METADATA` PARAMETER TO STORE KEY-VALUE PAIRS. SUPPORTED AT TWO LEVELS:
+- **BATCH-LEVEL** — ON THE REQUEST BODY
+- **ITEM-LEVEL** — ON EACH ITEM IN THE `ITEMS` ARRAY
+
+SEE [METADATA](/API-REFERENCE/COMMON/METADATA) FOR DETAILS.
+</TIP>
