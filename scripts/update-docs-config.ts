@@ -42,7 +42,7 @@ interface DocsConfig {
 interface LanguageConfig {
   language: string;
   default?: boolean;
-  tabs: NavTab[];
+  groups: NavGroup[];
   openapi?: string[];
 }
 
@@ -218,6 +218,37 @@ function hasTranslations(lang: string): boolean {
   return files.some((f) => f.endsWith(".mdx"));
 }
 
+/**
+ * Flattens tabs into a single groups array.
+ * Mintlify i18n requires groups at the language level, not tabs.
+ * We preserve all groups from non-hidden tabs.
+ */
+function flattenTabsToGroups(tabs: NavTab[]): NavGroup[] {
+  const groups: NavGroup[] = [];
+  for (const tab of tabs) {
+    if (tab.hidden) continue;
+    groups.push(...tab.groups);
+  }
+  return groups;
+}
+
+/**
+ * Flattens and translates tabs into groups for a language.
+ */
+async function flattenAndTranslateTabsToGroups(
+  tabs: NavTab[],
+  lang: string
+): Promise<NavGroup[]> {
+  const groups: NavGroup[] = [];
+  for (const tab of tabs) {
+    if (tab.hidden) continue;
+    for (const group of tab.groups) {
+      groups.push(await translateGroup(group, lang));
+    }
+  }
+  return groups;
+}
+
 async function main(): Promise<void> {
   console.log("Updating docs.json with language configurations...\n");
 
@@ -240,27 +271,28 @@ async function main(): Promise<void> {
 
   console.log(`English tabs: ${englishTabs.map((t) => t.tab).join(", ")}`);
 
-  // Build languages array - English keeps original tabs, others get translated
+  // Flatten English tabs to groups for i18n (Mintlify requires groups at language level)
+  const englishGroups = flattenTabsToGroups(englishTabs);
+  console.log(`Flattened to ${englishGroups.length} groups for i18n`);
+
+  // Build languages array with groups (not tabs)
   const languages: LanguageConfig[] = [
     {
       language: "en",
       default: true,
-      tabs: englishTabs,
+      groups: englishGroups,
     },
   ];
 
   console.log("\nTranslating navigation for each language...");
   for (const lang of availableLangs) {
-    console.log(`  ${lang}: translating tabs and groups...`);
+    console.log(`  ${lang}: translating groups...`);
 
-    const translatedTabs: NavTab[] = [];
-    for (const tab of englishTabs) {
-      translatedTabs.push(await translateTab(tab, lang));
-    }
+    const translatedGroups = await flattenAndTranslateTabsToGroups(englishTabs, lang);
 
     const langConfig: LanguageConfig = {
       language: lang,
-      tabs: translatedTabs,
+      groups: translatedGroups,
     };
 
     const langOpenApi = getLangOpenApiFiles(lang);
