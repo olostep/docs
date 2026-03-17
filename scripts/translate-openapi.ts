@@ -72,15 +72,15 @@ async function translateString(text: string, lang: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: `You are a technical documentation translator. Translate the following API documentation text to ${langInfo.name} (${langInfo.nativeName}).
+          content: `Translate this API documentation text to ${langInfo.name} (${langInfo.nativeName}).
 
-RULES:
-- Translate naturally for technical documentation
-- Keep technical terms in English: API, JSON, URL, HTTP, ID, SDK
-- Keep brand names: Olostep
-- Keep code references in backticks exactly as-is
-- Keep any quoted values exactly as-is (e.g., "file", "completed")
-- Output ONLY the translated text, nothing else`,
+PRESERVE (do not translate):
+- Standard technical acronyms universally used in English
+- Brand names
+- Code references in backticks
+- Quoted values (e.g., "file", "completed")
+
+Output ONLY the translated text.`,
         },
         {
           role: "user",
@@ -202,16 +202,17 @@ async function batchTranslateStrings(
         messages: [
           {
             role: "system",
-            content: `You are a technical documentation translator. Translate the following API documentation texts to ${langInfo.name} (${langInfo.nativeName}).
+            content: `Translate these API documentation texts to ${langInfo.name} (${langInfo.nativeName}).
 
-RULES:
-- Each text is numbered [1], [2], etc. Output translations in the same format.
-- Translate naturally for technical documentation
-- Keep technical terms in English: API, JSON, URL, HTTP, ID, SDK, endpoint
-- Keep brand names: Olostep
-- Keep any quoted values exactly as-is (e.g., "file", "completed", "list")
-- Keep code/technical identifiers exactly as-is (e.g., file_id, expires_in)
-- Output ONLY the numbered translations, nothing else`,
+FORMAT: Each text is numbered [1], [2], etc. Output translations in the same format.
+
+PRESERVE (do not translate):
+- Standard technical acronyms universally used in English
+- Brand names
+- Quoted values (e.g., "file", "completed")
+- Technical identifiers (e.g., file_id, expires_in)
+
+Output ONLY the numbered translations.`,
           },
           {
             role: "user",
