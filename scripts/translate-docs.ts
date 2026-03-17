@@ -51,7 +51,7 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
 // Parallel processing - number of files to translate simultaneously
-const PARALLEL_FILES = 30;
+const PARALLEL_FILES = 50;
 
 let openai: OpenAI;
 
