@@ -80,9 +80,13 @@ jobs:
         with:
           name: workspace-setup
           path: |
-            .
-            !.git
+            **/*.mdx
+            **/*.json
+            scripts/
+            tsconfig.json
+            !node_modules/
           retention-days: 1
+          if-no-files-found: warn
 
   # ============================================
   # JOB 2: Phase 1 - Catch up missing translations
@@ -102,6 +106,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Validate OpenAI API key
         env:
@@ -162,6 +169,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Phase 2 - Translate changed files
         env:
