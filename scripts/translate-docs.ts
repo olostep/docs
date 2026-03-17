@@ -55,8 +55,8 @@ const MAX_ALLOWED_ERRORS = 0;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
-// Parallel processing - translate multiple languages concurrently
-const PARALLEL_LANGUAGES = 3;
+// Parallel processing - number of files to translate simultaneously
+const PARALLEL_FILES = 5;
 
 function loadGlossary(): Glossary {
   try {
@@ -361,35 +361,70 @@ async function translateFileToLang(
 }
 
 /**
- * Phase 1: Catch-up - translate all missing pages (parallel per file)
+ * Translates a single file to all specified languages (all languages in parallel)
+ */
+async function translateFileToAllLangs(
+  file: string,
+  langs: string[]
+): Promise<{ file: string; results: { success: boolean; lang: string; error?: string }[] }> {
+  const content = fs.readFileSync(path.join(DOCS_ROOT, file), "utf8");
+  
+  console.log(`  [${file}] → ${langs.length} languages`);
+  
+  // Translate to all languages in parallel
+  const results = await Promise.all(
+    langs.map((lang) => translateFileToLang(file, lang, content))
+  );
+  
+  const successCount = results.filter(r => r.success).length;
+  const failCount = results.filter(r => !r.success).length;
+  
+  if (failCount > 0) {
+    console.log(`  [${file}] ✓ ${successCount} | ✗ ${failCount}`);
+  } else {
+    console.log(`  [${file}] ✓ ${successCount}`);
+  }
+  
+  return { file, results };
+}
+
+/**
+ * Phase 1: Catch-up - translate all missing pages (5 files × 6 languages in parallel)
  */
 async function runCatchup(): Promise<TranslationResult> {
   console.log("\n=== PHASE 1: CATCH-UP ===\n");
+  console.log(`Parallelism: ${PARALLEL_FILES} files × all languages\n`);
 
   const englishFiles = findEnglishMdxFiles();
-  console.log(`Found ${englishFiles.length} English MDX files\n`);
+  console.log(`Found ${englishFiles.length} English MDX files`);
+
+  // Build list of files that need translation
+  const filesToTranslate: { file: string; langs: string[] }[] = [];
+  
+  for (const file of englishFiles) {
+    const missingLangs = getMissingTranslations(file);
+    if (missingLangs.length > 0) {
+      filesToTranslate.push({ file, langs: missingLangs });
+    }
+  }
+
+  console.log(`Files needing translation: ${filesToTranslate.length}\n`);
+
+  if (filesToTranslate.length === 0) {
+    return { totalTranslations: 0, errors: [] };
+  }
 
   let totalTranslations = 0;
   const errors: TranslationError[] = [];
 
-  for (const file of englishFiles) {
-    const missingLangs = getMissingTranslations(file);
+  // Process files in batches of PARALLEL_FILES
+  const fileResults = await processInBatches(
+    filesToTranslate,
+    PARALLEL_FILES,
+    ({ file, langs }) => translateFileToAllLangs(file, langs)
+  );
 
-    if (missingLangs.length === 0) {
-      continue;
-    }
-
-    console.log(`\n${file} - translating to ${missingLangs.length} languages (parallel)`);
-
-    const content = fs.readFileSync(path.join(DOCS_ROOT, file), "utf8");
-
-    // Translate to all missing languages in parallel batches
-    const results = await processInBatches(
-      missingLangs,
-      PARALLEL_LANGUAGES,
-      (lang) => translateFileToLang(file, lang, content)
-    );
-
+  for (const { file, results } of fileResults) {
     for (const result of results) {
       if (result.success) {
         totalTranslations++;
@@ -405,34 +440,39 @@ async function runCatchup(): Promise<TranslationResult> {
 }
 
 /**
- * Phase 2: Incremental - translate only changed files (parallel per file)
+ * Phase 2: Incremental - translate only changed files (5 files × 6 languages in parallel)
  */
 async function runIncremental(files: string[]): Promise<TranslationResult> {
   console.log("\n=== PHASE 2: INCREMENTAL ===\n");
+  console.log(`Parallelism: ${PARALLEL_FILES} files × all languages`);
   console.log(`Translating ${files.length} changed files\n`);
+
+  const allLangs = Object.keys(LANGUAGES);
+  
+  // Filter out deleted files
+  const filesToTranslate = files
+    .filter((file) => {
+      const exists = fs.existsSync(path.join(DOCS_ROOT, file));
+      if (!exists) console.log(`Skipping deleted file: ${file}`);
+      return exists;
+    })
+    .map((file) => ({ file, langs: allLangs }));
+
+  if (filesToTranslate.length === 0) {
+    return { totalTranslations: 0, errors: [] };
+  }
 
   let totalTranslations = 0;
   const errors: TranslationError[] = [];
-  const allLangs = Object.keys(LANGUAGES);
 
-  for (const file of files) {
-    const fullPath = path.join(DOCS_ROOT, file);
+  // Process files in batches of PARALLEL_FILES
+  const fileResults = await processInBatches(
+    filesToTranslate,
+    PARALLEL_FILES,
+    ({ file, langs }) => translateFileToAllLangs(file, langs)
+  );
 
-    if (!fs.existsSync(fullPath)) {
-      console.log(`Skipping deleted file: ${file}`);
-      continue;
-    }
-
-    console.log(`\n${file} - translating to ${allLangs.length} languages (parallel)`);
-    const content = fs.readFileSync(fullPath, "utf8");
-
-    // Translate to all languages in parallel batches
-    const results = await processInBatches(
-      allLangs,
-      PARALLEL_LANGUAGES,
-      (lang) => translateFileToLang(file, lang, content)
-    );
-
+  for (const { file, results } of fileResults) {
     for (const result of results) {
       if (result.success) {
         totalTranslations++;
@@ -445,6 +485,16 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
   console.log(`\nIncremental complete: ${totalTranslations} translations updated`);
   
   return { totalTranslations, errors };
+}
+
+/**
+ * Writes to GitHub Actions step summary (if available)
+ */
+function writeToSummary(content: string): void {
+  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+  if (summaryPath) {
+    fs.appendFileSync(summaryPath, content + "\n");
+  }
 }
 
 /**
@@ -467,14 +517,24 @@ function checkErrors(result: TranslationResult, phase: string, allowPartialFailu
   console.log(`  Total errors: ${result.errors.length}`);
 
   if (result.errors.length > 0) {
+    // Log warnings that appear in GitHub Actions annotations
     console.log("\nFailed translations (will be retried on next run):");
     result.errors.forEach((e) => {
-      console.log(`  ::warning file=${e.file}::Failed to translate to ${e.lang}: ${e.error}`);
+      // ::warning:: creates a visible annotation in the GitHub UI
+      console.log(`::warning file=${e.file},title=Translation Failed::Failed to translate to ${e.lang}: ${e.error}`);
     });
+
+    // Write to job summary for permanent record
+    writeToSummary(`\n### ⚠️ Failed Translations (${phase})\n`);
+    writeToSummary("| File | Language | Error |");
+    writeToSummary("|------|----------|-------|");
+    result.errors.forEach((e) => {
+      writeToSummary(`| \`${e.file}\` | ${e.lang} | ${e.error.substring(0, 100)} |`);
+    });
+    writeToSummary(`\n> These will be automatically retried on the next run.\n`);
 
     if (allowPartialFailure) {
       // For catch-up: just warn, don't fail. Failed files will be picked up next time
-      // since they weren't written to disk
       console.log(`\n⚠ ${result.errors.length} translation(s) failed but will be retried on next run.`);
       console.log("Continuing with deployment of successful translations...");
     } else {
