@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "スケジュールAPI",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "スケジュール作成",
+        "description": "指定された時間にAPIコールを実行する新しいスケジュールを作成します。一度だけの実行とcron式を使用した定期的なスケジュールの両方をサポートしています。自然言語テキストを使用してcron式を自動生成することもできます。POSTリクエストの場合、短縮形のOlostepエンドポイント（例: 'v1/scrapes'）を使用することができ、自動的にプレフィックスが追加されます。または、完全なURLを提供することもできます。ペイロードには送信したい任意のJSON構造を含めることができます。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST"
+                    ],
+                    "description": "スケジュールされたAPIコールのHTTPメソッド。GETまたはPOSTのいずれかである必要があります。"
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "スケジュールが実行されたときに呼び出されるエンドポイントURL。Olostepエンドポイントを使用したPOSTリクエストの場合、短縮形（例: 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers'）を使用することができ、自動的に 'https://api.olostep.com/' がプレフィックスされます。他のエンドポイントの場合は、完全なURLを提供してください。"
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "APIコールと共に送信するペイロード。必要な任意のJSON構造を含めることができます。GETリクエストの場合、通常は空です。POSTリクエストの場合、エンドポイントに送信したいデータを含める必要があります。",
+                    "default": {}
+                  },
+                  "cron_expression": {
+                    "type": "string",
+                    "description": "定期的なスケジュールのための6フィールド形式のcron式（分 時 日 月 曜日 年）。定期的なスケジュールには必須です。execute_atおよびtextとは相互排他的です。"
+                  },
+                  "execute_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "一度だけのスケジュール実行のためのISO 8601日時文字列。有効な未来の日時である必要があります。一度だけのスケジュールには必須です。cron_expressionとは相互排他的です。"
+                  },
+                  "expression_timezone": {
+                    "type": "string",
+                    "description": "スケジュールのためのIANAタイムゾーン識別子（例: 'UTC', 'America/New_York', 'Europe/London'）。定期的なスケジュールには必須で、一度だけのスケジュールにはオプションです。自然言語テキストを使用する場合、デフォルトは 'UTC' です。"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "自動的にcron式を生成するための自然言語テキスト。システムはあなたのテキストを有効なcron式に変換します。例: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'。cron_expressionおよびexecute_atとは相互排他的です。使用する場合、expression_timezoneのデフォルトは 'UTC' です。"
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "スケジュールが正常に作成されました。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ユニークなスケジュール識別子"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recurring",
+                        "onetime"
+                      ],
+                      "description": "スケジュールのタイプ: cronベースのスケジュールには 'recurring'、単一実行スケジュールには 'onetime'"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "description": "スケジュールされたコールのHTTPメソッド"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "呼び出されるエンドポイントURL"
+                    },
+                    "cron_expression": {
+                      "type": "string",
+                      "description": "cron式（定期的なスケジュールの場合のみ存在）"
+                    },
+                    "execute_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "実行日時（一度だけのスケジュールの場合のみ存在）"
+                    },
+                    "expression_timezone": {
+                      "type": "string",
+                      "description": "スケジュールのタイムゾーン"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "スケジュールが作成されたISO 8601日時"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なパラメータのための不正リクエスト。一般的なエラー: 無効なメソッド、エンドポイントの欠如、無効なcron_expression、無効なexecute_at日時、無効なタイムゾーン、または無効なschedule_id形式。"
+          },
+          "401": {
+            "description": "無効なAPIキーです。もう一度確認するか、問題がある場合はinfo@olostep.comに連絡してください。"
+          },
+          "500": {
+            "description": "スケジュール作成中に内部サーバーエラーが発生しました。"
+          }
+        }
+      },
+      "get": {
+        "summary": "スケジュール一覧",
+        "description": "あなたのチームのすべてのスケジュールを取得します。スケジュールの設定、ステータス、メタデータを含むリストを返します。デフォルトでは、削除されたスケジュールは除外されます。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "削除されたスケジュールをレスポンスに含めるには'true'に設定します。デフォルトでは、削除されたスケジュールは除外されます。",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "スケジュールのリストを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "チーム識別子"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "ユニークなスケジュール識別子"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "recurring",
+                              "onetime"
+                            ],
+                            "description": "スケジュールの種類"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "エンドポイントURL"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "APIコールと共に送信するペイロード"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "cron式（定期的なスケジュールの場合のみ存在）"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "実行日時（一度だけのスケジュールの場合のみ存在）"
+                          },
+                          "expression_timezone": {
+                            "type": "string",
+                            "description": "スケジュールのタイムゾーン"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "cron式を生成するために使用される自然言語テキスト"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "EventBridge内の内部スケジュール名"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "スケジュールグループ名"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "スケジュールが作成されたISO 8601日時"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "スケジュールが最後に更新されたISO 8601日時"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "ENABLED",
+                              "DELETED"
+                            ],
+                            "description": "スケジュールの現在の状態"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": [
+                              "GET",
+                              "POST"
+                            ],
+                            "description": "スケジュールされたコールのHTTPメソッド"
+                          }
+                        }
+                      },
+                      "description": "スケジュールオブジェクトの配列"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "スケジュールの総数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "無効なAPIキーです。"
+          },
+          "500": {
+            "description": "スケジュール取得中に内部サーバーエラーが発生しました。"
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "スケジュールを取得",
+        "description": "IDでスケジュールを1つ取得します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "スケジュールのユニークな識別子。'schedule_'で始まる必要があります。",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "スケジュールが正常に取得されました。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "チーム識別子"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "ユニークなスケジュール識別子"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "recurring",
+                            "onetime"
+                          ],
+                          "description": "スケジュールの種類"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "GET",
+                            "POST"
+                          ],
+                          "description": "スケジュールされたコールのHTTPメソッド"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "エンドポイントURL"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "APIコールと共に送信するペイロード"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "cron式（定期的なスケジュールの場合のみ存在）"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "実行日時（一度だけのスケジュールの場合のみ存在）"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "スケジュールのタイムゾーン"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "cron式を生成するために使用される自然言語テキスト"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "EventBridge内の内部スケジュール名"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "スケジュールグループ名"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "スケジュールが作成されたISO 8601日時"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "スケジュールが最後に更新されたISO 8601日時"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ENABLED",
+                            "DELETED"
+                          ],
+                          "description": "スケジュールの現在の状態"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "無効なschedule_id形式のため不正なリクエスト。スケジュールIDは'schedule_'で始まる必要があります。"
+          },
+          "401": {
+            "description": "無効なAPIキーです。"
+          },
+          "404": {
+            "description": "提供されたIDのスケジュールが見つかりません。"
+          },
+          "500": {
+            "description": "スケジュールを取得中に内部サーバーエラーが発生しました。"
+          }
+        }
+      },
+      "delete": {
+        "summary": "スケジュールを削除",
+        "description": "IDでスケジュールを削除します。これにより、将来の実行が停止し、スケジュールがEventBridgeから削除されます。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "削除するスケジュールのユニークな識別子。'schedule_'で始まる必要があります。",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "スケジュールが正常に削除されました。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "成功メッセージ"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "削除されたスケジュールのID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "無効なschedule_id形式またはスケジュールが既に削除されているため不正なリクエスト。スケジュールIDは'schedule_'で始まる必要があります。"
+          },
+          "401": {
+            "description": "無効なAPIキーです。"
+          },
+          "404": {
+            "description": "提供されたIDのスケジュールが見つかりません。"
+          },
+          "500": {
+            "description": "スケジュールを削除中に内部サーバーエラーが発生しました。"
+          }
+        }
+      }
+    }
+  }
+}

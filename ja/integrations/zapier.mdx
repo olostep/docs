@@ -1,0 +1,1004 @@
+---
+sidebarTitle: "Zapier"
+icon: "bolt"
+title: "Zapier統合"
+description: "Zapierのビジュアルワークフロービルダーを使用して、コードなしで8,000以上のアプリを通じてウェブ検索、スクレイピング、クロールを自動化"
+---
+
+OlostepのZapier統合は、Zapierの8,000以上のアプリのエコシステムに強力なウェブスクレイピング機能をもたらします。コードを書くことなくウェブデータを抽出、監視、処理する自動化ワークフローを構築します。
+
+[OlostepをZapierで始める →](https://zapier.com/apps/olostep/integrations)
+
+## 特徴
+
+この統合は、自動化されたウェブデータ抽出とAI駆動のリサーチのための5つの強力なアクションを提供します：
+
+<CardGroup cols={2}>
+  <Card title="ウェブサイトをスクレイプ" icon="file-lines">
+    単一のURLから複数の形式（Markdown、HTML、JSON、テキスト）でコンテンツを抽出
+  </Card>
+  
+  <Card title="URLを一括スクレイプ" icon="layer-group">
+    最大100,000のURLを並行して処理。大規模なデータ抽出に最適
+  </Card>
+  
+  <Card title="クロールを作成" icon="spider-web">
+    リンクをたどってウェブサイト全体を自律的に発見しスクレイプ
+  </Card>
+  
+  <Card title="マップを作成" icon="map">
+    サイト構造分析とコンテンツ発見のためにウェブサイトからすべてのURLを抽出
+  </Card>
+
+  <Card title="AIに質問" icon="brain">
+    ウェブソースや提供されたURLから引用付きでAI駆動の回答を取得
+  </Card>
+</CardGroup>
+
+## インストール
+
+### 1. ZapierでOlostepを見つける
+
+Zapierアプリディレクトリで「Olostep」を検索するか、新しいZapを作成するときに：
+
+1. [ZapierでのOlostep](https://zapier.com/apps/olostep/integrations)にアクセス
+2. 「Create Zap」をクリック
+3. アプリセレクターで「Olostep」を検索
+4. Olostepアプリを選択
+
+または、[Olostep統合ページ](https://zapier.com/apps/olostep/integrations)に直接アクセスして、利用可能なアクションを閲覧し、最初のZapを作成します。
+
+### 2. アカウントを接続
+
+Zapで初めてOlostepを使用するとき、アカウントを接続するよう求められます：
+
+1. 「Sign in to Olostep」をクリック
+2. Olostep APIキーを入力
+3. 「Yes, Continue to Olostep」をクリック
+
+APIキーは[Olostepダッシュボード](https://olostep.com/dashboard)から取得できます。
+
+## 利用可能なアクション
+
+### ウェブサイトをスクレイプ
+
+単一のURLからコンテンツを抽出。複数の形式とJavaScriptレンダリングをサポート。
+
+**使用例:**
+- 特定のページの変更を監視
+- eコマースサイトから商品情報を抽出
+- ニュース記事やブログ投稿からデータを収集
+- コンテンツ集約のためのコンテンツを引き出す
+
+**設定:**
+
+<ParamField path="スクレイプするURL" type="string" required>
+  スクレイプするウェブサイトのURL（http://またはhttps://を含む必要があります）
+</ParamField>
+
+<ParamField path="出力形式" type="dropdown" default="Markdown">
+  形式を選択：Markdown、HTML、JSON、またはプレーンテキスト
+</ParamField>
+
+<ParamField path="国コード" type="string">
+  ロケーション固有のコンテンツのための国コード（例："US", "GB", "CA"）
+</ParamField>
+
+<ParamField path="スクレイプ前の待機時間" type="integer">
+  JavaScriptレンダリングのための待機時間（0-10000ミリ秒）
+</ParamField>
+
+<ParamField path="パーサー" type="string">
+  特殊な抽出のためのオプションのパーサーID（例："@olostep/amazon-product"）
+</ParamField>
+
+**出力フィールド:**
+- スクレイプID
+- スクレイプされたURL
+- Markdownコンテンツ
+- HTMLコンテンツ
+- JSONコンテンツ
+- テキストコンテンツ
+- ステータス
+- タイムスタンプ
+- スクリーンショットURL（利用可能な場合）
+- ページメタデータ
+
+**例ワークフロー:**
+
+<AccordionGroup>
+  <Accordion title="競合他社の価格を監視">
+    **トリガー:** スケジュール（毎日午前9時）
+    
+    **アクション:** Olostep - ウェブサイトをスクレイプ
+    - URL: 競合他社の製品ページ
+    - 形式: JSON
+    - パーサー: @olostep/amazon-product
+    
+    **アクション:** Google Sheets - 行を作成
+    - 価格データを追跡スプレッドシートに追加
+    
+    **アクション:** Gmail - メールを送信（価格が下がった場合）
+    - 価格変更についてチームに通知
+  </Accordion>
+
+  <Accordion title="ブログ投稿を抽出して保存">
+    **トリガー:** RSS by Zapier - フィード内の新しいアイテム
+    
+    **アクション:** Olostep - ウェブサイトをスクレイプ
+    - URL: \{\{投稿URL\}\}
+    - 形式: Markdown
+    
+    **アクション:** Notion - ページを作成
+    - 記事コンテンツをNotionデータベースに保存
+  </Accordion>
+
+  <Accordion title="リードエンリッチメント">
+    **トリガー:** Google Sheets - 新しい行
+    
+    **アクション:** Olostep - ウェブサイトをスクレイプ
+    - URL: シートからの会社のウェブサイト
+    - 形式: Markdown
+    
+    **アクション:** OpenAI - テキストを完了
+    - AIを使用して会社情報を抽出
+    
+    **アクション:** Google Sheets - 行を更新
+    - 強化されたデータをシートに追加
+  </Accordion>
+</AccordionGroup>
+
+### URLを一括スクレイプ
+
+複数のURLを並行して処理（最大100,000件同時）。大規模なデータ抽出に最適。
+
+**使用例:**
+- 製品カタログ全体をスクレイプ
+- 複数の検索結果からデータを抽出
+- スプレッドシートからのURLリストを処理
+- 大量のコンテンツ抽出
+
+**設定:**
+
+<ParamField path="スクレイプするURL" type="text" required>
+  urlとcustom_idフィールドを持つオブジェクトのJSON配列。 
+  
+  例: `[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="出力形式" type="dropdown" default="Markdown">
+  すべてのURLの形式を選択：Markdown、HTML、JSON、またはプレーンテキスト
+</ParamField>
+
+<ParamField path="国コード" type="string">
+  ロケーション固有のスクレイピングのための国コード
+</ParamField>
+
+<ParamField path="スクレイプ前の待機時間" type="integer">
+  JavaScriptレンダリングのための待機時間
+</ParamField>
+
+<ParamField path="パーサー" type="string">
+  特殊な抽出のためのオプションのパーサーID
+</ParamField>
+
+**出力フィールド:**
+- バッチID（後で結果を取得するために使用）
+- ステータス
+- 総URL数
+- 作成日時
+- 要求された形式
+- 国コード
+- 使用されたパーサー
+
+**例ワークフロー:**
+
+<AccordionGroup>
+  <Accordion title="製品カタログをスクレイプ">
+    **トリガー:** Webhook - POSTリクエストを受信
+    
+    **アクション:** Code by Zapier - Pythonを実行
+    - CSV/リストをJSON配列形式に変換
+    
+    **アクション:** Olostep - URLを一括スクレイプ
+    - URL: \{\{前のステップからのJSON配列\}\}
+    - 形式: JSON
+    - パーサー: @olostep/amazon-product
+    
+    **アクション:** Webhook - POST
+    - バッチIDをシステムに送信して取得
+  </Accordion>
+
+  <Accordion title="毎日のコンテンツ監視">
+    **トリガー:** スケジュール - 毎日午前6時
+    
+    **アクション:** Google Sheets - 行を取得
+    - 監視するURLを取得
+    
+    **アクション:** Code by Zapier - URLをフォーマット
+    - バッチ配列形式に変換
+    
+    **アクション:** Olostep - URLを一括スクレイプ
+    - すべてのURLを一度に処理
+    
+    **アクション:** Slack - メッセージを送信
+    - スクレイピング完了をチームに通知
+  </Accordion>
+</AccordionGroup>
+
+### クロールを作成
+
+リンクをたどってウェブサイト全体を自律的に発見しスクレイプ。ドキュメントサイト、ブログ、コンテンツリポジトリに最適。
+
+**使用例:**
+- ドキュメントサイト全体をクロールしてアーカイブ
+- ウェブサイトからすべてのブログ投稿を抽出
+- ウェブコンテンツからナレッジベースを構築
+- ウェブサイト構造の変更を監視
+
+**設定:**
+
+<ParamField path="開始URL" type="string" required>
+  クロールの開始URL（http://またはhttps://を含む必要があります）
+</ParamField>
+
+<ParamField path="最大ページ数" type="integer" default="10">
+  クロールする最大ページ数
+</ParamField>
+
+<ParamField path="リンクをたどる" type="boolean" default="true">
+  ページで見つかったリンクをたどるかどうか
+</ParamField>
+
+<ParamField path="出力形式" type="dropdown" default="Markdown">
+  スクレイプされたコンテンツの形式
+</ParamField>
+
+<ParamField path="国コード" type="string">
+  ロケーション固有のクロールのためのオプションの国コード
+</ParamField>
+
+<ParamField path="パーサー" type="string">
+  特殊なコンテンツ抽出のためのオプションのパーサーID
+</ParamField>
+
+**出力フィールド:**
+- クロールID（後で結果を取得するために使用）
+- オブジェクトタイプ
+- ステータス
+- 開始URL
+- 最大ページ数
+- リンクをたどる
+- 作成タイムスタンプ
+- 形式
+
+**例ワークフロー:**
+
+<AccordionGroup>
+  <Accordion title="ドキュメントサイトをアーカイブ">
+    **トリガー:** スケジュール - 毎月1日の午前12時
+    
+    **アクション:** Olostep - クロールを作成
+    - 開始URL: https://docs.example.com
+    - 最大ページ数: 500
+    - リンクをたどる: true
+    - 形式: Markdown
+    
+    **アクション:** Webhook - POST
+    - クロールIDをアーカイブシステムに送信
+    
+    **アクション:** Slack - メッセージを送信
+    - クロールが進行中であることをチームに通知
+  </Accordion>
+
+  <Accordion title="競合他社のコンテンツ分析">
+    **トリガー:** スケジュール - 毎週月曜日の午前9時
+    
+    **アクション:** Olostep - クロールを作成
+    - 開始URL: 競合他社のブログURL
+    - 最大ページ数: 100
+    - 形式: Markdown
+    
+    **アクション:** Delay - 10分間待機
+    - クロールが完了するまで待機
+    
+    **アクション:** Airtable - レコードを作成
+    - 分析のためにクロールデータを保存
+  </Accordion>
+</AccordionGroup>
+
+### マップを作成
+
+コンテンツ発見とサイト構造分析のためにウェブサイトからすべてのURLを抽出。
+
+**使用例:**
+- サイトマップとサイト構造図を構築
+- 一括スクレイプ前にすべてのページを発見
+- 壊れたページや欠落したページを見つける
+- SEO監査と分析
+
+**設定:**
+
+<ParamField path="ウェブサイトURL" type="string" required>
+  リンクを抽出するウェブサイトのURL（http://またはhttps://を含む必要があります）
+</ParamField>
+
+<ParamField path="検索クエリ" type="string">
+  URLをフィルタリングするためのオプションの検索クエリ（例："blog"）
+</ParamField>
+
+<ParamField path="上位N件のURL" type="integer">
+  返されるURLの数を制限
+</ParamField>
+
+<ParamField path="含むURLパターン" type="string">
+  特定のパスを含むためのグロブパターン（例："/blog/**"）
+</ParamField>
+
+<ParamField path="除外URLパターン" type="string">
+  特定のパスを除外するためのグロブパターン（例："/admin/**"）
+</ParamField>
+
+**出力フィールド:**
+- マップID
+- オブジェクトタイプ
+- ウェブサイトURL
+- 発見された総URL数
+- URL（JSON配列）
+- 検索クエリ
+- 上位N件の制限
+
+**例ワークフロー:**
+
+<AccordionGroup>
+  <Accordion title="発見してスクレイプ">
+    **トリガー:** Zapierでのボタンクリック
+    
+    **アクション:** Olostep - マップを作成
+    - URL: https://example.com
+    - 含むパターン: /products/**
+    - 上位N件: 500
+    
+    **アクション:** Code by Zapier - URLを抽出
+    - マップ結果からURLを解析
+    
+    **アクション:** Olostep - URLを一括スクレイプ
+    - URL: \{\{マップからのURL\}\}
+    - 形式: JSON
+    
+    **アクション:** Google Sheets - 行を作成
+    - すべての製品データをスプレッドシートに追加
+  </Accordion>
+
+  <Accordion title="SEOサイト監査">
+    **トリガー:** スケジュール - 毎月
+    
+    **アクション:** Olostep - マップを作成
+    - URL: あなたのウェブサイト
+    - 上位N件: 1000
+    
+    **アクション:** Airtable - レコードを作成
+    - 追跡のためにすべてのURLを保存
+    
+    **アクション:** Slack - メッセージを送信
+    - 発見された総ページ数を報告
+  </Accordion>
+</AccordionGroup>
+
+### AIに質問
+
+ウェブ検索や提供されたコンテキストURLを使用して質問にAI駆動の回答を得る。リサーチ自動化、コンテンツ生成、データ分析に最適。
+
+**使用例:**
+- 引用付きのリサーチ自動化
+- 複数のURLからコンテンツを要約
+- ソース参照付きでレポートを生成
+- 特定のウェブページを使用して質問に回答
+- コンテンツ分析と抽出
+
+**設定:**
+
+<ParamField path="質問" type="string" required>
+  Olostep Answersに回答してもらいたい質問
+</ParamField>
+
+<ParamField path="コンテキストURL（JSON配列）" type="string">
+  回答を基にするためのオプションのJSON配列のURL（例：["https://example.com/page1", "https://example.com/page2"]）
+</ParamField>
+
+<ParamField path="検索クエリ" type="string">
+  コンテキストURLが提供されていない場合にウェブからソースを取得するためのオプションのクエリ（例："site:example.com pricing"）
+</ParamField>
+
+<ParamField path="ソースの数" type="integer">
+  回答を生成するために使用するソースの数を制限
+</ParamField>
+
+<ParamField path="形式" type="dropdown" default="Markdown">
+  回答形式を選択：Markdown、JSON、またはプレーンテキスト
+</ParamField>
+
+<ParamField path="引用を含める" type="boolean" default="true">
+  応答に引用/ソースを含めるかどうか
+</ParamField>
+
+**出力フィールド:**
+- 回答ID
+- オブジェクトタイプ
+- 質問
+- 回答（テキスト）
+- 回答（Markdown）
+- 回答（JSON）
+- 引用（URL、タイトル、スニペットを含むJSON配列）
+- 作成タイムスタンプ
+- 形式
+- コンテキストURL
+- 検索クエリ
+- ソースの数
+
+**例ワークフロー:**
+
+<AccordionGroup>
+  <Accordion title="自動化されたリサーチレポート">
+    **トリガー:** Slack - 新しいメッセージ（リサーチリクエストを含む）
+    
+    **アクション:** Olostep - AIに質問
+    - 質問: \{\{Slackメッセージ\}\}
+    - 検索クエリ: 関連する検索用語
+    - ソースの数: 5
+    - 形式: Markdown
+    - 引用を含める: true
+    
+    **アクション:** Slack - メッセージを送信
+    - AI生成の回答と引用で返信
+  </Accordion>
+
+  <Accordion title="URLからのコンテンツ要約">
+    **トリガー:** Google Sheets - 新しい行（URL付き）
+    
+    **アクション:** Olostep - AIに質問
+    - 質問: "これらのページからの主要なポイントを要約"
+    - コンテキストURL: \{\{シートからのURL\}\}
+    - 形式: Markdown
+    - 引用を含める: true
+    
+    **アクション:** Notion - ページを作成
+    - ソースリンク付きで要約を保存
+  </Accordion>
+
+  <Accordion title="競合インテリジェンス">
+    **トリガー:** スケジュール - 毎週
+    
+    **アクション:** Olostep - AIに質問
+    - 質問: "最新の製品アップデートと価格変更は何ですか？"
+    - 検索クエリ: site:competitor.com news OR updates
+    - ソースの数: 10
+    - 形式: JSON
+    
+    **アクション:** Airtable - レコードを作成
+    - 競合インサイトを保存
+    
+    **アクション:** Email - レポートを送信
+    - 毎週の競合分析を送信
+  </Accordion>
+
+  <Accordion title="FAQ自動応答">
+    **トリガー:** Typeform - 新しい応答
+    
+    **アクション:** Olostep - AIに質問
+    - 質問: \{\{顧客の質問\}\}
+    - コンテキストURL: ["https://yoursite.com/docs", "https://yoursite.com/faq"]
+    - 形式: テキスト
+    - 引用を含める: true
+    
+    **アクション:** Gmail - メールを送信
+    - AI生成の回答で顧客に返信
+  </Accordion>
+</AccordionGroup>
+
+## 人気のワークフロー例
+
+### Eコマース価格監視
+
+競合他社の価格を監視し、即時アラートを受け取る：
+
+```
+トリガー: スケジュール（毎時）
+↓
+アクション: Olostep - ウェブサイトをスクレイプ
+  - URL: 競合他社の製品ページ
+  - 形式: JSON
+  - パーサー: @olostep/amazon-product
+↓
+アクション: フィルター（価格が変更された場合のみ続行）
+↓
+アクション: Slack - メッセージを送信
+  - アラート: "価格が$\{\{price\}\}に変更されました"
+```
+
+### コンテンツ集約
+
+複数のソースからコンテンツを集約：
+
+```
+トリガー: Google Sheets - 新しい行
+↓
+アクション: Olostep - ウェブサイトをスクレイプ
+  - URL: \{\{シートからのURL\}\}
+  - 形式: Markdown
+↓
+アクション: OpenAI - 要約
+  - コンテンツを要約
+↓
+アクション: Airtable - レコードを作成
+  - 記事を要約付きで保存
+```
+
+### リードエンリッチメントパイプライン
+
+ウェブ情報でリードデータを強化：
+
+```
+トリガー: HubSpot - 新しい連絡先
+↓
+アクション: Olostep - ウェブサイトをスクレイプ
+  - URL: \{\{会社のウェブサイト\}\}
+  - 形式: Markdown
+↓
+アクション: OpenAI - データを抽出
+  - 抽出: 会社の規模、業界、製品
+↓
+アクション: HubSpot - 連絡先を更新
+  - 強化されたデータを連絡先に追加
+```
+
+### リサーチ自動化
+
+複数のソースからのリサーチを自動化：
+
+```
+トリガー: Airtable - 新しいレコード
+↓
+アクション: Olostep - マップを作成
+  - URL: リサーチ対象のウェブサイト
+  - 含む: /research/**
+↓
+アクション: Code - URLを解析
+↓
+アクション: Olostep - URLを一括スクレイプ
+  - URL: \{\{発見されたURL\}\}
+  - 形式: Markdown
+↓
+アクション: Notion - ページを作成
+  - リサーチデータベースを作成
+```
+
+### ソーシャルメディア監視
+
+言及とコンテンツを追跡：
+
+```
+トリガー: スケジュール（6時間ごと）
+↓
+アクション: Olostep - ウェブサイトをスクレイプ
+  - URL: ニュースサイトの検索ページ
+  - 形式: HTML
+↓
+アクション: Code - 言及を抽出
+  - ブランドの言及を見つける
+↓
+アクション: Google Sheets - 行を作成
+  - タイムスタンプ付きで言及を記録
+```
+
+## マルチステップワークフロー
+
+### 完全な製品スクレイピングパイプライン
+
+包括的な製品データパイプラインを構築：
+
+<Steps>
+  <Step title="製品URLを発見">
+    **マップを作成**を使用してターゲットウェブサイト上のすべての製品ページを見つける
+    - 含むパターン: `/products/**`
+    - 除外パターン: `/cart/**`, `/checkout/**`
+  </Step>
+  
+  <Step title="製品を一括処理">
+    **URLを一括スクレイプ**を使用してすべての製品データを抽出
+    - 形式: JSON
+    - パーサー: 製品固有のパーサーが利用可能な場合
+  </Step>
+  
+  <Step title="データベースに保存">
+    バッチIDをシステムに送信するか、待機して結果を取得
+    - Airtable、Google Sheets、またはデータベースを使用
+  </Step>
+  
+  <Step title="変更を監視">
+    毎日のスクレイプをスケジュールして価格/在庫の変更を追跡
+    - 既存のデータと比較
+    - 重要な変更についてアラート
+  </Step>
+</Steps>
+
+### SEOコンテンツ戦略
+
+競合他社を分析し、コンテンツを計画：
+
+<Steps>
+  <Step title="競合サイトをマップ">
+    **マップを作成**を使用して競合他社のウェブサイトをマップ
+    - すべてのブログ投稿とコンテンツページを抽出
+  </Step>
+  
+  <Step title="コンテンツをスクレイプ">
+    **URLを一括スクレイプ**を使用して完全なコンテンツを取得
+    - 形式: Markdownで簡単に分析
+  </Step>
+  
+  <Step title="AI分析">
+    OpenAIを使用してトピックとキーワードを分析
+    - コンテンツギャップを特定
+    - トレンドトピックを見つける
+  </Step>
+  
+  <Step title="コンテンツカレンダーを作成">
+    NotionまたはAirtableにインサイトを追加
+    - コンテンツ戦略を計画
+  </Step>
+</Steps>
+
+## 専門パーサー
+
+Olostepは人気のあるウェブサイト用の事前構築されたパーサーを提供します。`パーサー`フィールドで使用：
+
+<CardGroup cols={2}>
+  <Card title="Google検索" icon="google">
+    `@olostep/google-search`
+    
+    抽出: 検索結果、タイトル、スニペット、URL
+  </Card>
+  
+</CardGroup>
+
+### パーサーの使用
+
+単にパーサーIDをパーサーフィールドに追加：
+
+```
+アクション: Olostep - ウェブサイトをスクレイプ
+  - URL: https://www.amazon.com/dp/PRODUCT_ID
+  - 形式: JSON
+  - パーサー: @olostep/amazon-product
+```
+
+パーサーはそのウェブサイトタイプに特有の構造化データを自動的に抽出します。
+
+## 人気アプリとの統合
+
+### Google Sheets
+
+データ収集と追跡に最適：
+
+```
+1. Olostepがウェブサイトをスクレイプ
+2. データをフィルタリングまたは変換
+3. Google Sheets - 行を作成/更新
+```
+
+**使用例:**
+- 価格追跡スプレッドシート
+- リードエンリッチメントデータベース
+- コンテンツインベントリー
+- 競合分析シート
+
+### Airtable
+
+スクレイプされたデータで強力なデータベースを構築：
+
+```
+1. Olostepがスクレイプまたはクロール
+2. Code - データをフォーマット
+3. Airtable - レコードを作成
+```
+
+**使用例:**
+- 製品カタログ
+- リサーチデータベース
+- コンテンツカレンダー
+- リンクデータベース
+
+### Slack
+
+即時通知を受け取る：
+
+```
+1. Olostepがページを監視
+2. フィルター - 変更を確認
+3. Slack - メッセージを送信
+```
+
+**使用例:**
+- 価格下落アラート
+- コンテンツ更新通知
+- エラーモニタリング
+- 日次ダイジェスト
+
+### HubSpot / Salesforce
+
+CRMデータを自動的に強化：
+
+```
+1. 新しい連絡先が追加
+2. Olostepが会社のウェブサイトをスクレイプ
+3. OpenAIが主要情報を抽出
+4. CRM - 連絡先を更新
+```
+
+**使用例:**
+- リードエンリッチメント
+- 会社リサーチ
+- 競合インテリジェンス
+- アカウントマッピング
+
+### Notion
+
+ナレッジベースを構築：
+
+```
+1. Olostepがドキュメントをクロール
+2. Code - コンテンツを解析
+3. Notion - ページを作成
+```
+
+**使用例:**
+- ドキュメントミラー
+- リサーチリポジトリ
+- コンテンツライブラリ
+- チームウィキ
+
+## ベストプラクティス
+
+<AccordionGroup>
+  <Accordion title="複数のURLにはバッチ処理を使用">
+    3-5以上のURLをスクレイプする場合は、複数の**ウェブサイトをスクレイプ**アクションの代わりに**URLを一括スクレイプ**を使用します。バッチ処理は：
+    - はるかに速い（並行処理）
+    - よりコスト効果が高い
+    - 管理が簡単
+    - レート制限に優しい
+  </Accordion>
+
+  <Accordion title="適切な待機時間を設定">
+    JavaScriptが多いサイトには、「スクレイプ前の待機時間」パラメータを使用：
+    - シンプルなサイト: 0-1000ms
+    - 動的サイト: 2000-3000ms
+    - 重いJavaScript: 5000-8000ms
+    
+    最適な待機時間を見つけるために異なる値でテストしてください。
+  </Accordion>
+
+  <Accordion title="専門パーサーを使用">
+    人気のあるウェブサイト（Amazon、LinkedIn、Google）には事前構築されたパーサーを使用：
+    - 構造化データを自動的に取得
+    - より信頼性の高い抽出
+    - カスタムパーシングの必要なし
+    - Olostepによって維持
+  </Accordion>
+
+  <Accordion title="スクレイプ前にフィルタリング">
+    不要なスクレイプを避けるためにZapierのフィルターアクションを使用：
+    - URLが変更されたかどうかを確認
+    - 最近スクレイプされていないことを確認
+    - スクレイプ前にビジネスロジックを適用
+    
+    これによりAPIクレジットと実行時間が節約されます。
+  </Accordion>
+
+  <Accordion title="非同期操作を処理">
+    バッチ、クロール、マップ操作は非同期です：
+    - 返されたID（batch_id、crawl_id、map_id）を保存
+    - すぐに取得する場合はDelayアクションを使用
+    - 完了時のWebhookコールバックを検討
+    - 取得のために別のZapを設定
+  </Accordion>
+
+  <Accordion title="結果を適切に保存">
+    ニーズに応じて適切なストレージを選択：
+    - **Google Sheets**: シンプルな追跡、チームコラボレーション
+    - **Airtable**: リレーショナルデータ、リッチフォーマット
+    - **データベース**: 大規模、複雑なクエリ
+    - **Notion**: ナレッジベース、ドキュメント
+  </Accordion>
+
+  <Accordion title="監視とアラート">
+    スクレイピングワークフローの監視を設定：
+    - Zap内のエラーパスを使用
+    - 失敗時にSlack/Emailにアラートを送信
+    - OlostepダッシュボードでAPI使用状況を追跡
+    - 重要なメトリクスをログ
+  </Accordion>
+</AccordionGroup>
+
+## 業界別の一般的な使用例
+
+### Eコマース
+- **価格監視**: 競合他社の価格をリアルタイムで追跡
+- **製品リサーチ**: トレンド製品と市場のギャップを発見
+- **在庫追跡**: 在庫の可用性を監視
+- **レビュー分析**: 顧客レビューを集約して分析
+
+### マーケティング＆SEO
+- **コンテンツ発見**: コンテンツの機会を見つける
+- **競合分析**: 競合の戦略を追跡
+- **バックリンクリサーチ**: リンクの機会を発見
+- **キーワードリサーチ**: 検索結果からキーワードデータを抽出
+
+### セールス＆リードジェネレーション
+- **リードエンリッチメント**: CRMデータをウェブ情報で強化
+- **会社リサーチ**: 会社のインテリジェンスを収集
+- **連絡先発見**: 意思決定者を見つける
+- **競合インテリジェンス**: 競合の動きを追跡
+
+### リサーチ＆分析
+- **データ収集**: 複数のソースからデータを収集
+- **市場調査**: 業界のトレンドを追跡
+- **学術研究**: リサーチデータを収集
+- **価格インテリジェンス**: 価格戦略を分析
+
+### メディア＆出版
+- **コンテンツ集約**: 複数のサイトからコンテンツをキュレート
+- **ニュース監視**: ニュースと言及を追跡
+- **ソーシャルメディア**: ソーシャルプラットフォームを監視
+- **トレンド検出**: トレンドトピックを特定
+
+## トラブルシューティング
+
+<AccordionGroup>
+  <Accordion title="認証失敗">
+    **エラー**: "無効なAPIキー"
+    
+    **解決策**:
+    - [ダッシュボード](https://olostep.com/dashboard)からAPIキーを確認
+    - APIキーに余分なスペースがないことを確認
+    - ZapierでOlostepアカウントを再接続
+    - APIキーがアクティブであることを確認
+  </Accordion>
+
+  <Accordion title="スクレイプが空のコンテンツを返す">
+    **エラー**: コンテンツフィールドが空
+    
+    **解決策**:
+    - 「スクレイプ前の待機時間」を増やす
+    - ウェブサイトがログインを必要とするか確認
+    - 異なる形式（HTML vs Markdown）を試す
+    - URLがアクセス可能であることを確認
+    - サイトが自動アクセスをブロックしているか確認
+  </Accordion>
+
+  <Accordion title="バッチ配列形式エラー">
+    **エラー**: "バッチ配列のJSON形式が無効"
+    
+    **解決策**:
+    - 形式を使用: `[{"url":"https://example.com","custom_id":"id1"}]`
+    - 正しいJSON構文を確認
+    - URLを正しくフォーマットするためにCodeステップを使用
+    - オンラインバリデーターでJSONをテスト
+  </Accordion>
+
+  <Accordion title="レート制限超過">
+    **エラー**: "レート制限超過"
+    
+    **解決策**:
+    - Zapの実行を遅延で間隔を空ける
+    - 個別のスクレイプの代わりにバッチ処理を使用
+    - Olostepプランをアップグレード
+    - ダッシュボードでレート制限を確認
+  </Accordion>
+
+  <Accordion title="URLがスクレイプされない">
+    **エラー**: 特定のURLがスクレイプに失敗
+    
+    **解決策**:
+    - URL形式を確認（http://またはhttps://を含む）
+    - URLが認証を必要とするか確認
+    - まずブラウザでURLをテスト
+    - 国パラメータで試す
+    - ブロックされたドメインについてサポートに連絡
+  </Accordion>
+</AccordionGroup>
+
+## Zapierの制限と回避策
+
+### タスク制限
+Zapierにはプランに基づくタスク制限があります。各Olostepアクションは1タスクとしてカウントされます。
+
+**回避策**: 複数のURLを単一のタスクとしてスクレイプするためにバッチ処理を使用。
+
+### 実行時間
+Zapは30秒後にタイムアウトします。クロールや大規模なバッチはそれ以上かかる場合があります。
+
+**回避策**: IDを保存し、別のZapで結果を取得するか、Webhookを使用。
+
+### データサイズ
+Zapierにはタスクごとのデータサイズ制限があります。
+
+**回避策**: 出力でホストされたURLを使用して、大きなコンテンツを別途取得。
+
+### ポーリング対インスタント
+トリガーはポーリングベース（5-15分ごとにチェック）です。
+
+**回避策**: インスタント通知にはWebhookを使用するか、特定の時間にスケジュール。
+
+## 価格
+
+OlostepはAPI使用量に基づいて課金され、Zapierとは独立しています：
+
+- **スクレイプ**: スクレイプごとに支払い
+- **バッチ**: バッチ内のURLごとに支払い
+- **クロール**: クロールされたページごとに支払い
+- **マップ**: マップ操作ごとに支払い
+
+現在の価格は[olostep.com/pricing](https://olostep.com/pricing)で確認してください。
+
+**Zapierプラン**: Zapを実行するにはアクティブなZapierプランも必要です。
+
+## サポート
+
+Zapier統合に関するヘルプが必要ですか？
+
+<CardGroup cols={2}>
+  <Card title="ドキュメント" icon="book" href="https://docs.olostep.com">
+    完全なAPIドキュメントを閲覧
+  </Card>
+  
+  <Card title="サポートメール" icon="envelope" href="mailto:info@olostep.com">
+    メール: info@olostep.com
+  </Card>
+  
+  <Card title="Zapierコミュニティ" icon="users" href="https://community.zapier.com">
+    Zapierコミュニティで質問
+  </Card>
+  
+  <Card title="ステータスページ" icon="signal" href="https://status.olostep.com">
+    APIステータスを確認
+  </Card>
+</CardGroup>
+
+## 関連リソース
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Scrapesエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Batchesエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Crawlsエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Mapsエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    OlostepをPythonで使用
+  </Card>
+  
+  <Card title="LangChain統合" icon="link" href="/integrations/langchain">
+    LangChainでAIエージェントを構築
+  </Card>
+</CardGroup>
+
+## 始めましょう
+
+ウェブスクレイピングワークフローの自動化を始める準備はできましたか？
+
+<Card title="最初のZapを作成" icon="bolt" href="https://zapier.com/apps/olostep/integrations">
+  OlostepとZapierで自動化ワークフローを構築し始める
+</Card>
+
+Olostepを8,000以上のアプリと接続し、今日からウェブデータ抽出を自動化しましょう！

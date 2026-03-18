@@ -1,0 +1,780 @@
+---
+sidebarTitle: "Mastra"
+icon: "robot"
+title: "Mastra統合"
+description: "Mastra.aiのエージェントフレームワークを使用して、ウェブ検索、スクレイピング、クロール機能を持つAIエージェントを構築する"
+---
+
+Olostep Mastra統合は、Mastra.aiエージェントに強力なウェブデータ抽出機能をもたらします。Olostepはウェブ検索、スクレイピング、クロールAPIであり、ウェブデータを検索、抽出、構造化するためのAPIです。あらゆるウェブサイトからデータを自律的に検索、スクレイピング、分析、構造化するインテリジェントなAIエージェントを構築しましょう。
+
+[npmからインストール →](https://www.npmjs.com/package/@olostep/mastra-tools)
+
+## 特徴
+
+この統合は、自動化されたウェブデータ抽出のための4つの強力なAPIを提供します：
+
+<CardGroup cols={2}>
+  <Card title="ウェブサイトをスクレイピング" icon="file-lines">
+    単一のURLから複数の形式（Markdown、HTML、JSON、テキスト）でコンテンツを抽出
+  </Card>
+  
+  <Card title="URLを一括スクレイピング" icon="layer-group">
+    最大100,000のURLを並行して処理。大規模なデータ抽出に最適
+  </Card>
+  
+  <Card title="クロールを作成" icon="spider-web">
+    リンクをたどってウェブサイト全体を自動的に発見し、スクレイピング
+  </Card>
+  
+  <Card title="マップを作成" icon="map">
+    サイト構造の分析とコンテンツ発見のためにウェブサイトからすべてのURLを抽出
+  </Card>
+</CardGroup>
+
+## インストール
+
+<CodeGroup>
+```bash npm
+npm install @olostep/mastra-tools
+```
+
+```bash yarn
+yarn add @olostep/mastra-tools
+```
+
+```bash pnpm
+pnpm add @olostep/mastra-tools
+```
+</CodeGroup>
+
+## セットアップ
+
+### 1. パッケージをインストール
+
+```bash
+npm install @olostep/mastra-tools @mastra/core
+```
+
+### 2. 統合をインポートして登録
+
+Mastraの設定ファイル内で：
+
+```typescript
+import { Mastra } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+// Olostep統合を作成
+const olostep = createOlostepIntegration();
+
+// APIを登録（これによりエージェントが利用可能になります）
+olostep.registerApis();
+
+// Mastra設定に追加
+export const mastra = new Mastra({
+  config: {
+    integrations: [olostep],
+    // ... その他の設定
+  },
+});
+```
+
+### 3. APIキーを設定
+
+Olostep APIキーを環境変数として設定：
+
+```bash
+export OLOSTEP_API_KEY=your-api-key-here
+```
+
+または`.env`ファイルに：
+
+```
+OLOSTEP_API_KEY=your-api-key-here
+```
+
+APIキーは[Olostepダッシュボード](https://olostep.com/dashboard)から取得してください。
+
+## 利用可能なAPI
+
+この統合は、Mastraエージェントが利用できる4つのAPIを公開します：
+
+### scrapeWebsite
+
+単一のURLからコンテンツを抽出します。複数の形式とJavaScriptレンダリングをサポート。
+
+**使用例:**
+- 特定のページの変更を監視
+- eコマースサイトから商品情報を抽出
+- ニュース記事やブログ投稿からデータを収集
+- コンテンツ集約のためにコンテンツを引き出す
+
+**スキーマパラメータ:**
+
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+
+<ParamField path="url_to_scrape" type="string" required>
+  スクレイピングするウェブサイトのURL（http://またはhttps://を含む必要があります）
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  出力形式: ['html', 'markdown', 'json', 'text']
+</ParamField>
+
+<ParamField path="country" type="string">
+  ロケーション固有のコンテンツのための国コード（例: "US", "GB", "CA"）
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="number">
+  JavaScriptレンダリングのための待機時間（ミリ秒単位、0-10000）
+</ParamField>
+
+<ParamField path="parser" type="string">
+  専門的な抽出のためのオプションのパーサーID（例: "@olostep/amazon-product"）
+</ParamField>
+
+**レスポンス:**
+- `id` - スクレイプID
+- `url_to_scrape` - スクレイピングされたURL
+- `result.markdown_content` - Markdownコンテンツ
+- `result.html_content` - HTMLコンテンツ
+- `result.json_content` - JSONコンテンツ
+- `result.text_content` - テキストコンテンツ
+- `result.screenshot_hosted_url` - スクリーンショットURL（利用可能な場合）
+- `result.markdown_hosted_url` - ホストされたMarkdownのURL
+- `object` - オブジェクトタイプ（"scrape"）
+- `created` - Unixタイムスタンプ
+
+**使用例:**
+
+```typescript
+// エージェントまたはワークフロー内で
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'scrapeWebsite',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown'],
+      country: 'US',
+    }
+  }
+});
+```
+
+### batchScrape
+
+複数のURLを並行して処理します（一度に最大100,000）。大規模なデータ抽出に最適。
+
+**使用例:**
+- 商品カタログ全体をスクレイピング
+- 複数の検索結果からデータを抽出
+- スプレッドシートからのURLリストを処理
+- 大量のコンテンツを抽出
+
+**スキーマパラメータ:**
+
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+
+<ParamField path="batch_array" type="array" required>
+  `url`とオプションの`custom_id`フィールドを持つオブジェクトの配列
+  
+  例: `[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  すべてのURLの出力形式
+</ParamField>
+
+<ParamField path="country" type="string">
+  ロケーション固有のスクレイピングのための国コード
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="number">
+  JavaScriptレンダリングのための待機時間（ミリ秒単位）
+</ParamField>
+
+<ParamField path="parser" type="string">
+  専門的な抽出のためのオプションのパーサーID
+</ParamField>
+
+**レスポンス:**
+- `batch_id` - バッチID（後で結果を取得するために使用）
+- `status` - 処理ステータス
+- `object` - オブジェクトタイプ（"batch"）
+
+**使用例:**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'batchScrape',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      batch_array: [
+        { url: 'https://example.com', custom_id: 'site1' },
+        { url: 'https://test.com', custom_id: 'site2' },
+      ],
+      formats: ['markdown'],
+    }
+  }
+});
+```
+
+### createCrawl
+
+リンクをたどってウェブサイト全体を自動的に発見し、スクレイピングします。ドキュメントサイト、ブログ、コンテンツリポジトリに最適。
+
+**使用例:**
+- ドキュメントサイト全体をクロールしてアーカイブ
+- ウェブサイトからすべてのブログ投稿を抽出
+- ウェブコンテンツからナレッジベースを構築
+- ウェブサイト構造の変更を監視
+
+**スキーマパラメータ:**
+
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+
+<ParamField path="start_url" type="string" required>
+  クロールの開始URL（http://またはhttps://を含む必要があります）
+</ParamField>
+
+<ParamField path="max_pages" type="number" default="10">
+  クロールする最大ページ数
+</ParamField>
+
+<ParamField path="follow_links" type="boolean" default="true">
+  ページ上で見つかったリンクをたどるかどうか
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  スクレイピングされたコンテンツの形式
+</ParamField>
+
+<ParamField path="country" type="string">
+  ロケーション固有のクロールのためのオプションの国コード
+</ParamField>
+
+<ParamField path="parser" type="string">
+  専門的なコンテンツ抽出のためのオプションのパーサーID
+</ParamField>
+
+**レスポンス:**
+- `id` - クロールID（後で結果を取得するために使用）
+- `object` - オブジェクトタイプ（"crawl"）
+- `status` - クロールステータス
+- `created` - Unixタイムスタンプ
+
+**使用例:**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createCrawl',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      start_url: 'https://docs.example.com',
+      max_pages: 50,
+      follow_links: true,
+      formats: ['markdown'],
+    }
+  }
+});
+```
+
+### createMap
+
+コンテンツ発見とサイト構造分析のためにウェブサイトからすべてのURLを抽出します。
+
+**使用例:**
+- サイトマップとサイト構造図を作成
+- 一括スクレイピング前にすべてのページを発見
+- 壊れたページや欠落したページを発見
+- SEO監査と分析
+
+**スキーマパラメータ:**
+
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  リンクを抽出するウェブサイトのURL（http://またはhttps://を含む必要があります）
+</ParamField>
+
+<ParamField path="search_query" type="string">
+  URLをフィルタリングするためのオプションの検索クエリ（例: "blog"）
+</ParamField>
+
+<ParamField path="top_n" type="number">
+  返されるURLの数を制限
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  特定のパスを含めるためのグロブパターン（例: ["/blog/**"]）
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  特定のパスを除外するためのグロブパターン（例: ["/admin/**"]）
+</ParamField>
+
+**レスポンス:**
+- `id` - マップID
+- `object` - オブジェクトタイプ（"map"）
+- `url` - ウェブサイトURL
+- `total_urls` - 見つかったURLの総数
+- `urls` - 発見されたURLの配列
+
+**使用例:**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createMap',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url: 'https://example.com',
+      search_query: 'blog',
+      top_n: 100,
+      include_urls: ['/blog/**'],
+    }
+  }
+});
+```
+
+## エージェントでの使用
+
+### 基本的なエージェントの例
+
+ウェブサイトをスクレイピングできるエージェントを作成：
+
+```typescript
+import { Agent } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+const olostep = createOlostepIntegration();
+olostep.registerApis();
+
+const agent = new Agent({
+  name: 'web-researcher',
+  instructions: `
+    あなたはウェブリサーチアシスタントです。ユーザーがウェブサイトから情報を取得するように頼んだときは、
+    OlostepのscrapeWebsite APIを使用してコンテンツを抽出し、それを要約してください。
+  `,
+  model: 'openai/gpt-4',
+});
+
+// エージェントはMastraのAPIシステムを通じてOlostep APIを使用できます
+```
+
+### エージェントワークフローの例
+
+コンテンツを発見しスクレイピングするリサーチワークフローを構築：
+
+```typescript
+// 1. ウェブサイトをマッピングしてURLを発見
+const mapResult = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createMap',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url: 'https://example.com',
+      include_urls: ['/blog/**'],
+    }
+  }
+});
+
+// 2. 発見されたURLを一括スクレイピング
+const batchResult = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'batchScrape',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      batch_array: mapResult.urls.slice(0, 10).map(url => ({ url })),
+      formats: ['markdown'],
+    }
+  }
+});
+
+// 3. エージェントで結果を処理
+const summary = await agent.generate({
+  messages: [{
+    role: 'user',
+    content: `このコンテンツを要約してください: ${batchResult.result.markdown_content}`
+  }]
+});
+```
+
+## 人気のある使用例
+
+### リサーチエージェント
+
+トピックを自律的にリサーチするエージェントを構築：
+
+<AccordionGroup>
+  <Accordion title="マルチソースリサーチ">
+    **ワークフロー:**
+    1. ユーザーが尋ねる: "AIのトレンドをリサーチ"
+    2. エージェントが`createMap`を使用して関連ページを発見
+    3. エージェントが`batchScrape`を使用してコンテンツを抽出
+    4. エージェントが分析し、要約を作成
+    5. 構造化されたリサーチレポートを返す
+  </Accordion>
+
+  <Accordion title="競合モニタリング">
+    **ワークフロー:**
+    1. 毎日のモニタリングをスケジュール
+    2. `scrapeWebsite`を使用して競合ページをチェック
+    3. 前回のデータと比較
+    4. 重要な変更をアラート
+    5. 週次レポートを生成
+  </Accordion>
+
+  <Accordion title="コンテンツ集約">
+    **ワークフロー:**
+    1. `createCrawl`を使用してすべてのブログ投稿を発見
+    2. `batchScrape`を使用してコンテンツを抽出
+    3. AIで主要トピックを抽出
+    4. ナレッジベースに保存
+    5. コンテンツカレンダーを生成
+  </Accordion>
+</AccordionGroup>
+
+### Eコマースインテリジェンス
+
+商品と価格を監視：
+
+```
+エージェントワークフロー:
+1. 商品ページをスクレイピング（scrapeWebsite）
+2. 構造化データを抽出（パーサーを使用）
+3. 価格変動を追跡
+4. アラートを生成
+5. データベースを更新
+```
+
+### SEO分析
+
+ウェブサイトの構造とコンテンツを分析：
+
+```
+エージェントワークフロー:
+1. ウェブサイト構造をマッピング（createMap）
+2. 重要なセクションをクロール（createCrawl）
+3. コンテンツの質を分析
+4. SEOの機会を特定
+5. 推奨事項を生成
+```
+
+## 専門的なパーサー
+
+Olostepは人気のあるウェブサイト向けに事前構築されたパーサーを提供しています。`parser`パラメータで使用：
+
+<CardGroup cols={2}>
+  
+  <Card title="Google検索" icon="google">
+    `@olostep/google-search`
+    
+    抽出: 検索結果、タイトル、スニペット、URL
+  </Card>
+  
+  <Card title="Googleマップ" icon="map">
+    `@olostep/google-maps`
+    
+    抽出: ビジネス情報、レビュー、評価、場所
+  </Card>
+
+</CardGroup>
+
+### パーサーの使用
+
+`parser`パラメータにパーサーIDを追加：
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'scrapeWebsite',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url_to_scrape: 'https://www.amazon.com/dp/PRODUCT_ID',
+      formats: ['json'],
+      parser: '@olostep/amazon-product',
+    }
+  }
+});
+```
+
+パーサーはそのウェブサイトタイプに特化した構造化データを自動的に抽出します。
+
+## ベストプラクティス
+
+<AccordionGroup>
+  <Accordion title="複数のURLに対してバッチ処理を使用">
+    3-5以上のURLをスクレイピングする場合は、複数の`scrapeWebsite`呼び出しの代わりに`batchScrape`を使用してください。バッチ処理は：
+    - ずっと速い（並行処理）
+    - よりコスト効果が高い
+    - 管理が簡単
+    - レート制限に優しい
+  </Accordion>
+
+  <Accordion title="適切な待機時間を設定">
+    JavaScriptが多用されているサイトの場合、`wait_before_scraping`パラメータを使用：
+    - シンプルなサイト: 0-1000ms
+    - 動的なサイト: 2000-3000ms
+    - JavaScriptが多用されている: 5000-8000ms
+    
+    最適な待機時間を見つけるために異なる値でテストしてください。
+  </Accordion>
+
+  <Accordion title="専門的なパーサーを使用">
+    人気のあるウェブサイト（Amazon、LinkedIn、Google）には事前構築されたパーサーを使用：
+    - 自動的に構造化データを取得
+    - より信頼性の高い抽出
+    - カスタムパーシングが不要
+    - Olostepによって維持管理
+  </Accordion>
+
+  <Accordion title="非同期操作を処理">
+    バッチ、クロール、マップ操作は非同期です：
+    - 返されたID（batch_id、crawl_id、map_id）を保存
+    - 完了をポーリングまたはWebhookを使用
+    - 取得のための別々のワークフローを設定
+  </Accordion>
+
+  <Accordion title="エラーハンドリング">
+    API呼び出しは常にtry-catchブロックでラップしてください：
+    ```typescript
+    try {
+      const result = await mastra.callApi({
+        integrationName: 'olostep',
+        api: 'scrapeWebsite',
+        payload: { data: {...} }
+      });
+    } catch (error) {
+      // 認証、レート制限、ネットワークエラーを処理
+      console.error('スクレイピングに失敗しました:', error.message);
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="レート制限">
+    レート制限に注意してください：
+    - リクエストを遅延させて間隔を空ける
+    - 可能な限りバッチ処理を使用
+    - Olostepダッシュボードで使用状況を監視
+    - 必要に応じてプランをアップグレード
+  </Accordion>
+</AccordionGroup>
+
+## 完全な例
+
+リサーチエージェントを構築する完全な例：
+
+```typescript
+import { Mastra } from '@mastra/core';
+import { Agent } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+// Olostep統合を作成して登録
+const olostep = createOlostepIntegration();
+olostep.registerApis();
+
+// Mastraを初期化
+export const mastra = new Mastra({
+  config: {
+    integrations: [olostep],
+    // ... その他の設定
+  },
+});
+
+// リサーチエージェントを作成
+const researchAgent = new Agent({
+  name: 'research-assistant',
+  instructions: `
+    あなたはウェブデータを検索、抽出、構造化できるリサーチアシスタントです。
+    ユーザーがトピックをリサーチするように頼んだとき：
+    1. OlostepのcreateMapを使用して関連ページを発見
+    2. batchScrapeを使用して複数のソースからコンテンツを抽出
+    3. 分析して要約を作成
+    4. 構造化されたリサーチレポートを提示
+  `,
+  model: 'openai/gpt-4',
+});
+
+// エージェントを使用
+async function researchTopic(topic: string) {
+  // ステップ1: 関連ページを発見
+  const mapResult = await mastra.callApi({
+    integrationName: 'olostep',
+    api: 'createMap',
+    payload: {
+      data: {
+        apiKey: process.env.OLOSTEP_API_KEY!,
+        url: `https://example.com/search?q=${topic}`,
+        top_n: 20,
+      }
+    }
+  });
+
+  // ステップ2: 発見されたページをスクレイピング
+  const batchResult = await mastra.callApi({
+    integrationName: 'olostep',
+    api: 'batchScrape',
+    payload: {
+      data: {
+        apiKey: process.env.OLOSTEP_API_KEY!,
+        batch_array: mapResult.urls.slice(0, 10).map(url => ({ url })),
+        formats: ['markdown'],
+      }
+    }
+  });
+
+  // ステップ3: エージェントで分析
+  const summary = await researchAgent.generate({
+    messages: [{
+      role: 'user',
+      content: `このリサーチデータに基づいて、${topic}の包括的な要約を提供してください`
+    }]
+  });
+
+  return summary;
+}
+```
+
+## トラブルシューティング
+
+<AccordionGroup>
+  <Accordion title="認証に失敗しました">
+    **エラー**: "無効なAPIキー"
+    
+    **解決策**:
+    - [ダッシュボード](https://olostep.com/dashboard)からAPIキーを確認
+    - 環境変数にAPIキーが設定されていることを確認
+    - APIキーがアクティブであることを確認
+    - APIキーに余分なスペースがないか確認
+  </Accordion>
+
+  <Accordion title="APIが見つかりません">
+    **エラー**: "APIが見つかりません"または"統合が登録されていません"
+    
+    **解決策**:
+    - 統合を作成した後に`registerApis()`が呼び出されていることを確認
+    - 統合がMastra設定に追加されていることを確認
+    - 統合名が'olostep'であることを確認
+    - 変更後にMastraサーバーを再起動
+  </Accordion>
+
+  <Accordion title="スクレイピングが空のコンテンツを返す">
+    **エラー**: コンテンツフィールドが空
+    
+    **解決策**:
+    - `wait_before_scraping`時間を増やす
+    - ウェブサイトがログインを必要としているか確認
+    - 異なる形式（HTML対Markdown）を試す
+    - URLがアクセス可能であることを確認
+    - サイトが自動アクセスをブロックしているか確認
+  </Accordion>
+
+  <Accordion title="レート制限を超えました">
+    **エラー**: "レート制限を超えました"
+    
+    **解決策**:
+    - リクエストを遅延させて間隔を空ける
+    - 個別のスクレイピングの代わりにバッチ処理を使用
+    - Olostepプランをアップグレード
+    - ダッシュボードでレート制限を確認
+  </Accordion>
+
+  <Accordion title="TypeScriptエラー">
+    **エラー**: モジュールが見つからない、または型エラー
+    
+    **解決策**:
+    - `@mastra/core`がインストールされていることを確認
+    - TypeScriptのバージョン互換性を確認
+    - すべての依存関係がインストールされていることを確認
+    - 再ビルド: `npm run build`
+  </Accordion>
+</AccordionGroup>
+
+## 価格
+
+Olostepは、Mastraとは独立してAPI使用量に基づいて課金します：
+
+- **スクレイプ**: スクレイプごとに課金
+- **バッチ**: バッチ内のURLごとに課金
+- **クロール**: クロールされたページごとに課金
+- **マップ**: マップ操作ごとに課金
+
+現在の価格は[olostep.com/pricing](https://olostep.com/pricing)で確認してください。
+
+## サポート
+
+Mastra統合に関するヘルプが必要ですか？
+
+<CardGroup cols={2}>
+  <Card title="ドキュメンテーション" icon="book" href="https://docs.olostep.com">
+    完全なAPIドキュメントを参照
+  </Card>
+  
+  <Card title="サポートメール" icon="envelope" href="mailto:info@olostep.com">
+    メール: info@olostep.com
+  </Card>
+  
+  <Card title="Mastraドキュメント" icon="robot" href="https://mastra.ai/docs">
+    Mastraフレームワークについて学ぶ
+  </Card>
+  
+  <Card title="ステータスページ" icon="signal" href="https://status.olostep.com">
+    APIステータスを確認
+  </Card>
+</CardGroup>
+
+## 関連リソース
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Scrapesエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Batchesエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Crawlsエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Mapsエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Zapier統合" icon="bolt" href="/integrations/zapier">
+    Zapierワークフローで自動化
+  </Card>
+  
+  <Card title="LangChain統合" icon="link" href="/integrations/langchain">
+    LangChainでAIエージェントを構築
+  </Card>
+</CardGroup>
+
+## 始めましょう
+
+ウェブスクレイピング機能を持つAIエージェントを構築する準備はできましたか？
+
+<Card title="パッケージをインストール" icon="download" href="https://www.npmjs.com/package/@olostep/mastra-tools">
+  npmから@olostep/mastra-toolsをインストール
+</Card>
+
+OlostepとMastraを使って、ウェブデータを検索、抽出、構造化するインテリジェントなAIエージェントを構築しましょう！

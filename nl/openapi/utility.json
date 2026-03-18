@@ -1,0 +1,113 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Hulpprogramma API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/retrieve": {
+      "get": {
+        "summary": "Haal pagina-inhoud op",
+        "description": "Haalt de inhoud van een gecrawlde pagina op met behulp van zijn `retrieve_id`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "retrieve_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "De ID van de pagina-inhoud die je wilt ophalen. Beschikbaar in de respons van `/v1/crawls/{crawl_id}/pages`, `/v1/scrapes/{scrape_id}` of `/v1/batches/{batch_id}/items` endpoints"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown",
+                  "json"
+                ]
+              }
+            },
+            "description": "Optionele array om alleen specifieke formaten in productie op te halen. Als dit niet wordt opgegeven, worden alle formaten geretourneerd."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met pagina-inhoud.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "html_content": {
+                      "type": "string",
+                      "description": "HTML-inhoud van de pagina, indien aangevraagd en beschikbaar."
+                    },
+                    "markdown_content": {
+                      "type": "string",
+                      "description": "Markdown-inhoud van de pagina, indien aangevraagd en beschikbaar."
+                    },
+                    "json_content": {
+                      "type": "string",
+                      "description": "JSON-inhoud van de pagina geretourneerd door parsers, indien aangevraagd en beschikbaar."
+                    },
+                    "html_hosted_url": {
+                      "type": "string",
+                      "description": "S3 bucket URL van html. Verloopt over 7 dagen."
+                    },
+                    "markdown_hosted_url": {
+                      "type": "string",
+                      "description": "S3 bucket URL van markdown. Verloopt over 7 dagen."
+                    },
+                    "json_hosted_url": {
+                      "type": "string",
+                      "description": "S3 bucket URL van json. Verloopt over 7 dagen."
+                    },
+                    "size_exceeded": {
+                      "type": "boolean",
+                      "description": "Als de grootte van inhoudsobjecten de limiet van 6MB overschrijdt. Als dit waar is, gebruik dan gehoste S3 urls om inhoud te verkrijgen."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "404": {
+            "description": "Inhoud niet gevonden voor de opgegeven `retrieve_id`."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Dateien-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "Datei-Upload erstellen",
+        "description": "Generiere eine vorab signierte URL zum Hochladen einer JSON-Datei. Nach dem Hochladen musst du den Complete-Endpunkt aufrufen, um den Upload abzuschließen. Die Upload-URL läuft in 10 Minuten ab.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "Der Dateiname für die Datei. Muss mit der Erweiterung .json enden.",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Der Zweck der Datei. Unterstützte Werte: 'context' oder 'batch'. Standardmäßig 'context'.",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Upload-URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Datei-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"file.upload\" für diesen Endpunkt."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Erstellter Epoch-Zeitstempel"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Vorab signierte URL zum Hochladen der Datei. Läuft in 10 Minuten ab."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Anzahl der Sekunden, bis die Upload-URL abläuft (600 Sekunden = 10 Minuten)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage. Fehlender Dateiname oder ungültiger Dateityp (nur .json-Dateien werden unterstützt)."
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      },
+      "get": {
+        "summary": "Dateien auflisten",
+        "description": "Liste alle abgeschlossenen Dateien für dein Team auf. Optional nach Zweck filtern. Gibt nur Dateien mit dem Status 'completed' zurück.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "Dateien nach Zweck filtern. Unterstützte Werte: 'context' oder 'batch'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Liste der Dateien.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"list\" für diesen Endpunkt."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Datei-ID"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "Die Art des Objekts. \"file\" für diesen Endpunkt."
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Erstellter Epoch-Zeitstempel"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "Der Dateiname der hochgeladenen Datei"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "Dateigröße in Bytes"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "Der Zweck der Datei"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Dateistatus. Immer 'completed' für aufgelistete Dateien."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "Datei-Upload abschließen",
+        "description": "Schließe den Datei-Upload-Prozess ab und validiere die hochgeladene JSON-Datei. Dieser Endpunkt überprüft, ob die Datei existiert, validiert ihr JSON-Format, prüft die Dateigröße (max. 200MB) und aktualisiert den Dateistatus auf completed.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für die Datei, die abgeschlossen werden soll.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datei-Upload erfolgreich abgeschlossen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Datei-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"file\" für diesen Endpunkt."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Erstellter Epoch-Zeitstempel"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Der Dateiname der hochgeladenen Datei"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Dateigröße in Bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Der Zweck der Datei"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Dateistatus. Wird nach erfolgreichem Abschluss 'completed' sein."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage. Datei bereits abgeschlossen, ungültiger Status, Datei zu groß (max. 200MB) oder ungültiges JSON-Format."
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "404": {
+            "description": "Datei nicht gefunden oder Datei nicht auf S3 hochgeladen"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "Dateimetadaten nach ID abrufen",
+        "description": "Metadaten für eine Datei anhand ihrer ID abrufen.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für die Datei, die abgerufen werden soll.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Dateimetadaten.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Datei-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"file\" für diesen Endpunkt."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Erstellter Epoch-Zeitstempel"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Der Dateiname der hochgeladenen Datei"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Dateigröße in Bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Der Zweck der Datei"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Dateistatus (z.B. 'pending', 'completed')"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "404": {
+            "description": "Datei nicht gefunden"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Datei löschen",
+        "description": "Eine Datei und ihre zugehörigen Daten aus dem Speicher löschen.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für die Datei, die gelöscht werden soll.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datei erfolgreich gelöscht.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Datei-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"file\" für diesen Endpunkt."
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "Zeigt an, dass die Datei erfolgreich gelöscht wurde."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "404": {
+            "description": "Datei nicht gefunden"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "Dateiobjekt nach ID abrufen",
+        "description": "Erhalte eine vorab signierte URL, um den Inhalt einer abgeschlossenen Datei herunterzuladen. Optional kannst du die Ablaufzeit für die Download-URL mit dem expires_in-Abfrageparameter angeben (Standard ist 600 Sekunden / 10 Minuten).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für die Datei, die heruntergeladen werden soll.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Anzahl der Sekunden, bis die Download-URL abläuft. Standardmäßig 600 Sekunden (10 Minuten).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Download-URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Datei-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"file\" für diesen Endpunkt."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Erstellter Epoch-Zeitstempel"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Der Dateiname der hochgeladenen Datei"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Dateigröße in Bytes"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Vorab signierte URL zum Herunterladen der Datei. Läuft nach der angegebenen expires_in-Zeit ab."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Anzahl der Sekunden, bis die Download-URL abläuft."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage. Datei nicht abgeschlossen."
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "404": {
+            "description": "Datei nicht gefunden"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    }
+  }
+}

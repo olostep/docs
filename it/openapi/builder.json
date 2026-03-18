@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Builder API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://agent.olostep.com"
+    },
+    {
+      "url": "https://dataset.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    }
+  },
+  "paths": {
+    "/olostep-p2p-incomingAPI": {
+      "get": {
+        "summary": "Inizia lo scraping delle pagine web con varie configurazioni",
+        "description": "Questo endpoint ti permette di fare lo scraping delle pagine web con varie opzioni come impostare timeout, tempo di attesa prima dello scraping, preferenze di formato dei dati e altro.",
+        "servers": [
+          {
+            "url": "https://agent.olostep.com"
+          }
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "L'URL da cui iniziare lo scraping.",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "description": "Timeout in secondi per il processo di scraping, con un massimo di 620 secondi.",
+            "schema": {
+              "type": "integer",
+              "default": 40
+            }
+          },
+          {
+            "name": "waitBeforeScraping",
+            "in": "query",
+            "required": false,
+            "description": "Tempo di attesa in secondi prima di iniziare lo scraping, fino a 500 secondi.",
+            "schema": {
+              "type": "integer",
+              "default": 3
+            }
+          },
+          {
+            "name": "saveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Opzione per salvare il contenuto estratto come HTML.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "saveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Opzione per salvare il contenuto estratto come Markdown.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "removeCSSselectors",
+            "in": "query",
+            "required": false,
+            "description": "Opzione per rimuovere determinati selettori CSS dal contenuto. Facoltativamente, puoi anche passare un array JSON stringificato di selettori specifici che vuoi rimuovere. I selettori CSS rimossi quando questa opzione è impostata su `default` sono `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "schema": {
+              "type": "string",
+              "default": "default",
+              "enum": [
+                "default",
+                "none",
+                "JSON stringified array of CSS selectors"
+              ]
+            }
+          },
+          {
+            "name": "htmlTransformer",
+            "in": "query",
+            "required": false,
+            "description": "Specifica il trasformatore HTML da usare, se presente. La libreria Mercury Parser di Postlight viene utilizzata per rimuovere annunci e altri contenuti indesiderati dal contenuto estratto.",
+            "schema": {
+              "type": "string",
+              "default": "none",
+              "enum": [
+                "none",
+                "postlightParser"
+              ]
+            }
+          },
+          {
+            "name": "removeImages",
+            "in": "query",
+            "required": false,
+            "description": "Opzione per rimuovere le immagini dal contenuto estratto.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "expandMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Se vero, il contenuto markdown viene restituito nel campo markdown_content.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "expandHtml",
+            "in": "query",
+            "required": false,
+            "description": "Se vero, il contenuto HTML viene restituito nel campo html_content.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "description": "Azioni da eseguire sulla pagina prima di ottenere il contenuto",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "Attendere",
+                    "required": [
+                      "type",
+                      "milliseconds"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "wait"
+                        ],
+                        "description": "Attendere per un determinato numero di millisecondi"
+                      },
+                      "milliseconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Tempo di attesa in millisecondi"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Clic",
+                    "required": [
+                      "type",
+                      "selector"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "click"
+                        ],
+                        "description": "Clicca su un elemento"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "Selettore CSS per l'elemento su cui cliccare"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Compila Input",
+                    "required": [
+                      "type",
+                      "selector",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fill_input"
+                        ],
+                        "description": "Compila un elemento di input con un valore"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "Selettore CSS per l'elemento di input"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Testo da inserire nell'input"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Scorri",
+                    "required": [
+                      "type",
+                      "direction",
+                      "amount"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scroll"
+                        ],
+                        "description": "Scorri la pagina"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "up",
+                          "down",
+                          "left",
+                          "right"
+                        ],
+                        "description": "Direzione dello scorrimento"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "Quantità di scorrimento in pixel"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con i dati richiesti."
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+          },
+          "401": {
+            "description": "Accesso non autorizzato a causa di token API mancante o non valido."
+          },
+          "500": {
+            "description": "Errore interno del server."
+          }
+        }
+      }
+    },
+    "/olostep-p2p-dataset-API": {
+      "get": {
+        "servers": [
+          {
+            "url": "https://dataset.olostep.com"
+          }
+        ],
+        "summary": "Recupera informazioni sul dataset",
+        "description": "Permette agli utenti di recuperare informazioni sul dataset in formato Markdown e/o HTML in base all'ID del dataset fornito.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasetId",
+            "in": "query",
+            "required": true,
+            "description": "Identificatore univoco per il dataset da recuperare.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "retrieveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Opzione per recuperare il dataset in formato Markdown.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "retrieveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Opzione per recuperare il dataset in formato HTML.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "fastLane",
+            "in": "query",
+            "required": false,
+            "description": "Opzione sperimentale per velocizzare il processo di scraping",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con le informazioni sul dataset."
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+          },
+          "404": {
+            "description": "Dataset non trovato per l'ID fornito."
+          },
+          "500": {
+            "description": "Errore interno del server."
+          }
+        }
+      }
+    }
+  }
+}

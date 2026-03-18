@@ -1,0 +1,544 @@
+---
+icon: "globe"
+sidebarTitle: "GEO - Herramientas de Búsqueda AI"
+title: "Obtener datos de herramientas de búsqueda AI populares"
+description: "Extraer datos estructurados de motores de búsqueda impulsados por AI usando solicitudes por lotes"
+---
+
+## Descripción General
+
+Esta guía demuestra cómo usar el endpoint de Batches de Olostep para obtener datos de herramientas de búsqueda AI populares, incluyendo Google AI Mode, Gemini, Microsoft Copilot, ChatGPT, Perplexity y Google AI Overview.
+
+Al aprovechar los analizadores especializados para cada plataforma, puedes extraer resultados de búsqueda estructurados a gran escala, lo que es ideal para:
+- Recolección de inteligencia competitiva
+- Comparación de resultados de búsqueda en múltiples plataformas
+- Monitoreo de motores de búsqueda AI
+
+## Formulación de Solicitudes
+
+### Paso 1: Prepara Tus Consultas
+
+Crea un array de consultas que deseas buscar. Para esta demostración, consultaremos noticias en diferentes ciudades:
+
+```javascript
+const axios = require('axios');
+
+// Configuración
+const CONFIG = {
+  url: 'https://api.olostep.com/v1/batches',
+  token: 'YOUR_API_KEY_HERE'
+};
+
+// Demostración: Generar consultas para diferentes ciudades
+const BASE_QUERY = 'what is the news today in';
+const CITIES = [
+  'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix',
+  'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose'
+];
+```
+
+### Paso 2: Generar Elementos para Cada Herramienta AI
+
+Cada herramienta de búsqueda AI requiere un ID de analizador específico y una estructura de URL. A continuación se muestran las funciones de generación de elementos para cada plataforma:
+
+<Tabs>
+  <Tab title="Google AI Mode">
+    **ID del Analizador:** `@olostep/google-aimode-results`
+    
+    ```javascript
+    const generateAIModeItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://google.com/aimode?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+ </Tab>
+  
+  <Tab title="ChatGPT">
+    **ID del Analizador:** `@olostep/chatgpt-results`
+    
+    ```javascript
+    const generateChatGPTItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://chatgpt.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+  
+  <Tab title="Perplexity">
+    **ID del Analizador:** `@olostep/perplexity-results`
+    
+    ```javascript
+    const generatePerplexityItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://www.perplexity.ai/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+  
+  <Tab title="Google AI Overview">
+    **ID del Analizador:** `@olostep/google-ai-overview-results`
+    
+    ```javascript
+    const generateGoogleAIOverviewItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://www.google.com/search?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+
+  </Tab>
+
+  <Tab title="Gemini">
+    **ID del Analizador:** `@olostep/gemini-results`
+    
+    ```javascript
+    const generateGeminiItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://gemini.google.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+  
+  <Tab title="Microsoft Copilot">
+    **ID del Analizador:** `@olostep/microsoft-copilot-results`
+    
+    ```javascript
+    const generateCopilotItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://copilot.microsoft.com/chats?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+   <Tab title="Grok">
+    **ID del Analizador:** `@olostep/grok-results`
+    
+    ```javascript
+    const generateGrokItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://grok.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+</Tabs>
+
+### Paso 3: Enviar la Solicitud por Lote
+
+Envía tu solicitud por lote con los elementos generados:
+
+```javascript
+const response = await axios.post(CONFIG.url, {
+  parser: { id: '@olostep/gemini-results' },
+  items: generateGeminiItems()
+}, {
+  headers: {
+    'Authorization': `Bearer ${CONFIG.token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const batchId = response.data.id;
+```
+
+**Nota:** Después de enviar, [consulta para completar](/use-cases/batch#step-2-monitor-batch-status) para recuperar resultados.
+
+## Formato de Respuesta
+
+Después de enviar una solicitud por lote y consultar para completar, recibirás respuestas en el siguiente formato:
+
+<Tabs>
+  <Tab title="Google AI Mode">
+    ```json
+    {
+      "url": "https://www.google.com//search?q=what+is+the+news+today+in+Austin&hl=en&udm=50&aep=11&newwindow=1&sei=mt_oaPvDBrKh5NoPy9W1sQE&mstk=AUtExfANCngr4KIDEH7t1EJsJ3xHfdsjka647_hz7r0UJWh1VM4FhWV9j1f2QOy0ylJU2l9-zWCxfORo5WzWeAN52_oVMM7nGAgEIRdyzsjtT7h1qhBn8Qj2RiN8HFQke6uYjmqnTeR4O1opgHbiLdAe5ZNfkzDyE_9O2zE&csuir=1",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "In Austin news, officials announced that progress has been made on the city's homelessness response \n\n.  \n\n**Top story: Homelessness**  \n\n* Austin officials and local advocates reported \"real, measurable progress\" in addressing the needs of the city's homeless population.\n* The announcement came ahead of a report from the Ending Community Homelessness Coalition (ECHO)... ",
+      "sources": [
+        {
+          "url": "https://www.kxan.com/video/austin-mayor-citys-decreased-homelessness-is-a-big-deal/11151402/#:~:text=Elected%20city%20and%20county%20officials%2C%20along%20with,experiencing%20homelessness%20in%20Austin.%20Read%20More:%20https://www.kxan.com/news/local/austin/echo%2Dto%2Dpresent%2Dreport%2Don%2Dstate%2Dof%2Daustins%2Dhomelessness%2Dresponse%2Dsystem/",
+          "title": "KXAN\n·",
+          "description": "Austin mayor: City's decreased homelessness is 'a big deal'",
+          "icon": null,
+          "domain": "https://www.kxan.com",
+          "cited": true
+        },
+        {
+          "url": "https://www.fox7austin.com/tag/us/tx/travis-county/austin/east-austin#:~:text=Austin%20pd%20arrests%20man%20in%20deadly%20east%20austin%20double%20shooting",
+          "title": "FOX 7 Austin",
+          "description": "East Austin",
+          "icon": null,
+          "domain": "https://www.fox7austin.com",
+          "cited": true
+        },
+        ...
+      ],
+      "country": null
+    }
+    ```
+  </Tab>
+
+  <Tab title="ChatGPT">
+    ```json
+    {
+      "url": "https://chatgpt.com/?model=auto&q=what%20is%20the%20news%20today%20in%20Austin",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Here's a roundup of **today's top news in Austin, Texas**:\n\n---\n\n## 🏛️ Local Government\n\n* **New Homeless Navigation Center Approved:** The Austin City Council approved the purchase of a commercial property on South Interstate 35...\n\n[Council OKs purchase of site - Austin Monitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n\n## 📚 Education\n\n* **Austin ISD Consolidation:** Families rally at Austin ISD headquarters to oppose consolidation plan...\n\n[Austin's Leading Local News - KVUE](https://www.kvue.com/)",
+      "inline_references": [
+        {
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "text": "Council OKs purchase of site - Austin Monitor",
+          "position": 1
+        },
+        {
+          "url": "https://www.kvue.com/",
+          "text": "Austin's Leading Local News - KVUE",
+          "position": 2
+        },
+        ...
+      ],
+      "sources": [
+        {
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "title": "Council OKs purchase of site for new homeless navigation center - Austin Monitor",
+          "snippet": "City Council voted 8–3 on Thursday to purchase a commercial property on South Interstate 35...",
+          "cited": true,
+          "date_published": "2025-10-10T12:00:00.000Z",
+          "attribution": "austinmonitor.com"
+        },
+        {
+          "url": "https://www.kvue.com/",
+          "title": "Austin's Leading Local News - KVUE",
+          "snippet": "Families rally at Austin ISD headquarters to oppose consolidation plan...",
+          "cited": true,
+          "date_published": null,
+          "attribution": "www.kvue.com"
+        },
+        ...
+      ],
+      "products": [],
+      "network_search_calls": {
+        "user_query": "what is the news today in Austin",
+        "default_model_slug": "auto",
+        "model_slug": "gpt-5-2",
+        "search_triggered": true,
+        "search_queries": [
+          {
+            "query": "Austin Texas news today October 2025",
+            "type": "model_query"
+          },
+          ...
+        ],
+        "search_result_groups": [
+          {
+            "domain": "austinmonitor.com",
+            "entries": [
+              {
+                "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+                "title": "Council OKs purchase of site for new homeless navigation center",
+                "snippet": "City Council voted 8–3 on Thursday to purchase a commercial property...",
+                "pub_date": "2025-10-10T12:00:00.000Z",
+                "attribution": "austinmonitor.com",
+                "ref_type": "news",
+                "ref_index": 1
+              }
+            ]
+          },
+          ...
+        ]
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Perplexity">
+    ```json
+    {
+      "url": "https://www.perplexity.ai/search/what-is-the-news-today-in-aust-_3zTmnq8QGiB7f2f.ESHgw",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "\nToday's news in Austin includes both local and statewide developments. Here's a summary of the major headlines:\n\n- Local Government\n  - New Homeless Navigation Center: The Austin City Council approved the purchase of a commercial property on South Interstate 35 to serve as the city's first housing navigation center. [austinmonitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n  - Coffee Shop Zoning: The Austin City Council is working to make it easier to open walkable neighborhood coffee shops.\n- Education\n  - Austin ISD Consolidation: Community members are protesting the Austin Independent School District's plan to close 13 schools, with a possible TEA takeover looming. Families rally at Austin ISD headquarters to oppose the consolidation plan. [kvue](https://www.kvue.com/)\n- Crime & Safety\n  - North Austin Homicide: Police have identified a woman found dead behind a business on Research Boulevard. A suspect has been arrested.\n  - Airport Security: A suspicious package found at Austin's airport has since been cleared.\n\nFor the latest updates, check local news sources like KUT, KVUE, and the Austin Monitor.\n",
+      "sources": [
+        {
+          "position": 1,
+          "label": "KUT Homepage | KUT Radio, Austin's NPR Station",
+          "url": "https://www.kut.org/",
+          "description": ""
+        },
+        {
+          "position": 2,
+          "label": "Austin News, Weather, Sports, Breaking News - CBS Austin",
+          "url": "https://cbsaustin.com/",
+          "description": ""
+        },
+        {
+          "position": 3,
+          "label": "Council OKs purchase of site for new homeless navigation center",
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "description": ""
+        },
+        {
+          "position": 4,
+          "label": "Austin's Leading Local News - KVUE",
+          "url": "https://www.kvue.com/",
+          "description": ""
+        },
+        ...
+      ],
+      "related_queries": [
+        "Show top local headlines in Austin right now",
+        "What are the latest Austin ISD school closure updates",
+        "Austin City Council meeting highlights today"
+      ],
+      "shopping_cards": [],
+      "videos": [],
+      "images": [],
+      "hotels": [],
+      "places": [],
+      "search_model_queries": [
+        {
+          "query": "what is the news today in Austin",
+          "engine": "web",
+          "limit": 8
+        }
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Google AI Overview">
+    ```json
+    {
+      "url": "https://www.google.com/search?q=what%20is%20the%20news%20today%20in%20Austin&gl=IN&hl=en",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Today's top news in Austin includes the Texas House failing to meet a quorum due to a Democratic standoff, a suspect being arrested for a North Austin homicide, and a suspicious package found at the Austin airport that has since been cleared. Other local headlines involve community protests against proposed Austin ISD school closures, the City Council's effort to simplify opening neighborhood coffee shops, and a man's 80-year prison sentence for his fifth DWI...",
+      "sources": [
+        {
+          "title": "Austin News, Weather, Sports, Breaking News",
+          "url": "https://cbsaustin.com/#:~:text=%22I%20feel%20sad%2C%22%20Austin,Roberson%20in%20shaken%20baby%20case",
+          "index": 0
+        },
+        {
+          "title": "News - FOX 7 Austin",
+          "url": "https://www.fox7austin.com/news#:~:text=Concerned%20community%20members%20protest%20proposed,multiple%20break%2Dins%20in%20custody",
+          "index": 1
+        },
+        ...
+      ],
+      "text_blocks": [
+        {
+          "type": "paragraph",
+          "snippet": "Today's top news in Austin includes the Texas House failing to meet a quorum due to a Democratic standoff, a suspect being arrested for a North Austin homicide, and a suspicious package found at the Austin airport that has since been cleared. Other local headlines involve community protests against proposed Austin ISD school closures, the City Council's effort to simplify opening neighborhood coffee shops, and a man's 80-year prison sentence for his fifth DWI conviction.",
+          "snippet_highlighted_words": "the Texas House failing to meet a quorum due to a Democratic standoff, a suspect being arrested for a North Austin homicide, and a suspicious package found at the Austin airport that has since been cleared"
+        },
+        {
+          "type": "list",
+          "list": [
+            {
+              "type": "paragraph",
+              "snippet": "Democratic Standoff: The Texas House is unable to meet a quorum because Texas Democrats are continuing their boycott of the legislative session."
+            },
+            {
+              "type": "paragraph",
+              "snippet": "Proposed ISD Closures: Community members are protesting the Austin Independent School District's plan to close 13 schools, with a possible TEA takeover looming."
+            },
+            {
+              "type": "paragraph",
+              "snippet": "Coffee Shops: The Austin City Council is working to make it easier to open walkable neighborhood coffee shops."
+            },
+            {
+              "type": "paragraph",
+              "snippet": "Homeless Navigation Center: The city council has approved the purchase of a new property for a homeless navigation center."
+            }
+          ],
+          "title": "Austin Politics & Governance"
+        },
+        ...
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Gemini">
+    ```json
+    {
+      "url": "https://gemini.google.com/",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Here are some of the top local news headlines in Austin, Texas:\n\n### Local Government and Community\n\n* **New Homeless Navigation Center Approved:** The Austin City Council approved the purchase of a commercial property on South Interstate 35...\n\n[Council OKs purchase of site for new homeless navigation center - Austin Monitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n\n* **Austin ISD Consolidation:** Families rally at Austin ISD headquarters to oppose consolidation plan...\n\n[Austin's Leading Local News - KVUE](https://www.kvue.com/)",
+      "sources": [
+        {
+          "position": 1,
+          "label": "Council OKs purchase of site for new homeless navigation center - Austin Monitor",
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "description": "City Council voted 8–3 on Thursday to purchase a commercial property on South Interstate 35 to serve as the city's first housing navigation center...",
+          "confidence_level": 0.9781935
+        },
+        {
+          "position": 2,
+          "label": "Austin's Leading Local News - KVUE",
+          "url": "https://www.kvue.com/",
+          "description": "Families rally at Austin ISD headquarters to oppose consolidation plan. Parents are urging Austin ISD leaders to...",
+          "confidence_level": 0.9623676
+        },
+        ...
+      ],
+      "links_attached": true,
+      "model": "gemini"
+    }
+    ```
+  </Tab>
+
+  <Tab title="Microsoft Copilot">
+    ```json
+    {
+      "url": "https://copilot.microsoft.com/chats/G7TZeFAA3dMces2Cb5J3N",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Here's a roundup of today's top stories from Austin:\n\n## 🕵️ Crime & Safety\n\n**Homicide Investigation in North Austin** Police have identified 43-year-old Mary Gonzales as the woman found dead behind a business on Research Boulevard. A suspect, 21-year-old, has been arrestedMSN News.\n\n**Suspicious Package at Airport** Police investigated after a suspicious package was found at Austin's airport, which has since been clearedMSN News.\n\n## 🏛️ Local Government\n\n**Homeless Navigation Center** The city council has approved the purchase of a new property for a homeless navigation centerAustin Monitor.\n\n[MSN NewsWoman found dead behind North Austin business identified; suspect arrested](https://www.msn.com/en-us/news/crime/woman-found-dead-behind-north-austin-business-identified-suspect-arrested/ar-AA1ObaMU)\n[MSN NewsPolice investigating after suspicious package found at Austin's airport](https://www.msn.com/en-us/news/crime/police-investigating-after-suspicious-package-found-at-austins-airport/ar-AA1Ob39x)",
+      "sources": [
+        {
+          "url": "https://www.msn.com/en-us/news/crime/woman-found-dead-behind-north-austin-business-identified-suspect-arrested/ar-AA1ObaMU",
+          "title": "Woman found dead behind North Austin business identified; suspect arrested",
+          "position": 319,
+          "icon_url": "https://services.bingapis.com/favicon?url=www.msn.com"
+        },
+        {
+          "url": "https://www.msn.com/en-us/news/crime/police-investigating-after-suspicious-package-found-at-austins-airport/ar-AA1Ob39x",
+          "title": "Police investigating after suspicious package found at Austin's airport",
+          "position": 555,
+          "icon_url": "https://services.bingapis.com/favicon?url=www.msn.com"
+        },
+        ...
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Grok">
+    ```json
+    {
+      "url": "https://grok.com/",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "### \n\nlatest news in Austin TX today Searched for \"latest news in Austin TX today\" \n\n10 posts \n\n### \n\nAustin since:2025-10-10 until:2025-10-11 filter:news Searched for \"Austin since:2025-10-10 until:2025-10-11 filter:news\" \n\n10 posts \n\n### \n\nAustin Texas news October 10 2025 Searched for \"Austin Texas news October 10 2025\" \n\n15 results \n\n### Top News Stories in Austin, TX – October 10, 2025\n\nHere's a roundup of the latest developments from local sources, focusing on key events, weather...",
+      "sources": [
+        {
+          "url": "https://www.austinchronicle.com/issues/october-10-2025/",
+          "title": "October 10 • 2025 - The Austin Chronicle",
+          "description": "To be clear, by “a good deal,” I don’t mean “rock-bottom prices.” I’m talking about a meal that’s completely worth the cash, both in terms of quality and quantity. And at Le Calamar, a new South First spot that specializes in Texan… ... Proposition Quit Dear Editor, Regarding the recent article in The Austin Chronicle [“Higher Taxes Are on the Ballot. City Leaders Explain What They’ll Get Us,” News, Sept.",
+          "icon": "https://imgs.search.brave.com/IIGvOiGOT-2BIUALAC8jt1l2gfEyH5C1RNDmZTaKBM8/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDQ5NWE3OTli/MzYxZmI5MTBmMTA4/MzNlOTI1NTY3M2Nm/ZTYyMWYyYWI5OTEz/MTJlYzAwNWJjNjg3/ZTZhOWQ4OC93d3cu/YXVzdGluY2hyb25p/Y2xlLmNvbS8",
+          "domain": "https://www.austinchronicle.com/",
+          "cited": true
+        },
+        {
+          "url": "https://www.austinchronicle.com/",
+          "title": "Home - The Austin Chronicle",
+          "description": "Current Issue October 10 • 2025 Vol. 45 • No. 6 Special Issues Best of Austin Austin Music Awards SXSW The 420 Issue The Burger Issue The Drinks Issue Newsletters Photo Galleries SUPPORT FREE PRESS.SUPPORT THE AUSTIN CHRONICLE. For over 40 years, The Austin Chronicle has been the progressive voice of Austin.",
+          "icon": "https://imgs.search.brave.com/IIGvOiGOT-2BIUALAC8jt1l2gfEyH5C1RNDmZTaKBM8/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDQ5NWE3OTli/MzYxZmI5MTBmMTA4/MzNlOTI1NTY3M2Nm/ZTYyMWYyYWI5OTEz/MTJlYzAwNWJjNjg3/ZTZhOWQ4OC93d3cu/YXVzdGluY2hyb25p/Y2xlLmNvbS8",
+          "domain": "https://www.austinchronicle.com/",
+          "cited": true
+        },
+      ],
+      "xposts": [
+        {
+          "post_url": "https://x.com/EugeneAustin/status/1976621075090878962",
+          "username": "EugeneAustin",
+          "name": "Eugene Sepulveda",
+          "text": "👏🏽👏🏽👏🏽 Nobel Peace Prize 2025 live updates: Venezuelan opposition leader María Corina Machado wins  [She is standing up for the people of her country as opposed to Donald Trump who’s deploying troops against his own] https://t.co/tVQ2jxH41J",
+          "create_time": "2025-10-10T12:09:22Z",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/1908632830118068224/xO8hj6PK_normal.jpg",
+          "post_id": "1976621075090878962",
+          "view_count": 25
+        },
+        {
+          "post_url": "https://x.com/TheSteelersWire/status/1976608836657029234",
+          "username": "TheSteelersWire",
+          "name": "Steelers Wire",
+          "text": "Steelers injury update: Will Calvin Austin III play vs the Browns? https://t.co/1eGS7g2xYz https://t.co/17krn8un1N",
+          "create_time": "2025-10-10T11:20:44Z",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/1607062294046941191/UBv9QEQW_normal.jpg",
+          "post_id": "1976608836657029234",
+          "view_count": 462
+        },
+      ],
+      "model": "grok-4-auto"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Ejemplos completos de respuesta:**
+- [Google AI Mode](https://olostep-storage.s3.us-east-1.amazonaws.com/json_wcez50jwt6_2.json)
+- [ChatGPT](https://olostep-storage.s3.us-east-1.amazonaws.com/json_9q5mzct5fe_2.json)
+- [Perplexity](https://olostep-storage.s3.us-east-1.amazonaws.com/json_4930ezsqmw_2.json)
+- [Google AI Overview](https://olostep-storage.s3.us-east-1.amazonaws.com/json_tshp1kuuyn_2.json)
+- [Gemini](https://olostep-storage.s3.us-east-1.amazonaws.com/json_y2tqdrfaro_2.json)
+- [Microsoft Copilot](https://olostep-storage.s3.us-east-1.amazonaws.com/json_hyjx3dykha_1.json)
+- [Grok](https://olostep-storage.s3.us-east-1.amazonaws.com/json_qh73hpdhyv_1.json)
+
+## Matriz de Precios y Geolocalización
+
+La siguiente tabla describe el soporte para búsqueda específica por país y los créditos consumidos por cada analizador.
+
+| Característica       | Google AI Mode | ChatGPT | Perplexity | Google AI Overview | Gemini | Microsoft Copilot | Grok |
+| ------------------- | :------------: | :-----: | :--------: | :----------------: | :----: | :---------------: | :--: |
+| **País Soportado** |       ✅       |    ✅     |     ✅     |         ✅         |   ✅   |        ✅         |  ✅  |
+| **Límite de Tamaño de Lote** |       2500      |    2500     |     2500     |         2500         |   2500   |        1000         |  1000  
+| **Créditos**         |       3        |    5    |     3      |         3          |   3    |         3         |  3   |
+
+### Verificación de Países Soportados
+
+Usa el siguiente endpoint para recuperar la lista de países soportados para cada analizador:
+
+```
+GET https://api.olostep.com/v1/countries?service=batches&parser={parser_id}
+```
+
+**Ejemplo de Solicitud:**
+
+```bash
+curl "https://api.olostep.com/v1/countries?service=batches&parser=@olostep/perplexity-results"
+```
+
+¿Falta algo? Comunícate con `info@olostep.com` para soporte o asistencia en implementaciones personalizadas.

@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Such-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "Suche abrufen",
+        "description": "Eine zuvor abgeschlossene Suche anhand ihrer ID abrufen.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für die abzurufende Suche.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit dem Suchobjekt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "404": {
+            "description": "Suche nicht gefunden"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "Suche erstellen",
+        "description": "Durchsuche das Web mit einer natürlichen Sprachabfrage und erhalte eine deduplizierte Liste relevanter Links mit Titeln und Beschreibungen.  Es wird die Abfrage semantisch im Web durchsuchen und Ergebnisse zurückgeben.  Siehe [Suchfunktion](/searches/searches).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Die Suchabfrage in natürlicher Sprache."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Suchergebnissen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "Stringified JSON des vollständigen Suchergebnisses."
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "URL zur gehosteten JSON-Datei auf S3.",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Deduplizierte Liste relevanter Links, die über mehrere Suchen gefunden wurden.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "Die URL des Ergebnisses."
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Der Titel der Ergebnisseite."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Ein kurzer Ausschnitt oder eine Beschreibung des Ergebnisses."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage (Fehlende Abfrage)"
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,213 @@
+---
+title: "元数据"
+sidebarTitle: "元数据"
+description: "为API资源附加自定义键值对"
+icon: "tag"
+---
+
+<Info>
+**目前适用于[Batches](/api-reference/batches/create)。** 对于scrapes、crawls、maps和answers的支持即将推出。
+</Info>
+
+元数据允许你为Olostep资源附加自定义键值对。这对于跟踪、过滤、组织和在API请求中存储上下文非常有用。
+
+元数据遵循[Stripe的方法](https://stripe.com/docs/api/metadata)——简单、灵活，并且在所有端点上一致。
+
+---
+
+## 使用场景
+
+<CardGroup cols={2}>
+  <Card title="跟踪与组织" icon="folder">
+    使用订单ID、客户ID或项目名称将资源链接到内部系统。
+  </Card>
+  <Card title="过滤与搜索" icon="magnifying-glass">
+    标记资源以便在应用程序中轻松检索和过滤。
+  </Card>
+  <Card title="工作流上下文" icon="diagram-project">
+    存储管道阶段、优先级或处理指令。
+  </Card>
+  <Card title="审计追踪" icon="clock-rotate-left">
+    记录谁发起了请求、时间戳或版本信息。
+  </Card>
+</CardGroup>
+
+---
+
+## 在创建时添加元数据
+
+在创建资源时包含`metadata`参数：
+
+<CodeGroup>
+
+```json Request Body
+{
+  "url": "https://example.com",
+  "metadata": {
+    "order_id": "12345",
+    "customer_name": "John Doe",
+    "priority": "high",
+    "internal_ref": "proj-2024-001"
+  }
+}
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <your_token>"},
+    json={
+        "items": [{"custom_id": "1", "url": "https://example.com"}],
+        "metadata": {
+            "project": "q4-analysis",
+            "team": "data-ops",
+            "priority": "high"
+        }
+    }
+)
+```
+
+```javascript Node.js
+const response = await fetch("https://api.olostep.com/v1/batches", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <your_token>",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    items: [{ custom_id: "1", url: "https://example.com" }],
+    metadata: {
+      project: "q4-analysis",
+      team: "data-ops",
+      priority: "high"
+    }
+  })
+});
+```
+
+</CodeGroup>
+
+元数据将在该资源的所有后续GET响应中返回。
+
+---
+
+## 验证规则
+
+| 约束 | 限制 | 错误示例 |
+|------|------|----------|
+| 最大键数 | 50 | `"元数据最多可以有50个键。你提供了51个键。"` |
+| 键长度 | 40个字符 | `"元数据键 \"my_very_long_key_name...\" 超过了40个字符的限制。"` |
+| 键格式 | 无方括号 | `"元数据键 \"items[0]\" 不能包含方括号（[ 或 ]）。"` |
+| 值长度 | 500个字符 | `"键 \"description\" 的元数据值超过了500个字符的限制。"` |
+| 值类型 | 仅限字符串 | `"键 \"count\" 的元数据值必须是字符串。得到的是对象。"` |
+
+<Note>
+**类型转换**：数字和布尔值会自动转换为字符串。
+- `42` → `"42"`
+- `true` → `"true"`
+- `3.14` → `"3.14"`
+
+对象和数组会被拒绝。
+</Note>
+
+---
+
+## 更新元数据（PATCH）
+
+<Info>
+**目前适用于：** 仅限[Batches](/api-reference/batches/update)。
+
+Crawls、Scrapes、Maps和Answers尚不支持在创建后更新元数据。
+</Info>
+
+你可以使用[PATCH端点](/api-reference/batches/update)更新现有批次的元数据。更新使用合并行为。
+
+### 更新操作
+
+<AccordionGroup>
+
+<Accordion title="添加新键" icon="plus">
+在保留现有键的同时添加新键。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"new_key": "new_value"}}'
+```
+
+**之前：** `{"project": "alpha"}`  
+**之后：** `{"project": "alpha", "new_key": "new_value"}`
+</Accordion>
+
+<Accordion title="更新现有键" icon="pen">
+用新值覆盖现有键。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "beta"}}'
+```
+
+**之前：** `{"project": "alpha", "priority": "high"}`  
+**之后：** `{"project": "beta", "priority": "high"}`
+</Accordion>
+
+<Accordion title="删除特定键" icon="trash">
+将键设置为`null`或`""`（空字符串）以删除它。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"priority": null}}'
+```
+
+**之前：** `{"project": "alpha", "priority": "high"}`  
+**之后：** `{"project": "alpha"}`
+</Accordion>
+
+<Accordion title="清除所有元数据" icon="eraser">
+将整个元数据字段设置为`null`或`""`以删除所有键。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": null}'
+```
+
+**之前：** `{"project": "alpha", "priority": "high"}`  
+**之后：** `{}`
+</Accordion>
+
+<Accordion title="混合操作" icon="shuffle">
+在一个请求中添加、更新和删除键。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "gamma", "new_field": "value", "old_field": null}}'
+```
+
+**之前：** `{"project": "alpha", "old_field": "remove_me"}`  
+**之后：** `{"project": "gamma", "new_field": "value"}`
+</Accordion>
+
+</AccordionGroup>
+
+### PATCH行为总结
+
+| 操作 | 请求 | 结果 |
+|------|------|------|
+| 添加键 | `{"metadata": {"new": "value"}}` | 键已添加，其他保留 |
+| 更新键 | `{"metadata": {"existing": "new_value"}}` | 键已更新，其他保留 |
+| 删除键 | `{"metadata": {"key": null}}` | 键已删除，其他保留 |
+| 删除键 | `{"metadata": {"key": ""}}` | 键已删除，其他保留 |
+| 清除所有 | `{"metadata": null}` | 所有键已删除 |
+| 清除所有 | `{"metadata": ""}` | 所有键已删除 |
+| 无操作 | `{"metadata": {}}` | 无变化 |

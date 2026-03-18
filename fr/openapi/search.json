@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Recherche",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "Obtenir Recherche",
+        "description": "Récupérer une recherche précédemment complétée par son ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour la recherche à récupérer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec l'objet de recherche.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clé API Invalide"
+          },
+          "404": {
+            "description": "Recherche Non Trouvée"
+          },
+          "500": {
+            "description": "Erreur Interne du Serveur"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "Créer Recherche",
+        "description": "Recherche le web avec une requête en langage naturel et renvoie une liste dédupliquée de liens pertinents avec des titres et des descriptions.  Il recherchera la requête de manière sémantique sur le web et retournera les résultats.  Voir [Fonctionnalité de Recherche](/searches/searches).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "La requête de recherche en langage naturel."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec les résultats de recherche.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "JSON sous forme de chaîne de caractères du résultat complet de la recherche."
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "URL vers le fichier JSON hébergé sur S3.",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Liste dédupliquée de liens pertinents trouvés à travers plusieurs recherches.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "L'URL du résultat."
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Le titre de la page de résultat."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Un court extrait ou une description du résultat."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise Requête (Requête manquante)"
+          },
+          "401": {
+            "description": "Clé API Invalide"
+          },
+          "500": {
+            "description": "Erreur Interne du Serveur"
+          }
+        }
+      }
+    }
+  }
+}

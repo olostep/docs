@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Zoek-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "Haal Zoekopdracht",
+        "description": "Haal een eerder voltooide zoekopdracht op met zijn ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor de zoekopdracht die moet worden opgehaald.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met het zoekobject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ongeldige API Sleutel"
+          },
+          "404": {
+            "description": "Zoekopdracht Niet Gevonden"
+          },
+          "500": {
+            "description": "Interne Serverfout"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "Maak Zoekopdracht",
+        "description": "Doorzoek het web met een natuurlijke taalquery en krijg een gededupliceerde lijst van relevante links met titels en beschrijvingen terug.  Het zal de query semantisch over het web doorzoeken en resultaten teruggeven.  Zie [Zoekfunctie](/searches/searches).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "De zoekquery in natuurlijke taal."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met zoekresultaten.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "Ge-stringified JSON van het volledige zoekresultaat."
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "URL naar het gehoste JSON-bestand op S3.",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Gededupliceerde lijst van relevante links gevonden over meerdere zoekopdrachten.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "De URL van het resultaat."
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "De titel van de resultaatpagina."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Een kort fragment of beschrijving van het resultaat."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foutieve Aanvraag (Ontbrekende query)"
+          },
+          "401": {
+            "description": "Ongeldige API Sleutel"
+          },
+          "500": {
+            "description": "Interne Serverfout"
+          }
+        }
+      }
+    }
+  }
+}

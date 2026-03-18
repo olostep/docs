@@ -1,0 +1,747 @@
+---
+title: "生成エンジン最適化"
+icon: "bolt-lightning"
+---
+
+Olostepは、生成エンジン最適化（GEO）分野で活動する企業向けに、すぐに使えるソリューションを提供しています。
+
+<img 
+  src="/images/geo/geo-preview.png" 
+  alt="GEOプレビュー"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+## 概要
+
+OlostepのAPIは、GEO/SEOプラットフォームを強化するためのウェブスクレイピング、検索、クロール機能を提供します。
+
+これには、大規模な[クロール](/features/crawls/crawls)、ウェブサイトの[マッピング](/features/maps/maps)（ウェブサイトからすべてのURLを特定する）、データのスクレイピングと解析（Google AIOs、AIモード、Perplexity、ChatGPT、Microsoft Copilot、G2、Reddit、ビジネスウェブサイトなどのソースから）をスケジュールに従って実行することなどが含まれます。
+
+このAPIは、この分野のいくつかのVC支援スタートアップによって使用されています。
+
+## なぜGEOにOlostepを使うのか？
+
+- **スケーラビリティ:** 100k URLのバッチを並行して実行することで、数百万のURLを処理できます。
+- **コスト効率:** 市場で最もコスト効率の高いAPIです。社内ソリューションよりも40%安価です（専用のエンジニアリングリソースを考慮しなくても）。
+- **信頼性/トリガーレート:** エンドポイントは信頼性が高く、最高クラスのデータ品質を提供します。
+- **複数のフォーマット:** 解析されたデータを直接JSON、html、またはmarkdown形式で取得できます。
+- **カスタムパーサー:** パーサーを使用して関連するJSON情報のみを抽出するか、独自のものを作成してAPIに渡すことができます。
+- **自動化:** 事前に定義された時間/定期的な間隔で実行されるスケジュールタスクを設定できます。
+- **優れたDX:** PythonとNodeJSのSDK、オブジェクト指向API、Webhookサポートなどを提供しています。
+- **専用サポート:** Slackを通じて専用サポートを提供し、APIを最大限に活用できるようサポートします。
+- **ノウハウ:** Olostepは、VC支援のSEO & GEO企業の重要な部分を支えています。
+
+## LLM検索エンジンソース
+
+サポートされているソースとそのデータフォーマット、地理的ロケーションの可用性のより包括的なリストを以下に示します。ここに記載されていないソースや国が必要な場合は、[info@olostep.com](mailto:info@olostep.com)または[Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email)までご連絡ください。リストに追加します。
+
+異なるデータ解析を希望する場合、これらのパーサーのそれぞれを自分のダッシュボードにデプロイし、解析をニーズに合わせてカスタマイズすることも、チームに依頼することもできます。ChatGPTを含むほとんどのパーサーでは、ネットワーク応答を直接解析して`search_groups`のような内部詳細を特定することも可能です。
+
+### Google AI概要
+
+<img 
+  src="/images/geo/ai-overview.png" 
+  alt="AI概要プレビュー"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 480, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+#### 例の応答
+
+Google AI概要から抽出できるデータの例を以下に示します:
+```json
+{
+  "prompt": "what is mitochondria",
+  "answer_markdown": "ミトコンドリアは真核細胞内の重要な細胞小器官であり、しばしば「細胞の発電所」と呼ばれます。食物と酸素を利用可能なエネルギー（ATP）に変換し、成長や運動などのほとんどの細胞活動を促進します。これらの二重膜構造は独自のDNAを持ち、細胞シグナル伝達、代謝、さらにはプログラムされた細胞死にも関与し、生命にとって重要です。一部の細胞には数百または数千のミトコンドリアがあります。\n\n主な機能:\nエネルギー生産: 細胞のエネルギー（ATP）の90%以上を生成します。\n細胞呼吸: 酸素と栄養素を利用して有酸素呼吸を行います。\n細胞シグナル伝達: 他の細胞に影響を与えるシグナル分子を生成します。\n代謝: 脂肪や炭水化物の分解に関与します。\nアポトーシス: 損傷した細胞を除去するプロセスを開始します。\n\n構造:\n二重膜: 外膜と反応のための表面積を増やす折りたたまれた内膜（クリステ）があります。\nマトリックス: クレブス回路が行われ、ミトコンドリアDNA（mtDNA）が収容されている内側の区画です。\nミトコンドリアDNA（mtDNA）: 母親から受け継がれる独自のDNAで、核DNAとは別です。\n\n重要性:\n生存に不可欠であり、一部の細胞（筋肉細胞など）には多くのミトコンドリアがありますが、一部の細胞（成熟した赤血球など）にはありません。\n機能不全は多くの病気に関連しており、新しい治療法のターゲットとなっています。",
+  "sources": [
+    {
+      "title": "Mitochondria and health | National Institutes of Health (NIH)",
+      "url": "https://www.nih.gov/news-events/nih-research-matters/mitochondria-health",
+      "snippet": null,
+      "source": "National Institutes of Health (.gov)",
+      "index": 1
+    },
+    {
+      "title": "What are Mitochondria and Why They Matter - MitoCanada",
+      "url": "https://mitocanada.org/what-are-mitochondria/",
+      "snippet": null,
+      "source": "MitoCanada",
+      "index": 2
+    },
+    {
+      "title": "Definition of mitochondria - NCI Dictionary of Cancer Terms",
+      "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/mitochondria",
+      "snippet": null,
+      "source": "National Cancer Institute (.gov)",
+      "index": 3
+    },
+    {
+      "title": "All about mitochondria: Definition and disease",
+      "url": "https://www.genomicseducation.hee.nhs.uk/blog/all-about-mitochondria-definition-and-disease/",
+      "snippet": null,
+      "source": "Genomics Education Programme",
+      "index": 4
+    },
+    {
+      "title": "Mitochondrion - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "snippet": null,
+      "source": "Wikipedia",
+      "index": 5
+    },
+    {
+      "title": "Mitochondria - The Cell - NCBI Bookshelf",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK9896/",
+      "snippet": null,
+      "source": "National Institutes of Health (.gov)",
+      "index": 6
+    },
+    {
+      "title": "Mitochondria Structure and Function",
+      "url": "https://www.youtube.com/watch?v=4F9dDAD3_ZI&t=522",
+      "snippet": null,
+      "source": "YouTube",
+      "index": 7
+    },
+    {
+      "title": "what they are, what they do and how to keep them healthy",
+      "url": "https://corconinternational.com/mitochondria-what-they-are-what-they-do-and-how-to-keep-them-healthy/",
+      "snippet": null,
+      "source": "Cor.Con. International",
+      "index": 8
+    },
+    {
+      "title": "What is mitochondria, and why is it called the powerhouse of a ...",
+      "url": "https://www.quora.com/What-is-mitochondria-and-why-is-it-called-the-powerhouse-of-a-cell",
+      "snippet": null,
+      "source": "Quora",
+      "index": 9
+    },
+    {
+      "title": "Mitochondria - Physiopedia",
+      "url": "https://www.physio-pedia.com/Mitochondria",
+      "snippet": null,
+      "source": "Physiopedia",
+      "index": 10
+    }
+  ],
+  "text_blocks": [
+    {
+      "snippet": "ミトコンドリアは真核細胞内の重要な細胞小器官であり、しばしば「細胞の発電所」と呼ばれます。食物と酸素を利用可能なエネルギー（ATP）に変換し、成長や運動などのほとんどの細胞活動を促進します。これらの二重膜構造は独自のDNAを持ち、細胞シグナル伝達、代謝、さらにはプログラムされた細胞死にも関与し、生命にとって重要です。一部の細胞には数百または数千のミトコンドリアがあります。\n\n主な機能:\nエネルギー生産: 細胞のエネルギー（ATP）の90%以上を生成します。\n細胞呼吸: 酸素と栄養素を利用して有酸素呼吸を行います。\n細胞シグナル伝達: 他の細胞に影響を与えるシグナル分子を生成します。\n代謝: 脂肪や炭水化物の分解に関与します。\nアポトーシス: 損傷した細胞を除去するプロセスを開始します。\n\n構造:\n二重膜: 外膜と反応のための表面積を増やす折りたたまれた内膜（クリステ）があります。\nマトリックス: クレブス回路が行われ、ミトコンドリアDNA（mtDNA）が収容されている内側の区画です。\nミトコンドリアDNA（mtDNA）: 母親から受け継がれる独自のDNAで、核DNAとは別です。\n\n重要性:\n生存に不可欠であり、一部の細胞（筋肉細胞など）には多くのミトコンドリアがありますが、一部の細胞（成熟した赤血球など）にはありません。\n機能不全は多くの病気に関連しており、新しい治療法のターゲットとなっています。"
+    }
+  ],
+  "organic_results": [
+    {
+      "position": 1,
+      "title": "Mitochondria",
+      "link": "https://www.genome.gov/genetics-glossary/Mitochondria",
+      "snippet": "ミトコンドリアは膜で囲まれた細胞小器官（単数形：ミトコンドリオン）であり、細胞の生化学的反応に必要な化学エネルギーの大部分を生成します。"
+    },
+    {
+      "position": 2,
+      "title": "Mitochondrion",
+      "link": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "snippet": "ミトコンドリオン（複数形：ミトコンドリア）は、動物、植物、菌類などのほとんどの真核生物の細胞に見られる細胞小器官です。ミトコンドリアは二重膜を持ちます。"
+    },
+    {
+      "position": 3,
+      "title": "Mitochondrion | Definition, Function, Structure, & Facts",
+      "link": "https://www.britannica.com/science/mitochondrion",
+      "snippet": "2025年11月19日 — 「細胞の発電所」として知られるミトコンドリアは、細胞の生存と機能に必要なエネルギーを生成します。"
+    },
+    {
+      "position": 4,
+      "title": "Mitochondria: what are they and why do we have them?",
+      "link": "https://qbi.uq.edu.au/brain/brain-anatomy/mitochondria-what-are-they-and-why-do-we-have-them",
+      "snippet": "ミトコンドリアの主な役割は、私たちが食べるカロリーを呼吸する酸素と燃焼して、すべての細胞活動を駆動するエネルギーを生成することです。"
+    },
+    {
+      "position": 5,
+      "title": "what they are, what they do and how to keep them healthy",
+      "link": "https://corconinternational.com/mitochondria-what-they-are-what-they-do-and-how-to-keep-them-healthy/",
+      "snippet": "ミトコンドリアは真核細胞内に見られる細胞小器官です。二重膜で特徴付けられるその構造は、最も重要な機能の1つを果たすように設計されています。"
+    },
+    {
+      "position": 6,
+      "title": "What are Mitochondria | MRC Mitochondrial Biology Unit",
+      "link": "https://www.mrc-mbu.cam.ac.uk/what-are-mitochondria",
+      "snippet": "ミトコンドリアは、細胞内で特別なコンパートメント（細胞小器官）であり、食物分子を分解してエネルギーを生成することで知られています。"
+    },
+    {
+      "position": 7,
+      "title": "Mitochondria and health",
+      "link": "https://www.nih.gov/news-events/nih-research-matters/mitochondria-health",
+      "snippet": "2025年7月22日 — 細胞のミトコンドリアは、体が生存するために必要なほとんどすべてのエネルギーを生成します。また、多くの重要な細胞機能にも関与しています。"
+    },
+    {
+      "position": 8,
+      "title": "What is mitochondria, and why is it called the powerhouse ...",
+      "link": "https://www.quora.com/What-is-mitochondria-and-why-is-it-called-the-powerhouse-of-a-cell",
+      "snippet": "ミトコンドリアはすべての真核細胞の細胞質に存在する膜で囲まれた細胞小器官であり、アデノシン三リン酸（ATP）を生成します。"
+    }
+  ],
+  "url": "https://www.google.com/search?q=what%20is%20mitochondria"
+}
+```
+
+#### 対応国
+
+- アメリカ
+- イギリス
+- カナダ
+- オーストラリア
+- ニュージーランド
+- アイルランド
+- インド
+- イタリア
+- フランス
+- ドイツ
+- スペイン
+- オランダ
+- ベルギー
+- スイス
+- オーストリア
+- スウェーデン
+- ノルウェー
+- デンマーク
+
+### Google AIモード
+
+<img 
+  src="/images/geo/ai-mode.png" 
+  alt="AI概要プレビュー"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 480, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+#### 例の応答
+
+```json
+{
+  "url": "https://www.google.com//search?q=what+is+mitochondria&hl=en&udm=50&aep=11&newwindow=1&sei=hzA8acTQB5v6kPIPq9S3-Ac&mstk=AUtExfCLP2fvgaMf1soQAnxZquvJa4U4ZeY2UOzcjdV8a1DHUR1sTlm5jnoP_7c_xODSuiok8ipNW5OqJed6mnSgcszpiNCnQ9BBYzxXSF83FoBZep8Ytk1JkOU2QbC7vTfZ6-TR7ZCgXMtO8B-pggVV9_98cl-LC5ZMizo&csuir=1",
+  "prompt": "what is mitochondria",
+  "answer_markdown": "ミトコンドリア（単数形：ミトコンドリオン）は、ほとんどすべての真核細胞内に見られる膜で囲まれた**細胞小器官**です。細胞の生化学反応を駆動するために必要な化学エネルギーの大部分を生成するため、**「細胞の発電所」**として広く知られています。\n\n主な機能: エネルギー生産\n\nミトコンドリアの主な機能は、細胞の主要なエネルギー担体であるアデノシン三リン酸（ATP）を生成することです。このプロセスは細胞呼吸または酸化的リン酸化と呼ばれ、酸素を使用して栄養素（グルコースや脂肪酸など）を分解し、大量のエネルギーを放出します。\n\n高エネルギーを必要とする細胞、例えば筋肉、肝臓、脳、腎臓の細胞には、代謝要求を満たすために数百または数千のミトコンドリアが含まれています。\n\nその他の重要な機能\n\nエネルギー生産を超えて、ミトコンドリアは他のいくつかの重要な細胞プロセスに関与しています:\n\n* **細胞シグナル伝達** さまざまなシグナル伝達経路に参加し、他の細胞小器官とコミュニケーションをとって細胞活動を調整します。\n* **プログラムされた細胞死（アポトーシス）** ミトコンドリアは、損傷したまたは感染した細胞を体から除去するために必要なアポトーシスを開始する中心的な役割を果たします。\n* **カルシウムの貯蔵と調節** 筋肉の収縮や神経伝達物質の放出などのプロセスに不可欠なカルシウムイオンの貯蔵場所およびバッファーとして機能します。\n* **重要な分子の合成** ステロイドホルモン、血液の一部（ヘムなど）、および一部の神経伝達物質の合成に寄与します。\n\nユニークな特徴\n\nミトコンドリアは、他の細胞小器官とは異なるいくつかのユニークな特徴を持っています:\n\n* **二重膜** 外膜と非常に折りたたまれた内膜（クリステ）で囲まれています。内膜の折り目は、エネルギー生産の化学反応に利用可能な表面積を増やします。\n* **独自のDNA** ミトコンドリアは、細胞の核DNAとは別に、小さく円形のDNAゲノム（mtDNA）を含んでいます。このmtDNAはほとんど母親からのみ受け継がれます。\n* **細菌起源** 独自のDNAの存在と他の構造的類似性は、ミトコンドリアがかつて自由生活していた細菌であり、10億年以上前により大きな宿主細胞によって取り込まれ、相互に利益をもたらす関係を形成したという共生説を強く支持しています。\n\n機能不全のミトコンドリアは、パーキンソン病、心臓病、糖尿病、癌などのさまざまな健康問題につながる可能性があります。\n\nAIは誤りを犯す可能性があるため、応答を二重に確認してください。\n\nパブリックリンクを作成中...\n\nこのスレッドを他の人と共有できます。\n\nありがとうございます\n\nあなたのフィードバックはGoogleの改善に役立ちます。 [プライバシーポリシー](https://policies.google.com/privacy?hl=en)をご覧ください。\n\nフィードバックをもっと共有する 問題を報告する 閉じる\n\nミトコンドリア機能不全が特定の病気にどのように関連しているのか？\n\nミトコンドリアマトリックスでどのような反応が起こるのか？\n\nミトコンドリアの共生説についてもっと説明してください。",
+  "sources": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "title": "Wikipedia",
+      "description": "Mitochondrion - Wikipedia",
+      "icon": null,
+      "domain": "https://en.wikipedia.org",
+      "cited": true
+    },
+    {
+      "url": "https://byjus.com/biology/mitochondria/",
+      "title": "BYJU'S",
+      "description": "Mitochondria Definition - BYJU'S",
+      "icon": null,
+      "domain": "https://byjus.com",
+      "cited": true
+    },
+    {
+      "url": "https://medschool.ucla.edu/research/themed-areas/metabolism-research/mitochondria",
+      "title": "UCLA Medical School",
+      "description": "What Does The Mitochondria Do? - UCLA Medical School",
+      "icon": null,
+      "domain": "https://medschool.ucla.edu",
+      "cited": true
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "title": "Wikipedia",
+      "description": "Mitochondrion - Wikipedia",
+      "icon": null,
+      "domain": "https://en.wikipedia.org",
+      "cited": true
+    },
+    {
+      "url": "https://byjus.com/biology/mitochondria/",
+      "title": "BYJU'S",
+      "description": "Mitochondria Definition - BYJU'S",
+      "icon": null,
+      "domain": "https://byjus.com",
+      "cited": true
+    },
+    {
+      "url": "https://my.clevelandclinic.org/health/diseases/15612-mitochondrial-diseases",
+      "title": "Cleveland Clinic",
+      "description": "Mitochondrial Diseases: Causes, Symptoms & Treatment",
+      "icon": null,
+      "domain": "https://my.clevelandclinic.org",
+      "cited": true
+    },
+    {
+      "url": "https://bio.libretexts.org/Bookshelves/Introductory_and_General_Biology/General_Biology_(Boundless)/04%3A_Cell_Structure/4.09%3A_Eukaryotic_Cells_-_Mitochondria",
+      "title": "Biology LibreTexts",
+      "description": "4.9: Eukaryotic Cells - Mitochondria - Biology LibreTexts",
+      "icon": null,
+      "domain": "https://bio.libretexts.org",
+      "cited": true
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3513836/",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Cellular and molecular mechanisms of mitochondrial function - PMC",
+      "icon": null,
+      "domain": "https://pmc.ncbi.nlm.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.medicalnewstoday.com/articles/320875",
+      "title": "Medical News Today",
+      "description": "Mitochondria: Form, function, and disease - Medical News Today",
+      "icon": null,
+      "domain": "https://www.medicalnewstoday.com",
+      "cited": true
+    },
+    {
+      "url": "https://www.nature.com/scitable/topicpage/mitochondria-14053590/",
+      "title": "Nature",
+      "description": "Mitochondria, Cell Energy, ATP Synthase | Learn Science at Scitable",
+      "icon": null,
+      "domain": "https://www.nature.com",
+      "cited": true
+    },
+    {
+      "url": "https://www.britannica.com/science/mitochondrion",
+      "title": "Britannica",
+      "description": "Mitochondrion | Definition, Function, Structure, & Facts - Britannica",
+      "icon": null,
+      "domain": "https://www.britannica.com",
+      "cited": true
+    },
+    {
+      "url": "https://medschool.ucla.edu/research/themed-areas/metabolism-research/mitochondria",
+      "title": "UCLA Medical School",
+      "description": "What Does The Mitochondria Do? - UCLA Medical School",
+      "icon": null,
+      "domain": "https://medschool.ucla.edu",
+      "cited": true
+    },
+    {
+      "url": "https://www.genome.gov/genetics-glossary/Mitochondria",
+      "title": "National Human Genome Research Institute (NHGRI) (.gov)",
+      "description": "Mitochondria - National Human Genome Research Institute",
+      "icon": null,
+      "domain": "https://www.genome.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.khanacademy.org/science/ap-biology/cell-structure-and-function/cell-compartmentalization-and-its-origins/a/chloroplasts-and-mitochondria",
+      "title": "Khan Academy",
+      "description": "Mitochondria and chloroplasts (article) - Khan Academy",
+      "icon": null,
+      "domain": "https://www.khanacademy.org",
+      "cited": true
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK9896/",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Mitochondria - The Cell - NCBI Bookshelf - NIH",
+      "icon": null,
+      "domain": "https://www.ncbi.nlm.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.chop.edu/mitochondria-facts",
+      "title": "Children's Hospital of Philadelphia",
+      "description": "Facts about Mitochondria - Children's Hospital of Philadelphia",
+      "icon": null,
+      "domain": "https://www.chop.edu",
+      "cited": true
+    },
+    {
+      "url": "https://www.nih.gov/news-events/nih-research-matters/mitochondria-health",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Mitochondria and health | National Institutes of Health (NIH)",
+      "icon": null,
+      "domain": "https://www.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.news-medical.net/life-sciences/What-are-Mitochondria.aspx",
+      "title": "News-Medical",
+      "description": "What are Mitochondria? - News-Medical.Net",
+      "icon": null,
+      "domain": "https://www.news-medical.net",
+      "cited": true
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10167337/",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Mitochondria: It is all about energy - PMC - PubMed Central",
+      "icon": null,
+      "domain": "https://pmc.ncbi.nlm.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.vedantu.com/question-answer/are-mitochondria-called-the-powerhouse-of-the-class-11-biology-cbse-608a2e28d658fd6b4d2593cf",
+      "title": "Vedantu",
+      "description": "Why are mitochondria called the powerhouse of the cell? - Vedantu",
+      "icon": null,
+      "domain": "https://www.vedantu.com",
+      "cited": true
+    },
+    {
+      "url": "https://qbi.uq.edu.au/brain/brain-anatomy/mitochondria-what-are-they-and-why-do-we-have-them",
+      "title": "Queensland Brain Institute",
+      "description": "Mitochondria: what are they and why do we have them?",
+      "icon": null,
+      "domain": "https://qbi.uq.edu.au",
+      "cited": true
+    },
+    {
+      "url": "https://www.pfizer.com/news/articles/why_mitochondria_is_the_organelle_of_the_moment",
+      "title": "Pfizer",
+      "description": "Why Mitochondria Is The Organelle Of The Moment - Pfizer",
+      "icon": null,
+      "domain": "https://www.pfizer.com",
+      "cited": true
+    }
+  ]
+}
+```
+#### 対応国
+
+- アメリカ
+- イギリス
+- カナダ
+- オーストラリア
+- ニュージーランド
+- アイルランド
+- インド
+- イタリア
+- フランス
+- ドイツ
+- スペイン
+- オランダ
+- ベルギー
+- スイス
+- オーストリア
+- スウェーデン
+- ノルウェー
+- デンマーク
+
+
+### ChatGPT
+
+<img 
+  src="/images/geo/chatgpt.png" 
+  alt="ChatGPTプレビュー"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 500, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+#### 例の応答
+
+```json
+{
+  "url": "https://chatgpt.com/?q=best%20leather%20shoes%20for%20men",
+  "prompt": "best leather shoes for men",
+  "answer_markdown": "ここでは、スタイルの幅広い範囲にわたる**男性用のベストレザーシューズ**を紹介します。ドレスシューズやカジュアルクラシックから多用途のスニーカーまで。カテゴリごとにグループ化しているので、ニーズに合った完璧なペアを簡単に見つけられます👇\n\n![Allen Edmonds Park Avenue Cap Toe Oxford](https://images.openai.com/static-rsc-1/14XMTUPwjjZJjmC68MzLfCcHqGs_7bwkONzBhcG4MmKOK5Ti2jC-cRJrcE0yJyRS5jBBt8hm3dy_Zd7oHXmVDUxs92KclzIuhBcB8U9_cOc8OBsTQ0_E-G-CV_uuvSF1S9LqhiCxU7zm33RuQ60cU25ukgPrBwKgM7d1UDFdDM41O8n4d49Yklah25o9_SXCCH3JGlrQsw2ilkvBm2LWQ89L6fDqzGDNbscjCd-lEmP8XaLBXy7VMRb3A0wzbP7a) \n\nAllen Edmonds Park Avenue Cap Toe Oxford\n\n$379.98\n\n•\n\nAllen Edmonds\n\n![Amberjack Men's The Original](https://images.openai.com/static-rsc-1/0KrE1f1Gu9PLxbbjk4RZFcs9aAKqLZVhgPM70_uWHz1P2NleprLpSyoW4Ew0odsIu6yvbAUQZTh_FgMFLJyQ3vAgb-8aF8gr_N4eEP8FatrOTA90otAP-JxDIQxLd2rVYrkyNe_YLKvwoZAjFbrZ6goV2986izKJOEoTcVvqvlX7JmhRF3uHzRw2J7OtdlhZmCD2wp_BiiBFK6yhrlHdj0ArBT18hfa442ZoEPr3H2G6aWgudJqZDO0ghYQZh1dtEyYlbu4Hc_c0jqk8Am_IEA) \n\nAmberjack Men's The Original\n\n$156.00\n\n•\n\nAmberjack + others\n\n![Florsheim Men's Leather Cap Toe Oxford](https://images.openai.com/static-rsc-1/Y26RpwbB4MRr5wcvVgvRju6w5i8N9VPjRVCGuUUpyojoXwQA6MG9S7jXcFAVQ2atGeand34_v2b7woseK046PRVl9D7qptsBj4t16Q4goaTNlQ0JBfAHb7rSnwI6mVZuv2RLfhPI2l8xo8jIbzfIyA70AqcHwNwnRlifGdcpUItF8rKywlZY7MNWMOOvEw-l-vyh5UQc34dwHux09eyWJA) \n\nFlorsheim Men's Leather Cap Toe Oxford\n\n$134.99\n\n•\n\nMen's Wearhouse\n\n![Cole Haan Original Grand 2.0](https://images.openai.com/static-rsc-1/ugTwpcIGevr0OKoKxcmFcAJIFmpaQx18FfKUS8CK6HFiCuOVaGfltQEuYQZkyM9tIJai9H7VjVPvWkiK-ZziZy6ZbW7Dmi7QpRmR3l1Q5GzPsUPmkwuD1UlVmJEvB-1gbppHsW132JqSQpe1-LnjNCQgY8pHW9gpsDBqlkEuha53UqxzonI5GlU3fmdAomM2FDmBCCZzLsvwmq7du69OH-eoHkFvxm4uMcIhUEhzuidEdiPCM7QKhAN7dQ08iLQ5) \n\nCole Haan Original Grand 2.0\n\n$229.99\n\n•\n\nMen's Wearhouse + others\n\n![Nike Killshot 2 Leather](https://images.openai.com/static-rsc-1/f5idIh1FPUyES4ADdwPC7zDjrbGTcErq4gqZ9tLjrpdMiuhJqGzv8MfeBiq14QcAhT5Bct_195df1kZ9QHdknrGsCVMp6RDsizoxdx2xZfas1nh-Nwbj_BXUUExsxLI1-chrIMo7WA-o1ieOltij6eSi5U2kmOZCwle0rxjp9-dUVqTaLuw4GijrKP0vXXnavBC5tbY3MV2vC9h5ahataA) \n\nNike Killshot 2 Leather\n\n$100.00\n\n•\n\nNike + others\n\n![Reebok Classic Leather](https://images.openai.com/static-rsc-1/ttBGBcmS9RfUetDiscFxQ60VaZJSNPQKgcVEvPlYhMRK-YKy1UAjLKqj6R_R40mnbMD-MHgNNloq4jT6ajMkTX-KeGtEXZvUInf2Co9U42q1YJl_SzxmNDWjWRih1BmA79sdCvaLIJe1J8G0gRV3Uh4GFl8whWuWyN6IP4MNlyuMggs218MiXdRfRu6Mv0fc2Z7UzKJhAxoXRC2ALS5qWkr5XJAj2iJMD1IpFIilyOI) \n\nReebok Classic Leather\n\n$45.00\n\n•\n\nJD Sports + others\n\n![Clarks Un Briley Step](https://images.openai.com/static-rsc-1/vMgGbUlVej0Lpo05qmFzfP-bUFUV5ROywy86CaQdz_TbxLcNdlaRh0pi69f3sW9DToxYP-Yj0fYbF4n-aEOIz_FbcJK722hTZ-diKH9OJABsh-6UJ14KxJFkHvjxXK_Du1dLi-OOYCYj6svKYwcwySZ1mIUy7BC-71nxwlXOBShlYTKl1o9eHMtYIUFqXrXhvqrhG4ahjpXkydvbJ7v6Di5-Bz8kBZcpUXHs3eCcOcUc02wMslWhLf3jBw-IbCJxGsqgAb6AGY2iRM1zgfNggQ) \n\nClarks Un Briley Step\n\n$170.00\n\n•\n\nClarks Shoes + others\n\n![Thursday Boot Company Classic Cap Toe](https://images.openai.com/static-rsc-1/HMxvWc6R4ddGT9B4lwaS-_iqGaMcGZfCfqvz7jjpEsgPjhmOOd2cOSl1jOKegwTZ3-RQIzyZcY_ZMIO1AvqidOHYWfJYPfNBnaqamlIvNb6b5nMCepsFdQHb_oiC8rSBCeCp8pcyKroxTahKpTZRN8gz9SB-CQP944UJ4QfU_F_tK3XzkzRfm_avJCR-N3dmjr8flkEo3ueBQm2nTALPioUrJXHssC21MzONp57dOlf4dGBJMQ-xzp87VONWP94f) \n\nThursday Boot Company Classic Cap Toe\n\n$168.00\n\n•\n\nThursday Boot Company + others\n\n### 👔 クラシックドレス＆フォーマルレザーシューズ\n\n_オフィス、結婚式、フォーマルな場に最適。_ \n\n* **Allen Edmonds Park Avenue Cap Toe Oxford**  – プレミアムなアメリカ製オックスフォードで、タイムレスなスタイルと品質のクラフトマンシップを持ち、長持ちする投資ペアを求める方に最適です。\n* **Amberjack Men's The Original**  – 快適さと洗練されたドレスシューズの外観を絶妙に融合し、終日着用に広く愛されています。\n* **Florsheim Men's Leather Cap Toe Oxford**  – スリムなシルエットで、優れた価値のあるクラシックなフォーマルオプション。\n* **Cole Haan Original Grand 2.0**  – ドレスシューズと快適技術の融合 — スタイリッシュなブローグのディテールと柔軟でクッション性のある構造。\n\n### 👞 カジュアル＆エブリデイレザーシューズ\n\n_スマートカジュアルな装いと日常の着用に最適。_ \n\n* **Nike Killshot 2 Leather**  – ジーンズやチノパンと相性の良いレザースニーカー — タイムレスなレトロスタイリング。\n* **Reebok Classic Leather**  – カジュアルな装いに合う、アイコニックで快適なレザースニーカー。\n* **Clarks Un Briley Step**  – 歩行や日常使用に最適な快適なレザーカジュアルシューズ。\n\n### 🥾 多用途＆スマートカジュアル\n\n_オフィスから週末への移行が容易。_ \n\n* **Thursday Boot Company Classic Cap Toe**  – ドレッシーでありながら実用的な頑丈なレザーのレースアップ — ビジネスカジュアルなルックスに最適。\n\n---\n\n## 👞 レザーシューズ選びのクイックヒント\n\n**1\\. 必要なスタイルを知る** \n\n* **オックスフォード＆ダービーシューズ** \\= よりフォーマルでドレッシー。 [FashionBeans](https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com)\n* **レザースニーカー** \\= カジュアルで多用途。 [FashionBeans](https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com)\n* **ブーツ＆レースアップ** \\= デザインに応じてスマートとラグドのミックス。 [Men's](https://www.mensjournal.com/style/essential-mens-shoes?utm_source=chatgpt.com)\n\n**2\\. レザーの品質が重要**   \nフルグレインやカーフスキンレザーは通常、より耐久性があり、使用とともに美しくエイジングします。 [FashionBeans](https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com) \n\n**3\\. 快適技術はボーナス**   \n一部の現代のドレスシューズには、クッション性と柔軟なソールが含まれており、長時間立っている場合に理想的です。 [Yahoo](https://www.yahoo.com/lifestyle/best-mens-dress-shoes-203007687.html?utm_source=chatgpt.com) \n\n---\n\nもし**予算と求めるスタイル**（例：フォーマルオフィス、カジュアルウィークエンド、ラグド/アウトドア）を教えていただければ、さらにおすすめをカスタマイズできます！",
+  "inline_references": [
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "text": "FashionBeans",
+      "position": 1
+    },
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "text": "FashionBeans",
+      "position": 2
+    },
+    {
+      "url": "https://www.mensjournal.com/style/essential-mens-shoes?utm_source=chatgpt.com",
+      "text": "Men's Journal",
+      "position": 3
+    },
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "text": "FashionBeans",
+      "position": 4
+    },
+    {
+      "url": "https://www.yahoo.com/lifestyle/best-mens-dress-shoes-203007687.html?utm_source=chatgpt.com",
+      "text": "Yahoo",
+      "position": 5
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "title": "7 Best Leather Shoes for Men: Effortless Style Anywhere 2025 | FashionBeans",
+      "snippet": "October 2, 2024",
+      "cited": true
+    },
+    {
+      "url": "https://www.mensjournal.com/style/essential-mens-shoes?utm_source=chatgpt.com",
+      "title": "Essential Men's Shoes That Every Guy Should Own | Men's Journal - Men's Journal",
+      "snippet": "January 12, 2022",
+      "cited": true
+    },
+    {
+      "url": "https://www.yahoo.com/lifestyle/best-mens-dress-shoes-203007687.html?utm_source=chatgpt.com",
+      "title": "The 13 best men's dress shoes to buy — Cole Haan, Rothy's and more",
+      "snippet": null,
+      "cited": true
+    },
+    {
+      "url": "https://legendsonlyleague.com/best-leather-sneakers-for-men/?utm_source=chatgpt.com",
+      "title": "Best Leather Sneakers for Men - 2025 Reviews - Legends Only League",
+      "snippet": "— Let’s be real—finding the perfect pair of leather sneakers is like hunting for that one comfortable chair you never want to get up from. You want something that looks sharp enough for a casual Friday...December 5, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://footwind.net/best-mens-leather-dress-shoes/?utm_source=chatgpt.com",
+      "title": "7 Best Men's Leather Dress Shoes of 2026",
+      "snippet": "— This post contains affiliate links. As an Amazon Associate, we earn from qualifying purchases.  Finding the right men’s leather dress shoes can be a challenge, especially when balancing style, comfort...December 3, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://rustictools.com/best-leather-dress-shoes/?utm_source=chatgpt.com",
+      "title": "Best Leather Dress Shoes For Every Occasion",
+      "snippet": "— The Allen Edmonds Park Avenue is a timeless classic for a reason. Its sleek, cap-toe design is impeccably executed, exuding sophistication and elegance that complements any formal or business attire....October 7, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://www.alldressy.com/best-mens-dress-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Dress Shoes - All Dress",
+      "snippet": "— 4. SKECHERS MORENO EDERSON OXFORD WITH MEMORY FOAM  Check price on Amazon  Description: A casual dress-style Oxford with Skechers comfort tech: memory foam insole, relaxed fit, and simple lace-up styl...August 2, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://toptenreviewed.com/best-mens-leather-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Leather Shoes to Elevate Your Style Game - TopTenReviewed",
+      "snippet": "— BEST MENS LEATHER SHOES – REVIEWS  1. ALLEN EDMONDS PARK AVENUE CAP-TOE OXFORD  The Allen Edmonds Park Avenue Cap-Toe Oxford is a quintessential choice for men seeking an elegant footwear option for f...May 29, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://thesmalltools.com/best-mens-leather-shoes/?utm_source=chatgpt.com",
+      "title": "Best Mens Leather Shoes: A Guide To Timeless Style - TheSmallTools",
+      "snippet": "— Looking ahead, the men’s leather shoe market is poised for continued innovation and adaptation. Advancements in 3D printing, personalized fitting technologies, and smart shoe features are likely to s...May 29, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://comparisonlive.com/mens-leather-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Leather Shoes to Elevate Your Style Game - Comparison Live",
+      "snippet": "— 1. ALLEN EDMONDS PARK AVENUE CAP-TOE OXFORD  The Allen Edmonds Park Avenue Cap-Toe Oxford is a staple in men’s formal footwear. Crafted from premium calfskin leather, these shoes are not only stylish...May 7, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://www.menshealth.com/style/g19545927/best-dress-shoes//?utm_source=chatgpt.com",
+      "title": "10 Best Dress Shoes for Men in 2024, Tested by Our Fashion Director",
+      "snippet": "— * ### Best Leather  Suit Supply Brown DerbyRead more  We even explored hybrid types that blend formal style with casual comfort. Finding the best dress shoes for men doesn't have to be expensive, com...September 26, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://totallyreviewed.com/best-mens-leather-dress-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Leather Dress Shoes: Elevate Your Style with Timeless Elegance - Totally Reviewed",
+      "snippet": "— BEST MENS LEATHER DRESS SHOES  01. ALLEN EDMONDS PARK AVENUE CAP-TOE OXFORD  Crafted with precision and elegance, the Allen Edmonds Park Avenue Cap-Toe Oxford exudes timeless sophistication. The impec...August 6, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://www.esquire.com/style/mens-fashion/g36384400/best-mens-leather-sneakers//?utm_source=chatgpt.com",
+      "title": "13 Best Leather Sneakers for Men 2024",
+      "snippet": "— If you're in the market for something vintage inspired, we've got that, too—plus designer options, revamped runners, and more.  * ### Best Leather Sneakers Under $100  Cole Haan Grand Crosscourt II Sn...April 12, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://www.esquire.com/style/mens-fashion/g36384400/best-mens-leather-sneakers/?utm_source=chatgpt.com",
+      "title": "13 Best Leather Sneakers for Men 2024",
+      "snippet": "— * ### Best Leather Sneakers Under $100  Cole Haan Grand Crosscourt II SneakersRead more  * ### Best All-White Leather Sneakers  Greats Royale SneakersRead more  * ### Best Nostalgic Leather Sneakers...April 12, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://smallbiztrends.com/best-dress-shoes-for-men/?utm_source=chatgpt.com",
+      "title": "Best Dress Shoes for Men: Our Picks and Info",
+      "snippet": "— COLE HAAN MEN’S PINCH TASSEL LOAFER  Cole Haan’s Pinch Tassel Loafer, a symbol of nearly 80 years of craftsmanship, offers an impeccable blend of luxury and style. A choice for the dapper gentleman, t...December 17, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://www.askdeb.com/reviews/10-best-mens-dress-shoes-us/?utm_source=chatgpt.com",
+      "title": "10 Best Mens Dress Shoes Us - AskDeb",
+      "snippet": "— 1. DOCKERS MENS GORDON LEATHER OXFORD DRESS SHOE,BLACK,11 W US  9.7/10 our score  Buy Now  I recently bought the Dockers Mens Gordon Leather Oxford Dress Shoe and I am absolutely loving it! The leathe...November 8, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://www.menshealth.com/style/g42053085/best-mens-leather-sneakers/?utm_source=chatgpt.com",
+      "title": "20 Best Leather Sneakers for Men in 2024, Tested by Style Experts",
+      "snippet": "— Skip to Content  sign in  Subscribe  Courtesy of Retailer  Our product picks are editor-tested, expert-approved. We may earn a commission through links on our site. Why Trust Us?  WHETHER YOU'RE runni...March 22, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://stridewise.com/best-leather-sneakers/?utm_source=chatgpt.com",
+      "title": "9 Best Leather Sneakers for Men 2025 | Minimalist, Low Profile, Dressy Sneaks | Stridewise",
+      "snippet": "— BEST VALUE LEATHER SNEAKER: THURSDAY BOOT CO. PREMIER LOW TOP SNEAKERS  * Wide and extra wide sizes * Excellent selection of leathers and colors * $129  If you’ve been in the boot game for a while, Th...February 24, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://explorenationalparks.store/best-leather-shoes-for-men?utm_source=chatgpt.com",
+      "title": "Best Leather Shoes for Men: Complete 2024 Buyer's Guide | Explore National Parks",
+      "snippet": "TOP 5 BEST LEATHER SHOES FOR MEN IN 2024  1. ALLEN EDMONDS FIFTH AVENUE OXFORD  ★★★★★  (4.4/5 - 1,247 reviews)  The gold standard for American-made dress shoes. This cap-toe oxford features premium ca...",
+      "cited": false
+    },
+    {
+      "url": "https://www.mic.com/shopping/the-12-best-leather-sneakers-for-men-82393043?utm_source=chatgpt.com",
+      "title": "The 12 best leather sneakers for men",
+      "snippet": "1. THE SPERRY SNEAKERS  Sperry Men's Striper II LTT Leather ShoeSee price on AmazonSee on Amazon  These leather sneakers from Sperry have uppers made from 100% premium full-grain leather, so they stri...",
+      "cited": false
+    },
+    {
+      "url": "https://www.greats.com/collections/leather-shoes?utm_source=chatgpt.com",
+      "title": "Leather Shoes for Men | GREATS Premium Men’s Footwear",
+      "snippet": "Free standard shipping on all US orders over $100 and free exchanges  New In: The Ravine. Shop Now  New Colors. Same Icon. Shop Royale 2.0.  CART  LEATHER SHOES FOR MEN  STEP FORWARD  Step up your sty...",
+      "cited": false
+    },
+    {
+      "url": "https://www.michiganfootdoctors.com/best-mens-dress-shoes-2022-birchbury-brenston-bramford-reviews/?utm_source=chatgpt.com",
+      "title": "11 Best Men’s Dress Shoes for 2025 – Stylish, Comfortable & Built to Last",
+      "snippet": "The authors or speakers are not associated with any of the above products.  11 BEST MEN’S DRESS SHOES FOR ANY EVENT  STEP INTO STYLE, COMFORT, AND CONFIDENCE  When it comes to elevating your wardrobe...",
+      "cited": false
+    }
+  ],
+  "network_search_calls": {
+    "user_query": "best leather shoes for men",
+    "default_model_slug": "gpt-5-2",
+    "model_slug": "gpt-5-2",
+    "search_triggered": true,
+    "search_queries": [
+      {
+        "query": "best leather shoes for men",
+        "type": "initial_search"
+      },
+      {
+        "query": "best leather shoes for men",
+        "type": "model_query"
+      },
+      {
+        "query": "best men's leather dress shoes and casual leather shoes review",
+        "type": "model_query"
+      }
+    ],
+    "search_result_groups": [
+      {
+        "domain": "www.gq.com",
+        "entries": [
+          {
+            "url": "https://www.gq.com/story/willy-chavarria-adidas-ss26",
+            "title": "This Is Willy Chavarria's Best Adidas Shoe Yet",
+            "snippet": "Willy Chavarria has had a standout year in fashion, highlighted by his dynamic collaborations with Adidas. After launching his first collection in January 2025 and presenting an impactful runway in Paris, Chavarria closes the year with a final Adidas drop that showcases his bold, distinctive style. The collection includes oversized apparel like zip mock necks, half-zips with rose embroidery, long-sleeve soccer jerseys, and nearly ankle-length pull-away shorts.\n\nThe main focus, however, is the footwear. Chavarria reimagines Adidas classics, particularly the Forum line. Highlights include a blacked-out Forum Low with a redesigned sole and premium leather upper, and a classic Forum High in his signature black and red. The centerpiece of the release is the striking Forum Boot ($300), a black-on-black hybrid design with a thick sole and elevated upper, channeling high-fashion gritty aesthetics reminiscent of Prada. This ambitious release closes a landmark year for Chavarria and hints at more innovation to come. The collection dropped December 12, 2025, and is available via Adidas and the CONFIRMED app.",
+            "pub_date": "2025-12-12T14:28:26.708Z",
+            "attribution": "www.gq.com",
+            "ref_type": "news",
+            "ref_index": 22
+          },
+          {
+            "url": "https://www.gq.com/story/jacob-elordi-harry-styles-the-row-eel-loafers",
+            "title": "Jacob Elordi and Harry Styles Are on the Same Loafer Wavelength",
+            "snippet": "Jacob Elordi and Harry Styles have both recently been spotted wearing the same luxurious eel-leather loafers by The Row, signaling a fashionable convergence among style-forward men. Elordi donned his pair during a Frankenstein-themed press tour event in London on December 7, showcasing his tall and eclectic approach to fashion, while Styles was seen wearing them more casually in Rome on November 28. The loafers, known as \"soft eel loafers,\" are crafted in Italy with detailed pleating and hand-painted soles, reflecting The Row’s reputation for subtle yet high-quality design. This shared footwear choice exemplifies a growing trend among sneaker enthusiasts transitioning toward loafers for their aesthetic versatility rather than abandoning sneakers altogether. The phenomenon underscores a broader menswear movement where style choices align more through evolving taste than deliberate mimicry. Originally featured in British GQ, the article highlights how both celebrities are surfing the loafer wave at the height of its popularity.",
+            "pub_date": "2025-12-08T17:04:33.800Z",
+            "attribution": "www.gq.com",
+            "ref_type": "news",
+            "ref_index": 27
+          },
+          {
+            "url": "https://www.gq.com/story/paraboot-michael-hottest-mens-shoe-right-now",
+            "title": "The Paraboot Michael Is the Hottest Men's Shoe of the Moment",
+            "snippet": "The Paraboot Michael, an 80-year-old French-made work derby shoe, has emerged as one of the hottest men's shoes in 2025, ranking in the top 10 of the Lyst Index for the first quarter. Priced at $635, the durable Tyrolean-style derby with a distinctive moc-toe seam and chunky rubber sole is experiencing a resurgence, bolstered by its long-standing cult appeal and fashion-forward versatility. While not as flashy as high-fashion items from brands like Miu Miu or Saint Laurent, the Michael has been celebrated by fashion insiders and publications like GQ for its understated cool, comfort, and robust design that complements various outfits. Formerly a staff favorite at the now-closed Unionmade store in San Francisco, the Michael suits anything from casual jeans to formal slacks and is even wedding-appropriate. Beyond the Michael, Paraboot’s broader catalog includes models like the Reims and Nante loafers and the Thiers, Columbia, and Pacific styles, all exemplifying the brand’s craftsmanship. Known for making their own soles, Paraboot prioritizes quality over affordability, making the Michael not only a trendy item but also a durable, stylish investment.",
+            "pub_date": "2025-05-07T21:23:16.684Z",
+            "attribution": "www.gq.com",
+            "ref_type": "news",
+            "ref_index": 30
+          }
+        ]
+      },
+      {
+        "domain": "www.instyle.com",
+        "entries": [
+          {
+            "url": "https://www.instyle.com/steve-madden-jones-zipper-boots-review-11867378",
+            "title": "NYC Girls Love the $1,500 Boots Zoë Kravitz and Dakota Johnson Have Worn for Years-and My Lookalikes Are $87",
+            "snippet": "The article from InStyle highlights the popularity of The Row's Zippered Boots, a favorite among style icons like Zoë Kravitz and Dakota Johnson since their 2019 release. Known for their chic design and high price tag of $1,500, these boots have become a winter staple in New York City. However, for those unwilling to splurge, the author celebrates a stylish and affordable alternative: Steve Madden’s Jones Boots. Retailing for as low as $87 (on sale), the Jones Boots mimic the original's silhouette with chunky Chelsea soles, front zipper detail, and multiple material options including suede and patent leather. The boots are praised for both their design and comfort, requiring minimal break-in time and providing reliable support for long walks in harsh winter conditions. Available in various colors and textures, they offer a fashionable yet functional option for cold-weather wear. The author enthusiastically recommends snagging a pair while still in stock.",
+            "pub_date": "2025-12-12T12:00:00.000Z",
+            "attribution": "www.instyle.com",
+            "ref_type": "news",
+            "ref_index": 23
+          }
+        ]
+      },
+      {
+        "domain": "www.whowhatwear.com",
+        "entries": [
+          {
+            "url": "https://www.whowhatwear.com/fashion/celebrity-style/miu-miu-mary-jane-loafers-alexa-chung",
+            "title": "Of Course, Alexa Chung Was the First to Step Out in Miu Miu's Next It Flats",
+            "snippet": "Alexa Chung has debuted what’s expected to be Miu Miu’s next big footwear trend: the Leather Loafers with Straps, priced at £820. Captured lounging in a garden, Chung styled the flats—a fusion of loafer and Mary Jane—effortlessly with a layered top and miniskirt, showcasing their versatility and charm. These practical, wearable flats combine classic loafer structure with modern ruching and a Mary-Jane-style strap, ensuring a snug fit. Available in black and a rich chocolate brown, the loafers blend seamlessly into capsule wardrobes and align with current fashion trends. With subtle branding and a slim profile, they offer a polished yet preppy look and are expected to become a key favorite as warmer seasons arrive. The article highlights the shoes' adaptability, suggesting styling them with socks, skirts, or relaxed jeans, and notes their availability in multiple shades and half sizes for perfect fit.",
+            "pub_date": "2025-12-06T09:30:29.000Z",
+            "attribution": "www.whowhatwear.com",
+            "ref_type": "news",
+            "ref_index": 24
+          }
+        ]
+      },
+      {
+        "domain": "people.com",
+        "entries": [
+          {
+            "url": "https://people.com/julia-roberts-penny-loafers-december-2025-11865501",
+            "title": "Julia Roberts Is the Latest Celeb to Break Out This Stylist-Approved Shoe Style, and It's a 'True Classic'",
+            "snippet": "Julia Roberts is the latest celebrity to embrace the resurgence of penny loafers, a timeless shoe style that fashion stylist Cynthia Kennedy describes as a \"true classic making a comeback.\" Roberts wore sleek black penny loafers during her appearance on Variety’s latest season of its *Actors on Actors* series, where she was featured alongside Sean Penn. Her chic loafers complemented her suit perfectly, offering the polish of heels with added comfort. Other stars like Gwyneth Paltrow and Amanda Seyfried have also been spotted wearing loafers recently, further cementing the shoe’s revival.\n\nTo help fans emulate Roberts’ style, the article highlights several loafers for purchase, including affordable options like the Qjn Penny Loafers for $46 and premium alternatives like Cole Haan’s Stassi Penny Loafers for $80. There are also stylish variations like chunky-heeled loafers and bunion-friendly, leather-made styles. The trend is gaining momentum, making now a great time for fashion-conscious shoppers to jump in on this stylish and comfortable footwear revival.",
+            "pub_date": "2025-12-10T01:30:00.000Z",
+            "attribution": "people.com",
+            "ref_type": "news",
+            "ref_index": 25
+          },
+          {
+            "url": "https://people.com/katie-holmes-kristen-bell-steve-madden-sale-december-2025-11865460",
+            "title": "Katie Holmes, Kristen Bell, and Molly Ringwald Wore This Classic Winter Shoe - and We Found Similar Styles on Sale",
+            "snippet": "Several celebrities, including Katie Holmes, Kristen Bell, Molly Ringwald, and Amanda Seyfried, have been spotted wearing classic heeled leather boots this December, showcasing the timeless appeal of this winter staple. Inspired by their polished and versatile styles, Steve Madden has a selection of similar boots available at up to 41% off using the code GIFT at checkout.\n\nThe featured boots include various trendy and comfortable options: the square-toe Klayton boots ($77), the knee-high Berkleigh ($91), the pointed Aria ($91), and the textured Nitro Black Eel boots ($140). Each style is praised for its blend of fashion and function, with reviews highlighting features such as comfort for wide feet, all-day wearability, and luxurious vegan leather textures. Other discounted styles include the Distortion Black, Alluring Black Leather, and Cypress Black boots. These celeb-inspired looks offer affordable, chic options for winter wardrobes.",
+            "pub_date": "2025-12-11T01:30:00.000Z",
+            "attribution": "people.com",
+            "ref_type": "news",
+            "ref_index": 26
+          },
+          {
+            "url": "https://people.com/best-mens-dress-shoes-7481434",
+            "title": "The 10 Best Men's Dress Shoes of 2024",
+            "snippet": "The article, published by PEOPLE on April 18, 2023, presents the 10 best men’s dress shoes of 2024, selected after testing 22 pairs for comfort, fit, quality, and value. The Cole Haan Original Grand Wingtip Derby took the top spot for its comfort, support, and versatility, thanks to features like Grand.OS technology and durable leather. Other top picks include:\n\n- Best Budget: Dream Pairs Bruno Moda Oxford – Sleek and affordable, though lacking arch support.\n- Best Under $100: Clarks Tilden Cap Oxford – Offers shock-absorption and comfort but runs small.\n- Best Oxfords: Ace Marks Cap Toe – Stylish and well-crafted, requiring a short break-in.\n- Best Investment: Magnanni Corey Oxford – Luxurious craftsmanship with high-end materials.\n\nOther categories include best boots (Thursday Boot Co. Cavalier Chelsea), casual (Dr. Scholl’s Sync Oxford), all-day wear (Stacy Adams Dickinson), and slip-ons (Mephisto Edlef). The article also emphasizes key buying tips on comfort, style, and pricing, with insights from podiatrists and stylists. Testing was done across multiple stages of wear to inform comprehensive reviews.",
+            "pub_date": "2023-04-18T18:21:55.000Z",
+            "attribution": "people.com",
+            "ref_type": "news",
+            "ref_index": 31
+          },
+          {
+            "url": "https://people.com/best-chelsea-boots-8732888",
+            "title": "The Best Chelsea Boots Tested by Our Editors: Dr. Martens, Blundstone, and Ugg from $60",
+            "snippet": "This article from PEOPLE reviews the best Chelsea boots on the market, compiled from over 237 hours of testing conducted by editors and testers. Eleven Chelsea boot styles were compared based on comfort, fit, durability, materials, and value, with insights also gathered from fashion stylists. Chelsea boots—initially popularized in the 1960s—remain a fashionable and versatile choice, especially for transitional fall weather.\n\nThe top pick is the Blundstone 585 Classic Chelsea Boot for its durable water-resistant leather, good arch support, and adaptability for both hikes and casual wear. The Dr. Martens Smooth Leather Chelsea Boot was named runner-up for its classic aesthetic, though it requires some break-in time. For budget-conscious shoppers, the Athlefit Women's Chelsea Platform Ankle Boots offered surprising quality at just $60. Other standouts include the Nisolo Carmen Boot for premium leather quality, Ugg Brisbane for durability and waterproofing, and the L.L. Bean Camden Hills Boot for its excellent traction. High-end investment options like the Reformation Katerina Boot also earned praise for their style and quality, despite needing a break-in period.\n\nThe article concludes with styling suggestions and emphasizes the PEOPLE Tested methodology for unbiased product evaluations.",
+            "pub_date": "2024-10-25T12:15:00.000Z",
+            "at

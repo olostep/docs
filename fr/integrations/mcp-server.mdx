@@ -1,0 +1,165 @@
+---
+sidebarTitle: "Serveur MCP"
+icon: "hammer"
+title: "Serveur MCP"
+description: "Utilisez Olostep via le Model Context Protocol pour des données web rapides et efficaces"
+---
+
+Le serveur MCP d'Olostep offre des outils d'accès web à vos applications IA. Il permet à votre IA de :
+1. Rechercher sur le web pour ancrer l'IA sur des données du monde réel (faits, documents, événements)
+2. Obtenir le contenu markdown de n'importe quelle page web
+3. Découvrir et filtrer les URL pertinentes au sein d'un site web.
+
+## Installation
+Tu as besoin d'une clé API. Obtiens la clé API depuis https://www.olostep.com/dashboard/api-keys.
+
+Tu peux soit utiliser notre URL hébergée à distance, soit exécuter le serveur localement.
+
+### URL hébergée à distance
+
+```bash
+https://mpc.olostep.com/mcp
+```
+
+### Exécution avec npx
+
+```bash
+env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp
+```
+
+### Installation manuelle
+
+```bash
+npm install -g olostep-mcp
+```
+
+### Exécution sur Claude Desktop
+
+Ajoute ceci à ton fichier claude_desktop_config.json :
+
+```bash
+{
+  "mcpServers": {
+    "mcp-server-olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+```bash
+npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
+```
+
+### Exécution sur Claude Code
+
+Exécute ceci dans ton terminal
+
+```bash
+claude mcp add --transport http secure-api https://mpc.olostep.com/mcp \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+Alternative (local / stdio)
+```bash
+claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
+  -- npx -y olostep-mcp
+```
+
+### Exécution sur Cursor
+
+<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=olostep-web&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIm9sb3N0ZXAtbWNwIl0sImVudiI6eyJPTE9TVEVQX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D">
+  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Ajouter le serveur MCP Olostep à Cursor" style={{ maxHeight: 32 }} />
+</a>
+
+#### Configuration manuelle
+
+Pour configurer Olostep MCP dans Cursor :
+
+- Ouvre les paramètres de Cursor (clique sur l'icône des paramètres en haut à droite de l'IDE)
+- Clique sur MCP
+- Clique sur "+ Ajouter un nouveau serveur MCP global"
+- Entre ce qui suit dans le fichier mcp.json :
+```bash
+{
+  "mcpServers": {
+    "olostep": {
+      "url": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Alternative (local / stdio)
+```bash
+{
+  "mcpServers": {
+    "olostep-web": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+- N'oublie pas de remplacer `YOUR_API_KEY` par ta clé API réelle que tu peux obtenir depuis le [tableau de bord Olostep](https://www.olostep.com/dashboard)
+- Tu peux maintenant fermer l'onglet des paramètres. Si nécessaire, actualise la liste des serveurs MCP pour voir les nouveaux outils.
+
+> Si tu utilises Windows et que tu rencontres des problèmes, essaie `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
+
+La prochaine fois que tu utiliseras Cursor, il utilisera automatiquement le MCP d'Olostep lorsque nécessaire. Tu peux également demander explicitement à utiliser le MCP d'Olostep lorsque tu as besoin d'informations à jour du web.
+
+### Exécution sur Windsurf
+Ajoute ceci à ton fichier ./codeium/windsurf/model_config.json :
+
+```bash
+{
+  "mcpServers": {
+    "olostep": {
+      "serverUrl": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Alternative (local / stdio)
+```bash
+{
+  "mcpServers": {
+    "mcp-server-olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+## Outils disponibles
+- **scrape_website** : Extraire le contenu d'une URL unique. Prend en charge plusieurs formats et le rendu JavaScript.
+- **search_web** : Rechercher sur le web une requête donnée et retourner des résultats structurés (non-IA, basé sur un parseur).
+- **answers** : Rechercher sur le web et retourner des réponses alimentées par l'IA dans la structure JSON souhaitée, avec sources et citations.
+- **batch_scrape_urls** : Extraire jusqu'à 10 000 URL en même temps. Parfait pour l'extraction de données à grande échelle.
+- **get_batch_results** : Récupérer le statut et le contenu extrait pour un travail par lots. Si terminé, récupère les éléments et extrait le contenu pour chaque URL.
+- **create_crawl** : Découvrir et extraire de manière autonome des sites web entiers en suivant les liens à partir d'une URL de départ.
+- **create_map** : Obtenir toutes les URL d'un site web. Extraire les URL pour la découverte et l'analyse du site.
+- **get_webpage_content** : Récupérer le contenu d'une page web au format markdown.
+- **get_website_urls** : Rechercher et récupérer les URL pertinentes d'un site web.
+- **google_search** : Récupérer des données structurées à partir des résultats de recherche Google.
+
+## Conclusion
+Tu peux trouver des détails complets sur Olostep MCP [ici](https://github.com/olostep/olostep-mcp-server).

@@ -1,0 +1,167 @@
+---
+icon: "lines-leaning"
+sidebarTitle: "Raccolta Batch"
+title: "Ottieni il contenuto di più siti web in un colpo solo"
+description: "Avvia una raccolta batch per estrarre contenuti da fino a 100k URL in 5-7 minuti"
+---
+
+## Panoramica
+
+L'endpoint [Batches](https://docs.olostep.com/api-reference/batches/create) di Olostep ti consente di avviare una raccolta di fino a 10.000 URL e ottenere il contenuto in 5-7 minuti. Puoi avviare fino a 10 raccolte contemporaneamente per estrarre contenuti da 100.000 URL in un colpo solo. Se hai bisogno di maggiore scalabilità, contattaci.
+
+Questo è utile se hai già gli URL che vuoi processare — ad esempio, per aggregare dati per analisi, costruire uno strumento di ricerca specializzato o monitorare più siti web per cambiamenti.
+
+In questa guida, ti mostreremo come avviare una raccolta con una lista di URL e recuperare il contenuto in formato markdown.
+
+## Gist con Codice Completo
+Ecco tutto il codice in un unico gist che puoi copiare e incollare per provare la raccolta batch con Olostep:
+https://gist.github.com/olostep/e903f2e4fc28f8093b834b4df68b8031
+
+In questo gist abbiamo mostrato come avviare una raccolta con 5 query di ricerca su Google, controllare lo stato e recuperare il contenuto per ogni elemento.
+
+## Prerequisiti
+Prima di iniziare, assicurati di avere quanto segue:
+
+- Una chiave API valida di Olostep. Puoi ottenerne una registrandoti su [Olostep](https://www.olostep.com/dashboard).
+- Python installato sul tuo sistema.
+- Le librerie `requests` e `hashlib` (installa `requests` con `pip install requests` se necessario).
+
+## Passo 1: Crea una Raccolta da URL Locali
+
+Se hai già una lista di URL che vuoi processare, puoi definirli direttamente nel tuo script. Altrimenti, puoi leggerli da un file o database.
+
+```python filename="start_batch.py"
+import requests
+import hashlib
+
+API_KEY = "YOUR_API_KEY"
+
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=nikola+tesla&gl=us&hl=en",
+        "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+        "https://www.google.com/search?q=google+solar+eclipse&gl=us&hl=en",
+        "https://www.google.com/search?q=crispr&gl=us&hl=en",
+        "https://www.google.com/search?q=genghis%20khan&gl=us&hl=en"
+    ]
+    return [{"custom_id": create_hash_id(url), "url": url} for url in urls]
+
+def start_batch(items):
+    payload = {
+        "items": items
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+    return response.json()["id"]
+
+if __name__ == "__main__":
+    items = compose_items_array()
+    batch_id = start_batch(items)
+    print("Raccolta avviata. ID:", batch_id)
+```
+
+## Passo 2: Monitora lo Stato della Raccolta
+
+Una volta avviata la raccolta, puoi monitorarne lo stato usando il `batch_id` che viene restituito quando avvii la raccolta.
+
+```python filename="check_status.py"
+import requests
+
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}",
+        headers=headers
+    )
+    return response.json()["status"]
+```
+
+Puoi controllare lo stato ogni pochi secondi (ad esempio, 10 secondi) fino a quando la raccolta è completa:
+
+```python
+import time
+
+def recursive_check(batch_id):
+    status = check_batch_status(batch_id)
+    print("Stato:", status)
+    if status == "completed":
+        print("Raccolta completata!")
+    else:
+        time.sleep(60)
+        recursive_check(batch_id)
+```
+
+## Passo 3: Recupera gli Elementi Completati
+
+Una volta che la raccolta è segnata come completa, recupera gli elementi processati.
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}/items",
+        headers=headers
+    )
+    return response.json()["items"]
+```
+
+Ogni elemento includerà un `retrieve_id` che puoi usare per ottenere il contenuto estratto.
+
+```python
+items = get_completed_items(batch_id)
+for item in items:
+    print(f"URL: {item['url']}\nCustom ID: {item['custom_id']}\nRetrieve ID: {item['retrieve_id']}\n---")
+```
+
+## Passo 4: Recupera il Contenuto
+
+Usa il `retrieve_id` per ottenere il contenuto estratto in markdown, html o json. Ecco un esempio per recuperare il contenuto in formato markdown:
+
+```python filename="retrieve_content.py"
+def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# Esempio di utilizzo:
+items = get_completed_items(batch_id)
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content)
+```
+
+## Contenuto Ospitato
+Ospitiamo anche il contenuto per 7 giorni, quindi puoi recuperarlo più volte senza dover rifare il scraping.
+Esempio di un URL ospitato per [contenuto markdown](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_p64bro0q3n_924d0fa125efcc5c.txt)
+
+## Esempi di Casi d'Uso
+
+### 1. Costruire Motori di Ricerca
+Usa Olostep per estrarre contenuti da siti web specifici per settore (legale, medico, AI) e costruire un database ricercabile.
+
+### 2. Monitoraggio di Siti Web
+Monitora la disponibilità di prodotti, cambiamenti di prezzo o aggiornamenti di notizie su più siti web pianificando raccolte batch giornaliere.
+
+### 3. Monitoraggio dei Social Media
+Esegui il scraping delle menzioni del tuo marchio o parole chiave su forum o fonti di contenuto ed estrai dati strutturati.
+
+### 4. Aggregatori
+Costruisci una bacheca di lavoro, un aggregatore di notizie o una piattaforma di annunci immobiliari estraendo dati da dozzine di fonti.
+
+## Conclusione
+
+Con la raccolta batch, puoi estrarre contenuti da fino a 100k URL rapidamente ed efficientemente. Che tu stia costruendo strumenti di ricerca, aggregatori o sistemi di monitoraggio, le Raccolte di Olostep semplificano il lavoro.
+
+Vuoi estrarre solo dati strutturati? Usa i [Parsers](https://docs.olostep.com/features/structured-content/parsers) per ottenere solo i campi di cui hai bisogno. Hai bisogno di aiuto? Contatta `info@olostep.com` per supporto o per farci scrivere script personalizzati per il tuo caso d'uso.

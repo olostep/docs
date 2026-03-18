@@ -1,0 +1,112 @@
+---
+icon: "list-ol"
+sidebarTitle: "获取网站中特定的URL"
+title: "从Stripe网站中提取博客URL"
+description: "过滤并提取Stripe网站中的博客URL，以便进行针对性的内容分析。"
+---
+
+## 概述
+
+与其[映射整个网站](/use-cases/get-website-structure)，你可能更想专注于特定部分。在本指南中，我们将向你展示如何从Stripe网站中仅提取博客URL。
+
+## 仅提取博客URL
+
+要从Stripe网站中仅提取博客URL，可以使用maps端点和路径模式过滤器。`include_urls`参数允许你指定想要在结果中包含的URL模式。
+
+<CodeGroup>
+    ```python extract_stripe_blog_urls.py
+    import requests
+    import time
+    import json
+
+    # 配置
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # 开始时间，用于延迟跟踪
+    start_time = time.time()
+    
+    # 定义包含URL模式的负载
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog", "/blog/**"]  # 匹配 /blog 和 /blog 下的所有路径
+    }
+    
+    # 发起请求
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # 计算延迟
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"请求完成耗时 {latency}ms")
+    
+    # 处理结果
+    data = response.json()
+    print(f"在Stripe网站上找到 {data['urls_count']} 个博客URL")
+    
+    # 打印前10个URL作为示例
+    print("\n示例博客URL:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # 将博客URL保存到文件以便进一步处理
+    with open('stripe_blog_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\n所有博客URL已保存到 stripe_blog_urls.json")
+    ```
+</CodeGroup>
+
+### 理解URL模式
+
+在上面的示例中，我们使用了两种模式规范：
+
+- `/blog` - 精确匹配主博客页面 (https://stripe.com/blog)
+- `/blog/**` - 匹配 /blog 下的所有子路径，包括单个博客文章、分类页面等。
+
+这种组合确保我们捕获所有与博客相关的内容，同时排除网站的其他部分。
+
+### 示例响应
+
+```json
+{
+  "id": "map_xyz789abc",
+  "urls_count": 278,
+  "urls": [
+    "https://stripe.com/blog",
+    "https://stripe.com/blog/page/1",
+    "https://stripe.com/blog/page/2",
+    "https://stripe.com/blog/engineering",
+    "https://stripe.com/blog/product",
+    "https://stripe.com/blog/how-we-built-it-usage-based-billing",
+    "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+    "https://stripe.com/blog/stripe-radar-responded-to-card-testing",
+    "https://stripe.com/blog/future-of-real-time-payments",
+    "https://stripe.com/blog/ml-flywheel-improve-models"
+    // ... 为简洁省略其他URL
+  ]
+}
+```
+
+## 按类别过滤博客URL
+
+你可以进一步细化提取，专注于特定的博客类别。例如，如果你只对Stripe的工程博客文章感兴趣：
+
+<CodeGroup>
+    ```python extract_engineering_blog_urls.py
+    # 定义更具体的URL模式负载
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog/engineering", "/blog/engineering/**"]
+    }
+    ```
+</CodeGroup>
+
+## 下一步
+
+现在你已经提取了所有Stripe的博客URL，
+
+1. 你可以使用[scrape API](../../api-reference/scrapes/create)单独获取它们的内容。
+2. 或者，使用[下一个指南](/use-cases/crawl-matching-pages)直接通过内置过滤器爬取并提取这些博客页面的实际内容。

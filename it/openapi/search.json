@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API di Ricerca",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "Ottieni Ricerca",
+        "description": "Recupera una ricerca completata in precedenza tramite il suo ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per la ricerca da recuperare.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con l'oggetto della ricerca.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chiave API Non Valida"
+          },
+          "404": {
+            "description": "Ricerca Non Trovata"
+          },
+          "500": {
+            "description": "Errore Interno del Server"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "Crea Ricerca",
+        "description": "Cerca sul web con una query in linguaggio naturale e ottieni un elenco deduplicato di link rilevanti con titoli e descrizioni.  Cercherà la query semanticamente sul web e restituirà i risultati.  Vedi [Funzione di Ricerca](/searches/searches).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "La query di ricerca in linguaggio naturale."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con i risultati della ricerca.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "JSON in formato stringa del risultato completo della ricerca."
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "URL al file JSON ospitato su S3.",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Elenco deduplicato di link rilevanti trovati in più ricerche.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "L'URL del risultato."
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Il titolo della pagina del risultato."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Un breve frammento o descrizione del risultato."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta Errata (Query mancante)"
+          },
+          "401": {
+            "description": "Chiave API Non Valida"
+          },
+          "500": {
+            "description": "Errore Interno del Server"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+---
+title: "创建批次"
+description: "开始一个新的批次。你会收到一个 `id`，可以用来跟踪批次的进度，如[此处](/api-reference/batches/info)所示。注意：处理时间与批次大小无关，始终不变"
+openapi: "zh/openapi/batches.json POST /v1/batches"
+---
+
+<Tip>
+**完成时接收通知：** 传递 `webhook` 参数并提供你的端点 URL，以便在批次完成时接收一个 HTTP POST。详情请参阅 [Webhooks](/api-reference/common/webhooks)。
+</Tip>
+
+<Tip>
+**附加自定义数据：** 使用 `metadata` 参数存储键值对。支持两个级别：
+- **批次级别** — 在请求主体中
+- **项目级别** — 在 `items` 数组中的每个项目上
+
+详情请参阅 [Metadata](/api-reference/common/metadata)。
+</Tip>

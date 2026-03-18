@@ -1,0 +1,96 @@
+---
+icon: "list"
+sidebarTitle: "获取网站的所有URL"
+title: "提取Stripe网站的所有URL"
+description: "获取Stripe网站结构的完整地图，以了解其组织方式并发现可用内容。"
+---
+
+## 概述
+
+在深入了解网站的特定部分之前，通常有必要先了解其整体结构。在本指南中，我们将向你展示如何从Stripe网站提取所有URL，这将帮助你：
+
+- 了解整体网站架构
+- 发现你可能不知道的内容部分
+- 使用LLMs决定进一步抓取哪些URL
+
+## 提取所有Stripe URL
+
+要从Stripe网站提取所有URL，请使用maps端点和Stripe的域名。这将返回其网站上所有可发现URL的完整列表。
+
+<CodeGroup>
+    ```python get_stripe_urls.py
+    import requests
+    import time
+    import json
+
+    # 配置
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # 开始时间用于延迟跟踪
+    start_time = time.time()
+    
+    # 定义仅包含基本URL的有效负载
+    payload = {
+        "url": "https://stripe.com"
+    }
+    
+    # 发起请求
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # 计算延迟
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"请求完成于 {latency}ms")
+    
+    # 处理结果
+    data = response.json()
+    print(f"在Stripe网站上找到 {data['urls_count']} 个URL")
+    
+    # 打印前10个URL作为示例
+    print("\n示例URL:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # 将所有URL保存到文件以供进一步分析
+    with open('stripe_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\n所有URL已保存到stripe_urls.json")
+    ```
+</CodeGroup>
+
+### 示例响应
+
+```json
+{
+  "id": "map_abc123xyz",
+  "urls_count": 3842,
+  "urls": [
+    "https://stripe.com",
+    "https://stripe.com/about",
+    "https://stripe.com/blog",
+    "https://stripe.com/docs",
+    "https://stripe.com/pricing",
+    "https://stripe.com/customers",
+    "https://stripe.com/partners",
+    "https://stripe.com/enterprise",
+    "https://stripe.com/payments",
+    "https://stripe.com/billing"
+    // ... 数千个其他URL
+  ]
+}
+```
+
+## 分析Stripe网站结构
+
+提取所有URL后，你可以分析结构以识别模式。这对于理解Stripe如何组织其内容特别有用。例如，你可能会注意到这些URL模式：
+
+- `/blog/**` - 博客文章和文章
+- `/docs/**` - 文档页面
+- `/payments/**` - 支付产品信息
+- `/billing/**` - 账单产品信息
+
+在某些情况下，你可能只想获取网站特定部分的URL。例如，所有博客文章。你可以在[下一个指南](/use-cases/extract-specific-paths)中使用我们内置的过滤器。

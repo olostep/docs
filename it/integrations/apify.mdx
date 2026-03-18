@@ -1,0 +1,399 @@
+---
+sidebarTitle: "Apify"
+icon: "robot"
+title: "Integrazione Apify"
+description: "Automatizza la ricerca web, scraping e crawling con gli Apify Actors usando Olostep — l’API per cercare, estrarre e strutturare dati web."
+---
+
+Olostep è un'API per ricerca, scraping e crawling web — un'API per cercare, estrarre e strutturare dati web. Questa guida mostra come usare Olostep con gli Apify Actors per costruire pipeline di dati web affidabili end-to-end.
+
+## Cosa puoi costruire
+
+<CardGroup cols={2}>
+  <Card title="Scrape Sito Web" icon="file-lines">
+    Estrai contenuti da qualsiasi URL singolo in Markdown, HTML, JSON o Testo
+  </Card>
+  <Card title="Scrape URL in Batch" icon="layer-group">
+    Processa grandi liste di URL in parallelo con output strutturati
+  </Card>
+  <Card title="Crea Crawl" icon="spider-web">
+    Scopri e fai scraping delle pagine collegate per costruire dataset completi
+  </Card>
+  <Card title="Crea Mappa" icon="map">
+    Estrai tutti gli URL da un sito web (scoperta tipo sitemap)
+  </Card>
+  <Card title="Risposte AI" icon="robot">
+    Fai domande e ottieni risposte JSON strutturate con fonti
+  </Card>
+</CardGroup>
+
+## Inizio rapido
+
+### 1) Installa Apify CLI
+
+```bash
+npm install -g apify-cli
+apify --version
+```
+
+### 2) Ottieni la tua chiave API Olostep
+
+Dal Dashboard di Olostep → Chiavi API.
+
+### 3) Esegui l'Actor Olostep localmente
+
+```bash
+cd olostep-tools/integrations/apify
+apify run
+```
+
+Il file di input locale predefinito si trova in:
+`olostep-tools/integrations/apify/storage/key_value_stores/default/INPUT.json`
+
+Esempio di input:
+```json
+{
+  "operation": "scrape",
+  "apiKey": "YOUR_OLostep_API_KEY",
+  "url_to_scrape": "https://example.com",
+  "formats": "markdown"
+}
+```
+
+### 4) Distribuisci su Apify (cloud)
+
+```bash
+apify login
+apify push
+```
+
+Poi apri Apify Console → Actors → esegui l'actor con il tuo input desiderato.
+
+### Esegui in Apify Console (passo dopo passo)
+
+1. Apri il tuo Actor in Apify Console → Source → Input.  
+2. Nella scheda Manuale vedrai un campo visibile “Olostep API Key”. Incolla la tua chiave dal Dashboard di Olostep.  
+3. Scegli un'operazione (predefinito “scrape”).  
+4. Compila i campi rilevanti (per “scrape”, imposta “URL to Scrape”).  
+5. Clicca Salva → Avvia.  
+6. Quando l'esecuzione termina, apri la scheda Dataset per scaricare i risultati (JSON/CSV/Excel).
+
+Note:
+- Per “URL to Scrape”, puoi incollare con o senza schema. Se manca, l'actor premette automaticamente `https://`.  
+- Se un sito è pesante in JavaScript e vedi un timeout, imposta “Wait Before Scraping” a 2000–5000 ms e riprova.
+
+## Operazioni disponibili
+
+### Scrape Sito Web
+Estrai contenuti da un singolo URL. Ottimo per automazione a livello di pagina.
+
+<ParamField path="operation" type="constant" default="scrape">
+  Deve essere "scrape"
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  La tua chiave API Olostep (Bearer)
+</ParamField>
+<ParamField path="url_to_scrape" type="string" required>
+  L'URL da fare scraping (deve includere http:// o https://)
+</ParamField>
+<ParamField path="formats" type="dropdown" default="markdown">
+  Uno di: Markdown, HTML, JSON, Testo
+</ParamField>
+<ParamField path="country" type="string">
+  Codice paese opzionale (es., "US", "GB", "CA")
+</ParamField>
+<ParamField path="wait_before_scraping" type="integer">
+  Tempo di attesa opzionale in ms per il rendering JavaScript (0–10000)
+</ParamField>
+<ParamField path="parser" type="string">
+  ID parser opzionale (es., "@olostep/amazon-product")
+</ParamField>
+
+Campi di output:
+- id, url, status, formats
+- markdown_content / html_content / json_content / text_content
+- URL ospitati (se disponibili), metadata della pagina
+
+### Scrape URL in Batch
+Processa molti URL contemporaneamente con formattazione e struttura coerenti.
+
+<ParamField path="operation" type="constant" default="batch">
+  Deve essere "batch"
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  La tua chiave API Olostep
+</ParamField>
+<ParamField path="batch_array" type="text" required>
+  Array JSON di oggetti con `url` e `custom_id` opzionale  
+  Esempio: `[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+<ParamField path="formats" type="dropdown" default="markdown">
+  Uno di: Markdown, HTML, JSON, Testo
+</ParamField>
+<ParamField path="country" type="string">
+  Codice paese opzionale
+</ParamField>
+<ParamField path="wait_before_scraping" type="integer">
+  Tempo di attesa opzionale in ms per siti JS
+</ParamField>
+<ParamField path="parser" type="string">
+  ID parser opzionale
+</ParamField>
+
+Campi di output:
+- batch_id, status, total_urls, created_at, formats, country, parser, urls[]
+
+### Crea Crawl
+Segui i link e fai scraping di più pagine da un URL di partenza.
+
+<ParamField path="operation" type="constant" default="crawl">
+  Deve essere "crawl"
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  La tua chiave API Olostep
+</ParamField>
+<ParamField path="start_url" type="string" required>
+  URL di partenza per il crawl
+</ParamField>
+<ParamField path="max_pages" type="integer" default="10">
+  Pagine massime da fare crawling
+</ParamField>
+<ParamField path="follow_links" type="boolean" default="true">
+  Segui i link nella pagina
+</ParamField>
+<ParamField path="formats" type="dropdown" default="markdown">
+  Uno di: Markdown, HTML, JSON, Testo
+</ParamField>
+<ParamField path="country" type="string">
+  Codice paese opzionale
+</ParamField>
+<ParamField path="parser" type="string">
+  ID parser opzionale
+</ParamField>
+
+Campi di output:
+- crawl_id, object, status, start_url, max_pages, follow_links, created, formats
+
+### Crea Mappa
+Scopri tutti gli URL su un sito web e preparati per lo scraping in batch successivo.
+
+<ParamField path="operation" type="constant" default="map">
+  Deve essere "map"
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  La tua chiave API Olostep
+</ParamField>
+<ParamField path="website_url" type="string" required>
+  Il sito web da mappare
+</ParamField>
+<ParamField path="search_query" type="string">
+  Filtro query opzionale
+</ParamField>
+<ParamField path="top_n" type="integer">
+  Limita il numero di URL
+</ParamField>
+<ParamField path="include_patterns" type="string">
+  Includi glob(s), es. "/products/**"
+</ParamField>
+<ParamField path="exclude_patterns" type="string">
+  Escludi glob(s), es. "/admin/**"
+</ParamField>
+
+Campi di output:
+- map_id, object, website_url, total_urls, urls[], search_query, top_n
+
+## Esempi JSON da copiare e incollare (Console → Input → JSON)
+
+### Scrape
+```json
+{
+  "operation": "scrape",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "url_to_scrape": "https://www.wikipedia.org",
+  "formats": "markdown",
+  "wait_before_scraping": 2000
+}
+```
+
+### Batch
+```json
+{
+  "operation": "batch",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "batch_array": "[{\"url\":\"https://example.com\",\"custom_id\":\"site1\"},{\"url\":\"https://olostep.com\",\"custom_id\":\"site2\"}]",
+  "formats": "json"
+}
+```
+
+### Crawl
+```json
+{
+  "operation": "crawl",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "start_url": "https://docs.example.com",
+  "max_pages": 50,
+  "follow_links": true,
+  "formats": "markdown"
+}
+```
+
+### Mappa
+```json
+{
+  "operation": "map",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "website_url": "https://example.com",
+  "include_patterns": "/blog/**",
+  "top_n": 200
+}
+```
+
+### Risposte
+```json
+{
+  "operation": "answers",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "task": "What is the latest funding round of Olostep? Provide company, round, date, amount.",
+  "json": "{\"company\":\"\",\"round\":\"\",\"date\":\"\",\"amount\":\"\"}"
+}
+```
+
+## Esempi di flussi di lavoro
+
+<AccordionGroup>
+  <Accordion title="Scopri e fai Scraping di Prodotti">
+    1) Crea Mappa → include "/products/**"  
+    2) Analizza URL → costruisci array batch  
+    3) Scrape URL in Batch → formati: JSON  
+    4) Invia a Google Sheets / Airtable
+  </Accordion>
+  <Accordion title="Monitoraggio Contenuti Giornaliero">
+    1) Pianifica actor (giornalmente)  
+    2) Scrape Sito Web → formati: Markdown  
+    3) Riassumi con LLM  
+    4) Notifica su Slack
+  </Accordion>
+  <Accordion title="Base di Conoscenza del Competitor">
+    1) Crea Crawl (blog/docs)  
+    2) Memorizza output in Notion  
+    3) Aggiorna settimanalmente con Pianificazione
+  </Accordion>
+</AccordionGroup>
+
+## Parser specializzati
+
+Olostep supporta parser per strutturare dati per siti popolari.
+
+<CardGroup cols={2}>
+  <Card title="Prodotto Amazon" icon="amazon">
+    `@olostep/amazon-product` → titolo, prezzo, valutazione, recensioni, immagini, varianti
+  </Card>
+  <Card title="Ricerca Google" icon="google">
+    `@olostep/google-search` → risultati, titoli, snippet, URL
+  </Card>
+  <Card title="Google Maps" icon="map">
+    `@olostep/google-maps` → info aziendali, recensioni, valutazioni, posizione
+  </Card>
+  <Card title="Altri Parser" icon="cart-shopping" href="https://www.olostep.com/store">
+    Esplora estrattori di email, cercatori di handle social, estrattori di link di calendario e altro
+  </Card>
+</CardGroup>
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Preferisci batch per 3+ URL">
+    Più veloce, economico, facile da monitorare e rispettare i limiti di velocità.
+  </Accordion>
+  <Accordion title="Usa tempi di attesa appropriati">
+    Siti pesanti in JS: aumenta `wait_before_scraping` (es., 2000–5000ms).
+  </Accordion>
+  <Accordion title="Filtra prima di fare scraping">
+    Evita compiti non necessari — controlla prima i cambiamenti, mantieni lo stato di deduplicazione.
+  </Accordion>
+  <Accordion title="Memorizza grandi contenuti tramite URL ospitati">
+    Usa output ospitati per bypassare i limiti di dimensione del payload nei flussi Apify.
+  </Accordion>
+  <Accordion title="Tratta le operazioni asincrone come a lungo termine">
+    Batch/Crawl/Map restituiscono ID; recupera più tardi o concatenali con un ritardo.
+  </Accordion>
+  <Accordion title="Gestisci in modo pulito i timeout transitori">
+    Se vedi un 504 o un timeout transitorio, l'actor ritenta automaticamente una volta con un breve tempo di attesa.  
+    Puoi anche impostare “Wait Before Scraping” a 2000–5000 ms per pagine pesanti in JS.
+  </Accordion>
+</AccordionGroup>
+
+## Risoluzione dei problemi
+
+<AccordionGroup>
+  <Accordion title="Autenticazione fallita">
+    - Controlla la chiave API dal dashboard  
+    - Rimuovi spazi finali  
+    - Reinserisci nel modulo di input Apify
+  </Accordion>
+  <Accordion title="Contenuto vuoto">
+    - Aumenta il tempo di attesa  
+    - Verifica che l'URL sia pubblico / non bloccato da login  
+    - Prova un formato di output diverso
+  </Accordion>
+  <Accordion title="Limite di velocità superato">
+    - Distribuisci le esecuzioni tramite pianificazione  
+    - Preferisci batch per molti URL  
+    - Aggiorna il piano Olostep se necessario
+  </Accordion>
+  <Accordion title="Siti bloccati o dinamici">
+    - Prova il parametro paese  
+    - Regola attesa e parser  
+    - Contatta il supporto per assistenza
+  </Accordion>
+</AccordionGroup>
+
+## Prezzi
+
+Olostep addebita in base all'uso dell'API (indipendente da Apify):
+- Scrapes → per scraping
+- Batches → per URL
+- Crawls → per pagina
+- Maps → per operazione
+
+Vedi `https://olostep.com/pricing`.
+
+## Sicurezza
+
+- La tua chiave API viene inviata come token Bearer a runtime.  
+- Non commettere chiavi nel controllo di versione; Apify memorizza gli input in Key-Value Store.  
+- Nello sviluppo locale, mantieni le chiavi in `storage/key_value_stores/default/INPUT.json` (gitignored).
+
+## Risorse correlate
+
+<CardGroup cols={2}>
+  <Card title="API Scrapes" icon="file-lines" href="/features/scrapes/scrapes">
+    Estrai Markdown, HTML, testo o JSON strutturato compatibile con LLM da qualsiasi URL.
+  </Card>
+  <Card title="API Batches" icon="layer-group" href="/features/batches/batches">
+    Processa fino a 10k URL contemporaneamente e recupera i risultati più tardi.
+  </Card>
+  <Card title="API Crawls" icon="spider-web" href="/features/crawls/crawls">
+    Scopri e fai scraping ricorsivamente del contenuto di un sito.
+  </Card>
+  <Card title="API Maps" icon="map" href="/features/maps/maps">
+    Ottieni tutti gli URL su un sito web per preparare scraping in batch.
+  </Card>
+</CardGroup>
+
+## Supporto
+
+<CardGroup cols={2}>
+  <Card title="Documentazione" icon="book" href="https://docs.olostep.com">
+    Documentazione completa dell'API
+  </Card>
+  <Card title="Email di Supporto" icon="envelope" href="mailto:info@olostep.com">
+    info@olostep.com
+  </Card>
+  <Card title="Pagina di Stato" icon="signal" href="https://status.olostep.com">
+    Controlla lo stato della piattaforma
+  </Card>
+  <Card title="Documentazione Apify" icon="link" href="https://docs.apify.com">
+    Documentazione della piattaforma & SDK Apify
+  </Card>
+</CardGroup>

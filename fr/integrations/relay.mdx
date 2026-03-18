@@ -1,0 +1,556 @@
+---
+sidebarTitle: "Relay"
+icon: "bolt"
+title: "Intégration Relay"
+description: "Automatisez la recherche web, le scraping et le crawling avec le constructeur de flux de travail moderne de Relay.app, doté de fonctionnalités d’IA intégrée et de boucle humaine"
+---
+
+L'intégration Olostep Relay.app apporte des capacités puissantes de scraping web à la plateforme d'automatisation moderne de Relay. Créez des flux de travail automatisés qui extraient, surveillent et traitent les données web avec l'interface conviviale de Relay et des fonctionnalités avancées telles que l'IA intégrée et la boucle humaine.
+
+[Commencez avec Olostep sur Relay.app →](https://www.relay.app/apps/olostep/integrations)
+
+## Fonctionnalités
+
+Relay.app offre une expérience d'automatisation moderne avec des intégrations profondes et des capacités de flux de travail puissantes :
+
+<CardGroup cols={2}>
+  <Card title="Intégrations Profondes" icon="link">
+    Intégrations complètes et faciles à utiliser avec de nombreuses applications pour une automatisation fluide des flux de travail
+  </Card>
+  
+  <Card title="IA Intégrée" icon="brain">
+    Fonctionnalités d'IA intégrées pour améliorer la prise de décision et automatiser les tâches nécessitant une compréhension humaine
+  </Card>
+  
+  <Card title="Boucle Humaine" icon="users">
+    Ajoutez des étapes manuelles pour les tâches nécessitant un jugement humain, assurant flexibilité et contrôle qualité
+  </Card>
+  
+  <Card title="Flux de Travail Puissants" icon="workflow">
+    Éléments essentiels de flux de travail riches incluant la logique conditionnelle, la gestion des erreurs et le traitement parallèle
+  </Card>
+</CardGroup>
+
+## Installation
+
+### 1. Trouvez Olostep dans Relay.app
+
+Recherchez "Olostep" dans Relay.app lors de la création d'un nouveau flux de travail :
+
+1. Allez sur [Olostep sur Relay.app](https://www.relay.app/apps/olostep/integrations)
+2. Cliquez sur "Commencer gratuitement" ou "Créer un flux de travail"
+3. Recherchez "Olostep" dans le sélecteur d'applications
+4. Sélectionnez l'application Olostep
+
+Alternativement, visitez directement la [page d'intégration Olostep](https://www.relay.app/apps/olostep/integrations) pour parcourir les actions disponibles et créer votre premier flux de travail.
+
+### 2. Connectez Votre Compte
+
+Lorsque vous utilisez Olostep pour la première fois dans un flux de travail, vous serez invité à connecter votre compte :
+
+1. Cliquez sur "Connecter Olostep"
+2. Entrez votre clé API Olostep
+3. Autorisez la connexion
+
+Obtenez votre clé API depuis le [Tableau de bord Olostep](https://olostep.com/dashboard).
+
+## Actions Disponibles
+
+### Scraper URL
+
+Extraire le contenu d'une seule URL. Prend en charge plusieurs formats et le rendu JavaScript.
+
+**Cas d'utilisation :**
+- Surveiller des pages spécifiques pour des changements
+- Extraire des informations produits de sites e-commerce
+- Rassembler des données d'articles de presse ou de blogs
+- Extraire du contenu pour l'agrégation de contenu
+
+**Configuration :**
+
+<ParamField path="URL" type="string" required>
+  URL du site web à scraper (doit inclure http:// ou https://)
+</ParamField>
+
+<ParamField path="Format" type="dropdown" default="Markdown">
+  Choisissez le format : Markdown, HTML, JSON, ou Texte Brut
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  Code pays pour le contenu spécifique à une localisation (par ex., "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  Temps d'attente en millisecondes pour le rendu JavaScript (0-10000)
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  ID de parseur optionnel pour une extraction spécialisée (par ex., "@olostep/amazon-product")
+</ParamField>
+
+**Champs de sortie :**
+- ID de Scraping
+- URL Scrappée
+- Contenu Markdown
+- Contenu HTML
+- Contenu JSON
+- Contenu Texte
+- Statut
+- Horodatage
+- URL de capture d'écran (si disponible)
+- Métadonnées de la page
+
+**Exemples de Flux de Travail :**
+
+<AccordionGroup>
+  <Accordion title="Surveiller les Prix des Concurrents">
+    **Déclencheur :** Planification (Tous les jours à 9h)
+    
+    **Action :** Olostep - Scraper URL
+    - URL : Page produit du concurrent
+    - Format : JSON
+    - Parseur : @olostep/amazon-product
+    
+    **Action :** Google Sheets - Créer une Ligne
+    - Ajouter les données de prix au tableau de suivi
+    
+    **Boucle Humaine :** Examiner les changements de prix
+    - Approuver les baisses de prix significatives
+    
+    **Action :** Slack - Envoyer un Message
+    - Alerter l'équipe des changements de prix approuvés
+  </Accordion>
+
+  <Accordion title="Extraire et Sauvegarder des Articles de Blog">
+    **Déclencheur :** Flux RSS - Nouvel Élément
+    
+    **Action :** Olostep - Scraper URL
+    - URL : \{\{URL de l'article\}\}
+    - Format : Markdown
+    
+    **Action :** Notion - Créer une Page
+    - Sauvegarder le contenu de l'article dans la base de données Notion
+  </Accordion>
+
+  <Accordion title="Enrichissement de Leads avec l'IA">
+    **Déclencheur :** Google Sheets - Nouvelle Ligne
+    
+    **Action :** Olostep - Scraper URL
+    - URL : Site web de l'entreprise depuis la feuille
+    - Format : Markdown
+    
+    **Action IA :** OpenAI - Extraire des Données
+    - Extraire : taille de l'entreprise, industrie, produits
+    
+    **Action :** Google Sheets - Mettre à Jour la Ligne
+    - Ajouter les données enrichies à la feuille
+  </Accordion>
+</AccordionGroup>
+
+## Avantages de Relay.app
+
+Relay.app offre plusieurs avantages par rapport aux plateformes d'automatisation traditionnelles :
+
+### Flux de Travail avec Boucle Humaine
+
+Ajoutez des étapes de révision manuelle directement dans vos flux de travail :
+
+```
+1. Olostep scrappe le site web
+2. Étape de Révision Humaine ← Réviser et approuver les données
+3. Sauvegarder dans la base de données uniquement si approuvé
+```
+
+Parfait pour :
+- Le contrôle qualité avant le traitement des données
+- Le jugement humain sur le contenu extrait
+- Les flux de travail d'approbation pour les données sensibles
+- La révision des résumés générés par l'IA
+
+### Fonctionnalités d'IA Intégrées
+
+Utilisez l'IA directement dans vos flux de travail sans intégrations externes :
+
+- **Prise de Décision IA** : Laissez l'IA décider des chemins de flux de travail basés sur le contenu extrait
+- **Filtrage Intelligent** : Filtrer et catégoriser automatiquement les données extraites
+- **Résumé de Contenu** : Résumer de longs articles avant de les stocker
+- **Extraction de Données** : Utilisez l'IA pour extraire des données structurées à partir de contenu non structuré
+
+### Meilleure UX et Tests
+
+L'interface conviviale de Relay.app facilite la création de flux de travail :
+
+- Informations de test claires
+- Messages d'erreur utiles
+- Constructeur de flux de travail visuel
+- Débogage et dépannage faciles
+
+## Exemples de Flux de Travail Populaires
+
+### Surveillance des Prix en E-commerce avec Révision
+
+Surveillez les prix des concurrents avec approbation humaine :
+
+```
+Déclencheur : Planification (Toutes les heures)
+↓
+Action : Olostep - Scraper URL
+  - URL : Page produit du concurrent
+  - Format : JSON
+  - Parseur : @olostep/amazon-product
+↓
+Étape de Révision Humaine
+  - Réviser le changement de prix
+  - Approuver ou rejeter
+↓
+Action : Slack - Envoyer un Message (Si approuvé)
+  - Alerte : "Le prix a changé à $\{\{prix\}\}"
+```
+
+### Agrégation de Contenu avec l'IA
+
+Agrégerez et améliorez le contenu de plusieurs sources :
+
+```
+Déclencheur : Google Sheets - Nouvelle Ligne
+↓
+Action : Olostep - Scraper URL
+  - URL : \{\{URL depuis la feuille\}\}
+  - Format : Markdown
+↓
+Action IA : Résumer le Contenu
+  - Générer un résumé
+↓
+Action : Airtable - Créer un Enregistrement
+  - Stocker l'article avec résumé IA
+```
+
+### Pipeline d'Enrichissement de Leads
+
+Enrichissez les données de leads avec des informations web et l'IA :
+
+```
+Déclencheur : HubSpot - Nouveau Contact
+↓
+Action : Olostep - Scraper URL
+  - URL : \{\{Site web de l'entreprise\}\}
+  - Format : Markdown
+↓
+Action IA : Extraire Infos Entreprise
+  - Extraire : taille de l'entreprise, industrie, produits
+↓
+Étape de Révision Humaine
+  - Vérifier l'exactitude de l'extraction IA
+↓
+Action : HubSpot - Mettre à Jour le Contact
+  - Ajouter les données enrichies vérifiées
+```
+
+## Intégration avec des Applications Populaires
+
+### Google Sheets
+
+Parfait pour la collecte et le suivi des données :
+
+```
+1. Olostep scrappe le site web
+2. IA - Traiter et formater les données
+3. Révision Humaine (optionnelle)
+4. Google Sheets - Créer/Mettre à Jour une Ligne
+```
+
+**Cas d'utilisation :**
+- Tableaux de suivi des prix
+- Bases de données d'enrichissement de leads
+- Inventaire de contenu
+- Feuilles d'analyse concurrentielle
+
+### Airtable
+
+Construisez des bases de données puissantes avec des données extraites :
+
+```
+1. Olostep scrappe ou crawle
+2. IA - Extraire des données structurées
+3. Airtable - Créer des Enregistrements
+```
+
+**Cas d'utilisation :**
+- Catalogues de produits
+- Bases de données de recherche
+- Calendriers de contenu
+- Bases de données de liens
+
+### Slack
+
+Recevez des notifications instantanées avec des flux de travail d'approbation :
+
+```
+1. Olostep surveille la page
+2. Filtre - Vérifier les changements
+3. Étape d'Approbation Humaine
+4. Slack - Envoyer un Message (si approuvé)
+```
+
+**Cas d'utilisation :**
+- Alertes de baisse de prix (avec approbation)
+- Notifications de mise à jour de contenu
+- Surveillance des erreurs
+- Digests quotidiens
+
+### HubSpot / Salesforce
+
+Enrichissez automatiquement les données CRM :
+
+```
+1. Nouveau contact ajouté
+2. Olostep scrappe le site web de l'entreprise
+3. IA extrait les informations clés
+4. Étape de Révision Humaine
+5. CRM - Mettre à jour le contact (si approuvé)
+```
+
+**Cas d'utilisation :**
+- Enrichissement de leads avec contrôle qualité
+- Recherche d'entreprise
+- Intelligence concurrentielle
+- Cartographie des comptes
+
+### Notion
+
+Construisez des bases de connaissances avec du contenu révisé :
+
+```
+1. Olostep crawle la documentation
+2. IA - Analyser et structurer le contenu
+3. Étape de Révision Humaine
+4. Notion - Créer des Pages (contenu approuvé)
+```
+
+**Cas d'utilisation :**
+- Miroirs de documentation
+- Répertoires de recherche
+- Bibliothèques de contenu
+- Wikis d'équipe
+
+## Bonnes Pratiques
+
+<AccordionGroup>
+  <Accordion title="Utiliser la Boucle Humaine pour le Contrôle Qualité">
+    Exploitez la fonctionnalité de boucle humaine de Relay.app pour :
+    - Réviser les résumés générés par l'IA
+    - Approuver les données sensibles avant le stockage
+    - Valider l'exactitude du contenu extrait
+    - Prendre des décisions de jugement sur les chemins de flux de travail
+  </Accordion>
+
+  <Accordion title="Combiner avec l'IA Intégrée">
+    Utilisez les fonctionnalités d'IA intégrées de Relay.app :
+    - Catégoriser automatiquement le contenu extrait
+    - Générer des résumés avant de stocker
+    - Extraire des données structurées à partir de contenu non structuré
+    - Prendre des décisions intelligentes dans les flux de travail
+  </Accordion>
+
+  <Accordion title="Définir des Temps d'Attente Appropriés">
+    Pour les sites riches en JavaScript, utilisez le paramètre "Attendre avant de scraper" :
+    - Sites simples : 0-1000ms
+    - Sites dynamiques : 2000-3000ms
+    - JavaScript lourd : 5000-8000ms
+    
+    Testez avec différentes valeurs pour trouver le temps d'attente optimal.
+  </Accordion>
+
+  <Accordion title="Utiliser des Parseurs Spécialisés">
+    Pour les sites populaires (Amazon, LinkedIn, Google), utilisez des parseurs préconstruits :
+    - Obtenez des données structurées automatiquement
+    - Extraction plus fiable
+    - Pas besoin de parsing personnalisé
+    - Maintenu par Olostep
+  </Accordion>
+
+  <Accordion title="Exploiter les Fonctionnalités de Test de Relay.app">
+    Utilisez les excellentes capacités de test de Relay.app :
+    - Informations de test claires pour chaque étape
+    - Messages d'erreur utiles
+    - Débogage facile
+    - Testez les flux de travail avant activation
+  </Accordion>
+
+  <Accordion title="Stocker les Résultats Correctement">
+    Choisissez le bon stockage en fonction de vos besoins :
+    - **Google Sheets** : Suivi simple, collaboration d'équipe
+    - **Airtable** : Données relationnelles, formatage riche
+    - **Base de données** : Grande échelle, requêtes complexes
+    - **Notion** : Base de connaissances, documentation
+  </Accordion>
+</AccordionGroup>
+
+## Cas d'Utilisation Courants par Industrie
+
+### E-commerce
+- **Surveillance des Prix** : Suivre les prix des concurrents avec des flux de travail d'approbation humaine
+- **Recherche de Produits** : Découvrir les produits tendance et les lacunes du marché
+- **Suivi des Stocks** : Surveiller la disponibilité des stocks
+- **Analyse des Avis** : Agréger et analyser les avis clients avec l'IA
+
+### Marketing & SEO
+- **Découverte de Contenu** : Trouver des opportunités de contenu avec l'aide de l'IA
+- **Analyse Concurrentielle** : Suivre les stratégies des concurrents
+- **Recherche de Backlinks** : Découvrir des opportunités de liens
+- **Recherche de Mots-clés** : Extraire des données de mots-clés à partir des résultats de recherche
+
+### Ventes & Génération de Leads
+- **Enrichissement de Leads** : Améliorer les données CRM avec des informations web et révision humaine
+- **Recherche d'Entreprise** : Rassembler des informations sur les entreprises
+- **Découverte de Contacts** : Trouver des décideurs
+- **Intelligence Concurrentielle** : Suivre les mouvements des concurrents
+
+### Recherche & Analyse
+- **Collecte de Données** : Rassembler des données de multiples sources
+- **Recherche de Marché** : Suivre les tendances de l'industrie
+- **Recherche Académique** : Collecter des données de recherche
+- **Intelligence des Prix** : Analyser les stratégies de prix
+
+### Médias & Publication
+- **Agrégation de Contenu** : Curater du contenu de plusieurs sites avec des résumés IA
+- **Surveillance des Nouvelles** : Suivre les nouvelles et mentions
+- **Médias Sociaux** : Surveiller les plateformes sociales
+- **Détection de Tendances** : Identifier les sujets tendance
+
+## Dépannage
+
+<AccordionGroup>
+  <Accordion title="Échec de l'Authentification">
+    **Erreur** : "Clé API invalide"
+    
+    **Solutions** :
+    - Vérifiez la clé API depuis le [tableau de bord](https://olostep.com/dashboard)
+    - Assurez-vous qu'il n'y a pas d'espaces supplémentaires dans la clé API
+    - Reconnectez votre compte Olostep dans Relay.app
+    - Vérifiez que la clé API est active
+  </Accordion>
+
+  <Accordion title="Le Scraping Renvoie du Contenu Vide">
+    **Erreur** : Les champs de contenu sont vides
+    
+    **Solutions** :
+    - Augmentez le temps "Attendre avant de scraper"
+    - Vérifiez si le site web nécessite une connexion
+    - Essayez un format différent (HTML vs Markdown)
+    - Vérifiez que l'URL est accessible
+    - Vérifiez si le site bloque l'accès automatisé
+  </Accordion>
+
+  <Accordion title="Limite de Taux Dépassée">
+    **Erreur** : "Limite de taux dépassée"
+    
+    **Solutions** :
+    - Espacer les exécutions de flux de travail avec des délais
+    - Utiliser le traitement par lots au lieu de scrapes individuels
+    - Mettez à niveau votre plan Olostep
+    - Vérifiez la limite de taux dans le tableau de bord
+  </Accordion>
+
+  <Accordion title="URL Non Scrappée">
+    **Erreur** : Des URL spécifiques échouent à scraper
+    
+    **Solutions** :
+    - Vérifiez le format de l'URL (inclure http:// ou https://)
+    - Vérifiez si l'URL nécessite une authentification
+    - Testez l'URL dans un navigateur d'abord
+    - Essayez avec le paramètre de pays
+    - Contactez le support pour les domaines bloqués
+  </Accordion>
+</AccordionGroup>
+
+## Relay.app vs Zapier
+
+Relay.app est une alternative moderne à Zapier avec plusieurs avantages :
+
+**Avantages de Relay.app :**
+- **Boucle Humaine** : Étapes de révision manuelle intégrées
+- **IA Intégrée** : Fonctionnalités d'IA intégrées aux flux de travail
+- **Meilleure UX** : Interface plus intuitive et messages d'erreur plus clairs
+- **Meilleur Prix** : Plus rentable pour de nombreux cas d'utilisation
+- **Intégrations Plus Profondes** : Intégrations plus complètes avec des applications populaires
+
+**Quand Choisir Zapier :**
+- Besoin d'intégration avec des applications moins couramment utilisées
+- Préférence pour une plateforme plus établie
+- Nécessité de fonctionnalités spécifiques à Zapier
+
+Pour des comparaisons détaillées, voir [la comparaison de Relay.app avec Zapier](https://www.relay.app/blog/zapier-alternatives).
+
+## Tarification
+
+Olostep facture en fonction de l'utilisation de l'API, indépendamment de Relay.app :
+
+- **Scrapes** : Paiement par scrape
+- **Lots** : Paiement par URL dans le lot
+- **Crawls** : Paiement par page crawlée
+- **Maps** : Paiement par opération de carte
+
+Consultez la tarification actuelle sur [olostep.com/pricing](https://olostep.com/pricing).
+
+**Plan Relay.app** : Vous avez également besoin d'un plan actif Relay.app pour exécuter des flux de travail.
+
+## Support
+
+Besoin d'aide avec l'intégration Relay.app ?
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="https://docs.olostep.com">
+    Parcourez la documentation complète de l'API
+  </Card>
+  
+  <Card title="Email de Support" icon="envelope" href="mailto:info@olostep.com">
+    Email : info@olostep.com
+  </Card>
+  
+  <Card title="Centre d'Aide Relay.app" icon="help-circle" href="https://help.relay.app">
+    Visitez le centre d'aide de Relay.app
+  </Card>
+  
+  <Card title="Page de Statut" icon="signal" href="https://status.olostep.com">
+    Vérifiez le statut de l'API
+  </Card>
+</CardGroup>
+
+## Ressources Connexes
+
+<CardGroup cols={2}>
+  <Card title="API Scrapes" icon="file-lines" href="/features/scrapes/scrapes">
+    En savoir plus sur le point de terminaison Scrapes
+  </Card>
+  
+  <Card title="API Batches" icon="layer-group" href="/features/batches/batches">
+    En savoir plus sur le point de terminaison Batches
+  </Card>
+  
+  <Card title="API Crawls" icon="spider-web" href="/features/crawls/crawls">
+    En savoir plus sur le point de terminaison Crawls
+  </Card>
+  
+  <Card title="API Maps" icon="map" href="/features/maps/maps">
+    En savoir plus sur le point de terminaison Maps
+  </Card>
+  
+  <Card title="SDK Python" icon="python" href="/sdks/python">
+    Utilisez Olostep avec Python
+  </Card>
+  
+  <Card title="Intégration Zapier" icon="bolt" href="/integrations/zapier">
+    Comparez avec l'intégration Zapier
+  </Card>
+</CardGroup>
+
+## Commencer
+
+Prêt à automatiser vos flux de travail de scraping web avec Relay.app ?
+
+<Card title="Créez Votre Premier Flux de Travail" icon="bolt" href="https://www.relay.app/apps/olostep/integrations">
+  Commencez à construire des flux de travail automatisés avec Olostep et Relay.app
+</Card>
+
+Connectez Olostep avec la plateforme d'automatisation moderne de Relay.app et automatisez dès aujourd'hui votre extraction de données web !

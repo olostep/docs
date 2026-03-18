@@ -1,0 +1,213 @@
+---
+title: "Metadata"
+sidebarTitle: "Metadata"
+description: "Voeg aangepaste sleutel-waarde paren toe aan API-resources"
+icon: "tag"
+---
+
+<Info>
+**Momenteel beschikbaar voor [Batches](/api-reference/batches/create).** Ondersteuning voor scrapes, crawls, maps en antwoorden komt binnenkort.
+</Info>
+
+Metadata stelt je in staat om aangepaste sleutel-waarde paren toe te voegen aan Olostep resources. Dit is nuttig voor het volgen, filteren, organiseren en opslaan van context naast je API-verzoeken.
+
+Metadata volgt [Stripe's aanpak](https://stripe.com/docs/api/metadata) — eenvoudig, flexibel en consistent over alle eindpunten.
+
+---
+
+## Gebruiksscenario's
+
+<CardGroup cols={2}>
+  <Card title="Volgen & Organisatie" icon="folder">
+    Koppel resources aan interne systemen met order-ID's, klant-ID's of projectnamen.
+  </Card>
+  <Card title="Filteren & Zoeken" icon="magnifying-glass">
+    Tag resources voor eenvoudige opvraging en filtering in je applicatie.
+  </Card>
+  <Card title="Workflow Context" icon="diagram-project">
+    Sla pijplijnfase, prioriteitsniveau of verwerkingsinstructies op.
+  </Card>
+  <Card title="Audit Trail" icon="clock-rotate-left">
+    Registreer wie een verzoek heeft geïnitieerd, tijdstempels of versie-informatie.
+  </Card>
+</CardGroup>
+
+---
+
+## Metadata toevoegen bij creatie
+
+Voeg de `metadata` parameter toe bij het creëren van een resource:
+
+<CodeGroup>
+
+```json Request Body
+{
+  "url": "https://example.com",
+  "metadata": {
+    "order_id": "12345",
+    "customer_name": "John Doe",
+    "priority": "high",
+    "internal_ref": "proj-2024-001"
+  }
+}
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <your_token>"},
+    json={
+        "items": [{"custom_id": "1", "url": "https://example.com"}],
+        "metadata": {
+            "project": "q4-analysis",
+            "team": "data-ops",
+            "priority": "high"
+        }
+    }
+)
+```
+
+```javascript Node.js
+const response = await fetch("https://api.olostep.com/v1/batches", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <your_token>",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    items: [{ custom_id: "1", url: "https://example.com" }],
+    metadata: {
+      project: "q4-analysis",
+      team: "data-ops",
+      priority: "high"
+    }
+  })
+});
+```
+
+</CodeGroup>
+
+Metadata wordt geretourneerd in alle volgende GET-antwoorden voor die resource.
+
+---
+
+## Validatieregels
+
+| Beperking | Limiet | Foutvoorbeeld |
+|-----------|--------|---------------|
+| Maximum aantal sleutels | 50 | `"Metadata kan maximaal 50 sleutels hebben. Je hebt 51 sleutels opgegeven."` |
+| Sleutellengte | 40 tekens | `"Metadata sleutel \"my_very_long_key_name...\" overschrijdt de limiet van 40 tekens."` |
+| Sleutelformaat | Geen vierkante haken | `"Metadata sleutel \"items[0]\" mag geen vierkante haken ([ of ]) bevatten."` |
+| Waardelengte | 500 tekens | `"Metadata waarde voor sleutel \"description\" overschrijdt de limiet van 500 tekens."` |
+| Waardetype | Alleen strings | `"Metadata waarde voor sleutel \"count\" moet een string zijn. Object ontvangen."` |
+
+<Note>
+**Type Coercion**: Nummers en booleans worden automatisch omgezet naar strings.
+- `42` → `"42"`
+- `true` → `"true"`
+- `3.14` → `"3.14"`
+
+Objecten en arrays worden afgewezen.
+</Note>
+
+---
+
+## Metadata bijwerken (PATCH)
+
+<Info>
+**Momenteel beschikbaar voor:** Alleen [Batches](/api-reference/batches/update).
+
+Crawls, Scrapes, Maps en Antwoorden ondersteunen nog niet het bijwerken van metadata na creatie.
+</Info>
+
+Je kunt metadata bijwerken op bestaande batches met behulp van het [PATCH eindpunt](/api-reference/batches/update). Updates gebruiken merge-gedrag.
+
+### Update Operaties
+
+<AccordionGroup>
+
+<Accordion title="Nieuwe sleutels toevoegen" icon="plus">
+Nieuwe sleutels worden toegevoegd terwijl bestaande behouden blijven.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"new_key": "new_value"}}'
+```
+
+**Voor:** `{"project": "alpha"}`  
+**Na:** `{"project": "alpha", "new_key": "new_value"}`
+</Accordion>
+
+<Accordion title="Bestaande sleutels bijwerken" icon="pen">
+Bestaande sleutels worden overschreven met nieuwe waarden.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "beta"}}'
+```
+
+**Voor:** `{"project": "alpha", "priority": "high"}`  
+**Na:** `{"project": "beta", "priority": "high"}`
+</Accordion>
+
+<Accordion title="Specifieke sleutels verwijderen" icon="trash">
+Stel een sleutel in op `null` of `""` (lege string) om deze te verwijderen.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"priority": null}}'
+```
+
+**Voor:** `{"project": "alpha", "priority": "high"}`  
+**Na:** `{"project": "alpha"}`
+</Accordion>
+
+<Accordion title="Alle metadata wissen" icon="eraser">
+Stel het gehele metadata veld in op `null` of `""` om alle sleutels te verwijderen.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": null}'
+```
+
+**Voor:** `{"project": "alpha", "priority": "high"}`  
+**Na:** `{}`
+</Accordion>
+
+<Accordion title="Gemengde operaties" icon="shuffle">
+Voeg toe, werk bij en verwijder sleutels in één verzoek.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "gamma", "new_field": "value", "old_field": null}}'
+```
+
+**Voor:** `{"project": "alpha", "old_field": "remove_me"}`  
+**Na:** `{"project": "gamma", "new_field": "value"}`
+</Accordion>
+
+</AccordionGroup>
+
+### PATCH Gedragsoverzicht
+
+| Operatie | Verzoek | Resultaat |
+|----------|---------|-----------|
+| Sleutel toevoegen | `{"metadata": {"new": "value"}}` | Sleutel toegevoegd, anderen behouden |
+| Sleutel bijwerken | `{"metadata": {"existing": "new_value"}}` | Sleutel bijgewerkt, anderen behouden |
+| Sleutel verwijderen | `{"metadata": {"key": null}}` | Sleutel verwijderd, anderen behouden |
+| Sleutel verwijderen | `{"metadata": {"key": ""}}` | Sleutel verwijderd, anderen behouden |
+| Alles wissen | `{"metadata": null}` | Alle sleutels verwijderd |
+| Alles wissen | `{"metadata": ""}` | Alle sleutels verwijderd |
+| Geen actie | `{"metadata": {}}` | Geen wijzigingen |

@@ -1,0 +1,486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "クローラーAPI",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/crawls": {
+      "post": {
+        "summary": "新しいクローラーを開始",
+        "description": "指定されたパラメーターで新しいクローラーのプロセスを開始します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_url": {
+                    "type": "string",
+                    "description": "クローラーの開始地点。"
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "グロブ構文を使用してクローラーに含めるURLパスパターン。  デフォルトは`/**`で、すべてのURLを含みます。特定のセクションをクロールするには、`/blog/**`のようなパターンを使用します（例：ブログページのみ）、`/products/*.html`は商品ページ用、または異なるセクションのために複数のパターンを使用します。*（任意の文字）や**（再帰的なマッチング）などの標準的なグロブ機能をサポートしています。"
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "グロブパターンで除外するURLパス名。例：`/careers/**`。除外されたURLは、含まれるURLよりも優先されます。"
+                  },
+                  "max_pages": {
+                    "type": "number",
+                    "description": "クロールするページの最大数。ウェブサイト全体をクロールするようなほとんどのユースケースに推奨されます。"
+                  },
+                  "max_depth": {
+                    "type": "number",
+                    "description": "クロールの最大深度。n次のリンクまでのみ抽出するのに便利です。"
+                  },
+                  "include_external": {
+                    "type": "boolean",
+                    "description": "一次外部リンクをクロールします。"
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "ウェブサイトのサブドメインを含めます。デフォルトは`false`です。"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "特定のリンクを見つけるためのオプションの検索クエリで、結果を関連性でソートします。"
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "検索クエリに従って、各ページで最も関連性の高いリンクのトップNのみをクロールするためのオプションの数。"
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "クロールが完了したときにPOSTリクエストを受け取るためのHTTPS URL。`http://`または`https://`プロトコルを使用して公開アクセス可能なURLでなければなりません。localhostやプライベートIPアドレスを指すことはできません。[Webhooks](/api-reference/common/webhooks)でペイロード形式とリトライの動作を参照してください。"
+                  },
+                  "timeout": {
+                    "type": "number",
+                    "description": "n秒後にクロールを終了し、それまでに完了したページを取得します。指定されたタイムアウトから約10秒余分にかかることがあります。"
+                  },
+                  "follow_robots_txt": {
+                    "type": "boolean",
+                    "description": "robots.txtのルールを尊重するかどうか。`false`に設定すると、クローラーはrobots.txtの禁止指令に関係なくウェブサイトをスクレイプします。デフォルトは`true`です。",
+                    "default": true
+                  },
+                  "scrape_options": {
+                    "type": "object",
+                    "description": "Olostep APIから各個別ページのスクレイプリクエストを制御します。すべてのフィールドはオプションです。",
+                    "properties": {
+                      "formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "html",
+                            "markdown",
+                            "text",
+                            "json",
+                            "screenshot"
+                          ]
+                        },
+                        "description": "各スクレイプされたページにリクエストする出力形式。省略時は`[\"html\", \"markdown\"]`がデフォルトです。`html`は常に自動的に含まれます。`parser`が提供されると`json`が自動的に追加されます。注意：`raw_pdf`はサポートされていません—PDFはクロールできません。",
+                        "example": [
+                          "markdown",
+                          "screenshot"
+                        ]
+                      },
+                      "parser": {
+                        "type": "string",
+                        "description": "各ページで実行し、構造化された`json`出力を生成するためのパーサー名（例：`\"@olostep/extract-emails\"`）。設定されると`formats`に`json`を自動的に追加します。",
+                        "example": "@olostep/extract-emails"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "start_url",
+                  "max_pages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "クロールが正常に開始されました。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "クロールID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"crawl\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` または `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "エポックでの作成時間"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "日付での作成時間"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "クロールプロセスの現在の深さ。"
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "クロールされたページの数"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}": {
+      "get": {
+        "summary": "クロール情報を取得",
+        "description": "`crawl_id` を使用して特定のクロールに関する情報を取得します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "情報を取得するためのクロールのID。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "クロール情報を含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "クロールID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"crawl\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` または `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "エポックでの作成時間"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "日付での作成時間"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "クロールプロセスの現在の深さ。"
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "クロールされたページの数"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "404": {
+            "description": "提供されたIDに対するクロールが見つかりません。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}/pages": {
+      "get": {
+        "summary": "クロールされたページのリストを、オプションでコンテンツと共に取得",
+        "description": "特定のクロールIDに対して処理されたクロールされたページとコンテンツのリストを取得します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "URLのリストを取得するためのクロールのID。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "コンテンツの取得を開始するインデックスを表すオプションの整数。すべてのURLが取得されるまでページネーションに便利です。0から始め、最後のリクエストの `response['cursor']` 値を提供します。"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "返される結果の数を制限するためのオプションの整数。1回に10〜50件の結果を推奨。*cursor* を使用してページネーション。1回のリクエストで最大10MBのコンテンツを取得可能。"
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "結果を関連性でソートするためのオプションの検索クエリ。提供されている場合はデフォルトで元の search_query を使用。"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
+            },
+            "description": "**非推奨:** `retrieve_id` を使用して `/retrieve` エンドポイントを使用してください。  取得するフォーマットの配列（例: [\"html\", \"markdown\"]）。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "URLのリストを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "crawl_id": {
+                      "type": "string",
+                      "description": "クロールID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"crawl\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` または `completed`"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "pages_count": {
+                      "type": "number"
+                    },
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string",
+                            "description": "`/retrieve` エンドポイントからコンテンツを取得するために"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "is_external": {
+                            "type": "boolean"
+                          },
+                          "html_content": {
+                            "type": "string",
+                            "description": "非推奨: `/retrieve` エンドポイントと `retrieve_id` を使用してね。"
+                          },
+                          "markdown_content": {
+                            "type": "string",
+                            "description": "非推奨: `/retrieve` エンドポイントと `retrieve_id` を使用してね。"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "external_urls": {
+                          "type": "array",
+                          "description": "クロール中に見つかった外部URL",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "failed_urls": {
+                          "type": "array",
+                          "description": "見つかったけどスクレイプできなかったURL",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "次のリクエストで次のアイテムを取得するためにクエリに渡してね。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "404": {
+            "description": "提供されたIDに対するクロールが見つかりません。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    }
+  }
+}

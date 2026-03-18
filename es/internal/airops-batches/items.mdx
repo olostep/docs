@@ -1,0 +1,165 @@
+---
+title: "Obtener Elementos del Lote"
+description: "Recupera todos los elementos con sus metadatos extraídos"
+openapi: "GET /v1/batches-airops/{batch_id}/items"
+---
+
+## Descripción General
+
+Devuelve todos los elementos en el lote con sus metadatos extraídos. Los elementos incluyen tanto extracciones exitosas como fallidas en cualquier etapa.
+
+<Note>
+  Este endpoint solo devuelve resultados completos cuando el `status` del lote es `"completed"`. Si el lote aún está en proceso, recibirás un arreglo `items` vacío con un mensaje.
+</Note>
+
+## Estructura de la Respuesta
+
+<ResponseField name="batch_id" type="string">
+  El identificador del lote.
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  Marca de tiempo ISO 8601 cuando el lote se completó.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Estado del lote: `"completed"` o `"in_progress"`.
+</ResponseField>
+
+<ResponseField name="counts" type="object">
+  Resumen de conteos:
+  - `total` - Total de elementos en el lote
+  - `succeeded` - Procesados exitosamente
+  - `failed` - Fallidos en cualquier etapa
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Arreglo de todos los elementos con sus resultados.
+</ResponseField>
+
+---
+
+## Esquema del Elemento
+
+### Elementos Exitosos
+
+Los elementos completados tienen campos extraídos en el nivel raíz:
+
+```json
+{
+  "custom_id": "post-1",
+  "url": "https://example.com/blog/post-1",
+  "status": "completed",
+  "page_type": "informational_article",
+  "author": "John Doe",
+  "date_published": "2024-01-15",
+  "date_modified": null,
+  "brand_mentions": ["Acme Corp", "TechBrand"]
+}
+```
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `custom_id` | string | Tu identificador de la solicitud |
+| `url` | string | La URL extraída |
+| `status` | string | `"completed"` para elementos exitosos |
+| `page_type` | string | Tipo de página clasificada (ver [Descripción General](/internal/airops-batches/overview#page-types)) |
+| `author` | string \| null | Autor del contenido |
+| `date_published` | string \| null | Fecha de publicación (ISO 8601 cuando esté disponible) |
+| `date_modified` | string \| null | Fecha de última modificación |
+| `brand_mentions` | array | Marcas de tu lista de entrada encontradas en la página |
+
+### Elementos Fallidos
+
+Los elementos que fallaron durante cualquier etapa tienen una estructura de error:
+
+```json
+{
+  "custom_id": "post-failed",
+  "url": "https://example.com/broken-page",
+  "status": "failed",
+  "failed_stage": "scraping",
+  "error": {
+    "code": "SCRAPE_FAILED",
+    "message": "Connection timeout after 30s"
+  }
+}
+```
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `status` | string | `"failed"` para elementos fallidos |
+| `failed_stage` | string | Etapa donde ocurrió la falla: `scraping`, `analyzing`, o `enriching` |
+| `error` | object | Detalles del error con `code` y `message` |
+
+---
+
+## Fuentes de Extracción
+
+Los campos se extraen utilizando múltiples métodos en orden de prioridad:
+
+1. **Classifier** - Análisis de patrones de URL (instantáneo)
+2. **Parser** - Extracción de metadatos estructurados
+3. **LLM** - Extracción impulsada por IA para campos faltantes
+
+---
+
+## Ejemplo de Respuesta
+
+### Lote Completado
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "completed_at": "2024-01-15T12:30:00.000Z",
+  "status": "completed",
+  "counts": {
+    "total": 100,
+    "succeeded": 98,
+    "failed": 2
+  },
+  "items": [
+    {
+      "custom_id": "post-1",
+      "url": "https://example.com/blog/post-1",
+      "status": "completed",
+      "page_type": "informational_article",
+      "author": "John Doe",
+      "date_published": "2024-01-15",
+      "date_modified": null,
+      "brand_mentions": ["OpenAI", "Google"]
+    },
+    {
+      "custom_id": "post-2",
+      "url": "https://example.com/pricing",
+      "status": "completed",
+      "page_type": "pricing_page",
+      "author": null,
+      "date_published": null,
+      "date_modified": null,
+      "brand_mentions": []
+    },
+    {
+      "custom_id": "post-3",
+      "url": "https://example.com/broken",
+      "status": "failed",
+      "failed_stage": "scraping",
+      "error": {
+        "code": "SCRAPE_FAILED",
+        "message": "URL failed to scrape"
+      }
+    }
+  ]
+}
+```
+
+### Lote en Progreso
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "status": "in_progress",
+  "items": [],
+  "message": "El lote aún está en proceso. Los elementos estarán disponibles cuando el estado sea \"completed\"."
+}
+```

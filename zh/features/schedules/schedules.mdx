@@ -1,0 +1,565 @@
+---
+sidebarTitle: "计划"
+title: "计划"
+description: "计划 API 调用在指定时间自动运行"
+icon: "clock"
+---
+
+通过 Olostep 的 `/v1/schedules` 端点，你可以安排 API 调用在指定时间自动执行。使用 cron 表达式或自然语言安排一次性执行或定期任务。
+
+- 在特定日期时间安排一次性执行
+- 使用 cron 表达式创建定期计划
+- 使用自然语言文本自动生成 cron 表达式
+- 安排 HTTP 端点（GET 或 POST）
+- 对于 POST 请求，使用简短形式的 Olostep 端点（自动加前缀）或完整 URL
+- 传递你想要的任何负载 - 负载会按你指定的方式发送
+- 自动管理计划生命周期
+
+有关 API 详细信息，请参见 [计划端点 API 参考](/api-reference/schedules/create)。
+
+## 安装
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: 内置的 curl 就可以
+```
+
+</CodeGroup>
+
+## 创建计划
+
+创建一个计划以自动执行 API 调用。你可以使用 cron 表达式创建一次性计划或定期计划。`endpoint` 可以是任何 URL（不限于 Olostep 端点），`payload` 可以包含你想发送的任何数据。
+
+### 一次性计划
+
+安排一个 API 调用在特定日期时间执行一次。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 安排抓取任务在 1 小时后运行
+execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
+
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "execute_at": execute_at,
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 小时后
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### 使用 cron 表达式的定期计划
+
+使用 cron 表达式创建一个定期计划。Cron 表达式使用 6 个字段格式：分钟 小时 日 月 星期几 年。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 安排抓取任务每天上午 10 点 UTC 运行
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    cron_expression: '0 10 * * ? *', // 每天上午 10 点 UTC
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### 自然语言计划
+
+使用自然语言文本自动生成 cron 表达式。系统会将你的文本转换为有效的 cron 表达式。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 使用自然语言安排
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "text": "every 3 minutes",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    text: 'every Monday at 9am',
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "text": "every day at 10am",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+## 响应格式
+
+当你创建一个计划时，你会收到一个包含以下属性的计划对象：
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "recurring",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "cron_expression": "0 10 * * ? *",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T10:00:00.000Z"
+}
+```
+
+对于一次性计划，响应中包含 `execute_at` 而不是 `cron_expression`：
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "onetime",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "execute_at": "2025-01-15T10:00:00.000Z",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T09:00:00.000Z"
+}
+```
+
+## 列出计划
+
+检索你团队的所有计划。默认情况下，已删除的计划会被过滤掉。使用 `include_deleted` 查询参数来包含它们。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules", headers=headers)
+result = response.json()
+print(f"Total schedules: {result['count']}")
+for schedule in result['schedules']:
+    print(json.dumps(schedule, indent=2))
+
+# 要包含已删除的计划：
+# response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(`Total schedules: ${result.count}`)
+result.schedules.forEach(s => console.log(s))
+
+// 要包含已删除的计划：
+// const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# 要包含已删除的计划：
+# curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
+#   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## 获取一个计划
+
+通过其 ID 检索单个计划。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## 删除一个计划
+
+通过其 ID 删除一个计划。这将停止任何未来的执行。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.delete(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## 支持的端点
+
+### Olostep 端点（简短形式）
+
+对于 POST 请求，你可以使用 Olostep 端点的简短形式。系统会自动为这些加上 `https://api.olostep.com/` 前缀：
+
+- `v1/scrapes` - 安排网页抓取任务
+- `v1/batches` - 安排批处理作业
+- `v1/crawls` - 安排网站爬取操作
+- `v1/maps` - 安排地图数据提取
+- `v1/answers` - 安排答案生成
+
+### 完整 URL
+
+你也可以为你的端点提供完整的 URL。这对于外部 API 或 webhooks 是必需的：
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 安排调用外部 API
+payload = {
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+        "custom_field": "any value",
+        "data": {"nested": "structure"},
+        "timestamp": datetime.now().isoformat()
+    },
+    "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'https://api.example.com/webhook',
+    payload: {
+      custom_field: 'any value',
+      data: { nested: 'structure' },
+      timestamp: new Date().toISOString()
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+      "custom_field": "any value",
+      "data": {"nested": "structure"}
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+`payload` 字段接受任何 JSON 对象 - 你可以根据目标端点的需要进行结构化。
+
+## Cron 表达式格式
+
+Cron 表达式使用 6 个字段格式：
+
+```
+minute hour day month day-of-week year
+```
+
+示例：
+- `0/3 * * * ? *` - 每 3 分钟
+- `0 10 * * ? *` - 每天上午 10:00
+- `0 9 ? * MON *` - 每周一上午 9:00
+- `0 0 1 * ? *` - 每月的第一天午夜
+
+当未指定时，使用 `?` 表示日或星期几。
+
+## 自然语言示例
+
+你可以使用自然语言来描述计划。系统会自动将它们转换为 cron 表达式：
+
+- "every 3 minutes" → `0/3 * * * ? *`
+- "every day at 10am" → `0 10 * * ? *`
+- "every Monday at 9am" → `0 9 ? * MON *`
+- "every hour" → `0 * * * ? *`
+- "every week on Monday" → `0 0 ? * MON *`
+
+## 重要说明
+
+- 一次性计划在执行后会自动删除
+- 定期计划会持续运行，直到手动删除
+- 时区必须是有效的 IANA 时区标识符（例如 "UTC", "America/New_York", "Europe/London"）
+- `execute_at` 日期时间必须是未来的时间
+- 自然语言转换可能需要重试；系统最多会尝试 3 次
+- 使用自然语言文本（`text` 参数）时，时区默认为 "UTC"
+- 计划会使用提供的负载精确执行 API 调用 - 你可以传递任何需要的 JSON 结构
+- 对于 POST 请求，简短形式的 Olostep 端点（`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`）会自动加上 `https://api.olostep.com/` 前缀
+- 对于其他端点，请提供完整的 URL
+- `payload` 可以包含任何数据结构 - 它会按原样发送到你的目标端点
+- 删除已删除的计划将返回 400 错误
+
+## 价格
+
+计划本身是免费的。你只需为计划运行时执行的 API 调用付费。例如，如果你安排一次抓取，你将为每次执行支付 1 个信用（如果使用解析器或 LLM 提取则更多）。

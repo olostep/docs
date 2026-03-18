@@ -1,0 +1,58 @@
+---
+title: "Crea Risposta"
+openapi: "it/openapi/answers.json POST /v1/answers"
+---
+
+# Crea Risposta
+
+Questa API ti permette di creare una nuova risposta nel sistema. Puoi utilizzare questo endpoint per aggiungere risposte personalizzate in base alle tue esigenze.
+
+## Richiesta
+
+Per creare una risposta, invia una richiesta `POST` al seguente endpoint:
+
+```
+POST /v1/answers
+```
+
+### Parametri del Corpo della Richiesta
+
+- `question_id` (obbligatorio): L'ID della domanda a cui questa risposta è associata.
+- `content` (obbligatorio): Il contenuto della risposta.
+- `author` (opzionale): L'autore della risposta.
+
+### Esempio di Richiesta
+
+```json
+{
+  "question_id": "12345",
+  "content": "Questa è la mia risposta alla domanda.",
+  "author": "Mario Rossi"
+}
+```
+
+## Risposta
+
+Una risposta di successo restituirà il codice di stato `201 Created` insieme ai dettagli della risposta appena creata.
+
+### Esempio di Risposta
+
+```json
+{
+  "id": "67890",
+  "question_id": "12345",
+  "content": "Questa è la mia risposta alla domanda.",
+  "author": "Mario Rossi",
+  "created_at": "2023-10-01T12:34:56Z"
+}
+```
+
+## Errori
+
+- `400 Bad Request`: Se mancano parametri obbligatori o se i dati forniti non sono validi.
+- `404 Not Found`: Se l'ID della domanda fornito non esiste.
+- `500 Internal Server Error`: Se si verifica un errore imprevisto sul server.
+
+## Note
+
+Assicurati che l'ID della domanda esista prima di creare una risposta. Se hai bisogno di ulteriori informazioni su come gestire le risposte, consulta la [documentazione completa](https://example.com/docs).

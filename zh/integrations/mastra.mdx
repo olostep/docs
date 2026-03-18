@@ -1,0 +1,780 @@
+---
+sidebarTitle: "Mastra"
+icon: "robot"
+title: "Mastra 集成"
+description: "使用 Mastra.ai 的代理框架构建具有网页搜索、抓取和爬虫功能的 AI 代理"
+---
+
+Olostep Mastra 集成为 Mastra.ai 代理带来了强大的网页数据提取能力。Olostep 是一个网页搜索、抓取和爬虫 API——用于搜索、提取和结构化网页数据的 API。构建智能 AI 代理，可以自主搜索、抓取、分析和结构化任何网站的数据。
+
+[从 npm 安装 →](https://www.npmjs.com/package/@olostep/mastra-tools)
+
+## 功能
+
+该集成提供了 4 个强大的 API 用于自动化网页数据提取：
+
+<CardGroup cols={2}>
+  <Card title="抓取网站" icon="file-lines">
+    从任何单个 URL 提取内容，支持多种格式（Markdown、HTML、JSON、文本）
+  </Card>
+  
+  <Card title="批量抓取 URL" icon="layer-group">
+    并行处理多达 100,000 个 URL，适合大规模数据提取
+  </Card>
+  
+  <Card title="创建爬虫" icon="spider-web">
+    自主发现并抓取整个网站，通过链接进行导航
+  </Card>
+  
+  <Card title="创建地图" icon="map">
+    提取网站的所有 URL 用于网站结构分析和内容发现
+  </Card>
+</CardGroup>
+
+## 安装
+
+<CodeGroup>
+```bash npm
+npm install @olostep/mastra-tools
+```
+
+```bash yarn
+yarn add @olostep/mastra-tools
+```
+
+```bash pnpm
+pnpm add @olostep/mastra-tools
+```
+</CodeGroup>
+
+## 设置
+
+### 1. 安装包
+
+```bash
+npm install @olostep/mastra-tools @mastra/core
+```
+
+### 2. 导入并注册集成
+
+在你的 Mastra 配置文件中：
+
+```typescript
+import { Mastra } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+// 创建 Olostep 集成
+const olostep = createOlostepIntegration();
+
+// 注册 API（这使它们可供代理使用）
+olostep.registerApis();
+
+// 添加到你的 Mastra 配置中
+export const mastra = new Mastra({
+  config: {
+    integrations: [olostep],
+    // ... 其他配置
+  },
+});
+```
+
+### 3. 配置 API 密钥
+
+将你的 Olostep API 密钥设置为环境变量：
+
+```bash
+export OLOSTEP_API_KEY=your-api-key-here
+```
+
+或者在你的 `.env` 文件中：
+
+```
+OLOSTEP_API_KEY=your-api-key-here
+```
+
+从 [Olostep 仪表板](https://olostep.com/dashboard)获取你的 API 密钥。
+
+## 可用的 API
+
+该集成公开了 4 个 API，供你的 Mastra 代理使用：
+
+### scrapeWebsite
+
+从单个 URL 提取内容。支持多种格式和 JavaScript 渲染。
+
+**使用场景：**
+- 监控特定页面的变化
+- 从电商网站提取产品信息
+- 收集新闻文章或博客文章的数据
+- 为内容聚合提取内容
+
+**Schema 参数：**
+
+<ParamField path="apiKey" type="string" required>
+  你的 Olostep API 密钥
+</ParamField>
+
+<ParamField path="url_to_scrape" type="string" required>
+  要抓取的网站 URL（必须包含 http:// 或 https://）
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  输出格式：['html', 'markdown', 'json', 'text']
+</ParamField>
+
+<ParamField path="country" type="string">
+  用于特定位置内容的国家代码（例如，“US”、“GB”、“CA”）
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="number">
+  JavaScript 渲染的等待时间（0-10000 毫秒）
+</ParamField>
+
+<ParamField path="parser" type="string">
+  用于专业提取的可选解析器 ID（例如，“@olostep/amazon-product”）
+</ParamField>
+
+**响应：**
+- `id` - 抓取 ID
+- `url_to_scrape` - 抓取的 URL
+- `result.markdown_content` - Markdown 内容
+- `result.html_content` - HTML 内容
+- `result.json_content` - JSON 内容
+- `result.text_content` - 文本内容
+- `result.screenshot_hosted_url` - 截图 URL（如果可用）
+- `result.markdown_hosted_url` - 托管的 markdown URL
+- `object` - 对象类型（“scrape”）
+- `created` - Unix 时间戳
+
+**示例用法：**
+
+```typescript
+// 在你的代理或工作流中
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'scrapeWebsite',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown'],
+      country: 'US',
+    }
+  }
+});
+```
+
+### batchScrape
+
+并行处理多个 URL（一次最多 100,000 个）。非常适合大规模数据提取。
+
+**使用场景：**
+- 抓取整个产品目录
+- 从多个搜索结果中提取数据
+- 处理电子表格中的 URL 列表
+- 批量内容提取
+
+**Schema 参数：**
+
+<ParamField path="apiKey" type="string" required>
+  你的 Olostep API 密钥
+</ParamField>
+
+<ParamField path="batch_array" type="array" required>
+  包含 `url` 和可选 `custom_id` 字段的对象数组
+  
+  示例：`[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  所有 URL 的输出格式
+</ParamField>
+
+<ParamField path="country" type="string">
+  用于特定位置抓取的国家代码
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="number">
+  JavaScript 渲染的等待时间
+</ParamField>
+
+<ParamField path="parser" type="string">
+  用于专业提取的可选解析器 ID
+</ParamField>
+
+**响应：**
+- `batch_id` - 批次 ID（用于稍后检索结果）
+- `status` - 处理状态
+- `object` - 对象类型（“batch”）
+
+**示例用法：**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'batchScrape',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      batch_array: [
+        { url: 'https://example.com', custom_id: 'site1' },
+        { url: 'https://test.com', custom_id: 'site2' },
+      ],
+      formats: ['markdown'],
+    }
+  }
+});
+```
+
+### createCrawl
+
+通过跟随链接自主发现并抓取整个网站。非常适合文档网站、博客和内容库。
+
+**使用场景：**
+- 爬取并存档整个文档网站
+- 从网站中提取所有博客文章
+- 从网络内容中构建知识库
+- 监控网站结构变化
+
+**Schema 参数：**
+
+<ParamField path="apiKey" type="string" required>
+  你的 Olostep API 密钥
+</ParamField>
+
+<ParamField path="start_url" type="string" required>
+  爬虫的起始 URL（必须包含 http:// 或 https://）
+</ParamField>
+
+<ParamField path="max_pages" type="number" default="10">
+  要爬取的最大页面数
+</ParamField>
+
+<ParamField path="follow_links" type="boolean" default="true">
+  是否跟随页面上的链接
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  抓取内容的格式
+</ParamField>
+
+<ParamField path="country" type="string">
+  用于特定位置爬取的可选国家代码
+</ParamField>
+
+<ParamField path="parser" type="string">
+  用于专业内容提取的可选解析器 ID
+</ParamField>
+
+**响应：**
+- `id` - 爬虫 ID（用于稍后检索结果）
+- `object` - 对象类型（“crawl”）
+- `status` - 爬虫状态
+- `created` - Unix 时间戳
+
+**示例用法：**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createCrawl',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      start_url: 'https://docs.example.com',
+      max_pages: 50,
+      follow_links: true,
+      formats: ['markdown'],
+    }
+  }
+});
+```
+
+### createMap
+
+提取网站的所有 URL 用于内容发现和网站结构分析。
+
+**使用场景：**
+- 构建网站地图和网站结构图
+- 在批量抓取前发现所有页面
+- 查找损坏或丢失的页面
+- SEO 审核和分析
+
+**Schema 参数：**
+
+<ParamField path="apiKey" type="string" required>
+  你的 Olostep API 密钥
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  要提取链接的网站 URL（必须包含 http:// 或 https://）
+</ParamField>
+
+<ParamField path="search_query" type="string">
+  用于过滤 URL 的可选搜索查询（例如，“blog”）
+</ParamField>
+
+<ParamField path="top_n" type="number">
+  限制返回的 URL 数量
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  包含特定路径的 Glob 模式（例如，[“/blog/**”]）
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  排除特定路径的 Glob 模式（例如，[“/admin/**”]）
+</ParamField>
+
+**响应：**
+- `id` - 地图 ID
+- `object` - 对象类型（“map”）
+- `url` - 网站 URL
+- `total_urls` - 找到的总 URL 数
+- `urls` - 发现的 URL 数组
+
+**示例用法：**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createMap',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url: 'https://example.com',
+      search_query: 'blog',
+      top_n: 100,
+      include_urls: ['/blog/**'],
+    }
+  }
+});
+```
+
+## 使用代理
+
+### 基本代理示例
+
+创建一个可以抓取网站的代理：
+
+```typescript
+import { Agent } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+const olostep = createOlostepIntegration();
+olostep.registerApis();
+
+const agent = new Agent({
+  name: 'web-researcher',
+  instructions: `
+    你是一个网页研究助理。当用户要求你从网站获取信息时，
+    使用 Olostep scrapeWebsite API 提取内容，然后为他们总结。
+  `,
+  model: 'openai/gpt-4',
+});
+
+// 代理现在可以通过 Mastra 的 API 系统使用 Olostep API
+```
+
+### 代理工作流示例
+
+构建一个发现和抓取内容的研究工作流：
+
+```typescript
+// 1. 映射网站以发现 URL
+const mapResult = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createMap',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url: 'https://example.com',
+      include_urls: ['/blog/**'],
+    }
+  }
+});
+
+// 2. 批量抓取发现的 URL
+const batchResult = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'batchScrape',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      batch_array: mapResult.urls.slice(0, 10).map(url => ({ url })),
+      formats: ['markdown'],
+    }
+  }
+});
+
+// 3. 使用你的代理处理结果
+const summary = await agent.generate({
+  messages: [{
+    role: 'user',
+    content: `总结这些内容：${batchResult.result.markdown_content}`
+  }]
+});
+```
+
+## 常见用例
+
+### 研究代理
+
+构建一个可以自主研究主题的代理：
+
+<AccordionGroup>
+  <Accordion title="多源研究">
+    **工作流：**
+    1. 用户提问：“研究 AI 趋势”
+    2. 代理使用 `createMap` 发现相关页面
+    3. 代理使用 `batchScrape` 提取内容
+    4. 代理分析并总结发现
+    5. 返回结构化研究报告
+  </Accordion>
+
+  <Accordion title="竞争对手监控">
+    **工作流：**
+    1. 安排每日监控
+    2. 使用 `scrapeWebsite` 检查竞争对手页面
+    3. 与之前的数据进行比较
+    4. 对重大变化发出警报
+    5. 生成每周报告
+  </Accordion>
+
+  <Accordion title="内容聚合">
+    **工作流：**
+    1. 使用 `createCrawl` 发现所有博客文章
+    2. 使用 `batchScrape` 提取内容
+    3. 使用 AI 提取关键主题
+    4. 存储在知识库中
+    5. 生成内容日历
+  </Accordion>
+</AccordionGroup>
+
+### 电商情报
+
+监控产品和价格：
+
+```
+代理工作流：
+1. 抓取产品页面（scrapeWebsite）
+2. 提取结构化数据（使用解析器）
+3. 跟踪价格变化
+4. 生成警报
+5. 更新数据库
+```
+
+### SEO 分析
+
+分析网站结构和内容：
+
+```
+代理工作流：
+1. 映射网站结构（createMap）
+2. 爬取重要部分（createCrawl）
+3. 分析内容质量
+4. 识别 SEO 机会
+5. 生成推荐
+```
+
+## 专用解析器
+
+Olostep 提供了针对热门网站的预构建解析器。使用 `parser` 参数：
+
+<CardGroup cols={2}>
+  
+  <Card title="Google 搜索" icon="google">
+    `@olostep/google-search`
+    
+    提取：搜索结果、标题、摘要、URL
+  </Card>
+  
+  <Card title="Google 地图" icon="map">
+    `@olostep/google-maps`
+    
+    提取：商家信息、评论、评分、位置
+  </Card>
+
+</CardGroup>
+
+### 使用解析器
+
+将解析器 ID 添加到 `parser` 参数：
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'scrapeWebsite',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url_to_scrape: 'https://www.amazon.com/dp/PRODUCT_ID',
+      formats: ['json'],
+      parser: '@olostep/amazon-product',
+    }
+  }
+});
+```
+
+解析器自动提取特定于该网站类型的结构化数据。
+
+## 最佳实践
+
+<AccordionGroup>
+  <Accordion title="对多个 URL 使用批量处理">
+    当抓取超过 3-5 个 URL 时，使用 `batchScrape` 而不是多个 `scrapeWebsite` 调用。批量处理：
+    - 更快（并行处理）
+    - 更具成本效益
+    - 更易于管理
+    - 更适合速率限制
+  </Accordion>
+
+  <Accordion title="设置适当的等待时间">
+    对于 JavaScript 密集型网站，使用 `wait_before_scraping` 参数：
+    - 简单网站：0-1000 毫秒
+    - 动态网站：2000-3000 毫秒
+    - 重 JavaScript：5000-8000 毫秒
+    
+    测试不同的值以找到最佳等待时间。
+  </Accordion>
+
+  <Accordion title="使用专用解析器">
+    对于热门网站（如亚马逊、LinkedIn、Google），使用预构建解析器：
+    - 自动获取结构化数据
+    - 提取更可靠
+    - 无需自定义解析
+    - 由 Olostep 维护
+  </Accordion>
+
+  <Accordion title="处理异步操作">
+    批量、爬虫和地图操作是异步的：
+    - 存储返回的 ID（batch_id、crawl_id、map_id）
+    - 轮询完成或使用 webhooks
+    - 为检索设置单独的工作流
+  </Accordion>
+
+  <Accordion title="错误处理">
+    始终将 API 调用包装在 try-catch 块中：
+    ```typescript
+    try {
+      const result = await mastra.callApi({
+        integrationName: 'olostep',
+        api: 'scrapeWebsite',
+        payload: { data: {...} }
+      });
+    } catch (error) {
+      // 处理认证、速率限制或网络错误
+      console.error('抓取失败：', error.message);
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="速率限制">
+    注意速率限制：
+    - 用延迟间隔请求
+    - 尽可能使用批量处理
+    - 在 Olostep 仪表板中监控使用情况
+    - 如有需要升级计划
+  </Accordion>
+</AccordionGroup>
+
+## 完整示例
+
+以下是构建研究代理的完整示例：
+
+```typescript
+import { Mastra } from '@mastra/core';
+import { Agent } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+// 创建并注册 Olostep 集成
+const olostep = createOlostepIntegration();
+olostep.registerApis();
+
+// 初始化 Mastra
+export const mastra = new Mastra({
+  config: {
+    integrations: [olostep],
+    // ... 其他配置
+  },
+});
+
+// 创建研究代理
+const researchAgent = new Agent({
+  name: 'research-assistant',
+  instructions: `
+    你是一个可以搜索、提取和结构化网页数据的研究助理。
+    当用户要求你研究一个主题时：
+    1. 使用 Olostep 的 createMap 发现相关页面
+    2. 使用 batchScrape 从多个来源提取内容
+    3. 分析并总结发现
+    4. 提供结构化研究报告
+  `,
+  model: 'openai/gpt-4',
+});
+
+// 使用代理
+async function researchTopic(topic: string) {
+  // 第一步：发现相关页面
+  const mapResult = await mastra.callApi({
+    integrationName: 'olostep',
+    api: 'createMap',
+    payload: {
+      data: {
+        apiKey: process.env.OLOSTEP_API_KEY!,
+        url: `https://example.com/search?q=${topic}`,
+        top_n: 20,
+      }
+    }
+  });
+
+  // 第二步：抓取发现的页面
+  const batchResult = await mastra.callApi({
+    integrationName: 'olostep',
+    api: 'batchScrape',
+    payload: {
+      data: {
+        apiKey: process.env.OLOSTEP_API_KEY!,
+        batch_array: mapResult.urls.slice(0, 10).map(url => ({ url })),
+        formats: ['markdown'],
+      }
+    }
+  });
+
+  // 第三步：使用代理分析
+  const summary = await researchAgent.generate({
+    messages: [{
+      role: 'user',
+      content: `根据这些研究数据，提供关于 ${topic} 的全面总结`
+    }]
+  });
+
+  return summary;
+}
+```
+
+## 故障排除
+
+<AccordionGroup>
+  <Accordion title="认证失败">
+    **错误**：“无效的 API 密钥”
+    
+    **解决方案**：
+    - 从 [仪表板](https://olostep.com/dashboard)检查 API 密钥
+    - 确保 API 密钥设置在环境变量中
+    - 验证 API 密钥是否有效
+    - 检查 API 密钥中是否有多余的空格
+  </Accordion>
+
+  <Accordion title="API 未找到">
+    **错误**：“未找到 API”或“未注册集成”
+    
+    **解决方案**：
+    - 确保在创建集成后调用 `registerApis()`
+    - 验证集成是否已添加到 Mastra 配置中
+    - 检查集成名称是否为 'olostep'
+    - 在更改后重启 Mastra 服务器
+  </Accordion>
+
+  <Accordion title="抓取返回空内容">
+    **错误**：内容字段为空
+    
+    **解决方案**：
+    - 增加 `wait_before_scraping` 时间
+    - 检查网站是否需要登录
+    - 尝试不同的格式（HTML vs Markdown）
+    - 验证 URL 是否可访问
+    - 检查网站是否阻止自动访问
+  </Accordion>
+
+  <Accordion title="超出速率限制">
+    **错误**：“超出速率限制”
+    
+    **解决方案**：
+    - 用延迟间隔请求
+    - 使用批量处理而不是单独抓取
+    - 升级你的 Olostep 计划
+    - 在仪表板中检查速率限制
+  </Accordion>
+
+  <Accordion title="TypeScript 错误">
+    **错误**：模块未找到或类型错误
+    
+    **解决方案**：
+    - 确保安装了 `@mastra/core`
+    - 检查 TypeScript 版本兼容性
+    - 验证所有依赖项是否已安装
+    - 重新构建：`npm run build`
+  </Accordion>
+</AccordionGroup>
+
+## 定价
+
+Olostep 根据 API 使用收费，与 Mastra 独立：
+
+- **抓取**：按抓取收费
+- **批次**：按批次中的 URL 收费
+- **爬虫**：按爬取的页面收费
+- **地图**：按地图操作收费
+
+查看当前定价 [olostep.com/pricing](https://olostep.com/pricing)。
+
+## 支持
+
+需要 Mastra 集成的帮助？
+
+<CardGroup cols={2}>
+  <Card title="文档" icon="book" href="https://docs.olostep.com">
+    浏览完整的 API 文档
+  </Card>
+  
+  <Card title="支持邮箱" icon="envelope" href="mailto:info@olostep.com">
+    邮箱：info@olostep.com
+  </Card>
+  
+  <Card title="Mastra 文档" icon="robot" href="https://mastra.ai/docs">
+    了解 Mastra 框架
+  </Card>
+  
+  <Card title="状态页面" icon="signal" href="https://status.olostep.com">
+    检查 API 状态
+  </Card>
+</CardGroup>
+
+## 相关资源
+
+<CardGroup cols={2}>
+  <Card title="抓取 API" icon="file-lines" href="/features/scrapes/scrapes">
+    了解抓取端点
+  </Card>
+  
+  <Card title="批次 API" icon="layer-group" href="/features/batches/batches">
+    了解批次端点
+  </Card>
+  
+  <Card title="爬虫 API" icon="spider-web" href="/features/crawls/crawls">
+    了解爬虫端点
+  </Card>
+  
+  <Card title="地图 API" icon="map" href="/features/maps/maps">
+    了解地图端点
+  </Card>
+  
+  <Card title="Zapier 集成" icon="bolt" href="/integrations/zapier">
+    使用 Zapier 工作流自动化
+  </Card>
+  
+  <Card title="LangChain 集成" icon="link" href="/integrations/langchain">
+    使用 LangChain 构建 AI 代理
+  </Card>
+</CardGroup>
+
+## 开始使用
+
+准备好构建具有网页抓取功能的 AI 代理了吗？
+
+<Card title="安装包" icon="download" href="https://www.npmjs.com/package/@olostep/mastra-tools">
+  从 npm 安装 @olostep/mastra-tools
+</Card>
+
+使用 Olostep 和 Mastra 构建能够搜索、提取和结构化网页数据的智能 AI 代理！

@@ -1,0 +1,255 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Cartes",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    }
+  },
+  "paths": {
+    "/v1/maps/{map_id}": {
+      "get": {
+        "summary": "Obtenir la Carte",
+        "description": "Récupérer une carte précédemment complétée par son ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour la carte à récupérer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec l'objet carte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Identifiant unique pour cette carte"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "Nombre d'URLs dans la réponse actuelle"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Tableau d'URLs trouvées sur la page"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Curseur de pagination pour récupérer le prochain ensemble d'URLs. Si null, toutes les URLs ont été récupérées."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clé API Invalide"
+          },
+          "404": {
+            "description": "Carte Non Trouvée"
+          },
+          "500": {
+            "description": "Erreur Interne du Serveur"
+          }
+        }
+      }
+    },
+    "/v1/maps": {
+      "post": {
+        "summary": "Obtenir toutes les urls sur un certain site web",
+        "description": "Ce point de terminaison permet aux utilisateurs d'obtenir toutes les urls sur un certain site web. Cela peut prendre jusqu'à 120 secondes pour les sites complexes. Pour les grands sites, les résultats sont paginés en utilisant la pagination basée sur un curseur.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "L'URL du site web pour lequel tu veux les liens"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "Une requête de recherche optionnelle pour trier les liens par pertinence de recherche."
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "Un nombre optionnel pour limiter aux n premiers liens pour une requête de recherche."
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "Inclure les sous-domaines de l'URL donnée. `true` par défaut."
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Modèles de chemin d'URL à inclure en utilisant la syntaxe glob. Par exemple : `/blog/**` pour inclure uniquement les URLs de blog. Seules les URLs correspondant à ces modèles seront retournées."
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Modèles de chemin d'URL à exclure en utilisant la syntaxe glob. Par exemple : `/careers/**`. Les URLs exclues supplanteront les URLs incluses."
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "description": "OPTIONNEL : Curseur de pagination d'une réponse précédente. Lorsqu'il est fourni, retourne le prochain ensemble d'URLs à partir de l'endroit où la demande précédente s'est arrêtée en raison de la limite de taille de réponse."
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "examples": {
+                "basic": {
+                  "value": {
+                    "url": "https://docs.olostep.com"
+                  }
+                },
+                "withFilters": {
+                  "value": {
+                    "url": "https://docs.olostep.com",
+                    "include_urls": [
+                      "/api-reference/**"
+                    ],
+                    "exclude_urls": [
+                      "/api-reference/deprecated/**"
+                    ]
+                  }
+                },
+                "withCursor": {
+                  "value": {
+                    "cursor": "abc123_xyz456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec les URLs trouvées sur la page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "urls_count",
+                    "urls"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Identifiant unique pour cette carte"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "Nombre d'URLs dans la réponse actuelle"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Tableau d'URLs trouvées sur la page"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "Curseur de pagination pour récupérer le prochain ensemble d'URLs limité en raison de la limite de taille de 10MB. Si null ou non présent, toutes les URLs ont été récupérées."
+                    }
+                  }
+                },
+                "examples": {
+                  "basicResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 22,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/batches/create",
+                        "https://docs.olostep.com/api-reference/batches/info",
+                        "https://docs.olostep.com/api-reference/batches/items"
+                      ]
+                    }
+                  },
+                  "cursorResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 15,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/crawls/create",
+                        "https://docs.olostep.com/api-reference/crawls/info",
+                        "https://docs.olostep.com/api-reference/crawls/pages"
+                      ],
+                      "cursor": "abc123_def789"
+                    }
+                  },
+                  "allRetrievedResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 10,
+                      "urls": [
+                        "https://docs.olostep.com/features/maps/maps",
+                        "https://docs.olostep.com/get-started/authentication",
+                        "https://docs.olostep.com/get-started/welcome"
+                      ],
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison de paramètres incorrects ou manquants."
+          },
+          "401": {
+            "description": "Accès non autorisé en raison d'un jeton API manquant ou invalide."
+          },
+          "500": {
+            "description": "Erreur interne du serveur."
+          }
+        }
+      }
+    }
+  }
+}

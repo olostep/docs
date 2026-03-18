@@ -1,0 +1,1178 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API dei Batch",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "paths": {
+    "/v1/test-batch": {
+      "post": {
+        "summary": "Test batch",
+        "description": "Test batch",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "custom_id": {
+                          "type": "string",
+                          "description": "Un identificatore unico interno per l'url."
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "URL dell'elemento."
+                        }
+                      },
+                      "required": [
+                        "custom_id",
+                        "url"
+                      ]
+                    },
+                    "description": "Array di elementi da processare nel batch."
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch avviato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Batch"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/recent": {
+      "get": {
+        "summary": "Elenca i batch recenti",
+        "description": "Recupera l'elenco dei batch recenti per l'utente autenticato.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 100
+            },
+            "description": "Numero massimo di batch da restituire (predefinito 50, massimo 100)."
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtra per fonte (opzionale)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con elenco dei batch recenti.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "list"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "object": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created": {
+                            "type": "number"
+                          },
+                          "total_urls": {
+                            "type": "number"
+                          },
+                          "completed_urls": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Le credenziali di autenticazione sono mancanti o non valide. Vedi [Non autorizzato](/api-reference/errors/unauthorized) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorizzato",
+                  "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore interno del server. Vedi [Errore Interno](/api-reference/errors/internal_error) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Errore Interno del Server",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches": {
+      "post": {
+        "summary": "Avvia un nuovo batch",
+        "description": "Inizia un nuovo processo batch con i parametri specificati.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "custom_id": {
+                          "type": "string",
+                          "description": "Un identificatore unico interno per l'url."
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "URL dell'elemento."
+                        },
+                        "metadata": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/Metadata"
+                            }
+                          ],
+                          "description": "Metadata a livello di elemento. Allega coppie chiave-valore a singoli elementi per tracciamento, filtraggio o correlazione con i tuoi sistemi interni."
+                        }
+                      },
+                      "required": [
+                        "custom_id",
+                        "url"
+                      ]
+                    },
+                    "description": "Array di elementi da processare nel batch."
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Paese per l'esecuzione del batch. Fornisci in codici ISO 3166-1 alpha-2 come US(Stati Uniti), IN(India), ecc."
+                  },
+                  "parser": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Parser da utilizzare per il batch."
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "description": "Puoi usare questo parametro per specificare il parser da utilizzare. I parser sono utili per estrarre contenuti strutturati dalle pagine web. Olostep ha alcuni parser integrati per le pagine web più comuni, e puoi anche creare i tuoi parser."
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Quando è vero, restituisce URL completi (es., 'https://example.com/page') invece di percorsi relativi (es., '/page')"
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filtra i link estratti usando i pattern glob."
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filtra i link estratti usando i pattern glob."
+                      }
+                    },
+                    "description": "Ottieni tutti i link presenti su ogni pagina nel batch."
+                  },
+                  "metadata": {
+                    "$ref": "#/components/schemas/Metadata"
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL HTTPS per ricevere una richiesta POST quando il batch è completato. Deve essere un URL pubblicamente accessibile usando il protocollo `http://` o `https://`. Non può puntare a localhost o indirizzi IP privati. Vedi [Webhooks](/api-reference/common/webhooks) per il formato del payload e il comportamento di retry."
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              },
+              "example": {
+                "items": [
+                  {
+                    "custom_id": "product-123",
+                    "url": "https://example.com/product/123",
+                    "metadata": {
+                      "source": "catalog_sync",
+                      "priority": "high"
+                    }
+                  },
+                  {
+                    "custom_id": "product-456",
+                    "url": "https://example.com/product/456"
+                  }
+                ],
+                "country": "US",
+                "metadata": {
+                  "batch_name": "Q1 Product Sync",
+                  "initiated_by": "automation"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch avviato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Batch"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"batch\" per questo endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` o `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Epoch creato"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "Conteggio degli URL nel batch"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "Conteggio degli URL completati"
+                    },
+                    "parser": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    },
+                    "webhook": {
+                      "type": "string",
+                      "description": "URL del webhook per ricevere la notifica di completamento"
+                    }
+                  }
+                },
+                "example": {
+                  "id": "batch_abc123def456",
+                  "object": "batch",
+                  "status": "in_progress",
+                  "created": 1704067200,
+                  "total_urls": 2,
+                  "completed_urls": 0,
+                  "country": "US",
+                  "metadata": {
+                    "batch_name": "Q1 Product Sync",
+                    "initiated_by": "automation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri errati o mancanti. Vedi [Bad Request](/api-reference/errors/bad_request) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Richiesta Errata",
+                  "detail": "The 'items' array is required and must contain at least one item.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Le credenziali di autenticazione sono mancanti o non valide. Vedi [Non autorizzato](/api-reference/errors/unauthorized) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorizzato",
+                  "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Pagamento richiesto - crediti esauriti. Vedi [Payment Required](/api-reference/errors/payment_required) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "credits_exhausted",
+                  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+                  "status": 402,
+                  "title": "Pagamento Richiesto",
+                  "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/auth/",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Vietato - accesso negato a questa funzione. Vedi [Forbidden](/api-reference/errors/forbidden) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "access_denied",
+                  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+                  "status": 403,
+                  "title": "Vietato",
+                  "detail": "You don't have access to this feature. Please reach out to info@olostep.com to get approved",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto di idempotenza - una richiesta con questa chiave è in corso. Vedi [Idempotency Error](/api-reference/errors/idempotency_error) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "idempotency_key_in_progress",
+                  "type": "https://docs.olostep.com/api-reference/errors/idempotency_error",
+                  "status": 409,
+                  "title": "Errore di Idempotenza",
+                  "detail": "A request with this idempotency key is currently being processed. Please wait and retry.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Entità non elaborabile - violazione delle regole aziendali. Vedi [Entità Non Elaborabile](/api-reference/errors/unprocessable_entity) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "idempotency_key_reuse",
+                  "type": "https://docs.olostep.com/api-reference/errors/unprocessable_entity",
+                  "status": 422,
+                  "title": "Entità Non Elaborabile",
+                  "detail": "A request with this idempotency key was already made with different parameters. Idempotency keys must be unique per request.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore interno del server. Vedi [Errore Interno](/api-reference/errors/internal_error) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Errore Interno del Server",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}": {
+      "get": {
+        "summary": "Recupera informazioni sul batch",
+        "description": "Recupera informazioni su un batch specifico utilizzando il suo `batch_id`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID del batch per cui recuperare le informazioni."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta riuscita con informazioni sul batch.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Batch"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"batch\" per questo endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` o `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Epoch creato"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "Conteggio degli URL nel batch"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "Conteggio degli URL completati"
+                    },
+                    "parser": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    },
+                    "webhook": {
+                      "type": "string",
+                      "description": "URL del webhook per ricevere la notifica di completamento"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Le credenziali di autenticazione sono mancanti o non valide. Vedi [Non autorizzato](/api-reference/errors/unauthorized) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorizzato",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch non trovato per l'ID fornito. Vedi [Non Trovato](/api-reference/errors/not_found) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Non Trovato",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore interno del server. Vedi [Errore Interno](/api-reference/errors/internal_error) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Errore Interno del Server",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Aggiorna i metadati del batch",
+        "description": "Aggiorna i metadati per un batch specifico. Solo il campo `metadata` può essere aggiornato. Segue la semantica di merge di Stripe: le nuove chiavi vengono aggiunte, le chiavi esistenti vengono aggiornate e le chiavi impostate su stringa vuota vengono eliminate.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID del batch da aggiornare."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "$ref": "#/components/schemas/Metadata"
+                  }
+                },
+                "required": [
+                  "metadata"
+                ]
+              },
+              "example": {
+                "metadata": {
+                  "status": "reviewed",
+                  "reviewer": "jane@example.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Metadati del batch aggiornati con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Batch"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"batch\" per questo endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` o `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Epoch creato"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "Conteggio degli URL nel batch"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "Conteggio degli URL completati"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    }
+                  }
+                },
+                "example": {
+                  "id": "batch_abc123def456",
+                  "object": "batch",
+                  "status": "completed",
+                  "created": 1704067200,
+                  "total_urls": 10,
+                  "completed_urls": 10,
+                  "metadata": {
+                    "batch_name": "Q1 Product Sync",
+                    "status": "reviewed",
+                    "reviewer": "jane@example.com"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata - metadati mancanti o non validi. Vedi [Richiesta Errata](/api-reference/errors/bad_request) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_metadata",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Richiesta Errata",
+                  "detail": "No metadata field provided. Only metadata can be updated.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Le credenziali di autenticazione sono mancanti o non valide. Vedi [Non autorizzato](/api-reference/errors/unauthorized) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorizzato",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch non trovato per l'ID fornito. Vedi [Non Trovato](/api-reference/errors/not_found) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Non Trovato",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore interno del server. Vedi [Errore Interno](/api-reference/errors/internal_error) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Errore Interno del Server",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}/items": {
+      "get": {
+        "summary": "Recupera l'elenco degli elementi completati o falliti opzionalmente con contenuto per un batch specifico",
+        "description": "Recupera l'elenco degli elementi e del contenuto secondo lo stato richiesto per un ID batch specifico.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID del batch per cui recuperare gli elementi."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            },
+            "description": "Stato degli URL da recuperare (completed o failed)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Cursore di paginazione. Ometti questo parametro alla prima richiesta. Per le richieste successive, usa il valore `cursor` dalla risposta precedente. Vedi [Paginazione](/api-reference/common/pagination) per i dettagli."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Numero di risultati da restituire (consigliato 10-50)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta riuscita con elementi del batch.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "batch_id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "custom_id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "metadata": {
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/Metadata"
+                              }
+                            ],
+                            "description": "Metadati a livello di elemento se forniti durante la creazione del batch."
+                          },
+                          "links_on_page": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "items_count": {
+                      "type": "integer"
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "Cursore di paginazione. Presente quando ci sono più risultati disponibili. Usa questo valore nel parametro `cursor` della richiesta successiva. Vedi [Paginazione](/api-reference/common/pagination) per i dettagli."
+                    }
+                  }
+                },
+                "example": {
+                  "batch_id": "batch_abc123def456",
+                  "object": "list",
+                  "status": "completed",
+                  "items": [
+                    {
+                      "custom_id": "product-123",
+                      "retrieve_id": "ret_xyz789",
+                      "url": "https://example.com/product/123",
+                      "metadata": {
+                        "source": "catalog_sync",
+                        "priority": "high"
+                      }
+                    },
+                    {
+                      "custom_id": "product-456",
+                      "retrieve_id": "ret_abc456",
+                      "url": "https://example.com/product/456"
+                    }
+                  ],
+                  "items_count": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri non corretti. Vedi [Richiesta Errata](/api-reference/errors/bad_request) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Richiesta Errata",
+                  "detail": "Status must be either 'completed' or 'failed'",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Le credenziali di autenticazione sono mancanti o non valide. Vedi [Non autorizzato](/api-reference/errors/unauthorized) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorizzato",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch non trovato per l'ID fornito. Vedi [Non Trovato](/api-reference/errors/not_found) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Non Trovato",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore interno del server. Vedi [Errore Interno](/api-reference/errors/internal_error) per i dettagli.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Errore Interno del Server",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Risposta di errore Dettagli Problema RFC 7807",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificatore univoco dell'errore"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "error"
+            ],
+            "description": "Sempre 'error'"
+          },
+          "code": {
+            "type": "string",
+            "description": "Codice di errore leggibile dalla macchina"
+          },
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "Riferimento URI che identifica il tipo di problema"
+          },
+          "status": {
+            "type": "integer",
+            "description": "Codice di stato HTTP"
+          },
+          "title": {
+            "type": "string",
+            "description": "Breve riassunto leggibile dall'uomo"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Spiegazione leggibile dall'uomo"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Timestamp Unix"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Array opzionale di dettagli aggiuntivi sull'errore",
+            "items": {}
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "code",
+          "type",
+          "status",
+          "title",
+          "detail",
+          "created"
+        ]
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Insieme di coppie chiave-valore per memorizzare informazioni aggiuntive su un oggetto. Segue l'approccio di Stripe con regole di validazione: massimo 50 chiavi, chiave massimo 40 caratteri (senza parentesi quadre), valore massimo 500 caratteri, tutti i valori memorizzati come stringhe.",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Valore dei metadati (max 500 caratteri). Numeri e booleani sono automaticamente convertiti in stringhe."
+        },
+        "maxProperties": 50,
+        "example": {
+          "order_id": "12345",
+          "customer_name": "John Doe",
+          "priority": "high",
+          "processed": "true"
+        },
+        "x-validation-rules": {
+          "max_keys": 50,
+          "key_max_length": 40,
+          "key_forbidden_chars": [
+            "[",
+            "]"
+          ],
+          "value_max_length": 500,
+          "value_types": [
+            "string",
+            "number (coerced)",
+            "boolean (coerced)"
+          ]
+        }
+      }
+    }
+  }
+}

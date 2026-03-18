@@ -1,0 +1,113 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Dienstprogramm-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/v1/retrieve": {
+      "get": {
+        "summary": "Seiteninhalt abrufen",
+        "description": "Ruft den Inhalt einer gecrawlten Seite mithilfe ihrer `retrieve_id` ab.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "retrieve_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Die ID des abzurufenden Seiteninhalts. Verfügbar in der Antwort der Endpunkte `/v1/crawls/{crawl_id}/pages`, `/v1/scrapes/{scrape_id}` oder `/v1/batches/{batch_id}/items`"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown",
+                  "json"
+                ]
+              }
+            },
+            "description": "Optionale Liste, um nur bestimmte Formate in der Produktion abzurufen. Wenn nicht angegeben, werden alle Formate zurückgegeben."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Seiteninhalt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "html_content": {
+                      "type": "string",
+                      "description": "HTML-Inhalt der Seite, falls angefordert und verfügbar."
+                    },
+                    "markdown_content": {
+                      "type": "string",
+                      "description": "Markdown-Inhalt der Seite, falls angefordert und verfügbar."
+                    },
+                    "json_content": {
+                      "type": "string",
+                      "description": "JSON-Inhalt der Seite, der von Parsern zurückgegeben wird, falls angefordert und verfügbar."
+                    },
+                    "html_hosted_url": {
+                      "type": "string",
+                      "description": "S3-Bucket-URL von html. Läuft in 7 Tagen ab."
+                    },
+                    "markdown_hosted_url": {
+                      "type": "string",
+                      "description": "S3-Bucket-URL von markdown. Läuft in 7 Tagen ab."
+                    },
+                    "json_hosted_url": {
+                      "type": "string",
+                      "description": "S3-Bucket-URL von json. Läuft in 7 Tagen ab."
+                    },
+                    "size_exceeded": {
+                      "type": "boolean",
+                      "description": "Wenn die Größe der Inhaltsobjekte das 6MB-Limit überschreitet. Wenn wahr, verwende gehostete S3-URLs, um den Inhalt zu erhalten."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund falscher oder fehlender Parameter."
+          },
+          "404": {
+            "description": "Inhalt für die angegebene `retrieve_id` nicht gefunden."
+          },
+          "500": {
+            "description": "Interner Serverfehler."
+          }
+        }
+      }
+    }
+  }
+}

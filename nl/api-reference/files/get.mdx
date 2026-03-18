@@ -1,0 +1,47 @@
+---
+title: "Bestand Ophalen"
+description: "Haal metadata op voor een bestand met behulp van zijn ID."
+openapi: "nl/openapi/files.json GET /v1/files/{file_id}"
+---
+
+## Overzicht
+
+Met het **Get File** eindpunt kun je metadata ophalen voor een specifiek bestand door het `file_id` te gebruiken. Dit is handig wanneer je informatie nodig hebt over een bestand dat al is geüpload naar Olostep.
+
+## Eindpunt
+
+`GET /v1/files/{file_id}`
+
+### Parameters
+
+- `file_id` (vereist): De unieke identifier voor het bestand waarvan je de metadata wilt ophalen.
+
+## Voorbeeldverzoek
+
+```http
+GET /v1/files/12345
+Host: api.olostep.com
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+## Voorbeeldantwoord
+
+```json
+{
+  "id": "12345",
+  "name": "example.pdf",
+  "size": 1024,
+  "type": "application/pdf",
+  "created_at": "2023-10-01T12:00:00Z"
+}
+```
+
+## Reacties
+
+- **200 OK**: Het verzoek was succesvol en de metadata van het bestand wordt geretourneerd.
+- **404 Not Found**: Het opgegeven `file_id` bestaat niet.
+- **401 Unauthorized**: Er is geen geldige API-token verstrekt.
+
+## Opmerkingen
+
+Zorg ervoor dat je de juiste machtigingen hebt om toegang te krijgen tot de gevraagde bestandgegevens. Raadpleeg de [Authenticatiegids](https://docs.olostep.com/authentication) voor meer informatie over het verkrijgen van een toegangstoken.

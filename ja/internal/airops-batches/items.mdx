@@ -1,0 +1,165 @@
+---
+title: "バッチアイテムの取得"
+description: "抽出されたメタデータとともにすべてのアイテムを取得する"
+openapi: "GET /v1/batches-airops/{batch_id}/items"
+---
+
+## 概要
+
+抽出されたメタデータとともにバッチ内のすべてのアイテムを返します。アイテムには、成功した抽出と任意のステージでの失敗が含まれます。
+
+<Note>
+  このエンドポイントは、バッチの`status`が`"completed"`のときにのみ完全な結果を返します。バッチがまだ処理中の場合、空の`items`配列とメッセージを受け取ります。
+</Note>
+
+## レスポンス構造
+
+<ResponseField name="batch_id" type="string">
+  バッチ識別子。
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  バッチが完了したときのISO 8601タイムスタンプ。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  バッチのステータス: `"completed"` または `"in_progress"`。
+</ResponseField>
+
+<ResponseField name="counts" type="object">
+  サマリーカウント:
+  - `total` - バッチ内の総アイテム数
+  - `succeeded` - 成功した処理
+  - `failed` - 任意のステージで失敗したもの
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  結果を含むすべてのアイテムの配列。
+</ResponseField>
+
+---
+
+## アイテムスキーマ
+
+### 成功したアイテム
+
+完了したアイテムは、ルートレベルで抽出されたフィールドを持ちます:
+
+```json
+{
+  "custom_id": "post-1",
+  "url": "https://example.com/blog/post-1",
+  "status": "completed",
+  "page_type": "informational_article",
+  "author": "John Doe",
+  "date_published": "2024-01-15",
+  "date_modified": null,
+  "brand_mentions": ["Acme Corp", "TechBrand"]
+}
+```
+
+| フィールド | タイプ | 説明 |
+|-------|------|-------------|
+| `custom_id` | string | リクエストからのあなたの識別子 |
+| `url` | string | スクレイピングされたURL |
+| `status` | string | 成功したアイテムのための`"completed"` |
+| `page_type` | string | 分類されたページタイプ (詳細は[概要](/internal/airops-batches/overview#page-types)を参照) |
+| `author` | string \| null | コンテンツの著者 |
+| `date_published` | string \| null | 公開日 (利用可能な場合はISO 8601) |
+| `date_modified` | string \| null | 最終変更日 |
+| `brand_mentions` | array | ページ上で見つかった入力リストからのブランド |
+
+### 失敗したアイテム
+
+任意のステージで失敗したアイテムは、エラーストラクチャを持ちます:
+
+```json
+{
+  "custom_id": "post-failed",
+  "url": "https://example.com/broken-page",
+  "status": "failed",
+  "failed_stage": "scraping",
+  "error": {
+    "code": "SCRAPE_FAILED",
+    "message": "Connection timeout after 30s"
+  }
+}
+```
+
+| フィールド | タイプ | 説明 |
+|-------|------|-------------|
+| `status` | string | 失敗したアイテムのための`"failed"` |
+| `failed_stage` | string | 失敗が発生したステージ: `scraping`, `analyzing`, または `enriching` |
+| `error` | object | `code` と `message` を含むエラーの詳細 |
+
+---
+
+## 抽出ソース
+
+フィールドは、優先順位順に複数の方法を使用して抽出されます:
+
+1. **Classifier** - URLパターン分析 (即時)
+2. **Parser** - 構造化メタデータ抽出
+3. **LLM** - 欠落フィールドのためのAI駆動の抽出
+
+---
+
+## レスポンス例
+
+### 完了したバッチ
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "completed_at": "2024-01-15T12:30:00.000Z",
+  "status": "completed",
+  "counts": {
+    "total": 100,
+    "succeeded": 98,
+    "failed": 2
+  },
+  "items": [
+    {
+      "custom_id": "post-1",
+      "url": "https://example.com/blog/post-1",
+      "status": "completed",
+      "page_type": "informational_article",
+      "author": "John Doe",
+      "date_published": "2024-01-15",
+      "date_modified": null,
+      "brand_mentions": ["OpenAI", "Google"]
+    },
+    {
+      "custom_id": "post-2",
+      "url": "https://example.com/pricing",
+      "status": "completed",
+      "page_type": "pricing_page",
+      "author": null,
+      "date_published": null,
+      "date_modified": null,
+      "brand_mentions": []
+    },
+    {
+      "custom_id": "post-3",
+      "url": "https://example.com/broken",
+      "status": "failed",
+      "failed_stage": "scraping",
+      "error": {
+        "code": "SCRAPE_FAILED",
+        "message": "URL failed to scrape"
+      }
+    }
+  ]
+}
+```
+
+### 処理中のバッチ
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "status": "in_progress",
+  "items": [],
+  "message": "バッチはまだ処理中です。ステータスが\"completed\"になるとアイテムが利用可能になります。"
+}
+```

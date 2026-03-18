@@ -1,0 +1,167 @@
+---
+icon: "lines-leaning"
+sidebarTitle: "バッチスクレイピング"
+title: "複数のウェブサイトのコンテンツを一度に取得"
+description: "最大100kのURLから5〜7分でコンテンツを抽出するバッチスクレイピングを開始"
+---
+
+## 概要
+
+Olostepの[Batches](https://docs.olostep.com/api-reference/batches/create)エンドポイントを使用すると、最大10,000のURLのバッチを開始し、5〜7分でコンテンツを取得できます。一度に最大10バッチを開始して、100,000のURLから一度にコンテンツを抽出できます。さらに大規模な処理が必要な場合は、ぜひお問い合わせください。
+
+これは、すでに処理したいURLを持っている場合に便利です。例えば、データを集約して分析したり、専門的な検索ツールを構築したり、複数のウェブサイトの変更を監視したりするためです。
+
+このガイドでは、URLのリストを使ってバッチを開始し、マークダウン形式でコンテンツを取得する方法を説明します。
+
+## 完全なコードを含むGist
+Olostepでバッチスクレイピングを試すためにコピー＆ペーストできるすべてのコードを含むGistはこちらです：
+https://gist.github.com/olostep/e903f2e4fc28f8093b834b4df68b8031
+
+このGistでは、5つのGoogle検索クエリでバッチを開始し、ステータスを確認し、各アイテムのコンテンツを取得する方法を示しています。
+
+## 前提条件
+始める前に、以下を確認してください：
+
+- 有効なOlostep APIキー。 [Olostep](https://www.olostep.com/dashboard)でサインアップして取得できます。
+- システムにPythonがインストールされていること。
+- `requests`と`hashlib`ライブラリ（必要に応じて`pip install requests`でインストール）。
+
+## ステップ1: ローカルURLからバッチを作成
+
+すでに処理したいURLのリストがある場合は、スクリプト内で直接定義できます。そうでない場合は、ファイルやデータベースから読み込むことができます。
+
+```python filename="start_batch.py"
+import requests
+import hashlib
+
+API_KEY = "YOUR_API_KEY"
+
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=nikola+tesla&gl=us&hl=en",
+        "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+        "https://www.google.com/search?q=google+solar+eclipse&gl=us&hl=en",
+        "https://www.google.com/search?q=crispr&gl=us&hl=en",
+        "https://www.google.com/search?q=genghis%20khan&gl=us&hl=en"
+    ]
+    return [{"custom_id": create_hash_id(url), "url": url} for url in urls]
+
+def start_batch(items):
+    payload = {
+        "items": items
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+    return response.json()["id"]
+
+if __name__ == "__main__":
+    items = compose_items_array()
+    batch_id = start_batch(items)
+    print("Batch started. ID:", batch_id)
+```
+
+## ステップ2: バッチステータスを監視
+
+バッチが開始されたら、バッチを開始したときに返される`batch_id`を使用してステータスを監視できます。
+
+```python filename="check_status.py"
+import requests
+
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}",
+        headers=headers
+    )
+    return response.json()["status"]
+```
+
+バッチが完了するまで、数秒ごと（例：10秒ごと）にステータスをポーリングできます：
+
+```python
+import time
+
+def recursive_check(batch_id):
+    status = check_batch_status(batch_id)
+    print("Status:", status)
+    if status == "completed":
+        print("Batch is complete!")
+    else:
+        time.sleep(60)
+        recursive_check(batch_id)
+```
+
+## ステップ3: 完了したアイテムを取得
+
+バッチが完了とマークされたら、処理されたアイテムを取得します。
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}/items",
+        headers=headers
+    )
+    return response.json()["items"]
+```
+
+各アイテムには、スクレイピングされたコンテンツを取得するための`retrieve_id`が含まれています。
+
+```python
+items = get_completed_items(batch_id)
+for item in items:
+    print(f"URL: {item['url']}\nCustom ID: {item['custom_id']}\nRetrieve ID: {item['retrieve_id']}\n---")
+```
+
+## ステップ4: コンテンツを取得
+
+`retrieve_id`を使用して、抽出されたコンテンツをマークダウン、HTML、またはJSON形式で取得します。ここでは、マークダウン形式でコンテンツを取得する例を示します：
+
+```python filename="retrieve_content.py"
+def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# Example usage:
+items = get_completed_items(batch_id)
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content)
+```
+
+## ホストされたコンテンツ
+コンテンツは7日間ホストされるため、再スクレイピングせずに複数回取得できます。
+[マークダウンコンテンツ](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_p64bro0q3n_924d0fa125efcc5c.txt)のホストされたURLの例
+
+## 使用例
+
+### 1. 検索エンジンの構築
+Olostepを使用して、業界特化型のウェブサイト（法律、医療、AIなど）からコンテンツを抽出し、検索可能なデータベースを構築します。
+
+### 2. ウェブサイトの監視
+製品の在庫状況、価格の変動、ニュースの更新を複数のウェブサイトで監視し、毎日のバッチスクレイピングをスケジュールします。
+
+### 3. ソーシャルメディアの監視
+ブランドやキーワードの言及をフォーラムやコンテンツソースからスクレイピングし、構造化データを抽出します。
+
+### 4. アグリゲーター
+求人掲示板、ニュースアグリゲーター、不動産リスティングプラットフォームを構築し、数十のソースからデータを取得します。
+
+## 結論
+
+バッチスクレイピングを使用すると、最大100kのURLから迅速かつ効率的にコンテンツを抽出できます。検索ツール、アグリゲーター、監視システムを構築する際に、Olostep Batchesはその作業を簡素化します。
+
+構造化データのみを抽出したいですか？ [Parsers](https://docs.olostep.com/features/structured-content/parsers)を使用して必要なフィールドだけを取得します。サポートが必要ですか？ `info@olostep.com`までお問い合わせいただくか、カスタムスクリプトの作成を依頼してください。

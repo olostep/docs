@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Archivos",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Encabezado de autenticación Bearer del formato Bearer <token>, donde <token> es tu token de autenticación."
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "Crear Carga de Archivo",
+        "description": "Genera una URL pre-firmada para subir un archivo JSON. Después de subirlo, debes llamar al endpoint de completar para finalizar la carga. La URL de carga expira en 10 minutos.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "El nombre del archivo. Debe terminar con la extensión .json.",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "El propósito del archivo. Valores soportados: 'context' o 'batch'. Por defecto es 'context'.",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con URL de carga.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Archivo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"file.upload\" para este endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Marca de tiempo de época creada"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL pre-firmada para subir el archivo. Expira en 10 minutos."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Número de segundos hasta que la URL de carga expire (600 segundos = 10 minutos)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta. Falta el nombre del archivo o tipo de archivo inválido (solo se soportan archivos .json)."
+          },
+          "401": {
+            "description": "Clave de API inválida"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar Archivos",
+        "description": "Lista todos los archivos completados para tu equipo. Opcionalmente filtra por propósito. Solo devuelve archivos con estado 'completed'.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "Filtra archivos por propósito. Valores soportados: 'context' o 'batch'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con lista de archivos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"list\" para este endpoint."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "ID del Archivo"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "El tipo de objeto. \"file\" para este endpoint."
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Marca de tiempo de época creada"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "El nombre del archivo del archivo subido"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "Tamaño del archivo en bytes"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "El propósito del archivo"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Estado del archivo. Siempre 'completed' para archivos listados."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clave de API inválida"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "Completar la carga del archivo",
+        "description": "Completa el proceso de carga del archivo y valida el archivo JSON subido. Este endpoint verifica que el archivo existe, valida su formato JSON, comprueba el tamaño del archivo (máximo 200MB) y actualiza el estado del archivo a completed.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para el archivo a completar.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Carga del archivo completada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Archivo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"file\" para este endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Marca de tiempo de época creada"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "El nombre del archivo del archivo subido"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Tamaño del archivo en bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "El propósito del archivo"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Estado del archivo. Será 'completed' después de la finalización exitosa."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta. Archivo ya completado, estado inválido, archivo demasiado grande (máximo 200MB) o formato JSON inválido."
+          },
+          "401": {
+            "description": "Clave de API inválida"
+          },
+          "404": {
+            "description": "Archivo no encontrado o archivo no subido a S3"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "Obtener metadatos del archivo por ID",
+        "description": "Recupera los metadatos de un archivo por su ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para el archivo a recuperar.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con metadatos del archivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Archivo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"file\" para este endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Marca de tiempo de época creada"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "El nombre del archivo del archivo subido"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Tamaño del archivo en bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "El propósito del archivo"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Estado del archivo (por ejemplo, 'pending', 'completed')"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clave de API inválida"
+          },
+          "404": {
+            "description": "Archivo no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar archivo",
+        "description": "Elimina un archivo y sus datos asociados del almacenamiento.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para el archivo a eliminar.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archivo eliminado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Archivo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"file\" para este endpoint."
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "Indica que el archivo fue eliminado exitosamente."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clave de API inválida"
+          },
+          "404": {
+            "description": "Archivo no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "Obtener objeto de archivo por ID.",
+        "description": "Obtén un URL pre-firmado para descargar el contenido de un archivo \"completed\". Opcionalmente, especifica el tiempo de expiración para el URL de descarga usando el parámetro de consulta expires_in (por defecto es 600 segundos / 10 minutos).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para el archivo a descargar.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Número de segundos hasta que el URL de descarga expire. Por defecto es 600 segundos (10 minutos).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con URL de descarga.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Archivo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"file\" para este endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Marca de tiempo de época creada"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "El nombre del archivo del archivo subido"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Tamaño del archivo en bytes"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL pre-firmado para descargar el archivo. Expira después del tiempo especificado en expires_in."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Número de segundos hasta que el URL de descarga expire."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta. Archivo no \"completed\"."
+          },
+          "401": {
+            "description": "Clave de API inválida"
+          },
+          "404": {
+            "description": "Archivo no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    }
+  }
+}

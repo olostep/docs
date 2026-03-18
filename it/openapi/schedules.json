@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API degli Orari",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "Crea Orario",
+        "description": "Crea un nuovo orario per eseguire chiamate API a tempi specificati. Supporta sia esecuzioni una tantum che orari ricorrenti usando espressioni cron. Puoi anche usare testo in linguaggio naturale per generare automaticamente espressioni cron. Per le richieste POST, puoi usare gli endpoint Olostep in forma breve (es. 'v1/scrapes') che saranno automaticamente prefissati, oppure fornire un URL completo. Il payload può contenere qualsiasi struttura JSON che vuoi inviare.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST"
+                    ],
+                    "description": "Metodo HTTP per la chiamata API programmata. Deve essere GET o POST."
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "L'URL dell'endpoint da chiamare quando l'orario viene eseguito. Per le richieste POST con endpoint Olostep, puoi usare la forma breve (es. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') che sarà automaticamente prefissata con 'https://api.olostep.com/'. Per altri endpoint, fornisci l'URL completo."
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "Il payload da inviare con la chiamata API. Può contenere qualsiasi struttura JSON di cui hai bisogno. Per le richieste GET, questo è tipicamente vuoto. Per le richieste POST, questo dovrebbe contenere i dati che vuoi inviare all'endpoint.",
+                    "default": {}
+                  },
+                  "cron_expression": {
+                    "type": "string",
+                    "description": "Espressione cron in formato a 6 campi (minuto ora giorno mese giorno-della-settimana anno) per orari ricorrenti. Necessario per orari ricorrenti. Mutuamente esclusivo con execute_at e text."
+                  },
+                  "execute_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Stringa datetime ISO 8601 per l'esecuzione di un orario una tantum. Deve essere un datetime futuro valido. Necessario per orari una tantum. Mutuamente esclusivo con cron_expression."
+                  },
+                  "expression_timezone": {
+                    "type": "string",
+                    "description": "Identificatore del fuso orario IANA (es. 'UTC', 'America/New_York', 'Europe/London') per l'orario. Necessario per orari ricorrenti, opzionale per orari una tantum. Quando si usa testo in linguaggio naturale, questo predefinito è 'UTC'."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Testo in linguaggio naturale per generare automaticamente un'espressione cron. Il sistema convertirà il tuo testo in un'espressione cron valida. Esempi: 'ogni 3 minuti', 'ogni giorno alle 10am', 'ogni lunedì alle 9am'. Mutuamente esclusivo con cron_expression e execute_at. Quando usato, expression_timezone predefinito è 'UTC'."
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Orario creato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Identificatore unico dell'orario"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recurring",
+                        "onetime"
+                      ],
+                      "description": "Tipo di orario: 'recurring' per orari basati su cron, 'onetime' per orari di esecuzione singola"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "description": "Metodo HTTP per la chiamata programmata"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "L'URL dell'endpoint che sarà chiamato"
+                    },
+                    "cron_expression": {
+                      "type": "string",
+                      "description": "Espressione cron (presente solo per orari ricorrenti)"
+                    },
+                    "execute_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Datetime di esecuzione (presente solo per orari una tantum)"
+                    },
+                    "expression_timezone": {
+                      "type": "string",
+                      "description": "Fuso orario per l'orario"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Datetime ISO 8601 quando l'orario è stato creato"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri errati o mancanti. Errori comuni: metodo non valido, endpoint mancante, cron_expression non valida, datetime execute_at non valido, fuso orario non valido, o formato schedule_id non valido."
+          },
+          "401": {
+            "description": "Chiave API non valida. Prova a ricontrollarla o contatta info@olostep.com se hai problemi."
+          },
+          "500": {
+            "description": "Errore interno del server durante la creazione del programma."
+          }
+        }
+      },
+      "get": {
+        "summary": "Elenca Programmi",
+        "description": "Recupera tutti i programmi per il tuo team. Restituisce un elenco di programmi con la loro configurazione, stato e metadati. Per impostazione predefinita, i programmi eliminati sono filtrati.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "Imposta su 'true' per includere i programmi eliminati nella risposta. Per impostazione predefinita, i programmi eliminati sono filtrati.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta riuscita con elenco di programmi.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "Identificatore del team"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "Identificatore unico dell'orario"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "recurring",
+                              "onetime"
+                            ],
+                            "description": "Tipo di programma"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "L'URL dell'endpoint"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "Il payload da inviare con la chiamata API"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "Espressione cron (presente solo per orari ricorrenti)"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Datetime di esecuzione (presente solo per orari una tantum)"
+                          },
+                          "expression_timezone": {
+                            "type": "string",
+                            "description": "Fuso orario per l'orario"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Testo in linguaggio naturale usato per generare l'espressione cron"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "Nome interno del programma in EventBridge"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "Nome del gruppo di programmi"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Datetime ISO 8601 quando l'orario è stato creato"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Data e ora ISO 8601 dell'ultimo aggiornamento del programma"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "ENABLED",
+                              "DELETED"
+                            ],
+                            "description": "Stato attuale del programma"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": [
+                              "GET",
+                              "POST"
+                            ],
+                            "description": "Metodo HTTP per la chiamata programmata"
+                          }
+                        }
+                      },
+                      "description": "Array di oggetti programma"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Numero totale di programmi"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chiave API non valida."
+          },
+          "500": {
+            "description": "Errore interno del server durante il recupero dei programmi."
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "Ottieni Programma",
+        "description": "Recupera un singolo programma tramite il suo ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per il programma. Deve iniziare con 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Programma recuperato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "Identificatore del team"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "Identificatore unico dell'orario"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "recurring",
+                            "onetime"
+                          ],
+                          "description": "Tipo di programma"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "GET",
+                            "POST"
+                          ],
+                          "description": "Metodo HTTP per la chiamata programmata"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "L'URL dell'endpoint"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "Il payload da inviare con la chiamata API"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "Espressione cron (presente solo per orari ricorrenti)"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Datetime di esecuzione (presente solo per orari una tantum)"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "Fuso orario per l'orario"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "Testo in linguaggio naturale usato per generare l'espressione cron"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "Nome interno del programma in EventBridge"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "Nome del gruppo di programmi"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Datetime ISO 8601 quando l'orario è stato creato"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data e ora ISO 8601 dell'ultimo aggiornamento del programma"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ENABLED",
+                            "DELETED"
+                          ],
+                          "description": "Stato attuale del programma"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa del formato non valido di schedule_id. L'ID del programma deve iniziare con 'schedule_'."
+          },
+          "401": {
+            "description": "Chiave API non valida."
+          },
+          "404": {
+            "description": "Programma non trovato per l'ID fornito."
+          },
+          "500": {
+            "description": "Errore interno del server durante il recupero del programma."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Elimina Programma",
+        "description": "Elimina un programma tramite il suo ID. Questo fermerà qualsiasi esecuzione futura e rimuoverà il programma da EventBridge.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per il programma da eliminare. Deve iniziare con 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Programma eliminato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Messaggio di successo"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "L'ID del programma eliminato"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa del formato non valido di schedule_id o programma già eliminato. L'ID del programma deve iniziare con 'schedule_'."
+          },
+          "401": {
+            "description": "Chiave API non valida."
+          },
+          "404": {
+            "description": "Programma non trovato per l'ID fornito."
+          },
+          "500": {
+            "description": "Errore interno del server durante l'eliminazione del programma."
+          }
+        }
+      }
+    }
+  }
+}

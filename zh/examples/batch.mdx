@@ -1,0 +1,167 @@
+---
+icon: "lines-leaning"
+sidebarTitle: "批量抓取"
+title: "一次性获取多个网站的内容"
+description: "开始批量抓取，在5-7分钟内从多达10万个URL中提取内容"
+---
+
+## 概述
+
+Olostep的[Batches](https://docs.olostep.com/api-reference/batches/create)端点允许你启动最多10,000个URL的批量抓取，并在5-7分钟内获取内容。你可以同时启动最多10个批次，一次性从100,000个URL中提取内容。如果你需要更大的规模，请联系我们。
+
+这非常适合于你已经有想要处理的URL的情况——例如，用于聚合数据进行分析、构建专用搜索工具或监控多个网站的变化。
+
+在本指南中，我们将演示如何使用URL列表启动批量抓取并以markdown格式检索内容。
+
+## 包含完整代码的Gist
+这是一个包含所有代码的gist，你可以复制并粘贴以尝试使用Olostep进行批量抓取：
+https://gist.github.com/olostep/e903f2e4fc28f8093b834b4df68b8031
+
+在这个gist中，我们展示了如何用5个谷歌搜索查询启动一个批次，检查状态，并检索每个项目的内容。
+
+## 前提条件
+在开始之前，请确保你具备以下条件：
+
+- 有效的Olostep API密钥。你可以通过在[Olostep](https://www.olostep.com/dashboard)注册获得。
+- 系统上已安装Python。
+- `requests`和`hashlib`库（如有需要，通过`pip install requests`安装`requests`）。
+
+## 步骤1：从本地URL创建批次
+
+如果你已经有想要处理的URL列表，可以直接在脚本中定义它们。否则，可以从文件或数据库中读取。
+
+```python filename="start_batch.py"
+import requests
+import hashlib
+
+API_KEY = "YOUR_API_KEY"
+
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=nikola+tesla&gl=us&hl=en",
+        "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+        "https://www.google.com/search?q=google+solar+eclipse&gl=us&hl=en",
+        "https://www.google.com/search?q=crispr&gl=us&hl=en",
+        "https://www.google.com/search?q=genghis%20khan&gl=us&hl=en"
+    ]
+    return [{"custom_id": create_hash_id(url), "url": url} for url in urls]
+
+def start_batch(items):
+    payload = {
+        "items": items
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+    return response.json()["id"]
+
+if __name__ == "__main__":
+    items = compose_items_array()
+    batch_id = start_batch(items)
+    print("Batch started. ID:", batch_id)
+```
+
+## 步骤2：监控批次状态
+
+批次启动后，你可以使用启动批次时返回的`batch_id`监控其状态。
+
+```python filename="check_status.py"
+import requests
+
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}",
+        headers=headers
+    )
+    return response.json()["status"]
+```
+
+你可以每隔几秒（例如10秒）轮询状态，直到批次完成：
+
+```python
+import time
+
+def recursive_check(batch_id):
+    status = check_batch_status(batch_id)
+    print("Status:", status)
+    if status == "completed":
+        print("Batch is complete!")
+    else:
+        time.sleep(60)
+        recursive_check(batch_id)
+```
+
+## 步骤3：检索已完成的项目
+
+一旦批次标记为完成，获取已处理的项目。
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}/items",
+        headers=headers
+    )
+    return response.json()["items"]
+```
+
+每个项目将包含一个`retrieve_id`，你可以用它来获取抓取的内容。
+
+```python
+items = get_completed_items(batch_id)
+for item in items:
+    print(f"URL: {item['url']}\nCustom ID: {item['custom_id']}\nRetrieve ID: {item['retrieve_id']}\n---")
+```
+
+## 步骤4：检索内容
+
+使用`retrieve_id`获取以markdown、html或json格式提取的内容。以下是以markdown格式检索内容的示例：
+
+```python filename="retrieve_content.py"
+def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# Example usage:
+items = get_completed_items(batch_id)
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content)
+```
+
+## 托管内容
+我们还会托管内容7天，因此你可以多次检索而无需重新抓取。
+[markdown内容](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_p64bro0q3n_924d0fa125efcc5c.txt)的托管URL示例
+
+## 示例用例
+
+### 1. 构建搜索引擎
+使用Olostep从特定行业网站（法律、医疗、AI）中提取内容并构建可搜索的数据库。
+
+### 2. 网站监控
+通过安排每日批量抓取监控产品可用性、价格变化或新闻更新。
+
+### 3. 社交媒体监控
+抓取论坛或内容来源中对你品牌或关键词的提及，并提取结构化数据。
+
+### 4. 聚合器
+通过从数十个来源提取数据构建招聘板、新闻聚合器或房地产列表平台。
+
+## 结论
+
+通过批量抓取，你可以快速高效地从多达10万个URL中提取内容。无论你是在构建搜索工具、聚合器还是监控系统，Olostep Batches都能简化工作。
+
+想要只提取结构化数据？使用[Parsers](https://docs.olostep.com/features/structured-content/parsers)获取你需要的字段。需要帮助？请联系`info@olostep.com`以获取支持或让我们为你的用例编写自定义脚本。

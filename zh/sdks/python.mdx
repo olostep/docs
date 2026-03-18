@@ -1,0 +1,854 @@
+---
+sidebarTitle: "Python"
+title: "Olostep Python SDK"
+icon: "python"
+description: "官方 Python SDK，用于从网络中搜索、提取和结构化数据"
+---
+
+<Note>
+  **PyPI 包**: [olostep](https://pypi.org/project/olostep/) | **要求**: Python 3.11+
+</Note>
+
+## 安装
+
+<CodeGroup>
+
+```bash pip
+pip install olostep
+```
+
+```bash pip3
+pip3 install olostep
+```
+
+```bash poetry
+poetry add olostep
+```
+
+```bash uv
+uv pip install olostep
+```
+
+</CodeGroup>
+
+## 认证
+
+从 [Olostep Dashboard](https://www.olostep.com/dashboard/) 获取你的 API 密钥。
+
+## 快速开始
+
+根据你的使用场景，SDK 提供了两种客户端选项：
+
+<CardGroup cols={2}>
+  <Card
+    title="同步客户端 (`Olostep`)"
+    href="/sdks/python#sync-client-olostep"
+    icon="sync"
+  >
+    最适合：脚本和简单的使用场景，当你更喜欢阻塞操作时。<br /><br />
+    同步客户端提供了一个更简单的阻塞接口，如果你对 async/await 不熟悉，这会更容易上手。
+  </Card>
+  <Card
+    title="异步客户端 (`AsyncOlostep`)"
+    href="/sdks/python#async-client-asyncolostep"
+    icon="zap"
+  >
+    最适合：生产应用程序和处理许多并发请求。<br /><br />
+    异步客户端提供非阻塞操作，是需要高吞吐量的生产应用程序的推荐选择。
+  </Card>
+</CardGroup>
+
+# 同步客户端 (Olostep)
+
+同步客户端 (`Olostep`) 提供一个阻塞接口，非常适合脚本和简单的使用场景。
+
+```python
+from olostep import Olostep
+
+# 可以通过传递 'api_key' 参数或设置 OLOSTEP_API_KEY 环境变量来提供 API 密钥
+
+# 同步客户端自动处理资源管理
+# 不需要显式关闭 - 每次操作后资源会被清理
+client = Olostep(api_key="YOUR_REAL_KEY")
+scrape_result = client.scrapes.create(url_to_scrape="https://example.com")
+```
+
+### 基本网页抓取
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 简单抓取
+result = client.scrapes.create(url_to_scrape="https://example.com")
+print(f"Scraped {len(result.html_content)} characters")
+
+# 多种格式
+result = client.scrapes.create(
+    url_to_scrape="https://example.com",
+    formats=["html", "markdown"]
+)
+print(f"HTML: {len(result.html_content)} chars")
+print(f"Markdown: {len(result.markdown_content)} chars")
+```
+
+### 批量处理
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 高效处理多个 URL
+batch = client.batches.create(
+    urls=[
+        "https://www.google.com/search?q=python",
+        "https://www.google.com/search?q=javascript",
+        "https://www.google.com/search?q=typescript"
+    ]
+)
+
+# 等待完成并处理结果
+for item in batch.items():
+    content = item.retrieve(["html"])
+    print(f"Processed {item.url}: {len(content.html_content)} bytes")
+```
+
+### 智能网页爬取
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 使用智能过滤进行爬取
+crawl = client.crawls.create(
+    start_url="https://www.bbc.com",
+    max_pages=100,
+    include_urls=["/articles/**", "/blog/**"],
+    exclude_urls=["/admin/**"]
+)
+
+for page in crawl.pages():
+    content = page.retrieve(["html"])
+    print(f"Crawled: {page.url}")
+```
+
+### 网站映射
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 从网站提取所有链接
+maps = client.maps.create(url="https://example.com")
+
+# 获取所有发现的 URL
+urls = []
+for url in maps.urls():
+    urls.append(url)
+    if len(urls) >= 10:  # 演示限制
+        break
+
+print(f"Found {len(urls)} URLs")
+```
+
+### AI 驱动的答案
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 使用 AI 从网页获取答案
+answer = client.answers.create(
+    task="What is the main topic of https://example.com?"
+)
+print(f"Answer: {answer.answer}")
+```
+
+# 异步客户端 (AsyncOlostep)
+
+异步客户端 (`AsyncOlostep`) 是高性能应用程序、后端服务以及需要处理大量并发请求时的推荐客户端。
+
+```python
+from olostep import AsyncOlostep
+
+# 可以通过传递 'api_key' 参数或设置 OLOSTEP_API_KEY 环境变量来提供 API 密钥
+
+# 资源管理
+# ===================
+# SDK 支持两种资源管理使用模式：
+
+# 1. 上下文管理器（推荐用于一次性使用）：
+#    自动处理资源清理
+async with AsyncOlostep(api_key="YOUR_REAL_KEY") as client:
+    scrape_result = await client.scrapes.create(url_to_scrape="https://example.com")
+# 传输在此处自动关闭
+
+# 2. 显式关闭（用于长时间运行的服务）：
+#    需要手动资源清理
+client = AsyncOlostep(api_key="YOUR_REAL_KEY")
+try:
+    scrape_result = await client.scrapes.create(url_to_scrape="https://example.com")
+finally:
+    await client.close()  # 手动关闭传输
+```
+
+### 基本网页抓取
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # 简单抓取
+        result = await client.scrapes.create(url_to_scrape="https://example.com")
+        print(f"Scraped {len(result.html_content)} characters")
+
+        # 多种格式
+        result = await client.scrapes.create(
+            url_to_scrape="https://example.com",
+            formats=["html", "markdown"]
+        )
+        print(f"HTML: {len(result.html_content)} chars")
+        print(f"Markdown: {len(result.markdown_content)} chars")
+
+asyncio.run(main())
+```
+
+### 批量处理
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # 高效处理多个 URL
+        batch = await client.batches.create(
+            urls=[
+                "https://www.google.com/search?q=python",
+                "https://www.google.com/search?q=javascript",
+                "https://www.google.com/search?q=typescript"
+            ]
+        )
+
+        # 等待完成并处理结果
+        async for item in batch.items():
+            content = await item.retrieve(["html"])
+            print(f"Processed {item.url}: {len(content.html_content)} bytes")
+
+asyncio.run(main())
+```
+
+### 智能网页爬取
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # 使用智能过滤进行爬取
+        crawl = await client.crawls.create(
+            start_url="https://www.bbc.com",
+            max_pages=100,
+            include_urls=["/articles/**", "/blog/**"],
+            exclude_urls=["/admin/**"]
+        )
+
+        async for page in crawl.pages():
+            content = await page.retrieve(["html"])
+            print(f"Crawled: {page.url}")
+
+asyncio.run(main())
+```
+
+### 网站映射
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # 从网站提取所有链接
+        maps = await client.maps.create(url="https://example.com")
+
+        # 获取所有发现的 URL
+        urls = []
+        async for url in maps.urls():
+            urls.append(url)
+            if len(urls) >= 10:  # 演示限制
+                break
+
+        print(f"Found {len(urls)} URLs")
+
+asyncio.run(main())
+```
+
+### AI 驱动的答案
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # 使用 AI 从网页获取答案
+        answer = await client.answers.create(
+            task="What is the main topic of https://example.com?"
+        )
+        print(f"Answer: {answer.answer}")
+
+asyncio.run(main())
+```
+
+## SDK 参考
+
+### 方法结构
+
+两个 SDK 客户端都提供相同的清晰、Python 风格的接口，按逻辑命名空间组织：
+
+| 命名空间    | 目的                 | 关键方法                       |
+| ---------- | --------------------- | ------------------------------- |
+| `scrapes`  | 单个 URL 提取        | `create()`, `get()`             |
+| `batches`  | 多 URL 处理          | `create()`, `info()`, `items()` |
+| `crawls`   | 网站遍历             | `create()`, `info()`, `pages()` |
+| `maps`     | 链接提取             | `create()`, `urls()`            |
+| `answers`  | AI 驱动的提取        | `create()`, `get()`             |
+| `retrieve` | 内容检索             | `get()`                         |
+
+每个操作返回具有符合人体工学方法的有状态对象，用于后续操作。
+
+## 错误处理
+
+使用基础异常类捕获所有 SDK 错误：
+
+```python
+from olostep import Olostep, Olostep_BaseError
+
+client = Olostep(api_key="your-api-key")
+
+try:
+    result = client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Error has occurred: {type(e).__name__}")
+    print(f"Error message: {e}")
+```
+
+有关详细的错误处理信息，包括完整的异常层次结构和细粒度的错误处理选项，请参阅[详细错误处理](/sdks/python#detailed-error-handling)。
+
+## 自动重试
+
+SDK 根据 `RetryStrategy` 配置自动重试瞬态错误（网络问题、临时服务器问题）。你可以在创建客户端时通过传递 `RetryStrategy` 实例来自定义重试行为：
+
+```python
+from olostep import Olostep, RetryStrategy
+
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+
+client = Olostep(api_key="your-api-key", retry_strategy=retry_strategy)
+result = client.scrapes.create("https://example.com")
+```
+
+有关详细的重试配置选项和最佳实践，请参阅[重试策略](/sdks/python#retry-strategy-configuration)。
+
+## 高级功能
+
+### 智能输入强制
+
+SDK 智能处理各种输入格式，以实现最大便利：
+
+```python
+from olostep import Olostep, Country
+
+client = Olostep(api_key="your-api-key")
+
+# 格式：字符串、列表或枚举
+client.scrapes.create(url_to_scrape="https://example.com", formats="html")
+client.scrapes.create(url_to_scrape="https://example.com", formats=["html", "markdown"])
+
+# 国家：不区分大小写的字符串或枚举
+client.scrapes.create(url_to_scrape="https://example.com", country="us")
+client.scrapes.create(url_to_scrape="https://example.com", country=Country.US)
+
+# 列表：单个值或列表
+client.batches.create(urls="https://example.com")    # 单个 URL
+client.batches.create(urls=["https://a.com", "https://b.com"])  # 多个 URL
+```
+
+### 高级抓取选项
+
+```python
+from olostep import Olostep, Format, Country, WaitAction, FillInputAction
+
+client = Olostep(api_key="your-api-key")
+
+# 完全控制抓取行为
+result = client.scrapes.create(
+    url_to_scrape="https://news.google.com/",
+    wait_before_scraping=3000,
+    formats=[Format.HTML, Format.MARKDOWN],
+    remove_css_selectors=["script", ".popup"],
+    actions=[
+        WaitAction(milliseconds=1500),
+        FillInputAction(selector="searchbox", value="olostep")
+    ],
+    parser="@olostep/google-news",
+    country=Country.US,
+    remove_images=True
+)
+```
+
+### 带有自定义 ID 的批量处理
+
+```python
+from olostep import Olostep, Country
+
+client = Olostep(api_key="your-api-key")
+
+batch = client.batches.create([
+    {"url": "https://www.google.com/search?q=python", "custom_id": "search_1"},
+    {"url": "https://www.google.com/search?q=javascript", "custom_id": "search_2"},
+    {"url": "https://www.google.com/search?q=typescript", "custom_id": "search_3"}
+],
+country=Country.US,
+parser="@olostep/google-search"
+)
+
+# 按自定义 ID 处理结果
+# 使用解析器时，检索 JSON 内容而不是 HTML
+for item in batch.items():
+    if item.custom_id == "search_2":
+        content = item.retrieve(["json"])
+        print(f"Search result: {content.json_content}")
+```
+
+### 智能爬取
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 使用智能过滤进行爬取
+crawl = client.crawls.create(
+    start_url="https://www.bbc.com",
+    max_pages=1000,
+    max_depth=3,
+    include_urls=["/articles/**", "/news/**"],
+    exclude_urls=["/ads/**", "/tracking/**"],
+    include_external=False,
+    include_subdomain=True,
+)
+
+for page in crawl.pages():
+    content = page.retrieve(["html"])
+    print(f"Crawled: {page.url}")
+```
+
+### 带有过滤器的网站映射
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 使用高级过滤提取所有链接
+maps = client.maps.create(
+    url="https://www.bbc.com",
+    include_subdomain=True,
+    include_urls=["/articles/**", "/news/**"],
+    exclude_urls=["/ads/**", "/tracking/**"]
+)
+
+# 获取过滤后的 URL
+urls = []
+for url in maps.urls():
+    urls.append(url)
+
+print(f"Found {len(urls)} relevant URLs")
+```
+
+### 答案检索
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 首先创建一个答案
+created_answer = client.answers.create(
+    task="What is the main topic of https://example.com?"
+)
+
+# 然后使用 ID 检索它
+answer = client.answers.get(answer_id=created_answer.id)
+print(f"Answer: {answer.answer}")
+```
+
+### 内容检索
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# 通过检索 ID 获取内容
+result = client.retrieve.get(retrieve_id="ret_123")
+
+# 获取多种格式
+result = client.retrieve.get(retrieve_id="ret_123", formats=["html", "markdown", "text", "json"])
+```
+
+## 日志记录
+
+启用日志记录以调试问题：
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("olostep")
+logger.setLevel(logging.INFO)  # 使用 DEBUG 获取详细输出
+```
+
+**日志级别**: `INFO`（推荐），`DEBUG`（详细），`WARNING`，`ERROR`
+
+## 重试策略配置
+
+`RetryStrategy` 类通过自动重试、指数退避和抖动控制 Olostep SDK 如何处理瞬态 API 错误。这有助于确保在生产环境中可靠运行，在那里临时网络问题、速率限制和服务器过载可能导致间歇性故障。
+
+### 默认行为
+
+默认情况下，SDK 使用以下重试配置：
+
+- **最大重试次数**: 5 次尝试
+- **初始延迟**: 2 秒
+- **退避**: 指数（2^尝试次数）
+- **抖动**: 延迟的 10-90%（随机）
+
+这意味着：
+
+- 尝试 1：立即
+- 尝试 2：~2-3.6 秒延迟
+- 尝试 3：~4-7.2 秒延迟
+- 尝试 4：~8-14.4 秒延迟
+- 尝试 5：~16-28.8 秒延迟
+
+最大持续时间：~57 秒（最坏情况）
+
+### 自定义配置
+
+```python
+from olostep import AsyncOlostep, RetryStrategy
+
+# 创建自定义重试策略
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,  # 最小抖动 20%
+    jitter_max=0.8,  # 最大抖动 80%
+)
+
+# 使用客户端
+async with AsyncOlostep(
+    api_key="your-api-key",
+    retry_strategy=retry_strategy
+) as client:
+    result = await client.scrapes.create("https://example.com")
+```
+
+### 何时重试发生
+
+SDK 在以下情况下自动重试：
+
+- **临时服务器问题** (`OlostepServerError_TemporaryIssue`)
+- **超时响应** (`OlostepServerError_NoResultInResponse`)
+
+其他错误（身份验证、验证、资源未找到等）立即失败，不会重试。
+
+### 传输与调用者重试
+
+SDK 有两个重试层：
+
+1. **传输层**：处理网络级连接失败（DNS、超时等）
+2. **调用者层**：处理 API 级瞬态错误（由 `RetryStrategy` 控制）
+
+两个层是独立的，并且有单独的配置。总最大持续时间是两个层的总和。
+
+### 计算最大持续时间
+
+```python
+retry_strategy = RetryStrategy(max_retries=5, initial_delay=2.0)
+max_duration = retry_strategy.max_duration()
+print(f"Max call duration: {max_duration:.2f}s")
+```
+
+### 配置示例
+
+以下是如何为不同用例配置重试策略的一些示例。
+
+#### 保守策略
+
+```python
+# 更少的重试，较短的延迟
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+# 最大持续时间：~12.6 秒
+```
+
+#### 激进策略
+
+```python
+# 为关键操作提供更多重试
+retry_strategy = RetryStrategy(
+    max_retries=10,
+    initial_delay=0.5
+)
+# 最大持续时间：~969.75 秒
+```
+
+#### 无重试（快速失败）
+
+```python
+# 禁用重试以立即反馈失败
+retry_strategy = RetryStrategy(max_retries=0)
+
+client = AsyncOlostep(api_key="your-api-key", retry_strategy=retry_strategy)
+```
+
+#### 高吞吐量策略
+
+```python
+# 为高容量操作优化
+retry_strategy = RetryStrategy(
+    max_retries=2,
+    initial_delay=0.5,
+    jitter_min=0.1,
+    jitter_max=0.3  # 较低的抖动以获得更可预测的时间
+)
+# 最大持续时间：~1.95 秒
+```
+
+### 理解抖动
+
+抖动添加了随机化以防止“雷鸣般的羊群”问题，当许多客户端同时重试时。抖动计算如下：
+
+```python
+base_delay = initial_delay * (2 ** attempt)
+jitter_range = base_delay * (jitter_max - jitter_min)
+jitter = random.uniform(base_delay * jitter_min, base_delay * jitter_min + jitter_range)
+final_delay = base_delay + jitter
+```
+
+例如，`initial_delay=2.0`，`jitter_min=0.1`，`jitter_max=0.9`：
+
+- 尝试 0：base=2.0s，jitter=0.2-1.8s，final=2.2-3.8s
+- 尝试 1：base=4.0s，jitter=0.4-3.6s，final=4.4-7.6s
+- 尝试 2：base=8.0s，jitter=0.8-7.2s，final=8.8-15.2s
+
+### 最佳实践
+
+#### 对于生产应用程序
+
+```python
+# 为生产提供平衡的方法
+retry_strategy = RetryStrategy(
+    max_retries=5,
+    initial_delay=2.0,
+    jitter_min=0.1,
+    jitter_max=0.9
+)
+```
+
+#### 对于开发/测试
+
+```python
+# 为开发提供快速反馈
+retry_strategy = RetryStrategy(
+    max_retries=2,
+    initial_delay=0.5,
+    jitter_min=0.1,
+    jitter_max=0.3
+)
+```
+
+#### 对于批量操作
+
+```python
+# 为大型批量作业提供保守的方法
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+```
+
+### 监控和调试
+
+SDK 在 DEBUG 级别记录重试信息：
+
+```
+DEBUG: Temporary issue, retrying in 2.34s
+DEBUG: No result in response, retrying in 4.67s
+```
+
+启用调试日志以监控重试行为：
+
+```python
+import logging
+logging.getLogger("olostep").setLevel(logging.DEBUG)
+```
+
+### 错误处理
+
+当所有重试都耗尽时，原始错误会被抛出：
+
+```python
+try:
+    result = await client.scrapes.create("https://example.com")
+except OlostepServerError_TemporaryIssue as e:
+    print(f"Failed after all retries: {e}")
+    # 处理永久性失败
+```
+
+### 性能考虑
+
+- **内存**：每次重试尝试都会为请求/响应对象使用额外的内存
+- **时间**：启用重试时，总操作时间可能会显著更长
+- **API 限制**：重试会计入你的 API 使用限制
+- **网络**：由于重试尝试，网络流量增加
+
+根据应用程序对可靠性与性能的要求选择重试策略。
+
+## 详细错误处理
+
+### 异常层次结构
+
+Olostep SDK 提供了一个全面的异常层次结构，用于不同的故障场景。所有异常都继承自 `Olostep_BaseError`。
+
+有三种主要错误类型直接继承自 `Olostep_BaseError`：
+
+1. **`Olostep_APIConnectionError`** - 网络级连接失败
+2. **`OlostepServerError_BaseError`** - 由 API 服务器引发的错误
+3. **`OlostepClientError_BaseError`** - 由客户端 SDK 引发的错误
+
+### 为什么连接错误是单独的
+
+`Olostep_APIConnectionError` 与服务器错误分开，因为它表示在 API 可以处理请求之前发生的网络级故障。这些是传输层问题（DNS 或 HTTP 失败、超时、连接被拒绝等），而不是 API 级错误。HTTP 状态码（4xx, 5xx）被视为 API 响应，并被分类为服务器错误，即使它们表示问题。
+
+```
+Olostep_BaseError
+├── Olostep_APIConnectionError
+├── OlostepServerError_BaseError
+│   ├── OlostepServerError_TemporaryIssue
+│   │   ├── OlostepServerError_NetworkBusy
+│   │   └── OlostepServerError_InternalNetworkIssue
+│   ├── OlostepServerError_RequestUnprocessable
+│   │   ├── OlostepServerError_ParserNotFound
+│   │   └── OlostepServerError_OutOfResources
+│   ├── OlostepServerError_BlacklistedDomain
+│   ├── OlostepServerError_FeatureApprovalRequired
+│   ├── OlostepServerError_AuthFailed
+│   ├── OlostepServerError_CreditsExhausted
+│   ├── OlostepServerError_InvalidEndpointCalled
+│   ├── OlostepServerError_ResourceNotFound
+│   ├── OlostepServerError_NoResultInResponse
+│   └── OlostepServerError_UnknownIssue
+└── OlostepClientError_BaseError
+    ├── OlostepClientError_RequestValidationFailed
+    ├── OlostepClientError_ResponseValidationFailed
+    ├── OlostepClientError_NoAPIKey
+    ├── OlostepClientError_AsyncContext
+    ├── OlostepClientError_BetaFeatureAccessRequired
+    └── OlostepClientError_Timeout
+```
+
+### 推荐的错误处理
+
+对于大多数用例，捕获基础错误并打印错误名称：
+
+```python
+from olostep import AsyncOlostep, Olostep_BaseError
+
+try:
+    result = await client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Error has occurred: {type(e).__name__}")
+    print(f"Error message: {e}")
+```
+
+这种方法捕获所有 SDK 错误，并提供有关问题的清晰信息。错误名称（例如，`OlostepServerError_AuthFailed`）足够描述性，以便了解问题所在。
+
+### 细粒度的错误处理
+
+如果你需要更具体的错误处理，请直接捕获特定的错误类型。**避免使用 `OlostepServerError_BaseError` 或 `OlostepClientError_BaseError`** - 这些基类仅指示谁引发了错误（服务器与客户端），而不是谁负责修复它。这是一个实现细节，对错误处理逻辑没有帮助。
+
+相反，捕获指示实际问题的特定错误类型：
+
+```python
+from olostep import (
+    AsyncOlostep,
+    Olostep_BaseError,
+    Olostep_APIConnectionError,
+    OlostepServerError_AuthFailed,
+    OlostepServerError_CreditsExhausted,
+    OlostepClientError_NoAPIKey,
+)
+
+try:
+    result = await client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_APIConnectionError as e:
+    print(f"Network error: {type(e).__name__}")
+except OlostepServerError_AuthFailed:
+    print("Invalid API key")
+except OlostepServerError_CreditsExhausted:
+    print("Credits exhausted")
+except OlostepClientError_NoAPIKey:
+    print("API key not provided")
+except Olostep_BaseError as e:
+    print(f"Error has occurred: {type(e).__name__}")
+```
+
+## 配置
+
+### 环境变量
+
+| 变量                 | 描述                       | 默认值                      |
+| ---------------------- | ------------------------- | ---------------------------- |
+| `OLOSTEP_API_KEY`      | 你的 API 密钥              | 必需                     |
+| `OLOSTEP_BASE_API_URL` | API 基础 URL              | `https://api.olostep.com/v1` |
+| `OLOSTEP_API_TIMEOUT`  | 请求超时（秒）            | `150`                        |
+
+## 获取帮助
+
+- [完整文档](https://docs.olostep.com)
+- [社区 Slack](https://join.slack.com/t/olostep-users/shared_invite/zt-2pn2ce0uu-~591qIdhAfJy~LXCWQS5UQ)
+- [支持邮箱](mailto:info@olostep.com)
+
+## 资源
+
+<CardGroup cols={2}>
+  <Card title="PyPI 包" icon="python" href="https://pypi.org/project/olostep/">
+    在 PyPI 上查看
+  </Card>
+  <Card title="获取 API 密钥" icon="key" href="https://www.olostep.com/auth">
+    免费注册
+  </Card>
+</CardGroup>

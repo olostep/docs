@@ -1,0 +1,88 @@
+---
+title: "AirOpsバッチを作成"
+description: "自動ページメタデータ抽出とブランド検出でバッチを開始"
+openapi: "POST /v1/batches-airops"
+---
+
+## 概要
+
+新しいAirOpsバッチを作成します。このバッチは以下を行います：
+1. 提供されたすべてのURLをスクレイピング
+2. 構造化されたメタデータを自動的に抽出
+3. 欠落フィールドのある項目を識別
+4. 不完全な項目をLLMで充実
+5. すべてのURLに対して統一された結果を返す
+
+## リクエストパラメータ
+
+<ParamField body="items" type="array" required>
+  処理するURLの配列。各項目には以下が必要です：
+  - `url` - スクレイピングする有効なURL
+  - `custom_id` - あなたのユニークな識別子（1-255文字）
+</ParamField>
+
+<ParamField body="brands" type="array" default="[]">
+  ページコンテンツ内で探すブランド名。LLMはこれら特定のブランドの言及を検出し、`brand_mentions`フィールドに一致を返します。
+  
+  ```json
+  {
+    "brands": ["Acme Corp", "TechBrand", "SaaS Pro"]
+  }
+  ```
+</ParamField>
+
+<ParamField body="country" type="string" default="RANDOM">
+  地理ターゲットされたスクレイピングのための国。ISO 3166-1 alpha-2コード（`US`、`GB`、`DE`）または`RANDOM`を使用します。
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  Webhook通知を受け取るURL。このバッチのすべてのライフサイクルイベントがここに送信されます。
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  バッチに添付されるカスタムキーと値のペア。Stripeスタイル：最大50キー、キーは40文字以下、値は500文字以下。
+</ParamField>
+
+## レスポンス
+
+レスポンスにはバッチIDと初期ワークフローステータスが含まれます：
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch_airops",
+  "created": 1705315200000,
+  "total_urls": 100,
+  "status": {
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```

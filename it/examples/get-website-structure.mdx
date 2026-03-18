@@ -1,0 +1,96 @@
+---
+icon: "list"
+sidebarTitle: "Ottieni tutti gli URL di un sito web"
+title: "Estrai tutti gli URL dal sito di Stripe"
+description: "Ottieni una mappa completa della struttura del sito di Stripe per comprenderne l’organizzazione e scoprire i contenuti disponibili."
+---
+
+## Panoramica
+
+Prima di approfondire sezioni specifiche di un sito web, è spesso utile avere un quadro completo della sua struttura. In questa guida, ti mostreremo come estrarre tutti gli URL dal sito di Stripe, il che ti aiuterà a:
+
+- Comprendere l'architettura generale del sito
+- Scoprire sezioni di contenuto di cui potresti non essere a conoscenza
+- Usare LLM per decidere quali URL analizzare ulteriormente
+
+## Estrazione di tutti gli URL di Stripe
+
+Per estrarre tutti gli URL dal sito di Stripe, utilizza l'endpoint maps con il dominio di Stripe. Questo restituirà un elenco completo di tutti gli URL rilevabili sul loro sito.
+
+<CodeGroup>
+    ```python get_stripe_urls.py
+    import requests
+    import time
+    import json
+
+    # Configurazione
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Ora di inizio per il monitoraggio della latenza
+    start_time = time.time()
+    
+    # Definisci il payload solo con l'URL di base
+    payload = {
+        "url": "https://stripe.com"
+    }
+    
+    # Effettua la richiesta
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Calcola la latenza
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"Richiesta completata in {latency}ms")
+    
+    # Elabora i risultati
+    data = response.json()
+    print(f"Trovati {data['urls_count']} URL sul sito di Stripe")
+    
+    # Stampa i primi 10 URL come esempio
+    print("\nEsempio di URL:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Salva tutti gli URL in un file per ulteriori analisi
+    with open('stripe_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nTutti gli URL salvati in stripe_urls.json")
+    ```
+</CodeGroup>
+
+### Esempio di Risposta
+
+```json
+{
+  "id": "map_abc123xyz",
+  "urls_count": 3842,
+  "urls": [
+    "https://stripe.com",
+    "https://stripe.com/about",
+    "https://stripe.com/blog",
+    "https://stripe.com/docs",
+    "https://stripe.com/pricing",
+    "https://stripe.com/customers",
+    "https://stripe.com/partners",
+    "https://stripe.com/enterprise",
+    "https://stripe.com/payments",
+    "https://stripe.com/billing"
+    // ... migliaia di altri URL
+  ]
+}
+```
+
+## Analisi della struttura del sito di Stripe
+
+Dopo aver estratto tutti gli URL, puoi analizzare la struttura per identificare modelli. Questo è particolarmente utile per comprendere come Stripe organizza i suoi contenuti. Ad esempio, potresti notare questi modelli di URL:
+
+- `/blog/**` - Post e articoli del blog
+- `/docs/**` - Pagine di documentazione
+- `/payments/**` - Informazioni sui prodotti di pagamento
+- `/billing/**` - Informazioni sui prodotti di fatturazione
+
+In alcuni casi, vuoi ottenere solo gli URL in una sezione specifica del sito web. Ad esempio, tutti i post del blog. Puoi utilizzare il nostro filtro integrato nella [prossima guida](/use-cases/extract-specific-paths).

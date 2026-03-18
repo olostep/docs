@@ -1,0 +1,112 @@
+---
+icon: "list-ol"
+sidebarTitle: "ウェブサイトの特定のURLを取得"
+title: "StripeのウェブサイトからブログURLを抽出"
+description: "StripeのウェブサイトからブログURLのみをフィルタリングして抽出し、ターゲットコンテンツ分析を行います。"
+---
+
+## 概要
+
+[ウェブサイト全体をマッピングする](/use-cases/get-website-structure)代わりに、特定のセクションに焦点を当てたい場合があります。このガイドでは、StripeのウェブサイトからブログURLのみを抽出する方法を紹介します。
+
+## ブログURLのみを抽出する
+
+StripeのウェブサイトからブログURLのみを抽出するには、パスパターンフィルタを使用してmapsエンドポイントを利用します。`include_urls`パラメータを使用すると、結果に含めたいURLパターンを正確に指定することができます。
+
+<CodeGroup>
+    ```python extract_stripe_blog_urls.py
+    import requests
+    import time
+    import json
+
+    # 設定
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # レイテンシー追跡のための開始時間
+    start_time = time.time()
+    
+    # 含めるURLパターンを定義
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog", "/blog/**"]  # /blogおよび/blog以下のすべてのパスに一致
+    }
+    
+    # リクエストを送信
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # レイテンシーを計算
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"リクエスト完了: {latency}ms")
+    
+    # 結果を処理
+    data = response.json()
+    print(f"Stripeのウェブサイトで{data['urls_count']}件のブログURLを発見")
+    
+    # サンプルとして最初の10件のURLを表示
+    print("\nサンプルブログURL:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # さらなる処理のためにブログURLをファイルに保存
+    with open('stripe_blog_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nすべてのブログURLをstripe_blog_urls.jsonに保存しました")
+    ```
+</CodeGroup>
+
+### URLパターンの理解
+
+上記の例では、2つのパターン指定を使用しています：
+
+- `/blog` - メインのブログページ（https://stripe.com/blog）に正確に一致
+- `/blog/**` - /blog以下のすべてのサブパスに一致、個々のブログ投稿、カテゴリーページなどを含む
+
+この組み合わせにより、ウェブサイトの他のセクションを除外しつつ、ブログ関連のすべてのコンテンツをキャプチャできます。
+
+### レスポンス例
+
+```json
+{
+  "id": "map_xyz789abc",
+  "urls_count": 278,
+  "urls": [
+    "https://stripe.com/blog",
+    "https://stripe.com/blog/page/1",
+    "https://stripe.com/blog/page/2",
+    "https://stripe.com/blog/engineering",
+    "https://stripe.com/blog/product",
+    "https://stripe.com/blog/how-we-built-it-usage-based-billing",
+    "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+    "https://stripe.com/blog/stripe-radar-responded-to-card-testing",
+    "https://stripe.com/blog/future-of-real-time-payments",
+    "https://stripe.com/blog/ml-flywheel-improve-models"
+    // ... 省略された追加のURL
+  ]
+}
+```
+
+## カテゴリ別にブログURLをフィルタリング
+
+特定のブログカテゴリに焦点を当てて抽出をさらに絞り込むことができます。例えば、Stripeのエンジニアリングブログ投稿にのみ興味がある場合：
+
+<CodeGroup>
+    ```python extract_engineering_blog_urls.py
+    # より具体的なURLパターンを持つペイロードを定義
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog/engineering", "/blog/engineering/**"]
+    }
+    ```
+</CodeGroup>
+
+## 次のステップ
+
+StripeのブログURLをすべて抽出したので、
+
+1. [スクレイプAPI](../../api-reference/scrapes/create)を使用して、それぞれのコンテンツを個別に取得できます。
+2. または、[次のガイド](/use-cases/crawl-matching-pages)を使用して、これらのブログページから実際のコンテンツを直接抽出するための組み込みフィルタを使用してクロールできます。

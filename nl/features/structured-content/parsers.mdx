@@ -1,0 +1,242 @@
+---
+sidebarTitle: "Parsers Gebruiken"
+title: "Parsers Gebruiken"
+---
+
+Parsers zijn een manier om ongestructureerde data om te zetten in gestructureerde data die compatibel is met je backend. Door parsers te combineren met de Olostep API (crawls, scrapes, batches) kun je van elke website een API-aanroep maken om de JSON te retourneren die je nodig hebt.
+
+Parsers zijn ideaal wanneer je op grote schaal en op regelmatige basis data van dezelfde websites nodig hebt. Deze aanpak is aanzienlijk kostenefficiënter en sneller vergeleken met [LLM extractie](/features/structured-content/llm-extraction) en retourneert alleen de vereiste JSON.
+
+We bieden vooraf gebouwde parsers voor populaire websites en gebruikssituaties. Je kunt ook je eigen parsers maken in een paar minuten met LLMs via het [dashboard](https://www.olostep.com/dashboard/parsers) of ons team vragen om het voor je te doen.
+
+### Vooraf Gebouwde Parsers
+
+We bieden verschillende vooraf gebouwde parsers voor populaire websites:
+- Google Zoeken: `@olostep/google-search`
+- Amazon Product: `@olostep/amazon-it-product`
+- E-mail Extractie: `@olostep/extract-emails`
+- Kalenders Extractie: `@olostep/extract-calendars`
+- Socials Extractie: `@olostep/extract-socials`
+- TikTok data-extractie: neem contact met ons op om de parser-ID te krijgen
+- Google Nieuws: neem contact met ons op om de parser-ID te krijgen
+- Google Maps: neem contact met ons op om de parser-ID te krijgen
+
+### Voorbeeld Gebruik
+
+```python
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+    "formats": ["json"],
+    "parser": {"id": "@olostep/google-search"},
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "wait_before_scraping": 0,
+}
+headers = {
+    "Authorization": "Bearer <YOUR-API-KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+
+## Respons Formaat
+
+Wanneer je een verzoek doet aan de Olostep API met het parserformaat, ontvang je een JSON-respons zoals het onderstaande voorbeeld:
+
+```json
+{
+    "id": "scrape_94iqy385ty",
+    "object": "scrape",
+    "created": 1740595134,
+    "metadata": {},
+    "retrieve_id": "94iqy385ty",
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "result": {
+        "html_content": null,
+        "markdown_content": null,
+        "text_content": null,
+        "json_content": "{\"searchParameters\":{\"type\":\"search\",\"engine\":\"google\",\"q\":\"alexander the great\"},\"knowledgeGraph\":{\"title\":\"Alexander the Great\",\"type\":\"Former King of Macedonia\",\"description\":\"Alexander III of Macedon, most commonly known as Alexander the Great, was a king of the ancient Greek kingdom of Macedon.\",\"imageUrl\":\"https://www.mayaincaaztec.com/ancient-greece/alexander-the-great\",\"attributes\":{\"Born\":\"July 356 BC, Pella\",\"Died\":\"June 323 BC (age 32 years), Babylon\",\"Spouse\":\"Roxana (m. 327 BC\u2013323 BC), Parysatis II (m. 324 BC\u2013323 BC), Stateira (m. 324 BC\u2013323 BC)\",\"Children\":\"Alexander IV of Macedon\",\"Full name\":\"Alexander III of Macedon\",\"Siblings\":\"Cleopatra of Macedon, Philip III of Macedon, Thessalonike of Macedon, Cynane, Caranus, Europa of Macedon\"}},\"organic\":[{\"title\":\"Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Alexander_the_Great\",\"position\":1,\"snippet\":\"He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.\",\"sitelinks\":[{\"title\":\"Death of Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Death_of_Alexander_the_Great\"},{\"title\":\"Wars of Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Wars_of_Alexander_the_Great\"}]},{\"title\":\"Alexander the Great | Biography, Empire, Death, & Facts\",\"link\":\"https://www.britannica.com/biography/Alexander-the-Great#:~:text=Top%20Questions-,Why%20is%20Alexander%20the%20Great%20famous%3F,Greece%20to%20part%20of%20India.\",\"position\":2},{\"title\":\"Alexander the Great's Last Three Wishes. - LinkedIn\",\"link\":\"https://www.linkedin.com/pulse/moment-can-last-lifetime-alexander-greats-three-wishes-holt#:~:text=1)%20The%20king%20of%20Macedon,my%20coffin%2C%22%20Alexander%20said.\",\"position\":3},{\"title\":\"Alexander the Great Failure: The Collapse of the Macedonian Empire\",\"link\":\"https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.\",\"position\":4},{\"title\":\"Who defeated Alexander The Great? Who conquered Greece after him ...\",\"link\":\"https://www.quora.com/Who-defeated-Alexander-The-Great-Who-conquered-Greece-after-him-and-why-were-they-able-to-conquer-that-region-while-Alexander-couldnt#:~:text=No%20one%20defeated%20Alexander%20the,his%20death%20was%20not%20natural.\",\"position\":5},{\"title\":\"Alexander the Great | Biography, Empire, Death, & Facts\",\"link\":\"https://www.britannica.com/biography/Alexander-the-Great\",\"position\":6,\"snippet\":\"Feb 11, 2025 \u2014 Alexander the Great, a fearless Macedonian king and military genius, conquered vast territories from Greece to Egypt and India, ...\"},{\"title\":\"Alexander the Great: Empire & Death\",\"link\":\"https://www.history.com/topics/ancient-greece/alexander-the-great\",\"position\":7,\"snippet\":\"Nov 9, 2009 \u2014 Alexander the Great was an ancient Macedonian ruler and one of history's greatest military minds who, as King of Macedonia and Persia, ...\"},{\"title\":\"History - Alexander the Great\",\"link\":\"https://www.bbc.co.uk/history/historic_figures/alexander_the_great.shtml\",\"position\":8,\"snippet\":\"Alexander III of Macedon, better known as Alexander the Great, single-handedly changed the nature of the ancient world in little more than a decade.\"},{\"title\":\"Alexander the Great - National Geographic Education\",\"link\":\"https://education.nationalgeographic.org/resource/alexander-great/\",\"position\":9,\"snippet\":\"Oct 19, 2023 \u2014 Alexander was born in 356 B.C.E. in Pella, Macedonia, to King Philip II. As a young boy, Alexander was taught to read, write, and play the lyre.\"},{\"title\":\"Who loved Alexander the Great?\",\"link\":\"https://museums.cam.ac.uk/magic/who-loved-alexander-great\",\"position\":10,\"snippet\":\"Throughout his life, Alexander married 3 women and fathered at least 2 children but also had several male lovers. Amongst his closest relationships was that ...\"},{\"title\":\"Alexander the Great (1956)\",\"link\":\"https://www.imdb.com/title/tt0048937/\",\"position\":11,\"snippet\":\"The life and military conquests of Alexander III of Macedon (July 20/21, 356 - June 10/11, 323 B.C.), commonly known as Alexander the Great.\"},{\"title\":\"Alexander the Great\",\"link\":\"https://www.worldhistory.org/Alexander_the_Great/\",\"position\":12,\"snippet\":\"Nov 14, 2013 \u2014 He is known as 'the great' both for his military genius and his diplomatic skills in handling the various populaces of the regions he conquered.\"}],\"peopleAlsoAsk\":[{\"question\":\"What is Alexander the Great most famous for?\"},{\"question\":\"What did Alexander the Great say before he died?\",\"link\":\"https://www.linkedin.com/pulse/moment-can-last-lifetime-alexander-greats-three-wishes-holt#:~:text=1)%20The%20king%20of%20Macedon,my%20coffin%2C%22%20Alexander%20said.\",\"title\":\"Alexander the Great's Last Three Wishes. - LinkedIn\"},{\"question\":\"What led to the fall of Alexander?\",\"link\":\"https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.\",\"title\":\"Alexander the Great Failure: The Collapse of the Macedonian Empire\"},{\"question\":\"Which country defeated Alexander the Great?\",\"link\":\"https://www.quora.com/Who-defeated-Alexander-The-Great-Who-conquered-Greece-after-him-and-why-were-they-able-to-conquer-that-region-while-Alexander-couldnt#:~:text=No%20one%20defeated%20Alexander%20the,his%20death%20was%20not%20natural.\",\"title\":\"Who defeated Alexander The Great? Who conquered Greece after him ...\"}],\"relatedSearches\":[{\"query\":\"Alexander the Great book\"},{\"query\":\"Alexander the Great empire\"},{\"query\":\"Alexander the Great death\"},{\"query\":\"Alexander the Great religion\"},{\"query\":\"Alexander the Great Empire map\"},{\"query\":\"Alexander the Great achievements\"},{\"query\":\"What was Alexander the Great known for\"},{\"query\":\"Alexander the Great empire name\"}]}",
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": null,
+        "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/json_94iqy385ty.json",
+        "text_hosted_url": null,
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+De respons bevat:
+
+- **Basisinformatie over het verzoek**: `id`, `object`, `created` timestamp, `url_to_scrape`
+- **Resultaatobject** met URL's om toegang te krijgen tot verschillende formaten van de data
+- **json_content** met gestructureerde JSON-resultaten inclusief:
+- `searchParameters`: Informatie over de zoekopdracht
+- `knowledgeGraph`: Gedetailleerde informatie over het zoekonderwerp (indien beschikbaar)
+- `organic`: Lijst van zoekresultaten met titel, link, positie en snippet
+- `peopleAlsoAsk`: Gerelateerde vragen die gebruikers vaak zoeken
+- `relatedSearches`: Voorgestelde gerelateerde zoekopdrachten
+
+`json_content` is het belangrijkste deel van de respons met de gestructureerde JSON-resultaten. Je kunt de JSON-inhoud direct uit de respons halen of de gehoste URL gebruiken die in de respons wordt gegeven.
+
+## Gestructureerde Respons: json_content
+```json
+{
+  "searchParameters": {
+    "type": "search",
+    "engine": "google",
+    "q": "alexander the great"
+  },
+  "knowledgeGraph": {
+    "title": "Alexander the Great",
+    "type": "Former King of Macedonia",
+    "description": "Alexander III of Macedon, most commonly known as Alexander the Great, was a king of the ancient Greek kingdom of Macedon.",
+    "imageUrl": "https://www.mayaincaaztec.com/ancient-greece/alexander-the-great",
+    "attributes": {
+      "Born": "July 356 BC, Pella",
+      "Died": "June 323 BC (age 32 years), Babylon",
+      "Spouse": "Roxana (m. 327 BC–323 BC), Parysatis II (m. 324 BC–323 BC), Stateira (m. 324 BC–323 BC)",
+      "Children": "Alexander IV of Macedon",
+      "Full name": "Alexander III of Macedon",
+      "Siblings": "Cleopatra of Macedon, Philip III of Macedon, Thessalonike of Macedon, Cynane, Caranus, Europa of Macedon"
+    }
+  },
+  "organic": [
+    {
+      "title": "Alexander the Great",
+      "link": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+      "position": 1,
+      "snippet": "He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.",
+      "sitelinks": [
+        {
+          "title": "Death of Alexander the Great",
+          "link": "https://en.wikipedia.org/wiki/Death_of_Alexander_the_Great"
+        },
+        {
+          "title": "Wars of Alexander the Great",
+          "link": "https://en.wikipedia.org/wiki/Wars_of_Alexander_the_Great"
+        }
+      ]
+    },
+    {
+      "title": "Alexander the Great Failure: The Collapse of the Macedonian Empire",
+      "link": "https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.",
+      "position": 2
+    },
+    {
+      "title": "Which Indian king first time defeated Alexander? - Quora",
+      "link": "https://www.quora.com/Which-Indian-king-first-time-defeated-Alexander#:~:text=Alexander%20the%20Great%20was%20defeated,returned%20with%20only%2020000%20troops.",
+      "position": 3
+    },
+    {
+      "title": "Alexander the Great | Biography, Empire, Death, & Facts",
+      "link": "https://www.britannica.com/biography/Alexander-the-Great",
+      "position": 4,
+      "snippet": "Feb 11, 2025 — Alexander the Great, a fearless Macedonian king and military genius, conquered vast territories from Greece to Egypt and India, ..."
+    },
+    {
+      "title": "Alexander the Great: Empire & Death",
+      "link": "https://www.history.com/topics/ancient-greece/alexander-the-great",
+      "position": 5,
+      "snippet": "Nov 9, 2009 — Alexander the Great was an ancient Macedonian ruler and one of history's greatest military minds who, as King of Macedonia and Persia, ..."
+    },
+    {
+      "title": "Alexander the Great (1956)",
+      "link": "https://www.imdb.com/title/tt0048937/",
+      "position": 6,
+      "snippet": "The life and military conquests of Alexander III of Macedon (July 20/21, 356 - June 10/11, 323 B.C.), commonly known as Alexander the Great."
+    },
+    {
+      "title": "History - Alexander the Great",
+      "link": "https://www.bbc.co.uk/history/historic_figures/alexander_the_great.shtml",
+      "position": 7,
+      "snippet": "Alexander III of Macedon, better known as Alexander the Great, single-handedly changed the nature of the ancient world in little more than a decade."
+    },
+    {
+      "title": "Who loved Alexander the Great?",
+      "link": "https://museums.cam.ac.uk/magic/who-loved-alexander-great",
+      "position": 8,
+      "snippet": "Throughout his life, Alexander married 3 women and fathered at least 2 children but also had several male lovers. Amongst his closest relationships was that ..."
+    },
+    {
+      "title": "Alexander the Great",
+      "link": "https://www.worldhistory.org/Alexander_the_Great/",
+      "position": 9,
+      "snippet": "Nov 14, 2013 — He is known as 'the great' both for his military genius and his diplomatic skills in handling the various populaces of the regions he conquered."
+    },
+    {
+      "title": "Alexander the Great - National Geographic Education",
+      "link": "https://education.nationalgeographic.org/resource/alexander-great/",
+      "position": 10,
+      "snippet": "Oct 19, 2023 — Alexander was born in 356 B.C.E. in Pella, Macedonia, to King Philip II. As a young boy, Alexander was taught to read, write, and play the lyre."
+    }
+  ],
+  "peopleAlsoAsk": [
+    {
+      "question": "What is Alexander the Great most famous for?"
+    },
+    {
+      "question": "What did Alexander the Great say before he died?"
+    },
+    {
+      "question": "What led to the fall of Alexander?",
+      "link": "https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.",
+      "title": "Alexander the Great Failure: The Collapse of the Macedonian Empire"
+    },
+    {
+      "question": "Who first defeated Alexander the Great?",
+      "link": "https://www.quora.com/Which-Indian-king-first-time-defeated-Alexander#:~:text=Alexander%20the%20Great%20was%20defeated,returned%20with%20only%2020000%20troops.",
+      "title": "Which Indian king first time defeated Alexander? - Quora"
+    }
+  ],
+  "relatedSearches": [
+    {
+      "query": "Alexander the Great book"
+    },
+    {
+      "query": "Alexander the Great empire"
+    },
+    {
+      "query": "Alexander the Great death"
+    },
+    {
+      "query": "Alexander the Great religion"
+    },
+    {
+      "query": "Alexander the Great Empire map"
+    },
+    {
+      "query": "Alexander the Great achievements"
+    },
+    {
+      "query": "What was Alexander the Great known for"
+    },
+    {
+      "query": "Alexander the Great movie"
+    }
+  ]
+}
+```
+
+Olostep biedt ook een gehost JSON-bestand met de gestructureerde resultaten. Je kunt het JSON-bestand openen met behulp van het `json_hosted_url` veld in de respons:
+
+- Gestructureerde JSON: [Bekijk voorbeeld JSON](https://olostep-storage.s3.us-east-1.amazonaws.com/json_vxc86vq2pf.json)
+
+Als je ook de HTML- en Markdown-inhoud van de zoekresultaten wilt ontvangen, kun je deze formaten opnemen in de `formats` parameter en Olostep zal ze in de respons retourneren en gehoste URL's voor elk formaat bieden.
+- [Markdown formaat](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_vxc86vq2pf.txt)
+- [HTML](https://olostep-storage.s3.us-east-1.amazonaws.com/text_vxc86vq2pf.txt)
+
+### Een Aangepaste Parser Nodig?
+
+Als je een parser nodig hebt voor een specifieke website of de ID van een vooraf gebouwde parser:
+
+- Neem contact met ons op via info@olostep.com

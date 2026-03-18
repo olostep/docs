@@ -1,0 +1,58 @@
+---
+sidebarTitle: "Context"
+icon: "cookie"
+title: "Context"
+description: "Hergebruik aangepaste cookies, authenticatie en gecachte gegevens voor AI-automatiseringen"
+---
+
+> **Opmerking:** Deze functie is momenteel alleen ingeschakeld voor geselecteerde gebruikers. Om toegang aan te vragen, neem contact met ons op via info@olostep.com.
+
+Met contexten kun je aangepaste cookies doorgeven aan de API. Dit stelt je in staat om cookies, authenticatie en opgeslagen gegevens te hergebruiken om AI-automatiseringen aan te sturen.
+
+### Een Context Maken
+
+Hier is hoe je een context kunt maken om aangepaste cookies door te geven aan de API:
+
+1. Installeer de Olostep browser plugin van hier: [Olostep browser plugin](https://chromewebstore.google.com/detail/olostep/mjalbmdidmklbojfgakdpbifkgjjilkh)
+2. Bezoek de website waarvoor je de cookies/authenticatie wilt opslaan
+3. Log in op de website met de inloggegevens die je wilt opslaan
+4. Klik op het Olostep plugin-icoon en selecteer "Submit Context"
+5. Kopieer de context_id (die iets zal zijn als `ctx_yylqbfayto`) van de plugin en gebruik deze in je API-verzoeken
+
+### Context Gebruiken in de API-verzoeken
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.feizy.com/account-dashboard",
+    "formats": ["html", "markdown"],
+    "remove_css_selectors": "none",
+    "country": "US",
+    "context": {
+        "id": "ctx_yylqbfayto"
+    }
+}
+
+headers = {
+    "Authorization": "Bearer <API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+# Parseer de JSON-respons
+data = response.json()
+
+# Print de JSON met de juiste inspringing
+print(json.dumps(data, indent=4))
+```
+
+### Conclusie
+
+Deze functie stelt je in staat om cookies, authenticatie en opgeslagen gegevens te hergebruiken voor je API-verzoeken.
+
+Deze functie is in Beta voor bedrijven die AI-automatiseringen bouwen. Om toegang te krijgen tot deze functie, neem contact met ons op via `info@olostep.com`.

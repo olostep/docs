@@ -1,0 +1,236 @@
+---
+icon: "google"
+sidebarTitle: "Google搜索结果"
+title: "获取Google搜索结果（Python）"
+description: "使用Olostep和Python代码片段抓取Google搜索结果的SERP API。"
+---
+
+## 概述
+
+Olostep的API允许你通过使用[解析器](../../features/structured-content/parsers)从搜索引擎结果中提取结构化数据。这些解析器将搜索结果的原始HTML转换为干净的、结构化的JSON数据，方便分析或集成到你的应用程序中。
+
+## 集成示例
+
+要从搜索结果中获取解析后的JSON内容，你需要在`formats`参数中包含`json`，并在`parser`对象中指定解析器的名称`@olostep/google-search`。
+
+以下是如何以结构化格式检索Google搜索结果：
+
+```python
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+    "formats": ["json"],
+    "parser": {"id": "@olostep/google-search"},
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "wait_before_scraping": 0,
+}
+headers = {
+    "Authorization": "Bearer <YOUR-API-KEY>",
+    "Content-Type": "application/json"
+}
+response = requests.request("POST", endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=4))
+```
+
+## 响应格式
+
+当你使用Google搜索解析器向Olostep API发出请求时，你将收到如下的JSON响应：
+
+```json
+{
+    "id": "scrape_94iqy385ty",
+    "object": "scrape",
+    "created": 1740595134,
+    "metadata": {},
+    "retrieve_id": "94iqy385ty",
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "result": {
+        "html_content": null,
+        "markdown_content": null,
+        "text_content": null,
+        "json_content": "{\"searchParameters\":{\"type\":\"search\",\"engine\":\"google\",\"q\":\"alexander the great\"},\"knowledgeGraph\":{\"title\":\"Alexander the Great\",\"type\":\"Former King of Macedonia\",\"description\":\"Alexander III of Macedon, most commonly known as Alexander the Great, was a king of the ancient Greek kingdom of Macedon.\",\"imageUrl\":\"https://www.mayaincaaztec.com/ancient-greece/alexander-the-great\",\"attributes\":{\"Born\":\"July 356 BC, Pella\",\"Died\":\"June 323 BC (age 32 years), Babylon\",\"Spouse\":\"Roxana (m. 327 BC\u2013323 BC), Parysatis II (m. 324 BC\u2013323 BC), Stateira (m. 324 BC\u2013323 BC)\",\"Children\":\"Alexander IV of Macedon\",\"Full name\":\"Alexander III of Macedon\",\"Siblings\":\"Cleopatra of Macedon, Philip III of Macedon, Thessalonike of Macedon, Cynane, Caranus, Europa of Macedon\"}},\"organic\":[{\"title\":\"Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Alexander_the_Great\",\"position\":1,\"snippet\":\"He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.\",\"sitelinks\":[{\"title\":\"Death of Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Death_of_Alexander_the_Great\"},{\"title\":\"Wars of Alexander the Great\",\"link\":\"https://en.wikipedia.org/wiki/Wars_of_Alexander_the_Great\"}]},{\"title\":\"Alexander the Great | Biography, Empire, Death, & Facts\",\"link\":\"https://www.britannica.com/biography/Alexander-the-Great#:~:text=Top%20Questions-,Why%20is%20Alexander%20the%20Great%20famous%3F,Greece%20to%20part%20of%20India.\",\"position\":2},{\"title\":\"Alexander the Great's Last Three Wishes. - LinkedIn\",\"link\":\"https://www.linkedin.com/pulse/moment-can-last-lifetime-alexander-greats-three-wishes-holt#:~:text=1)%20The%20king%20of%20Macedon,my%20coffin%2C%22%20Alexander%20said.\",\"position\":3},{\"title\":\"Alexander the Great Failure: The Collapse of the Macedonian Empire\",\"link\":\"https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.\",\"position\":4},{\"title\":\"Who defeated Alexander The Great? Who conquered Greece after him ...\",\"link\":\"https://www.quora.com/Who-defeated-Alexander-The-Great-Who-conquered-Greece-after-him-and-why-were-they-able-to-conquer-that-region-while-Alexander-couldnt#:~:text=No%20one%20defeated%20Alexander%20the,his%20death%20was%20not%20natural.\",\"position\":5},{\"title\":\"Alexander the Great | Biography, Empire, Death, & Facts\",\"link\":\"https://www.britannica.com/biography/Alexander-the-Great\",\"position\":6,\"snippet\":\"Feb 11, 2025 \u2014 Alexander the Great, a fearless Macedonian king and military genius, conquered vast territories from Greece to Egypt and India, ...\"},{\"title\":\"Alexander the Great: Empire & Death\",\"link\":\"https://www.history.com/topics/ancient-greece/alexander-the-great\",\"position\":7,\"snippet\":\"Nov 9, 2009 \u2014 Alexander the Great was an ancient Macedonian ruler and one of history's greatest military minds who, as King of Macedonia and Persia, ...\"},{\"title\":\"History - Alexander the Great\",\"link\":\"https://www.bbc.co.uk/history/historic_figures/alexander_the_great.shtml\",\"position\":8,\"snippet\":\"Alexander III of Macedon, better known as Alexander the Great, single-handedly changed the nature of the ancient world in little more than a decade.\"},{\"title\":\"Alexander the Great - National Geographic Education\",\"link\":\"https://education.nationalgeographic.org/resource/alexander-great/\",\"position\":9,\"snippet\":\"Oct 19, 2023 \u2014 Alexander was born in 356 B.C.E. in Pella, Macedonia, to King Philip II. As a young boy, Alexander was taught to read, write, and play the lyre.\"},{\"title\":\"Who loved Alexander the Great?\",\"link\":\"https://museums.cam.ac.uk/magic/who-loved-alexander-great\",\"position\":10,\"snippet\":\"Throughout his life, Alexander married 3 women and fathered at least 2 children but also had several male lovers. Amongst his closest relationships was that ...\"},{\"title\":\"Alexander the Great (1956)\",\"link\":\"https://www.imdb.com/title/tt0048937/\",\"position\":11,\"snippet\":\"The life and military conquests of Alexander III of Macedon (July 20/21, 356 - June 10/11, 323 B.C.), commonly known as Alexander the Great.\"},{\"title\":\"Alexander the Great\",\"link\":\"https://www.worldhistory.org/Alexander_the_Great/\",\"position\":12,\"snippet\":\"Nov 14, 2013 \u2014 He is known as 'the great' both for his military genius and his diplomatic skills in handling the various populaces of the regions he conquered.\"}],\"peopleAlsoAsk\":[{\"question\":\"What is Alexander the Great most famous for?\"},{\"question\":\"What did Alexander the Great say before he died?\",\"link\":\"https://www.linkedin.com/pulse/moment-can-last-lifetime-alexander-greats-three-wishes-holt#:~:text=1)%20The%20king%20of%20Macedon,my%20coffin%2C%22%20Alexander%20said.\",\"title\":\"Alexander the Great's Last Three Wishes. - LinkedIn\"},{\"question\":\"What led to the fall of Alexander?\",\"link\":\"https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.\",\"title\":\"Alexander the Great Failure: The Collapse of the Macedonian Empire\"},{\"question\":\"Which country defeated Alexander the Great?\",\"link\":\"https://www.quora.com/Who-defeated-Alexander-The-Great-Who-conquered-Greece-after-him-and-why-were-they-able-to-conquer-that-region-while-Alexander-couldnt#:~:text=No%20one%20defeated%20Alexander%20the,his%20death%20was%20not%20natural.\",\"title\":\"Who defeated Alexander The Great? Who conquered Greece after him ...\"}],\"relatedSearches\":[{\"query\":\"Alexander the Great book\"},{\"query\":\"Alexander the Great empire\"},{\"query\":\"Alexander the Great death\"},{\"query\":\"Alexander the Great religion\"},{\"query\":\"Alexander the Great Empire map\"},{\"query\":\"Alexander the Great achievements\"},{\"query\":\"What was Alexander the Great known for\"},{\"query\":\"Alexander the Great empire name\"}]}",
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": null,
+        "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/json_94iqy385ty.json",
+        "text_hosted_url": null,
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+响应内容包括：
+
+- **基本请求信息**：`id`，`object`，`created`时间戳，`url_to_scrape`
+- **结果对象**，包含访问不同格式数据的URL
+- **json_content**，包含结构化的搜索结果，包括：
+- `searchParameters`：关于搜索查询的信息
+- `knowledgeGraph`：关于搜索主题的详细信息（如果有）
+- `organic`：搜索结果列表，包含标题、链接、位置和摘要
+- `peopleAlsoAsk`：用户常搜索的相关问题
+- `relatedSearches`：建议的相关搜索查询
+
+`json_content`是响应的主要部分，包含结构化的搜索结果。你可以直接从响应中访问JSON内容，或使用响应中提供的托管URL。
+
+## 结构化响应：json_content
+```json
+{
+  "searchParameters": {
+    "type": "search",
+    "engine": "google",
+    "q": "alexander the great"
+  },
+  "knowledgeGraph": {
+    "title": "Alexander the Great",
+    "type": "Former King of Macedonia",
+    "description": "Alexander III of Macedon, most commonly known as Alexander the Great, was a king of the ancient Greek kingdom of Macedon.",
+    "imageUrl": "https://www.mayaincaaztec.com/ancient-greece/alexander-the-great",
+    "attributes": {
+      "Born": "July 356 BC, Pella",
+      "Died": "June 323 BC (age 32 years), Babylon",
+      "Spouse": "Roxana (m. 327 BC–323 BC), Parysatis II (m. 324 BC–323 BC), Stateira (m. 324 BC–323 BC)",
+      "Children": "Alexander IV of Macedon",
+      "Full name": "Alexander III of Macedon",
+      "Siblings": "Cleopatra of Macedon, Philip III of Macedon, Thessalonike of Macedon, Cynane, Caranus, Europa of Macedon"
+    }
+  },
+  "organic": [
+    {
+      "title": "Alexander the Great",
+      "link": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+      "position": 1,
+      "snippet": "He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.",
+      "sitelinks": [
+        {
+          "title": "Death of Alexander the Great",
+          "link": "https://en.wikipedia.org/wiki/Death_of_Alexander_the_Great"
+        },
+        {
+          "title": "Wars of Alexander the Great",
+          "link": "https://en.wikipedia.org/wiki/Wars_of_Alexander_the_Great"
+        }
+      ]
+    },
+    {
+      "title": "Alexander the Great Failure: The Collapse of the Macedonian Empire",
+      "link": "https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.",
+      "position": 2
+    },
+    {
+      "title": "Which Indian king first time defeated Alexander? - Quora",
+      "link": "https://www.quora.com/Which-Indian-king-first-time-defeated-Alexander#:~:text=Alexander%20the%20Great%20was%20defeated,returned%20with%20only%2020000%20troops.",
+      "position": 3
+    },
+    {
+      "title": "Alexander the Great | Biography, Empire, Death, & Facts",
+      "link": "https://www.britannica.com/biography/Alexander-the-Great",
+      "position": 4,
+      "snippet": "Feb 11, 2025 — Alexander the Great, a fearless Macedonian king and military genius, conquered vast territories from Greece to Egypt and India, ..."
+    },
+    {
+      "title": "Alexander the Great: Empire & Death",
+      "link": "https://www.history.com/topics/ancient-greece/alexander-the-great",
+      "position": 5,
+      "snippet": "Nov 9, 2009 — Alexander the Great was an ancient Macedonian ruler and one of history's greatest military minds who, as King of Macedonia and Persia, ..."
+    },
+    {
+      "title": "Alexander the Great (1956)",
+      "link": "https://www.imdb.com/title/tt0048937/",
+      "position": 6,
+      "snippet": "The life and military conquests of Alexander III of Macedon (July 20/21, 356 - June 10/11, 323 B.C.), commonly known as Alexander the Great."
+    },
+    {
+      "title": "History - Alexander the Great",
+      "link": "https://www.bbc.co.uk/history/historic_figures/alexander_the_great.shtml",
+      "position": 7,
+      "snippet": "Alexander III of Macedon, better known as Alexander the Great, single-handedly changed the nature of the ancient world in little more than a decade."
+    },
+    {
+      "title": "Who loved Alexander the Great?",
+      "link": "https://museums.cam.ac.uk/magic/who-loved-alexander-great",
+      "position": 8,
+      "snippet": "Throughout his life, Alexander married 3 women and fathered at least 2 children but also had several male lovers. Amongst his closest relationships was that ..."
+    },
+    {
+      "title": "Alexander the Great",
+      "link": "https://www.worldhistory.org/Alexander_the_Great/",
+      "position": 9,
+      "snippet": "Nov 14, 2013 — He is known as 'the great' both for his military genius and his diplomatic skills in handling the various populaces of the regions he conquered."
+    },
+    {
+      "title": "Alexander the Great - National Geographic Education",
+      "link": "https://education.nationalgeographic.org/resource/alexander-great/",
+      "position": 10,
+      "snippet": "Oct 19, 2023 — Alexander was born in 356 B.C.E. in Pella, Macedonia, to King Philip II. As a young boy, Alexander was taught to read, write, and play the lyre."
+    }
+  ],
+  "peopleAlsoAsk": [
+    {
+      "question": "What is Alexander the Great most famous for?"
+    },
+    {
+      "question": "What did Alexander the Great say before he died?"
+    },
+    {
+      "question": "What led to the fall of Alexander?",
+      "link": "https://www.publishersweekly.com/9781847251886#:~:text=His%20inability%20to%20delegate%20work,its%20independence%20and%20its%20boundaries.",
+      "title": "Alexander the Great Failure: The Collapse of the Macedonian Empire"
+    },
+    {
+      "question": "Who first defeated Alexander the Great?",
+      "link": "https://www.quora.com/Which-Indian-king-first-time-defeated-Alexander#:~:text=Alexander%20the%20Great%20was%20defeated,returned%20with%20only%2020000%20troops.",
+      "title": "Which Indian king first time defeated Alexander? - Quora"
+    }
+  ],
+  "relatedSearches": [
+    {
+      "query": "Alexander the Great book"
+    },
+    {
+      "query": "Alexander the Great empire"
+    },
+    {
+      "query": "Alexander the Great death"
+    },
+    {
+      "query": "Alexander the Great religion"
+    },
+    {
+      "query": "Alexander the Great Empire map"
+    },
+    {
+      "query": "Alexander the Great achievements"
+    },
+    {
+      "query": "What was Alexander the Great known for"
+    },
+    {
+      "query": "Alexander the Great movie"
+    }
+  ]
+}
+```
+
+Olostep还提供了一个托管的JSON文件，包含结构化的搜索结果。你可以使用响应中的`json_hosted_url`字段访问JSON文件：
+
+- 结构化JSON：[查看示例JSON](https://olostep-storage.s3.us-east-1.amazonaws.com/json_vxc86vq2pf.json)
+
+如果你还想获取搜索结果的HTML和Markdown内容，可以在`formats`参数中包含这些格式，Olostep将在响应中返回它们，并提供每种格式的托管URL。
+- [Markdown格式](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_vxc86vq2pf.txt)
+- [HTML](https://olostep-storage.s3.us-east-1.amazonaws.com/text_vxc86vq2pf.txt)
+
+## 重要说明
+
+**搜索参数**：`gl=us`和`hl=en`参数将地理位置设置为美国，语言设置为英语。根据需要调整这些参数。
+
+## 结论
+将自定义解析器传递给API可以让你只获取所需的结构化数据。这使得将搜索结果集成到你的应用程序中、执行数据分析或构建与搜索相关的功能变得简单。
+
+如需了解可用解析器的信息或为你的特定用例请求自定义解析器，请通过[info@olostep.com](mailto:info@olostep.com)联系我们。

@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Builder API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://agent.olostep.com"
+    },
+    {
+      "url": "https://dataset.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/olostep-p2p-incomingAPI": {
+      "get": {
+        "summary": "様々な設定でウェブページのスクレイピングを開始",
+        "description": "このエンドポイントでは、タイムアウトの設定、スクレイピング前の待機時間、データ形式の好みなど、様々なオプションでウェブページをスクレイピングすることができます。",
+        "servers": [
+          {
+            "url": "https://agent.olostep.com"
+          }
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "スクレイピングを開始するためのURL。",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "description": "スクレイピングプロセスのタイムアウト（秒単位）、最大620秒。",
+            "schema": {
+              "type": "integer",
+              "default": 40
+            }
+          },
+          {
+            "name": "waitBeforeScraping",
+            "in": "query",
+            "required": false,
+            "description": "スクレイピングを開始する前に待機する時間（秒単位）、最大500秒。",
+            "schema": {
+              "type": "integer",
+              "default": 3
+            }
+          },
+          {
+            "name": "saveHtml",
+            "in": "query",
+            "required": false,
+            "description": "スクレイピングしたコンテンツをHTMLとして保存するオプション。",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "saveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "スクレイピングしたコンテンツをMarkdownとして保存するオプション。",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "removeCSSselectors",
+            "in": "query",
+            "required": false,
+            "description": "コンテンツから特定のCSSセレクタを削除するオプション。オプションで、削除したい特定のセレクタのJSON文字列化された配列を渡すこともできます。このオプションが`default`に設定されている場合に削除されるCSSセレクタは、`['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`です。",
+            "schema": {
+              "type": "string",
+              "default": "default",
+              "enum": [
+                "default",
+                "none",
+                "JSON stringified array of CSS selectors"
+              ]
+            }
+          },
+          {
+            "name": "htmlTransformer",
+            "in": "query",
+            "required": false,
+            "description": "使用するHTMLトランスフォーマーを指定します（ある場合）。PostlightのMercury Parserライブラリを使用して、広告やその他の不要なコンテンツをスクレイピングしたコンテンツから削除します。",
+            "schema": {
+              "type": "string",
+              "default": "none",
+              "enum": [
+                "none",
+                "postlightParser"
+              ]
+            }
+          },
+          {
+            "name": "removeImages",
+            "in": "query",
+            "required": false,
+            "description": "スクレイピングしたコンテンツから画像を削除するオプション。",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "expandMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "trueの場合、markdown_contentフィールドにMarkdownコンテンツが返されます。",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "expandHtml",
+            "in": "query",
+            "required": false,
+            "description": "trueの場合、html_contentフィールドにHTMLコンテンツが返されます。",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "description": "コンテンツを取得する前にページで実行するアクション",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "待機",
+                    "required": [
+                      "type",
+                      "milliseconds"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "wait"
+                        ],
+                        "description": "指定されたミリ秒数待機"
+                      },
+                      "milliseconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "待機する時間（ミリ秒単位）"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "クリック",
+                    "required": [
+                      "type",
+                      "selector"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "click"
+                        ],
+                        "description": "要素をクリック"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "クリックする要素のCSSセレクタ"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "入力を埋める",
+                    "required": [
+                      "type",
+                      "selector",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fill_input"
+                        ],
+                        "description": "入力要素に値を入力する"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "入力要素のCSSセレクタ"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "入力するテキスト"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "スクロール",
+                    "required": [
+                      "type",
+                      "direction",
+                      "amount"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scroll"
+                        ],
+                        "description": "ページをスクロールする"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "up",
+                          "down",
+                          "left",
+                          "right"
+                        ],
+                        "description": "スクロールする方向"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "ピクセル単位でスクロールする量"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "リクエストされたデータでの成功したレスポンス。"
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "401": {
+            "description": "不正アクセス：APIトークンがないか無効です。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    },
+    "/olostep-p2p-dataset-API": {
+      "get": {
+        "servers": [
+          {
+            "url": "https://dataset.olostep.com"
+          }
+        ],
+        "summary": "データセット情報を取得する",
+        "description": "提供されたデータセットIDに基づいて、Markdownおよび/またはHTML形式でデータセット情報を取得することができます。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasetId",
+            "in": "query",
+            "required": true,
+            "description": "取得するデータセットのユニークな識別子。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "retrieveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "データセットをMarkdown形式で取得するオプション。",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "retrieveHtml",
+            "in": "query",
+            "required": false,
+            "description": "データセットをHTML形式で取得するオプション。",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "fastLane",
+            "in": "query",
+            "required": false,
+            "description": "スクレイピングプロセスを高速化する実験的なオプション",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "データセット情報での成功したレスポンス。"
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "404": {
+            "description": "提供されたIDのデータセットが見つかりません。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    }
+  }
+}

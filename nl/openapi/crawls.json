@@ -1,0 +1,486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Crawl API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/crawls": {
+      "post": {
+        "summary": "Start een nieuwe crawl",
+        "description": "Start een nieuw crawlproces met de opgegeven parameters.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_url": {
+                    "type": "string",
+                    "description": "Het startpunt van de crawl."
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL-padpatronen om op te nemen in de crawl met behulp van glob-syntaxis.  Standaard ingesteld op `/**` wat alle URLs omvat. Gebruik patronen zoals `/blog/**` om specifieke secties te crawlen (bijv. alleen blogpagina's), `/products/*.html` voor productpagina's, of meerdere patronen voor verschillende secties. Ondersteunt standaard glob-functies zoals * (willekeurige tekens) en ** (recursieve matching)."
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL-padnamen in glob-patroon om uit te sluiten. Bijvoorbeeld: `/careers/**`. Uitgesloten URLs zullen voorrang hebben op opgenomen URLs."
+                  },
+                  "max_pages": {
+                    "type": "number",
+                    "description": "Maximum aantal pagina's om te crawlen. Aanbevolen voor de meeste gebruikssituaties zoals het crawlen van een hele website."
+                  },
+                  "max_depth": {
+                    "type": "number",
+                    "description": "Maximale diepte van de crawl. Handig om alleen tot n-graad van links te extraheren."
+                  },
+                  "include_external": {
+                    "type": "boolean",
+                    "description": "Crawl externe links van de eerste graad."
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "Subdomeinen van de website opnemen. Standaard `false`."
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "Een optionele zoekopdracht om specifieke links te vinden en ook de resultaten te sorteren op relevantie."
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "Een optioneel aantal om alleen de top N meest relevante links op elke pagina te crawlen volgens de zoekopdracht."
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "HTTPS URL om een POST-verzoek te ontvangen wanneer de crawl voltooid is. Moet een openbaar toegankelijke URL zijn met gebruik van `http://` of `https://` protocol. Kan niet wijzen naar localhost of privé IP-adressen. Zie [Webhooks](/api-reference/common/webhooks) voor payloadformaat en retry-gedrag."
+                  },
+                  "timeout": {
+                    "type": "number",
+                    "description": "Beëindig de crawl na n seconden met de tot dan toe voltooide pagina's. Kan ~10s extra duren vanaf de opgegeven timeout."
+                  },
+                  "follow_robots_txt": {
+                    "type": "boolean",
+                    "description": "Of de robots.txt-regels gerespecteerd moeten worden. Als ingesteld op `false`, zal de crawler de website scrapen ongeacht robots.txt disallow-richtlijnen. Standaard `true`.",
+                    "default": true
+                  },
+                  "scrape_options": {
+                    "type": "object",
+                    "description": "Bepaalt wat elke individuele pagina scrape aanvraagt van de Olostep API. Alle velden zijn optioneel.",
+                    "properties": {
+                      "formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "html",
+                            "markdown",
+                            "text",
+                            "json",
+                            "screenshot"
+                          ]
+                        },
+                        "description": "Uitvoerformaten om aan te vragen voor elke gescrapete pagina. Standaard ingesteld op `[\"html\", \"markdown\"]` wanneer weggelaten. `html` wordt altijd automatisch opgenomen. `json` wordt automatisch toegevoegd wanneer een `parser` is opgegeven. Let op: `raw_pdf` wordt niet ondersteund — PDF's kunnen niet gecrawld worden.",
+                        "example": [
+                          "markdown",
+                          "screenshot"
+                        ]
+                      },
+                      "parser": {
+                        "type": "string",
+                        "description": "Parsernaam om op elke pagina uit te voeren en gestructureerde `json` output te produceren (bijv. `\"@olostep/extract-emails\"`). Voegt automatisch `json` toe aan `formats` wanneer ingesteld.",
+                        "example": "@olostep/extract-emails"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "start_url",
+                  "max_pages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crawl succesvol gestart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"crawl\" voor deze endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` of `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Aangemaakte tijd in epoch"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Aangemaakte tijd in datum"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "De huidige diepte van het crawlproces."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Aantal gecrawlde pagina's"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}": {
+      "get": {
+        "summary": "Haal crawl-informatie op",
+        "description": "Haalt informatie op over een specifieke crawl met behulp van zijn `crawl_id`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "De ID van de crawl waarvoor je informatie wilt ophalen."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met crawl-informatie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"crawl\" voor deze endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` of `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Aangemaakte tijd in epoch"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Aangemaakte tijd in datum"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "De huidige diepte van het crawlproces."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Aantal gecrawlde pagina's"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "404": {
+            "description": "Crawl niet gevonden voor de opgegeven ID."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}/pages": {
+      "get": {
+        "summary": "Haal lijst van gecrawlde pagina's op, optioneel met inhoud",
+        "description": "Haalt de lijst van gecrawlde pagina's en inhoud op die zijn verwerkt voor een specifieke crawl ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "De ID van de crawl waarvoor je de lijst van URLs wilt ophalen."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Optionele integer die de index vertegenwoordigt om te beginnen met het ophalen van inhoud. Handig om te pagineren totdat alle URLs zijn opgehaald. Begin met 0, geef dan de waarde van `response['cursor']` van het laatste verzoek."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Optionele integer om het aantal geretourneerde resultaten te beperken. Aanbevolen 10-50 resultaten per keer. Gepagineerd met behulp van *cursor*. Maximaal 10MB aan inhoud kan in één verzoek worden opgehaald."
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Een optionele zoekopdracht om de resultaten op relevantie te sorteren. Gebruikt standaard de originele search_query als deze is opgegeven."
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
+            },
+            "description": "**Verouderd:** Gebruik de `/retrieve` endpoint met `retrieve_id`.  Array van formaten om op te halen (bijv. [\"html\", \"markdown\"])."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met de lijst van URLs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "crawl_id": {
+                      "type": "string",
+                      "description": "Crawl ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"crawl\" voor deze endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` of `completed`"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "pages_count": {
+                      "type": "number"
+                    },
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string",
+                            "description": "Om inhoud op te halen van de `/retrieve` endpoint."
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "is_external": {
+                            "type": "boolean"
+                          },
+                          "html_content": {
+                            "type": "string",
+                            "description": "Verouderd: Gebruik de `/retrieve` endpoint met `retrieve_id`."
+                          },
+                          "markdown_content": {
+                            "type": "string",
+                            "description": "Verouderd: Gebruik de `/retrieve` endpoint met `retrieve_id`."
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "external_urls": {
+                          "type": "array",
+                          "description": "Externe URLs die werden gevonden tijdens het crawlen",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "failed_urls": {
+                          "type": "array",
+                          "description": "URLs die werden gevonden maar niet konden worden gescraped",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "Moet in de query worden doorgegeven in de volgende aanvraag om de volgende items te krijgen."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "404": {
+            "description": "Crawl niet gevonden voor de opgegeven ID."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    }
+  }
+}

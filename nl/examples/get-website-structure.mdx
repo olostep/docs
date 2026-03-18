@@ -1,0 +1,96 @@
+---
+icon: "list"
+sidebarTitle: "Verkrijg alle URL’s van een website"
+title: "Haal alle URL’s van Stripe’s website op"
+description: "Verkrijg een compleet overzicht van de structuur van Stripe’s website om de organisatie te begrijpen en beschikbare inhoud te ontdekken."
+---
+
+## Overzicht
+
+Voordat je in specifieke secties van een website duikt, is het vaak nuttig om een compleet beeld van de structuur te krijgen. In deze gids laten we je zien hoe je alle URL's van Stripe's website kunt extraheren, wat je zal helpen om:
+
+- De algehele site-architectuur te begrijpen
+- Inhoudssecties te ontdekken waarvan je je misschien niet bewust was
+- LLM's te gebruiken om te beslissen welke URL's verder gescraped moeten worden
+
+## Alle Stripe URL's Extraheren
+
+Om alle URL's van Stripe's website te extraheren, gebruik je het maps endpoint met Stripe's domein. Dit zal een uitgebreide lijst van alle vindbare URL's op hun site retourneren.
+
+<CodeGroup>
+    ```python get_stripe_urls.py
+    import requests
+    import time
+    import json
+
+    # Configuratie
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Starttijd voor latentie-tracking
+    start_time = time.time()
+    
+    # Definieer de payload met alleen de basis-URL
+    payload = {
+        "url": "https://stripe.com"
+    }
+    
+    # Doe de aanvraag
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Bereken latentie
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"Aanvraag voltooid in {latency}ms")
+    
+    # Verwerk de resultaten
+    data = response.json()
+    print(f"Gevonden {data['urls_count']} URL's op Stripe's website")
+    
+    # Print de eerste 10 URL's als voorbeeld
+    print("\nVoorbeeld URL's:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Sla alle URL's op in een bestand voor verdere analyse
+    with open('stripe_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nAlle URL's opgeslagen in stripe_urls.json")
+    ```
+</CodeGroup>
+
+### Voorbeeldreactie
+
+```json
+{
+  "id": "map_abc123xyz",
+  "urls_count": 3842,
+  "urls": [
+    "https://stripe.com",
+    "https://stripe.com/about",
+    "https://stripe.com/blog",
+    "https://stripe.com/docs",
+    "https://stripe.com/pricing",
+    "https://stripe.com/customers",
+    "https://stripe.com/partners",
+    "https://stripe.com/enterprise",
+    "https://stripe.com/payments",
+    "https://stripe.com/billing"
+    // ... duizenden meer URL's
+  ]
+}
+```
+
+## Analyseren van Stripe's Website Structuur
+
+Na het extraheren van alle URL's kun je de structuur analyseren om patronen te identificeren. Dit is vooral nuttig om te begrijpen hoe Stripe hun inhoud organiseert. Bijvoorbeeld, je zou deze URL-patronen kunnen opmerken:
+
+- `/blog/**` - Blogposts en artikelen
+- `/docs/**` - Documentatiepagina's
+- `/payments/**` - Betalingsproductinformatie
+- `/billing/**` - Factureringsproductinformatie
+
+In sommige gevallen wil je alleen URL's verkrijgen in een specifieke sectie van de website. Bijvoorbeeld, alle blogposts. Je kunt onze ingebouwde filter gebruiken in de [volgende gids](/use-cases/extract-specific-paths).

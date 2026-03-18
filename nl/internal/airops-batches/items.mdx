@@ -1,0 +1,165 @@
+---
+title: "Batch Items Ophalen"
+description: "Haal alle items op met hun geëxtraheerde metadata"
+openapi: "GET /v1/batches-airops/{batch_id}/items"
+---
+
+## Overzicht
+
+Geeft alle items in de batch terug met hun geëxtraheerde metadata. Items omvatten zowel succesvolle extracties als mislukkingen van elke fase.
+
+<Note>
+  Deze endpoint geeft alleen volledige resultaten terug wanneer de batch `status` `"completed"` is. Als de batch nog steeds wordt verwerkt, ontvang je een lege `items` array met een bericht.
+</Note>
+
+## Respons Structuur
+
+<ResponseField name="batch_id" type="string">
+  De batch identifier.
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  ISO 8601 tijdstempel wanneer de batch voltooid is.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Batch status: `"completed"` of `"in_progress"`.
+</ResponseField>
+
+<ResponseField name="counts" type="object">
+  Samenvattende tellingen:
+  - `total` - Totaal aantal items in batch
+  - `succeeded` - Succesvol verwerkt
+  - `failed` - Mislukt in elke fase
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array van alle items met hun resultaten.
+</ResponseField>
+
+---
+
+## Item Schema
+
+### Succesvolle Items
+
+Voltooide items hebben geëxtraheerde velden op het rootniveau:
+
+```json
+{
+  "custom_id": "post-1",
+  "url": "https://example.com/blog/post-1",
+  "status": "completed",
+  "page_type": "informational_article",
+  "author": "John Doe",
+  "date_published": "2024-01-15",
+  "date_modified": null,
+  "brand_mentions": ["Acme Corp", "TechBrand"]
+}
+```
+
+| Veld | Type | Beschrijving |
+|-------|------|-------------|
+| `custom_id` | string | Jouw identifier van het verzoek |
+| `url` | string | De gescrapete URL |
+| `status` | string | `"completed"` voor succesvolle items |
+| `page_type` | string | Geclassificeerd paginatype (zie [Overzicht](/internal/airops-batches/overview#page-types)) |
+| `author` | string \| null | Auteur van de inhoud |
+| `date_published` | string \| null | Publicatiedatum (ISO 8601 indien beschikbaar) |
+| `date_modified` | string \| null | Datum van laatste wijziging |
+| `brand_mentions` | array | Merken uit je invoerlijst gevonden op de pagina |
+
+### Mislukte Items
+
+Items die in elke fase zijn mislukt, hebben een foutstructuur:
+
+```json
+{
+  "custom_id": "post-failed",
+  "url": "https://example.com/broken-page",
+  "status": "failed",
+  "failed_stage": "scraping",
+  "error": {
+    "code": "SCRAPE_FAILED",
+    "message": "Verbindingstime-out na 30s"
+  }
+}
+```
+
+| Veld | Type | Beschrijving |
+|-------|------|-------------|
+| `status` | string | `"failed"` voor mislukte items |
+| `failed_stage` | string | Fase waarin de mislukking optrad: `scraping`, `analyzing`, of `enriching` |
+| `error` | object | Foutdetails met `code` en `message` |
+
+---
+
+## Extractie Bronnen
+
+Velden worden geëxtraheerd met meerdere methoden in prioriteitsvolgorde:
+
+1. **Classifier** - URL-patroonanalyse (instant)
+2. **Parser** - Gestructureerde metadata-extractie
+3. **LLM** - AI-gestuurde extractie voor ontbrekende velden
+
+---
+
+## Voorbeeld Respons
+
+### Voltooide Batch
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "completed_at": "2024-01-15T12:30:00.000Z",
+  "status": "completed",
+  "counts": {
+    "total": 100,
+    "succeeded": 98,
+    "failed": 2
+  },
+  "items": [
+    {
+      "custom_id": "post-1",
+      "url": "https://example.com/blog/post-1",
+      "status": "completed",
+      "page_type": "informational_article",
+      "author": "John Doe",
+      "date_published": "2024-01-15",
+      "date_modified": null,
+      "brand_mentions": ["OpenAI", "Google"]
+    },
+    {
+      "custom_id": "post-2",
+      "url": "https://example.com/pricing",
+      "status": "completed",
+      "page_type": "pricing_page",
+      "author": null,
+      "date_published": null,
+      "date_modified": null,
+      "brand_mentions": []
+    },
+    {
+      "custom_id": "post-3",
+      "url": "https://example.com/broken",
+      "status": "failed",
+      "failed_stage": "scraping",
+      "error": {
+        "code": "SCRAPE_FAILED",
+        "message": "URL kon niet worden gescrapet"
+      }
+    }
+  ]
+}
+```
+
+### In-Progress Batch
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "status": "in_progress",
+  "items": [],
+  "message": "Batch wordt nog steeds verwerkt. Items zullen beschikbaar zijn wanneer de status \"completed\" is."
+}
+```

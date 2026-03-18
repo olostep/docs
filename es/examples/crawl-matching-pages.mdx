@@ -1,0 +1,203 @@
+---
+icon: "spider"
+sidebarTitle: "Rastrear páginas específicas en el sitio web"
+title: "Rastrear y extraer contenido de las páginas del blog de Stripe"
+description: "Aprende a rastrear y extraer contenido de las publicaciones del blog de Stripe."
+---
+
+## Resumen
+
+Esta guía te mostrará cómo:
+
+- Iniciar un rastreo específicamente dirigido a las publicaciones del blog de Stripe
+- Monitorear el progreso del rastreo
+- Recuperar y procesar el contenido rastreado
+
+## Rastreando las páginas del blog de Stripe
+
+Para rastrear las páginas del blog de Stripe, utiliza el endpoint de rastreos con coincidencia de patrones para dirigirte a URLs específicas del blog. Esto obtendrá el contenido HTML completo de cada página, que luego podrás procesar para extraer la información que necesitas.
+
+<CodeGroup>
+    ```python crawl_stripe_blog.py
+    import requests
+    import time
+    import json
+    from datetime import datetime
+
+    # Configuración
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Registrar hora de inicio para seguimiento de duración del rastreo
+    crawl_start_time = time.time()
+    
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Iniciando rastreo del blog de Stripe...")
+    
+    # Iniciar un rastreo enfocado en las publicaciones de ingeniería del blog de Stripe
+    # Puedes ajustar los patrones según tus intereses específicos
+    payload = {
+        "start_url": "https://stripe.com/blog",
+        "include_urls": ["/blog/engineering/**"],  # Enfocarse en publicaciones de ingeniería
+        "max_pages": 25  # Limitar a 25 páginas para este ejemplo
+    }
+
+    # Iniciar el rastreo
+    print("Iniciando rastreo de las publicaciones de ingeniería del blog de Stripe...")
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=payload)
+    data = response.json()
+    crawl_id = data['id']
+    print(f"Rastreo iniciado con ID: {crawl_id}")
+
+    # Monitorear el progreso del rastreo
+    while True:
+        status_response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+        status_data = status_response.json()
+        print(f"Estado del rastreo: {status_data['status']} - Páginas rastreadas: {status_data.get('pages_count', 0)}")
+        
+        if status_data['status'] == 'completed' or status_data['status'] == 'failed':
+            break
+            
+        # Esperar 5 segundos antes de verificar nuevamente
+        time.sleep(5)
+
+    # Calcular y mostrar la duración del rastreo
+    crawl_duration = time.time() - crawl_start_time
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Rastreo completado en {crawl_duration:.2f} segundos")
+    ```
+</CodeGroup>
+
+## Convirtiendo el contenido del blog a Markdown
+
+Una forma poderosa de usar el contenido rastreado es convertirlo al formato markdown, que es ideal para alimentar en LLMs o crear una base de conocimiento. Aquí te mostramos cómo recuperar y convertir el contenido del blog a markdown:
+
+<CodeGroup>
+    ```python blog_to_markdown.py
+    import requests
+    import time
+    import json
+    from datetime import datetime
+    import os
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Configuración
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Función para recuperar contenido en formato markdown
+    def retrieve_content(retrieve_id, formats):
+        params = {
+            "retrieve_id": retrieve_id,
+            "formats": json.dumps(formats)
+        }
+        response = requests.get(f"{API_URL}/retrieve", headers=HEADERS, params=params)
+        return response.json()
+
+    # Continuando desde el ejemplo de rastreo anterior
+    if status_data['status'] == 'completed':
+        print(f"\n¡Rastreo completado! Se recuperaron {status_data['pages_count']} páginas.")
+        pages_response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS)
+        pages_data = pages_response.json()
+        
+        # Crear directorio de salida si no existe
+        os.makedirs("output", exist_ok=True)
+        
+        # Preparar para recopilar contenido markdown
+        markdown_pages = []
+        total_pages = len(pages_data['pages'])
+        
+        # Procesar páginas en paralelo para obtener contenido markdown
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            # Crear futuros para la recuperación de contenido
+            future_to_page = {
+                executor.submit(retrieve_content, page['retrieve_id'], ["markdown"]): page
+                for page in pages_data['pages']
+            }
+            
+            # Procesar resultados a medida que se completan
+            for i, future in enumerate(as_completed(future_to_page), 1):
+                page = future_to_page[future]
+                url = page['url']
+                print(f"Procesando {i}/{total_pages}: {url}")
+                
+                try:
+                    content_data = future.result()
+                    if content_data and "markdown_content" in content_data:
+                        markdown_pages.append({
+                            'url': url,
+                            'title': page['title'],
+                            'markdown_content': content_data['markdown_content']
+                        })
+                        print(f"✓ Contenido markdown recuperado para {url}")
+                    else:
+                        print(f"⚠ No hay contenido markdown para {url}")
+                except Exception as e:
+                    print(f"❌ Error al recuperar contenido para {url}: {str(e)}")
+        
+        # Guardar todo el contenido markdown en un solo archivo
+        output_file = "output/stripe_blog_markdown.md"
+        
+        with open(output_file, "w", encoding="utf-8") as f:
+            for page in markdown_pages:
+                # Escribir encabezado de página con título y URL
+                f.write(f"URL: {page['url']}\n\n")
+                
+                # Escribir el contenido markdown
+                f.write(f"{page['markdown_content']}\n\n")
+                
+                # Añadir separador entre páginas
+                f.write("---\n\n")
+                
+                print(f"✓ Contenido markdown añadido desde {page['url']}")
+
+        print(f"\n✅ ¡Proceso completo! Todo el contenido markdown ha sido guardado en '{output_file}'")
+        print(f"Total de páginas procesadas: {len(markdown_pages)}")
+    else:
+        print(f"Rastreo fallido con estado: {status_data['status']}")
+    ```
+</CodeGroup>
+
+### Ejemplo de salida Markdown
+
+El archivo markdown resultante contendrá todo el contenido del blog rastreado en un formato limpio y estructurado:
+
+```markdown
+URL: https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations
+
+## Usando ML para detectar y responder a degradaciones de rendimiento
+
+Por Jane Smith, Ingeniera Senior en Stripe
+
+En Stripe, procesamos millones de solicitudes API cada día...
+
+---
+
+URL: https://stripe.com/blog/building-robust-payment-systems
+
+## Construyendo un sistema de pagos robusto
+
+Por John Doe, Gerente de Ingeniería
+
+La fiabilidad está en el núcleo de la infraestructura de Stripe...
+
+---
+```
+
+## Próximos pasos
+
+Ahora que has rastreado y extraído con éxito contenido del blog de Stripe, puedes:
+
+1. **Expandir tu rastreo**: Modifica el parámetro `include_urls` para rastrear otras secciones del blog de Stripe
+2. **Implementar actualizaciones regulares**: Configura un trabajo programado para rastrear periódicamente en busca de nuevo contenido
+3. **Realizar un análisis más profundo**: Usa herramientas de NLP para extraer conocimientos del contenido del blog
+4. **Construir un motor de búsqueda**: Crea una base de datos buscable del contenido del blog de Stripe
+5. **Alimentar en LLMs**: Usa el contenido markdown como contexto para que los LLMs respondan preguntas sobre las prácticas de ingeniería de Stripe
+
+Usando las capacidades de rastreo de contenido de Olostep, puedes construir herramientas poderosas para monitorear y analizar la estrategia de contenido de cualquier sitio web.

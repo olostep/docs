@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "文件 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer 认证头的格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "创建文件上传",
+        "description": "生成一个用于上传 JSON 文件的预签名 URL。上传后，你必须调用 complete 端点来完成上传。上传 URL 在 10 分钟后过期。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "文件的文件名。必须以 .json 扩展名结尾。",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "文件的用途。支持的值：'context' 或 'batch'。默认为 'context'。",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应，包含上传 URL。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "文件 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象类型。此端点为 \"file.upload\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "创建的纪元时间戳"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "用于上传文件的预签名 URL。10 分钟后过期。"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "上传 URL 过期的秒数（600 秒 = 10 分钟）"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求。缺少文件名或文件类型无效（仅支持 .json 文件）。"
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      },
+      "get": {
+        "summary": "列出文件",
+        "description": "列出你团队的所有已完成文件。可以选择按用途过滤。仅返回状态为 'completed' 的文件。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "按用途过滤文件。支持的值：'context' 或 'batch'。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应，包含文件列表。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "对象类型。此端点为 \"list\"。"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "文件 ID"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "对象类型。此端点为 \"file\"。"
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "创建的纪元时间戳"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "上传文件的文件名"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "文件大小（字节）"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "文件的用途"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "文件状态。对于列出的文件，总是 \"completed\"。"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "完成文件上传",
+        "description": "完成文件上传过程并验证上传的JSON文件。此端点验证文件是否存在，验证其JSON格式，检查文件大小（最大200MB），并将文件状态更新为completed。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "要完成的文件的唯一标识符。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "文件上传成功完成。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "文件 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象类型。此端点为 \"file\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "创建的纪元时间戳"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "上传文件的文件名"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "文件大小（字节）"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "文件的用途"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "文件状态。成功完成后将为 \"completed\"。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求。文件已完成、状态无效、文件过大（最大200MB）或JSON格式无效。"
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "404": {
+            "description": "文件未找到或文件未上传到S3"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "通过ID获取文件元数据",
+        "description": "通过文件ID检索元数据。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "要检索的文件的唯一标识符。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应文件元数据。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "文件 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象类型。此端点为 \"file\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "创建的纪元时间戳"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "上传文件的文件名"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "文件大小（字节）"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "文件的用途"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "文件状态（例如，\"pending\"，\"completed\"）"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "404": {
+            "description": "文件未找到"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除文件",
+        "description": "从存储中删除文件及其相关数据。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "要删除的文件的唯一标识符。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "文件删除成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "文件 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象类型。此端点为 \"file\"。"
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "表示文件已成功删除。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "404": {
+            "description": "文件未找到"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "通过ID获取文件对象。",
+        "description": "获取一个预签名的URL以下载已完成文件的内容。可以选择使用expires_in查询参数指定下载URL的过期时间（默认为600秒/10分钟）。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "要下载文件的唯一标识符。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "下载URL过期前的秒数。默认为600秒（10分钟）。",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应，包含下载URL。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "文件 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象类型。此端点为 \"file\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "创建的纪元时间戳"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "上传文件的文件名"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "文件大小（字节）"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "用于下载文件的预签名URL。在指定的expires_in时间后过期。"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "下载URL过期前的秒数。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求。文件未完成。"
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "404": {
+            "description": "文件未找到"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    }
+  }
+}

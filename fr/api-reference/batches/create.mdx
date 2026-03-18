@@ -1,0 +1,17 @@
+---
+title: "Créer un lot"
+description: "Démarre un nouveau lot. Vous recevez un `id` que vous pouvez utiliser pour suivre la progression du lot comme montré [ici](/api-reference/batches/info). Remarque : Le temps de traitement est constant, quelle que soit la taille du lot."
+openapi: "fr/openapi/batches.json POST /v1/batches"
+---
+
+<Tip>
+**Soyez notifié à la fin :** Passez le paramètre `webhook` avec l'URL de votre point de terminaison pour recevoir un HTTP POST lorsque le lot est terminé. Voir [Webhooks](/api-reference/common/webhooks) pour plus de détails.
+</Tip>
+
+<Tip>
+**Joindre des données personnalisées :** Utilisez le paramètre `metadata` pour stocker des paires clé-valeur. Pris en charge à deux niveaux :
+- **Niveau du lot** — dans le corps de la requête
+- **Niveau de l'élément** — sur chaque élément dans le tableau `items`
+
+Voir [Métadonnées](/api-reference/common/metadata) pour plus de détails.
+</Tip>

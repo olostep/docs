@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Risposte",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Header di autenticazione Bearer nella forma Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    }
+  },
+  "paths": {
+    "/v1/answers": {
+      "post": {
+        "summary": "Crea Risposta",
+        "description": "L'AI eseguirà azioni come cercare e navigare pagine web per trovare la risposta al compito fornito. Il tempo di esecuzione è di 3-30s a seconda della complessità.  Per compiti più lunghi, usa invece l'endpoint dell'agente. Vedi [Funzione Agente](/features/agents/agents). Vedi [Funzione Risposte](/features/answers/answers).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "Il compito da eseguire."
+                  },
+                  "json_format": {
+                    "type": "object",
+                    "description": "L'oggetto JSON di output desiderato con valori vuoti come schema, o semplicemente descrivi i dati che vuoi come stringa."
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risposta riuscita con la risposta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta Errata (Compito Mancante)"
+          },
+          "402": {
+            "description": "Chiave API Non Valida"
+          },
+          "500": {
+            "description": "Errore Interno del Server"
+          }
+        }
+      }
+    },
+    "/v1/answers/{answer_id}": {
+      "get": {
+        "summary": "Ottieni Risposta",
+        "description": "Questo endpoint recupera una risposta precedentemente completata tramite il suo ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "answer_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per la risposta da recuperare.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta riuscita con l'oggetto risposta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Chiave API Non Valida"
+          },
+          "404": {
+            "description": "Risposta Non Trovata"
+          },
+          "500": {
+            "description": "Errore Interno del Server"
+          }
+        }
+      }
+    }
+  }
+}

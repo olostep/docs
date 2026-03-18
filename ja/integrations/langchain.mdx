@@ -1,0 +1,592 @@
+---
+sidebarTitle: "LangChain"
+icon: "link"
+title: "LangChain統合"
+description: "LangChainを使用してウェブスクレイピングと検索機能を備えたインテリジェントなAIエージェントを構築する"
+---
+
+OlostepのLangChain統合は、あらゆるウェブサイトからデータを検索、スクレイピング、分析、構造化するAIエージェントを構築するための包括的なツールを提供します。LangChainとLangGraphアプリケーションに最適です。
+
+## 特徴
+
+この統合は、Olostep APIの5つの機能すべてにアクセスできます。
+
+<CardGroup cols={2}>
+  <Card title="スクレイプ" icon="file-lines">
+    任意の単一URLから複数の形式（Markdown、HTML、JSON、テキスト）でコンテンツを抽出
+  </Card>
+  
+  <Card title="バッチ" icon="layer-group">
+    最大10,000のURLを並行して処理。バッチジョブは5〜8分で完了
+  </Card>
+  
+  <Card title="回答" icon="question">
+    自然言語クエリと構造化出力を備えたAI駆動のウェブ検索
+  </Card>
+  
+  <Card title="マップ" icon="map">
+    サイト構造分析のためにウェブサイトからすべてのURLを抽出
+  </Card>
+  
+  <Card title="クロール" icon="spider-web">
+    リンクをたどってウェブサイト全体を自動的に発見しスクレイピング
+  </Card>
+</CardGroup>
+
+## インストール
+
+<CodeGroup>
+```bash pip
+pip install langchain-olostep
+```
+
+```bash poetry
+poetry add langchain-olostep
+```
+</CodeGroup>
+
+## セットアップ
+
+Olostep APIキーを環境変数として設定してください。
+
+```bash
+export OLOSTEP_API_KEY="your_olostep_api_key_here"
+```
+
+APIキーは[Olostep Dashboard](https://olostep.com/dashboard)から取得してください。
+
+## 利用可能なツール
+
+### scrape_website
+
+単一のURLからコンテンツを抽出します。複数の形式とJavaScriptレンダリングをサポート。
+
+<ParamField path="url" type="string" required>
+  スクレイプするウェブサイトのURL（http://またはhttps://を含める必要があります）
+</ParamField>
+
+<ParamField path="format" type="string" default="markdown">
+  出力形式：`markdown`、`html`、`json`、または`text`
+</ParamField>
+
+<ParamField path="country" type="string">
+  ロケーション固有のコンテンツのための国コード（例："US", "GB", "CA"）
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="integer">
+  JavaScriptレンダリングの待機時間（0-10000ミリ秒）
+</ParamField>
+
+<ParamField path="parser" type="string">
+  特殊な抽出のためのオプションのパーサーID（例："@olostep/amazon-product"）
+</ParamField>
+
+<CodeGroup>
+```python Basic Scraping
+from langchain_olostep import scrape_website
+import asyncio
+
+# ウェブサイトをスクレイプ
+content = asyncio.run(scrape_website.ainvoke({
+    "url": "https://example.com",
+    "format": "markdown"
+}))
+
+print(content)
+```
+
+```python With JavaScript
+# 動的コンテンツを待つ
+content = asyncio.run(scrape_website.ainvoke({
+    "url": "https://example.com",
+    "format": "markdown",
+    "wait_before_scraping": 2000
+}))
+```
+
+```python With Parser
+# 特殊なパーサーを使用
+content = asyncio.run(scrape_website.ainvoke({
+    "url": "https://www.amazon.com/dp/PRODUCT_ID",
+    "parser": "@olostep/amazon-product",
+    "format": "json"
+}))
+```
+</CodeGroup>
+
+### scrape_batch
+
+複数のURLを並行して処理（最大10,000件同時）。
+
+<ParamField path="urls" type="array" required>
+  スクレイプするURLのリスト
+</ParamField>
+
+<ParamField path="format" type="string" default="markdown">
+  すべてのURLの出力形式：`markdown`、`html`、`json`、または`text`
+</ParamField>
+
+<ParamField path="country" type="string">
+  ロケーション固有のコンテンツのための国コード
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="integer">
+  JavaScriptレンダリングの待機時間
+</ParamField>
+
+<ParamField path="parser" type="string">
+  特殊な抽出のためのオプションのパーサーID
+</ParamField>
+
+<CodeGroup>
+```python Batch Scraping
+from langchain_olostep import scrape_batch
+import asyncio
+
+# 複数のURLをスクレイプ
+result = asyncio.run(scrape_batch.ainvoke({
+    "urls": [
+        "https://example1.com",
+        "https://example2.com",
+        "https://example3.com"
+    ],
+    "format": "markdown"
+}))
+
+print(result)
+# 戻り値: {"batch_id": "batch_xxx", "status": "in_progress", ...}
+```
+</CodeGroup>
+
+### answer_question
+
+ウェブを検索し、ソース付きのAI駆動の回答を取得。データ強化と調査に最適。
+
+<ParamField path="task" type="string" required>
+  検索する質問またはタスク
+</ParamField>
+
+<ParamField path="json_schema" type="object">
+  希望する出力形式を記述するオプションのJSONスキーマ辞書/文字列
+</ParamField>
+
+<CodeGroup>
+```python Simple Question
+from langchain_olostep import answer_question
+import asyncio
+
+# 簡単な質問をする
+result = asyncio.run(answer_question.ainvoke({
+    "task": "What is the capital of France?"
+}))
+
+print(result)
+# 戻り値: {"answer": {"result": "Paris"}, "sources": [...]}
+```
+
+```python Structured Output
+# JSONスキーマで構造化データを取得
+result = asyncio.run(answer_question.ainvoke({
+    "task": "What is the latest book by J.K. Rowling?",
+    "json_schema": {
+        "book_title": "",
+        "author": "",
+        "release_date": ""
+    }
+}))
+
+print(result)
+# ソース付きの構造化された回答を返す
+```
+
+```python Data Enrichment
+# 会社データを強化
+result = asyncio.run(answer_question.ainvoke({
+    "task": "Find the CEO and headquarters of Stripe",
+    "json_schema": {
+        "ceo_name": "",
+        "headquarters": "",
+        "founded_year": ""
+    }
+}))
+
+# 不確実性を"NOT_FOUND"値で処理
+```
+</CodeGroup>
+
+### extract_urls
+
+サイト構造分析のためにウェブサイトからすべてのURLを抽出。
+
+<ParamField path="url" type="string" required>
+  URLを抽出するウェブサイトのURL
+</ParamField>
+
+<ParamField path="search_query" type="string">
+  URLをフィルタリングするためのオプションの検索クエリ
+</ParamField>
+
+<ParamField path="top_n" type="integer">
+  返されるURLの数を制限
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  含めるグロブパターン（例：["/blog/**"]）
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  除外するグロブパターン（例：["/admin/**"]）
+</ParamField>
+
+<CodeGroup>
+```python Extract All URLs
+from langchain_olostep import extract_urls
+import asyncio
+
+# ウェブサイトからすべてのURLを取得
+result = asyncio.run(extract_urls.ainvoke({
+    "url": "https://example.com",
+    "top_n": 100
+}))
+
+print(result)
+# 戻り値: {"urls": [...], "total_urls": 100, ...}
+```
+
+```python Filter URLs
+# ブログURLのみを取得
+result = asyncio.run(extract_urls.ainvoke({
+    "url": "https://example.com",
+    "include_urls": ["/blog/**"],
+    "exclude_urls": ["/admin/**", "/private/**"],
+    "top_n": 50
+}))
+```
+</CodeGroup>
+
+### crawl_website
+
+リンクをたどってウェブサイト全体を自動的に発見しスクレイピング。
+
+<ParamField path="start_url" type="string" required>
+  クロールの開始URL
+</ParamField>
+
+<ParamField path="max_pages" type="integer" default="100">
+  クロールする最大ページ数
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  含めるグロブパターン（例：["/**"]で全て）
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  除外するグロブパターン（例：["/admin/**"]）
+</ParamField>
+
+<ParamField path="max_depth" type="integer">
+  start_urlからクロールする最大深度
+</ParamField>
+
+<ParamField path="include_external" type="boolean" default="false">
+  外部URLを含める
+</ParamField>
+
+<CodeGroup>
+```python Crawl Website
+from langchain_olostep import crawl_website
+import asyncio
+
+# ドキュメントサイト全体をクロール
+result = asyncio.run(crawl_website.ainvoke({
+    "start_url": "https://docs.example.com",
+    "max_pages": 100
+}))
+
+print(result)
+# 戻り値: {"crawl_id": "crawl_xxx", "status": "in_progress", ...}
+```
+
+```python With Filters
+# URLフィルタを使用してクロール
+result = asyncio.run(crawl_website.ainvoke({
+    "start_url": "https://example.com",
+    "max_pages": 200,
+    "include_urls": ["/**"],
+    "exclude_urls": ["/admin/**", "/private/**"],
+    "max_depth": 3
+}))
+```
+</CodeGroup>
+
+## LangChainエージェント統合
+
+ウェブを検索しスクレイピングできるインテリジェントなエージェントを構築：
+
+<CodeGroup>
+```python Basic Agent
+from langchain.agents import initialize_agent, AgentType
+from langchain_openai import ChatOpenAI
+from langchain_olostep import (
+    scrape_website,
+    answer_question,
+    extract_urls
+)
+
+# Olostepツールでエージェントを作成
+tools = [scrape_website, answer_question, extract_urls]
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+
+# エージェントを使用
+result = agent.run("""
+Research the company at https://company.com:
+1. Scrape their about page
+2. Search for their latest funding round
+3. Extract all their product pages
+""")
+
+print(result)
+```
+</CodeGroup>
+
+## LangGraph統合
+
+LangGraphを使用して複雑なマルチステップワークフローを構築：
+
+<CodeGroup>
+```python Research Agent
+from langgraph.graph import StateGraph, END
+from langchain_olostep import (
+    scrape_website,
+    scrape_batch,
+    answer_question,
+    extract_urls
+)
+from langchain_openai import ChatOpenAI
+import json
+
+def create_research_agent():
+    workflow = StateGraph(dict)
+    
+    def discover_pages(state):
+        # ターゲットサイトからすべてのURLを抽出
+        result = extract_urls.invoke({
+            "url": state["target_url"],
+            "include_urls": ["/product/**"],
+            "top_n": 50
+        })
+        state["urls"] = json.loads(result)["urls"]
+        return state
+    
+    def scrape_pages(state):
+        # 発見したページをバッチでスクレイプ
+        result = scrape_batch.invoke({
+            "urls": state["urls"],
+            "format": "markdown"
+        })
+        state["batch_id"] = json.loads(result)["batch_id"]
+        return state
+    
+    def answer_questions(state):
+        # データについての質問にAIを使用して回答
+        result = answer_question.invoke({
+            "task": state["research_question"],
+            "json_schema": state["desired_format"]
+        })
+        state["answer"] = json.loads(result)["answer"]
+        return state
+    
+    workflow.add_node("discover", discover_pages)
+    workflow.add_node("scrape", scrape_pages)
+    workflow.add_node("analyze", answer_questions)
+    
+    workflow.set_entry_point("discover")
+    workflow.add_edge("discover", "scrape")
+    workflow.add_edge("scrape", "analyze")
+    workflow.add_edge("analyze", END)
+    
+    return workflow.compile()
+
+# エージェントを使用
+agent = create_research_agent()
+result = agent.invoke({
+    "target_url": "https://store.com",
+    "research_question": "What are the top 5 most expensive products?",
+    "desired_format": {
+        "products": [{"name": "", "price": "", "url": ""}]
+    }
+})
+```
+</CodeGroup>
+
+## 高度なユースケース
+
+### データ強化
+
+スプレッドシートデータをウェブ情報で強化：
+
+```python
+from langchain_olostep import answer_question
+
+companies = ["Stripe", "Shopify", "Square"]
+
+for company in companies:
+    result = answer_question.invoke({
+        "task": f"Find information about {company}",
+        "json_schema": {
+            "ceo": "",
+            "headquarters": "",
+            "employee_count": "",
+            "latest_funding": ""
+        }
+    })
+    print(f"{company}: {result}")
+```
+
+### Eコマース製品スクレイピング
+
+特殊なパーサーで製品データをスクレイプ：
+
+```python
+from langchain_olostep import scrape_website
+
+# Amazon製品をスクレイプ
+result = scrape_website.invoke({
+    "url": "https://www.amazon.com/dp/PRODUCT_ID",
+    "parser": "@olostep/amazon-product",
+    "format": "json"
+})
+# 構造化された製品データを返す：価格、タイトル、評価など
+```
+
+### SEO監査
+
+SEOのためにウェブサイト全体を分析：
+
+```python
+from langchain_olostep import extract_urls, scrape_batch
+import json
+
+# 1. すべてのページを発見
+urls_result = extract_urls.invoke({
+    "url": "https://yoursite.com",
+    "top_n": 1000
+})
+
+# 2. すべてのページをスクレイプ
+urls = json.loads(urls_result)["urls"]
+batch_result = scrape_batch.invoke({
+    "urls": urls,
+    "format": "html"
+})
+```
+
+### ドキュメントスクレイピング
+
+ドキュメントをクロールして抽出：
+
+```python
+from langchain_olostep import crawl_website
+
+# ドキュメントサイト全体をクロール
+result = crawl_website.invoke({
+    "start_url": "https://docs.example.com",
+    "max_pages": 500,
+    "include_urls": ["/docs/**"],
+    "exclude_urls": ["/api/**", "/v1/**"]
+})
+```
+
+## 専門パーサー
+
+Olostepは人気のあるウェブサイトのための事前構築されたパーサーを提供します：
+
+- `@olostep/google-search` - Google検索結果
+
+`parser`パラメータで使用：
+
+```python
+scrape_website.invoke({
+    "url": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "parser": "@olostep/google-search"
+})
+```
+
+## エラーハンドリング
+
+```python
+from langchain_core.exceptions import LangChainException
+
+try:
+    result = await scrape_website.ainvoke({
+        "url": "https://example.com"
+    })
+except LangChainException as e:
+    print(f"Scraping failed: {e}")
+```
+
+## ベストプラクティス
+
+<AccordionGroup>
+  <Accordion title="複数のURLに対してバッチ処理を使用">
+    3〜5以上のURLをスクレイプする場合は、複数の`scrape_website`呼び出しの代わりに`scrape_batch`を使用してください。バッチ処理ははるかに高速でコスト効率が高いです。
+  </Accordion>
+
+  <Accordion title="適切なタイムアウトを設定">
+    JavaScriptが多用されているサイトの場合、`wait_before_scraping`パラメータ（通常2000〜5000ms）を使用してください。これにより、動的コンテンツが完全に読み込まれることが保証されます。
+  </Accordion>
+
+  <Accordion title="専門パーサーを使用">
+    人気のあるウェブサイト（Amazon、LinkedIn、Google）には、事前構築されたパーサーを使用して自動的に構造化データを取得します。
+  </Accordion>
+
+  <Accordion title="URLを効率的にフィルタリング">
+    `extract_urls`または`crawl_website`を使用する際は、関連するページに焦点を当て、不要な処理を避けるためにグロブパターンを使用してください。
+  </Accordion>
+
+  <Accordion title="レート制限を処理">
+    レート制限エラーに対して指数バックオフを実装します。APIは内部でほとんどのレート制限を自動的に処理します。
+  </Accordion>
+</AccordionGroup>
+
+## サポート
+
+- **PyPIパッケージ**: [langchain-olostep](https://pypi.org/project/langchain-olostep/)
+- **ドキュメント**: [docs.olostep.com](https://docs.olostep.com)
+- **問題**: [GitHub Issues](https://github.com/olostep/langchain-olostep/issues)
+- **メール**: info@olostep.com
+
+## 関連リソース
+
+<CardGroup cols={2}>
+  <Card title="スクレイプAPI" icon="file-lines" href="/features/scrapes/scrapes">
+    スクレイプエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="バッチAPI" icon="layer-group" href="/features/batches/batches">
+    バッチエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="回答API" icon="question" href="/features/answers/answers">
+    回答エンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="マップAPI" icon="map" href="/features/maps/maps">
+    マップエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="クロールAPI" icon="spider-web" href="/features/crawls/crawls">
+    クロールエンドポイントについて学ぶ
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    Python SDKを探る
+  </Card>
+</CardGroup>

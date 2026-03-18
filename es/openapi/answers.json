@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Respuestas",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Encabezado de autenticación Bearer del formato Bearer <token>, donde <token> es tu token de autenticación."
+      }
+    }
+  },
+  "paths": {
+    "/v1/answers": {
+      "post": {
+        "summary": "Crear Respuesta",
+        "description": "La IA realizará acciones como buscar y navegar por páginas web para encontrar la respuesta a la tarea proporcionada. El tiempo de ejecución es de 3-30s dependiendo de la complejidad.  Para tareas más largas, usa el endpoint de agente en su lugar. Ver [Función de Agente](/features/agents/agents). Ver [Función de Respuestas](/features/answers/answers).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "La tarea a realizar."
+                  },
+                  "json_format": {
+                    "type": "object",
+                    "description": "El objeto JSON de salida deseado con valores vacíos como un esquema, o simplemente describe los datos que quieres como una cadena."
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con la respuesta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud Incorrecta (Falta Tarea)"
+          },
+          "402": {
+            "description": "Clave API Inválida"
+          },
+          "500": {
+            "description": "Error Interno del Servidor"
+          }
+        }
+      }
+    },
+    "/v1/answers/{answer_id}": {
+      "get": {
+        "summary": "Obtener Respuesta",
+        "description": "Este endpoint recupera una respuesta previamente completada por su ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "answer_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para la respuesta a recuperar.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con el objeto de respuesta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Clave API Inválida"
+          },
+          "404": {
+            "description": "Respuesta No Encontrada"
+          },
+          "500": {
+            "description": "Error Interno del Servidor"
+          }
+        }
+      }
+    }
+  }
+}

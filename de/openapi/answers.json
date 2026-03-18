@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Antworten-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/v1/answers": {
+      "post": {
+        "summary": "Antwort erstellen",
+        "description": "Die KI wird Aktionen wie das Suchen und Durchsuchen von Webseiten ausführen, um die Antwort auf die gestellte Aufgabe zu finden. Die Ausführungszeit beträgt 3-30 Sekunden, abhängig von der Komplexität.  Für längere Aufgaben verwende stattdessen den Agenten-Endpunkt. Siehe [Agentenfunktion](/features/agents/agents). Siehe [Antwortenfunktion](/features/answers/answers).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "Die auszuführende Aufgabe."
+                  },
+                  "json_format": {
+                    "type": "object",
+                    "description": "Das gewünschte Ausgabe-JSON-Objekt mit leeren Werten als Schema, oder beschreibe einfach die gewünschten Daten als String."
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit der Antwort.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage (Fehlende Aufgabe)"
+          },
+          "402": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    },
+    "/v1/answers/{answer_id}": {
+      "get": {
+        "summary": "Antwort abrufen",
+        "description": "Dieser Endpunkt ruft eine zuvor abgeschlossene Antwort anhand ihrer ID ab.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "answer_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für die abzurufende Antwort.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit dem Antwortobjekt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Ungültiger API-Schlüssel"
+          },
+          "404": {
+            "description": "Antwort nicht gefunden"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    }
+  }
+}

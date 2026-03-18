@@ -1,0 +1,59 @@
+---
+title: "获取答案"
+openapi: "zh/openapi/answers.json GET /v1/answers/{answer_id}"
+---
+
+## 概述
+
+`GET /v1/answers/{answer_id}` 端点允许你检索特定答案的详细信息。你需要提供答案的唯一标识符 `answer_id`。
+
+## 请求
+
+### 路径参数
+
+- `answer_id` (字符串): 你想要检索的答案的唯一标识符。
+
+### 示例请求
+
+```http
+GET /v1/answers/12345 HTTP/1.1
+Host: api.olostep.com
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+## 响应
+
+成功的响应将返回一个包含答案详细信息的 JSON 对象。
+
+### 响应字段
+
+- `id` (字符串): 答案的唯一标识符。
+- `content` (字符串): 答案的文本内容。
+- `created_at` (字符串): 答案创建的时间戳。
+- `updated_at` (字符串): 答案最后更新的时间戳。
+
+### 示例响应
+
+```json
+{
+  "id": "12345",
+  "content": "这是一个示例答案。",
+  "created_at": "2023-01-01T00:00:00Z",
+  "updated_at": "2023-01-02T00:00:00Z"
+}
+```
+
+## 错误
+
+如果请求失败，响应将包含错误代码和消息。
+
+### 常见错误
+
+- `404 Not Found`: 如果提供的 `answer_id` 不存在。
+- `401 Unauthorized`: 如果缺少或提供的访问令牌无效。
+
+## 相关链接
+
+- [创建答案](./post.mdx)
+- [更新答案](./put.mdx)
+- [删除答案](./delete.mdx)

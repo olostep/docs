@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API del Constructor",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://agent.olostep.com"
+    },
+    {
+      "url": "https://dataset.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Encabezado de autenticación Bearer del formato Bearer <token>, donde <token> es tu token de autenticación."
+      }
+    }
+  },
+  "paths": {
+    "/olostep-p2p-incomingAPI": {
+      "get": {
+        "summary": "Inicia el scraping de páginas web con varias configuraciones",
+        "description": "Este endpoint permite a los usuarios hacer scraping de páginas web con varias opciones como establecer tiempos de espera, tiempo de espera antes de hacer scraping, preferencias de formato de datos y más.",
+        "servers": [
+          {
+            "url": "https://agent.olostep.com"
+          }
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "La URL desde la cual comenzar el scraping.",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "description": "Tiempo de espera en segundos para el proceso de scraping, con un máximo de 620 segundos.",
+            "schema": {
+              "type": "integer",
+              "default": 40
+            }
+          },
+          {
+            "name": "waitBeforeScraping",
+            "in": "query",
+            "required": false,
+            "description": "Tiempo de espera en segundos antes de comenzar el scraping, hasta 500 segundos.",
+            "schema": {
+              "type": "integer",
+              "default": 3
+            }
+          },
+          {
+            "name": "saveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Opción para guardar el contenido extraído como HTML.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "saveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Opción para guardar el contenido extraído como Markdown.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "removeCSSselectors",
+            "in": "query",
+            "required": false,
+            "description": "Opción para eliminar ciertos selectores CSS del contenido. Opcionalmente, también puedes pasar un array en formato JSON stringified de selectores específicos que deseas eliminar. Los selectores CSS eliminados cuando esta opción está configurada en `default` son `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "schema": {
+              "type": "string",
+              "default": "default",
+              "enum": [
+                "default",
+                "none",
+                "JSON stringified array of CSS selectors"
+              ]
+            }
+          },
+          {
+            "name": "htmlTransformer",
+            "in": "query",
+            "required": false,
+            "description": "Especifica el transformador HTML a usar, si hay alguno. La biblioteca Mercury Parser de Postlight se utiliza para eliminar anuncios y otros contenidos no deseados del contenido extraído.",
+            "schema": {
+              "type": "string",
+              "default": "none",
+              "enum": [
+                "none",
+                "postlightParser"
+              ]
+            }
+          },
+          {
+            "name": "removeImages",
+            "in": "query",
+            "required": false,
+            "description": "Opción para eliminar imágenes del contenido extraído.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "expandMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Si es verdadero, el contenido en markdown se devuelve en el campo markdown_content.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "expandHtml",
+            "in": "query",
+            "required": false,
+            "description": "Si es verdadero, el contenido en HTML se devuelve en el campo html_content.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "description": "Acciones a realizar en la página antes de obtener el contenido",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "Esperar",
+                    "required": [
+                      "type",
+                      "milliseconds"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "wait"
+                        ],
+                        "description": "Esperar una cantidad especificada de milisegundos"
+                      },
+                      "milliseconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Tiempo de espera en milisegundos"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Hacer clic",
+                    "required": [
+                      "type",
+                      "selector"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "click"
+                        ],
+                        "description": "Hacer clic en un elemento"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "Selector CSS para el elemento en el que hacer clic"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Llenar Entrada",
+                    "required": [
+                      "type",
+                      "selector",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fill_input"
+                        ],
+                        "description": "Llena un elemento de entrada con un valor"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "Selector CSS para el elemento de entrada"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Texto para ingresar en la entrada"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Desplazar",
+                    "required": [
+                      "type",
+                      "direction",
+                      "amount"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scroll"
+                        ],
+                        "description": "Desplaza la página"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "up",
+                          "down",
+                          "left",
+                          "right"
+                        ],
+                        "description": "Dirección para desplazar"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "Cantidad para desplazar en píxeles"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con los datos solicitados."
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a parámetros incorrectos o faltantes."
+          },
+          "401": {
+            "description": "Acceso no autorizado debido a un token de API faltante o inválido."
+          },
+          "500": {
+            "description": "Error interno del servidor."
+          }
+        }
+      }
+    },
+    "/olostep-p2p-dataset-API": {
+      "get": {
+        "servers": [
+          {
+            "url": "https://dataset.olostep.com"
+          }
+        ],
+        "summary": "Recuperar información del conjunto de datos",
+        "description": "Permite a los usuarios recuperar información del conjunto de datos en formato Markdown y/o HTML basado en el ID del conjunto de datos proporcionado.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasetId",
+            "in": "query",
+            "required": true,
+            "description": "Identificador único para el conjunto de datos a recuperar.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "retrieveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Opción para recuperar el conjunto de datos en formato Markdown.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "retrieveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Opción para recuperar el conjunto de datos en formato HTML.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "fastLane",
+            "in": "query",
+            "required": false,
+            "description": "Opción experimental para acelerar el proceso de scraping",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con la información del conjunto de datos."
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a parámetros incorrectos o faltantes."
+          },
+          "404": {
+            "description": "Conjunto de datos no encontrado para el ID proporcionado."
+          },
+          "500": {
+            "description": "Error interno del servidor."
+          }
+        }
+      }
+    }
+  }
+}

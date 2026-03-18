@@ -1,0 +1,227 @@
+---
+icon: "bell"
+sidebarTitle: "Suivi des Prix"
+title: "Suivi des Prix avec Olostep"
+description: "Apprenez à utiliser Olostep pour suivre les prix des produits à grande échelle sur un e-commerce."
+---
+
+## Vue d'ensemble
+
+Olostep fournit une API de web scraping qui permet le suivi en temps réel des prix de millions de produits sur un e-commerce à intervalles réguliers (par exemple toutes les quelques heures) de manière évolutive et rentable.
+
+Ceci est utile pour les entreprises qui souhaitent surveiller les fluctuations de prix, comparer les prix sur plusieurs sites web ou suivre les stratégies de tarification des concurrents.
+
+Dans ce guide, nous verrons comment un client utilise Olostep pour configurer un suivi automatisé des prix pour des millions de produits Amazon quotidiennement.
+
+## Pourquoi utiliser Olostep pour le suivi des prix ?
+
+- **Évolutivité :** Suivez les prix de millions de produits toutes les quelques heures.
+- **Automatisation :** Configurez des tâches de scraping planifiées qui s'exécutent à des moments prédéfinis/intervalles réguliers.
+- **Formats multiples :** Récupérez les données au format JSON, html ou markdown.
+- **Parseurs personnalisés :** Extrayez uniquement les informations JSON pertinentes avec nos parseurs ou passez les vôtres à l'API.
+
+## Comment suivre les prix avec Olostep
+
+### Vue d'ensemble de la configuration du processus
+
+Lors du suivi de produits à grande échelle, nous recommandons d'utiliser le [point de terminaison Batches d'Olostep](https://docs.olostep.com/api-reference/batches/create).
+
+Ce point de terminaison vous permet d'envoyer plusieurs lots d'URL (chacun jusqu'à 10 000) à traiter en parallèle, puis de récupérer les résultats après 5 à 8 minutes. Vous pouvez envoyer plusieurs lots en même temps, surveiller leur progression et récupérer les résultats une fois qu'ils sont terminés. De cette façon, vous pouvez traiter des millions d'URL en 15 à 20 minutes.
+
+Le flux global pour le suivi des prix avec Olostep est le suivant :
+
+1. **Lisez les produits de la base de données et enregistrez les URL que vous souhaitez suivre dans un fichier CSV.**
+2. **Lisez les données du fichier CSV et démarrez un lot en utilisant le point de terminaison de lot d'Olostep.** Cela se fait en postant les données au point de terminaison par morceaux de jusqu'à 10 000 URL à la fois.
+3. **Vérifiez l'état du lot toutes les 60 secondes** pour surveiller la progression.
+4. **Une fois le lot terminé, lisez le contenu et utilisez-le dans votre flux de travail.**
+
+Vous pouvez démarrer un lot et obtenir le contenu html/markdown de la page, puis le parser vous-même pour extraire les données souhaitées. Mais nous recommandons de démarrer le lot avec un parseur afin de recevoir un objet JSON contenant uniquement les données analysées dont vous avez besoin. Vous pouvez passer votre propre parseur à l'API ou utiliser l'un de ceux préconstruits que nous avons pour certains sites web courants (par exemple, pages de produits Amazon, résultats de recherche Google, profils Linkedin, etc.).
+
+Nous stockons les données pour chaque lot pendant 7 jours afin que vous puissiez les récupérer plusieurs fois si nécessaire.
+
+### Étape 1 : Exporter les données produits de votre base de données
+
+La première étape consiste à récupérer les informations sur les produits de votre base de données et à les enregistrer au format CSV. Ce fichier doit contenir des identifiants de produits, des URL et toutes les métadonnées supplémentaires nécessaires pour le suivi.
+
+### Étape 2 : Démarrer un lot avec Olostep
+
+Pour démarrer un lot, lisez les données produits du CSV et envoyez-les au point de terminaison de lot d'Olostep. Cela se fait en utilisant une requête HTTP POST avec une charge utile JSON.
+
+Chaque lot peut contenir jusqu'à 10 000 URL. Pour les grands ensembles de données (>10 000 URL), divisez-les en plusieurs lots et envoyez-les en parallèle.
+
+Un lot se compose d'un tableau d'éléments, où chaque élément représente une URL de produit à traiter. Voici la structure d'une requête de lot
+
+```python
+import requests
+
+def start_batch(batch_array):
+    payload = {
+        "batch_array": batch_array,                 # Tableau d'éléments à traiter
+        "batch_country": "IT",                      # Code pays pour le lot
+        "parser": "@olostep/amazon-it-product"      # Optionnel : Spécifiez un parseur personnalisé pour obtenir uniquement les données JSON nécessaires
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()["id"]
+```
+
+#### Structure du tableau de lot
+Chaque élément dans le batch_array doit suivre cette structure :
+<CodeGroup>
+    ```json filename="batch_item.json"
+    {
+        "custom_id": "unique_identifier",    // Requis : Votre identifiant unique pour l'élément
+        "url": "product_url",               // Requis : URL à traiter
+        "wait_before_scraping": 0,         // Optionnel : Temps d'attente avant de scraper chaque URL dans le lot (en millisecondes)
+    }
+    ```
+</CodeGroup>
+Paramètres
+<ResponseField name="batch_array" type="array" required>
+    Tableau d'éléments à traiter. Maximum de 10 000 URL par lot. Chaque élément doit avoir un `custom_id` unique.
+</ResponseField>
+<ResponseField name="batch_country" type="string" required>
+    Code pays à deux lettres (par exemple, "IT" pour l'Italie).
+</ResponseField>
+<ResponseField name="parser" type="string">
+    Nom du parseur personnalisé à utiliser (par exemple, "@olostep/amazon-it-product"). Contactez-nous à info@olostep.com pour accéder aux parseurs préconstruits ou pour créer le vôtre.
+</ResponseField>
+Réponse
+<CodeGroup>
+    ```json filename="response.json"
+    {
+        "id": "batch_54ikwskmt8"
+    }
+    ```
+</CodeGroup>
+Le point de terminaison renvoie un objet JSON contenant le batch_id, qui peut être utilisé pour surveiller l'état et ensuite récupérer les résultats.
+
+Exemple d'utilisation
+<CodeGroup>
+    ```python
+    # Préparer le tableau de lot
+    batch_array = [
+    {
+        "custom_id": "product_123",
+        "url": "https://www.amazon.it/dp/B0CHF6Z393/?coliid=INQXTGFQF4FM4&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    },
+    {
+        "custom_id": "product_124",
+        "url": "https://www.amazon.it/dp/B0CHMJL774/?coliid=I6CFYA5EHVHE2&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    }
+    ]
+
+    # Démarrer le traitement du lot
+    batch_id = start_batch(batch_array)
+    print(f"Lot démarré : {batch_id}")
+    ```
+</CodeGroup>
+
+### Étape 3 : Surveiller l'état du lot
+Une fois qu'un lot est démarré, vous devrez surveiller son état pour déterminer quand le traitement est terminé. L'API fournit un point de terminaison de statut qui peut être interrogé périodiquement (par exemple, toutes les 60 secondes) avec le batch_id
+
+<CodeGroup>
+    ```python filename="check_status.py"
+    import requests
+
+    def check_batch_status(batch_id):
+    headers = {"Authorization": "Bearer " + API_KEY}
+    response = requests.request(
+    "GET",
+    f"https://api.olostep.com/v1/batches/{batch_id}",
+    headers=headers
+    )
+    return response.json()["status"]
+    ```
+</CodeGroup>
+
+Pour une utilisation en production, il est recommandé de mettre en œuvre une surveillance asynchrone pour gérer plusieurs lots efficacement :
+<CodeGroup>
+    ```python
+    import asyncio
+
+    async def monitor_batch(batch_id: str) -> None:
+    """Surveiller un seul lot jusqu'à ce qu'il soit terminé"""
+    while True:
+        status = check_batch_status(batch_id)
+        if status == "completed":
+            print(f"Lot {batch_id} terminé !")
+            return
+        print(f"Lot {batch_id} toujours en cours... Nouvelle vérification dans 60 secondes")
+        await asyncio.sleep(60)
+    ```
+</CodeGroup>
+
+
+### Étape 4 : Récupérer les ID pour les éléments terminés
+
+Une fois le lot marqué comme terminé, vous pouvez récupérer la liste des éléments terminés. Chaque élément aura un retrieve_id. Si vous voulez le contenu réel, utilisez le point de terminaison retrieve en passant le `retrieve_id`
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    response = requests.get(f"https://api.olostep.com/v1/batches/{batch_id}/items", headers=headers)
+    return response.json()["items"]
+```
+Cela renverra les éléments terminés qui ont chacun un `retrieve_id` pour chaque URL envoyée. Vous pouvez ensuite utiliser le point de terminaison retrieve pour récupérer et stocker les données extraites (html, markdown ou JSON) pour chaque URL.
+
+Vous pouvez obtenir le `retrieve_id` pour chaque élément dans le lot en utilisant le code suivant :
+
+```python
+items = get_completed_items("your_batch_id")
+for item in items:
+    print(f"""
+    URL: {item['url']}
+    Custom ID: {item['custom_id']}
+    Retrieve ID: {item['retrieve_id']}
+    ---
+    """)
+```
+
+### Étape 5 : Récupérer le contenu pour chaque élément
+
+Une fois que vous avez le `retrieve_id` pour chaque élément, vous pouvez récupérer son contenu (HTML, Markdown ou JSON) en utilisant le point de terminaison retrieve :
+
+<CodeGroup>
+    ```python filename="retrieve_content.py"
+    def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(
+    url,
+    headers=headers,
+    params=params
+    )
+    return response.json()
+
+    # Exemple d'utilisation
+    retrieve_id = "product_123"
+    content = retrieve_content(retrieve_id)
+
+    # Si vous voulez traiter plusieurs éléments
+    def process_batch_content(batch_id):
+    items = get_completed_items(batch_id)
+    for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    # Traitez ou stockez le contenu selon vos besoins
+    ```
+</CodeGroup>
+
+
+## Conclusion
+
+En suivant ces étapes, vous pouvez configurer un système de suivi des prix automatisé en utilisant Olostep. Bientôt, nous publierons un dépôt open-source sur GitHub avec le code complet pour cet exemple.

@@ -1,0 +1,925 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Batches di AirOps",
+    "version": "1.0.0",
+    "description": "API interna per lo scraping batch specifico di AirOps con arricchimento LLM automatizzato per l'estrazione dei metadati delle pagine."
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "paths": {
+    "/v1/batches-airops": {
+      "post": {
+        "operationId": "createAirOpsBatch",
+        "summary": "Crea Batch AirOps",
+        "description": "Avvia un processo batch che combina lo scraping con l'arricchimento basato su LLM per l'estrazione dei metadati delle pagine. Il flusso di lavoro: scraping degli URL → estrazione dei metadati → analisi delle lacune → arricchimento LLM per i campi mancanti.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBatchRequest"
+              },
+              "example": {
+                "items": [
+                  {
+                    "url": "https://example.com/blog/post-1",
+                    "custom_id": "post-1"
+                  },
+                  {
+                    "url": "https://example.com/blog/post-2",
+                    "custom_id": "post-2"
+                  }
+                ],
+                "brands": [
+                  "Acme Corp",
+                  "TechBrand"
+                ],
+                "country": "US",
+                "webhook": "https://your-server.com/webhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch creato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBatchResponse"
+                },
+                "example": {
+                  "id": "batch_abc123xyz",
+                  "object": "batch_airops",
+                  "created": 1705315200000,
+                  "total_urls": 2,
+                  "status": {
+                    "overall": "in_progress",
+                    "scraping": {
+                      "state": "started",
+                      "submitted": 2,
+                      "valid": 2,
+                      "succeeded": 0,
+                      "failed": 0,
+                      "started_at": 1705315200000,
+                      "completed_at": null,
+                      "error": null
+                    },
+                    "analyzing": {
+                      "state": "pending",
+                      "items_analyzed": 0,
+                      "items_needing_enrichment": 0,
+                      "items_complete": 0,
+                      "fields_to_enrich": null,
+                      "started_at": null,
+                      "completed_at": null
+                    },
+                    "enriching": {
+                      "state": "pending",
+                      "items_to_enrich": 0,
+                      "items_enriched": 0,
+                      "items_failed": 0,
+                      "llm_batch_id": null,
+                      "started_at": null,
+                      "completed_at": null,
+                      "error": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Errore di validazione.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Le credenziali di autenticazione sono mancanti o non valide.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Errore interno del server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches-airops/{batch_id}": {
+      "get": {
+        "operationId": "getAirOpsBatch",
+        "summary": "Ottieni Stato Batch AirOps",
+        "description": "Recupera lo stato attuale e la configurazione di un batch AirOps.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID del batch da recuperare.",
+            "example": "batch_abc123xyz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stato del batch recuperato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchDetailResponse"
+                },
+                "example": {
+                  "id": "batch_abc123xyz",
+                  "object": "batch",
+                  "created_at": 1705315200000,
+                  "total_urls": 50,
+                  "status": "completed",
+                  "batch_mode": true,
+                  "scraping": {
+                    "state": "completed",
+                    "submitted": 50,
+                    "valid": 50,
+                    "succeeded": 48,
+                    "failed": 2,
+                    "started_at": 1705315200000,
+                    "completed_at": 1705315500000,
+                    "error": null
+                  },
+                  "analyzing": {
+                    "state": "completed",
+                    "items_analyzed": 48,
+                    "items_needing_enrichment": 30,
+                    "items_complete": 18,
+                    "started_at": 1705315500000,
+                    "completed_at": 1705315502000
+                  },
+                  "enriching": {
+                    "state": "completed",
+                    "items_to_enrich": 30,
+                    "items_enriched": 30,
+                    "items_failed": 0,
+                    "llm_batch_id": "batch_xyz789",
+                    "batch_mode": true,
+                    "started_at": 1705315502000,
+                    "completed_at": 1705316800000,
+                    "error": null
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch non trovato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches-airops/{batch_id}/items": {
+      "get": {
+        "operationId": "getAirOpsBatchItems",
+        "summary": "Ottieni Elementi Batch AirOps",
+        "description": "Recupera tutti gli elementi nel batch con il loro parser e i dati arricchiti.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID del batch per cui recuperare gli elementi.",
+            "example": "batch_abc123xyz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Elementi del batch recuperati con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBatchItemsResponse"
+                },
+                "example": {
+                  "batch_id": "batch_abc123xyz",
+                  "completed_at": "2024-01-15T12:30:00.000Z",
+                  "status": "completed",
+                  "counts": {
+                    "total": 3,
+                    "succeeded": 2,
+                    "failed": 1
+                  },
+                  "items": [
+                    {
+                      "custom_id": "post-1",
+                      "url": "https://example.com/blog/post-1",
+                      "status": "completed",
+                      "page_type": "informational_article",
+                      "author": "John Doe",
+                      "date_published": "2024-01-15",
+                      "date_modified": null,
+                      "brand_mentions": [
+                        "Acme Corp"
+                      ]
+                    },
+                    {
+                      "custom_id": "post-2",
+                      "url": "https://example.com/pricing",
+                      "status": "completed",
+                      "page_type": "pricing_page",
+                      "author": null,
+                      "date_published": null,
+                      "date_modified": null,
+                      "brand_mentions": []
+                    },
+                    {
+                      "custom_id": "post-3",
+                      "url": "https://example.com/broken",
+                      "status": "failed",
+                      "failed_stage": "scraping",
+                      "error": {
+                        "code": "SCRAPE_FAILED",
+                        "message": "URL failed to scrape"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch non trovato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Header di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    },
+    "schemas": {
+      "CreateBatchRequest": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/BatchItem"
+            },
+            "description": "Array di elementi da elaborare."
+          },
+          "brands": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "default": [],
+            "description": "Nomi di brand da cercare nel contenuto della pagina. L'LLM estrarrà le menzioni di questi brand da ogni pagina."
+          },
+          "country": {
+            "type": "string",
+            "default": "RANDOM",
+            "description": "Paese per lo scraping geo-targeted. Usa i codici ISO 3166-1 alpha-2 (US, GB, DE, ecc.) o 'RANDOM' per la selezione automatica."
+          },
+          "webhook": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL per ricevere notifiche webhook per eventi del ciclo di vita del batch."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        }
+      },
+      "BatchItem": {
+        "type": "object",
+        "required": [
+          "url",
+          "custom_id"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "L'URL da scrappare."
+          },
+          "custom_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Il tuo identificatore unico per questo elemento."
+          }
+        }
+      },
+      "CreateBatchResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificatore unico del batch."
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "batch_airops"
+            ],
+            "description": "Identificatore del tipo di oggetto."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Timestamp Unix (millisecondi) quando il batch è stato creato."
+          },
+          "total_urls": {
+            "type": "integer",
+            "description": "Numero totale di URL nel batch."
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          }
+        }
+      },
+      "BatchDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "batch"
+            ]
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "Timestamp Unix (ms)"
+          },
+          "total_urls": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed"
+            ],
+            "description": "Stato generale del workflow."
+          },
+          "batch_mode": {
+            "type": "boolean",
+            "description": "Se la modalità batch async LLM è abilitata"
+          },
+          "scraping": {
+            "$ref": "#/components/schemas/ScrapingStatus"
+          },
+          "analyzing": {
+            "$ref": "#/components/schemas/AnalyzingStatus"
+          },
+          "enriching": {
+            "$ref": "#/components/schemas/EnrichingStatus"
+          }
+        }
+      },
+      "ListBatchItemsResponse": {
+        "type": "object",
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "description": "L'identificatore del batch."
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Timestamp ISO 8601 quando il batch è stato completato."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "in_progress"
+            ],
+            "description": "Stato del batch."
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Totale degli elementi nel batch."
+              },
+              "succeeded": {
+                "type": "integer",
+                "description": "Elementi processati con successo."
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Elementi falliti."
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchItemResult"
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "Messaggio di stato (presente quando il batch è ancora in elaborazione)."
+          }
+        }
+      },
+      "BatchItemResult": {
+        "type": "object",
+        "description": "Un elemento processato. La struttura varia in base allo stato.",
+        "properties": {
+          "custom_id": {
+            "type": "string",
+            "description": "Il tuo identificatore dalla richiesta."
+          },
+          "url": {
+            "type": "string",
+            "description": "L'URL estratto."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "failed"
+            ],
+            "description": "Stato di elaborazione dell'elemento."
+          },
+          "page_type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "homepage",
+              "product_page",
+              "collection_page",
+              "pricing_page",
+              "informational_article",
+              "documentation",
+              "listicle_article",
+              "comparison_page",
+              "support_article",
+              "review_page",
+              "forum_thread",
+              "social_media_post",
+              "social_media_profile",
+              "video_page",
+              "news_article",
+              "case_study",
+              "marketplace_listing",
+              "landing_page",
+              "deal_page",
+              "job_posting",
+              "other"
+            ],
+            "description": "Tipo di pagina classificata (presente quando lo stato è \"completed\")."
+          },
+          "author": {
+            "type": "string",
+            "nullable": true,
+            "description": "Autore del contenuto."
+          },
+          "date_published": {
+            "type": "string",
+            "nullable": true,
+            "description": "Data di pubblicazione."
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true,
+            "description": "Data dell'ultima modifica."
+          },
+          "brand_mentions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Marchi trovati sulla pagina."
+          },
+          "failed_stage": {
+            "type": "string",
+            "enum": [
+              "scraping",
+              "analyzing",
+              "enriching"
+            ],
+            "description": "Fase in cui si è verificato l'errore (presente quando lo stato è \"failed\")."
+          },
+          "error": {
+            "$ref": "#/components/schemas/StepError",
+            "description": "Dettagli dell'errore (presente quando lo stato è \"failed\")."
+          }
+        }
+      },
+      "EnrichedData": {
+        "type": "object",
+        "nullable": true,
+        "description": "Output finale unito che combina i risultati del parser e dell'estrazione LLM.",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "page_type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "homepage",
+              "product_page",
+              "collection_page",
+              "pricing_page",
+              "informational_article",
+              "documentation",
+              "listicle_article",
+              "comparison_page",
+              "support_article",
+              "review_page",
+              "forum_thread",
+              "social_media_post",
+              "social_media_profile",
+              "video_page",
+              "news_article",
+              "case_study",
+              "marketplace_listing",
+              "landing_page",
+              "deal_page",
+              "job_posting",
+              "other"
+            ],
+            "description": "Tipo di pagina classificata."
+          },
+          "author": {
+            "type": "string",
+            "nullable": true,
+            "description": "Autore del contenuto."
+          },
+          "date_published": {
+            "type": "string",
+            "nullable": true,
+            "description": "Data di pubblicazione (formato ISO 8601 quando disponibile)."
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true,
+            "description": "Data dell'ultima modifica."
+          },
+          "brand_mentions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Marchi dalla tua lista di input che sono stati menzionati sulla pagina."
+          },
+          "methods": {
+            "type": "object",
+            "description": "Metodo di estrazione utilizzato per ciascun campo.",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "classifier",
+                "parser",
+                "llm",
+                "not_found"
+              ]
+            }
+          }
+        }
+      },
+      "WorkflowStatus": {
+        "type": "object",
+        "description": "Oggetto di stato unificato che mostra tutte le fasi del workflow.",
+        "properties": {
+          "overall": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed"
+            ],
+            "description": "Stato aggregato del workflow."
+          },
+          "scraping": {
+            "$ref": "#/components/schemas/ScrapingStatus"
+          },
+          "analyzing": {
+            "$ref": "#/components/schemas/AnalyzingStatus"
+          },
+          "enriching": {
+            "$ref": "#/components/schemas/EnrichingStatus"
+          }
+        }
+      },
+      "ScrapingStatus": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed"
+            ]
+          },
+          "submitted": {
+            "type": "integer",
+            "description": "URL inviati al scraper."
+          },
+          "valid": {
+            "type": "integer",
+            "description": "URL validi dopo la validazione."
+          },
+          "succeeded": {
+            "type": "integer",
+            "description": "URL estratti con successo."
+          },
+          "failed": {
+            "type": "integer",
+            "description": "Estrazioni fallite."
+          },
+          "started_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "error": {
+            "$ref": "#/components/schemas/StepError"
+          }
+        }
+      },
+      "AnalyzingStatus": {
+        "type": "object",
+        "description": "Fase di analisi delle lacune - determina quali necessità richiedono l'arricchimento LLM.",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed"
+            ]
+          },
+          "items_analyzed": {
+            "type": "integer"
+          },
+          "items_needing_enrichment": {
+            "type": "integer"
+          },
+          "items_complete": {
+            "type": "integer",
+            "description": "Elementi con tutti i campi presenti dal parser."
+          },
+          "fields_to_enrich": {
+            "type": "object",
+            "nullable": true,
+            "description": "Conteggio degli elementi che necessitano di ciascun campo.",
+            "properties": {
+              "page_type": {
+                "type": "integer"
+              },
+              "author": {
+                "type": "integer"
+              },
+              "date_published": {
+                "type": "integer"
+              },
+              "date_modified": {
+                "type": "integer"
+              },
+              "brand_mentions": {
+                "type": "integer"
+              }
+            }
+          },
+          "started_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "EnrichingStatus": {
+        "type": "object",
+        "description": "Fase di estrazione LLM tramite Batch API.",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed",
+              "skipped"
+            ]
+          },
+          "items_to_enrich": {
+            "type": "integer"
+          },
+          "items_enriched": {
+            "type": "integer"
+          },
+          "items_failed": {
+            "type": "integer"
+          },
+          "llm_batch_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID Batch API LLM"
+          },
+          "batch_mode": {
+            "type": "boolean",
+            "description": "Se è stata utilizzata l'API batch asincrona"
+          },
+          "llm": {
+            "$ref": "#/components/schemas/LLMInfo"
+          },
+          "started_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "error": {
+            "$ref": "#/components/schemas/StepError"
+          }
+        }
+      },
+      "LLMInfo": {
+        "type": "object",
+        "nullable": true,
+        "description": "Fornitore LLM e dettagli sull'uso.",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Fornitore di elaborazione"
+          },
+          "model": {
+            "type": "string",
+            "description": "Modello utilizzato per l'estrazione"
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "prompt_tokens": {
+                "type": "integer"
+              },
+              "completion_tokens": {
+                "type": "integer"
+              },
+              "total_tokens": {
+                "type": "integer"
+              }
+            }
+          },
+          "completion_time_ms": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Tempo di elaborazione in ms"
+          }
+        }
+      },
+      "StepError": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "example": "validation_error"
+          },
+          "error_message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error_code": {
+            "type": "string"
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Coppie chiave-valore per dati personalizzati. Max 50 chiavi, chiave max 40 caratteri, valore max 500 caratteri.",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "maxProperties": 50,
+        "example": {
+          "project_id": "12345",
+          "source": "weekly-crawl"
+        }
+      }
+    }
+  }
+}

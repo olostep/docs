@@ -1,0 +1,1178 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API des lots",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "paths": {
+    "/v1/test-batch": {
+      "post": {
+        "summary": "Tester le lot",
+        "description": "Tester le lot",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "custom_id": {
+                          "type": "string",
+                          "description": "Un identifiant unique interne pour l'url."
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "URL de l'élément."
+                        }
+                      },
+                      "required": [
+                        "custom_id",
+                        "url"
+                      ]
+                    },
+                    "description": "Tableau d'éléments à traiter dans le lot."
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lot démarré avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du lot"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/recent": {
+      "get": {
+        "summary": "Lister les lots récents",
+        "description": "Récupère la liste des lots récents pour l'utilisateur authentifié.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 100
+            },
+            "description": "Nombre maximum de lots à retourner (par défaut 50, max 100)."
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrer par source (optionnel)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec la liste des lots récents.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "list"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "object": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created": {
+                            "type": "number"
+                          },
+                          "total_urls": {
+                            "type": "number"
+                          },
+                          "completed_urls": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Les informations d'authentification sont manquantes ou invalides. Voir [Non autorisé](/api-reference/errors/unauthorized) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorisé",
+                  "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur. Voir [Erreur interne](/api-reference/errors/internal_error) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Erreur Interne du Serveur",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches": {
+      "post": {
+        "summary": "Démarrer un nouveau lot",
+        "description": "Initie un nouveau processus de lot avec les paramètres spécifiés.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "custom_id": {
+                          "type": "string",
+                          "description": "Un identifiant unique interne pour l'url."
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "URL de l'élément."
+                        },
+                        "metadata": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/Metadata"
+                            }
+                          ],
+                          "description": "Métadonnées au niveau de l'élément. Attache des paires clé-valeur aux éléments individuels pour le suivi, le filtrage ou la corrélation avec tes systèmes internes."
+                        }
+                      },
+                      "required": [
+                        "custom_id",
+                        "url"
+                      ]
+                    },
+                    "description": "Tableau d'éléments à traiter dans le lot."
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Pays pour l'exécution du lot. Fournir en codes ISO 3166-1 alpha-2 comme US(USA), IN(Inde), etc."
+                  },
+                  "parser": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Analyseur à utiliser pour le lot."
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "description": "Tu peux utiliser ce paramètre pour spécifier l'analyseur à utiliser. Les analyseurs sont utiles pour extraire du contenu structuré des pages web. Olostep a quelques analyseurs intégrés pour les pages web les plus courantes, et tu peux aussi créer tes propres analyseurs."
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Quand c'est vrai, cela renvoie des URLs complètes (par exemple, 'https://example.com/page') au lieu de chemins relatifs (par exemple, '/page')."
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filtrer les liens extraits en utilisant des motifs glob."
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filtrer les liens extraits en utilisant des motifs glob."
+                      }
+                    },
+                    "description": "Obtiens tous les liens présents sur chaque page du lot."
+                  },
+                  "metadata": {
+                    "$ref": "#/components/schemas/Metadata"
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL HTTPS pour recevoir une requête POST lorsque le lot est terminé. Doit être une URL publiquement accessible utilisant le protocole `http://` ou `https://`. Ne peut pas pointer vers localhost ou des adresses IP privées. Voir [Webhooks](/api-reference/common/webhooks) pour le format de la charge utile et le comportement de nouvelle tentative."
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              },
+              "example": {
+                "items": [
+                  {
+                    "custom_id": "product-123",
+                    "url": "https://example.com/product/123",
+                    "metadata": {
+                      "source": "catalog_sync",
+                      "priority": "high"
+                    }
+                  },
+                  {
+                    "custom_id": "product-456",
+                    "url": "https://example.com/product/456"
+                  }
+                ],
+                "country": "US",
+                "metadata": {
+                  "batch_name": "Q1 Product Sync",
+                  "initiated_by": "automation"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lot démarré avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du lot"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"batch\" pour ce point de terminaison."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` ou `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Époque créée"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "Nombre d'URLs dans le lot"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "Nombre d'URLs complétées"
+                    },
+                    "parser": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    },
+                    "webhook": {
+                      "type": "string",
+                      "description": "URL de webhook pour recevoir la notification de fin"
+                    }
+                  }
+                },
+                "example": {
+                  "id": "batch_abc123def456",
+                  "object": "batch",
+                  "status": "in_progress",
+                  "created": 1704067200,
+                  "total_urls": 2,
+                  "completed_urls": 0,
+                  "country": "US",
+                  "metadata": {
+                    "batch_name": "Q1 Product Sync",
+                    "initiated_by": "automation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison de paramètres incorrects ou manquants. Voir [Bad Request](/api-reference/errors/bad_request) pour les détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Mauvaise Requête",
+                  "detail": "The 'items' array is required and must contain at least one item.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Les informations d'authentification sont manquantes ou invalides. Voir [Non autorisé](/api-reference/errors/unauthorized) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorisé",
+                  "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Paiement requis - crédits épuisés. Voir [Payment Required](/api-reference/errors/payment_required) pour les détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "credits_exhausted",
+                  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+                  "status": 402,
+                  "title": "Paiement Requis",
+                  "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/auth/",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Interdit - accès refusé à cette fonctionnalité. Voir [Forbidden](/api-reference/errors/forbidden) pour les détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "access_denied",
+                  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+                  "status": 403,
+                  "title": "Interdit",
+                  "detail": "You don't have access to this feature. Please reach out to info@olostep.com to get approved",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit d'idempotence - une requête avec cette clé est en cours. Voir [Idempotency Error](/api-reference/errors/idempotency_error) pour les détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "idempotency_key_in_progress",
+                  "type": "https://docs.olostep.com/api-reference/errors/idempotency_error",
+                  "status": 409,
+                  "title": "Erreur d'Idempotence",
+                  "detail": "A request with this idempotency key is currently being processed. Please wait and retry.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Entité non traitable - violation de règle métier. Voir [Entité Non Traitable](/api-reference/errors/unprocessable_entity) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "idempotency_key_reuse",
+                  "type": "https://docs.olostep.com/api-reference/errors/unprocessable_entity",
+                  "status": 422,
+                  "title": "Entité Non Traitable",
+                  "detail": "A request with this idempotency key was already made with different parameters. Idempotency keys must be unique per request.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur. Voir [Erreur interne](/api-reference/errors/internal_error) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Erreur Interne du Serveur",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}": {
+      "get": {
+        "summary": "Récupérer les informations du lot",
+        "description": "Récupère les informations sur un lot spécifique en utilisant son `batch_id`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID du lot pour lequel récupérer les informations."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec les informations du lot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du lot"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"batch\" pour ce point de terminaison."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` ou `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Époque créée"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "Nombre d'URLs dans le lot"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "Nombre d'URLs complétées"
+                    },
+                    "parser": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    },
+                    "webhook": {
+                      "type": "string",
+                      "description": "URL de webhook pour recevoir la notification de fin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Les informations d'authentification sont manquantes ou invalides. Voir [Non autorisé](/api-reference/errors/unauthorized) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorisé",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lot non trouvé pour l'ID fourni. Voir [Non Trouvé](/api-reference/errors/not_found) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Non Trouvé",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur. Voir [Erreur interne](/api-reference/errors/internal_error) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Erreur Interne du Serveur",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Mettre à jour les métadonnées du lot",
+        "description": "Met à jour les métadonnées pour un lot spécifique. Seul le champ `metadata` peut être mis à jour. Suit la sémantique de fusion de Stripe : les nouvelles clés sont ajoutées, les clés existantes sont mises à jour, et les clés définies sur une chaîne vide sont supprimées.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID du lot à mettre à jour."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "$ref": "#/components/schemas/Metadata"
+                  }
+                },
+                "required": [
+                  "metadata"
+                ]
+              },
+              "example": {
+                "metadata": {
+                  "status": "reviewed",
+                  "reviewer": "jane@example.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Métadonnées du lot mises à jour avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du lot"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"batch\" pour ce point de terminaison."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` ou `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Époque créée"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "Nombre d'URLs dans le lot"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "Nombre d'URLs complétées"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    }
+                  }
+                },
+                "example": {
+                  "id": "batch_abc123def456",
+                  "object": "batch",
+                  "status": "completed",
+                  "created": 1704067200,
+                  "total_urls": 10,
+                  "completed_urls": 10,
+                  "metadata": {
+                    "batch_name": "Q1 Product Sync",
+                    "status": "reviewed",
+                    "reviewer": "jane@example.com"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête - métadonnées manquantes ou invalides. Voir [Mauvaise Requête](/api-reference/errors/bad_request) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_metadata",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Mauvaise Requête",
+                  "detail": "No metadata field provided. Only metadata can be updated.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Les informations d'authentification sont manquantes ou invalides. Voir [Non autorisé](/api-reference/errors/unauthorized) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorisé",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lot non trouvé pour l'ID fourni. Voir [Non Trouvé](/api-reference/errors/not_found) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Non Trouvé",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur. Voir [Erreur interne](/api-reference/errors/internal_error) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Erreur Interne du Serveur",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}/items": {
+      "get": {
+        "summary": "Récupérer la liste des éléments complétés ou échoués avec contenu optionnel pour un lot spécifique",
+        "description": "Récupère la liste des éléments et du contenu selon le statut demandé pour un ID de lot spécifique.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID du lot pour lequel récupérer les éléments."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            },
+            "description": "Statut des URLs à récupérer (completed ou failed)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Curseur de pagination. Omet ce paramètre lors de la première requête. Pour les requêtes suivantes, utilise la valeur `cursor` de la réponse précédente. Voir [Pagination](/api-reference/common/pagination) pour plus de détails."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Nombre de résultats à retourner (recommandé 10-50)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec les éléments du lot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "batch_id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "custom_id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "metadata": {
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/Metadata"
+                              }
+                            ],
+                            "description": "Métadonnées au niveau de l'élément si fournies lors de la création du lot."
+                          },
+                          "links_on_page": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "items_count": {
+                      "type": "integer"
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "Curseur de pagination. Présent lorsqu'il y a plus de résultats disponibles. Utilise cette valeur dans le paramètre `cursor` de la prochaine requête. Voir [Pagination](/api-reference/common/pagination) pour plus de détails."
+                    }
+                  }
+                },
+                "example": {
+                  "batch_id": "batch_abc123def456",
+                  "object": "list",
+                  "status": "completed",
+                  "items": [
+                    {
+                      "custom_id": "product-123",
+                      "retrieve_id": "ret_xyz789",
+                      "url": "https://example.com/product/123",
+                      "metadata": {
+                        "source": "catalog_sync",
+                        "priority": "high"
+                      }
+                    },
+                    {
+                      "custom_id": "product-456",
+                      "retrieve_id": "ret_abc456",
+                      "url": "https://example.com/product/456"
+                    }
+                  ],
+                  "items_count": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison de paramètres incorrects. Voir [Mauvaise Requête](/api-reference/errors/bad_request) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Mauvaise Requête",
+                  "detail": "Status must be either 'completed' or 'failed'",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Les informations d'authentification sont manquantes ou invalides. Voir [Non autorisé](/api-reference/errors/unauthorized) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Non autorisé",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lot non trouvé pour l'ID fourni. Voir [Non Trouvé](/api-reference/errors/not_found) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "Non Trouvé",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur. Voir [Erreur interne](/api-reference/errors/internal_error) pour plus de détails.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "Erreur Interne du Serveur",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Réponse d'erreur de Détails du Problème RFC 7807",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifiant unique de l'erreur"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "error"
+            ],
+            "description": "Toujours 'error'"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code d'erreur lisible par machine"
+          },
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "Référence URI identifiant le type de problème"
+          },
+          "status": {
+            "type": "integer",
+            "description": "Code de statut HTTP"
+          },
+          "title": {
+            "type": "string",
+            "description": "Résumé court et lisible par l'humain"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Explication lisible par l'humain"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Horodatage Unix"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Tableau optionnel de détails d'erreur supplémentaires",
+            "items": {}
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "code",
+          "type",
+          "status",
+          "title",
+          "detail",
+          "created"
+        ]
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Ensemble de paires clé-valeur pour stocker des informations supplémentaires sur un objet. Suit l'approche de Stripe avec des règles de validation : max 50 clés, clé max 40 caractères (pas de crochets), valeur max 500 caractères, toutes les valeurs stockées sous forme de chaînes.",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Valeur des métadonnées (max 500 caractères). Les nombres et les booléens sont automatiquement convertis en chaînes."
+        },
+        "maxProperties": 50,
+        "example": {
+          "order_id": "12345",
+          "customer_name": "John Doe",
+          "priority": "high",
+          "processed": "true"
+        },
+        "x-validation-rules": {
+          "max_keys": 50,
+          "key_max_length": 40,
+          "key_forbidden_chars": [
+            "[",
+            "]"
+          ],
+          "value_max_length": 500,
+          "value_types": [
+            "string",
+            "number (coerced)",
+            "boolean (coerced)"
+          ]
+        }
+      }
+    }
+  }
+}

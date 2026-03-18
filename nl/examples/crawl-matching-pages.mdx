@@ -1,0 +1,203 @@
+---
+icon: "spider"
+sidebarTitle: "Specifieke pagina’s crawlen op Website"
+title: "Crawlen en Inhoud Extraheren van Stripe’s Blogpagina’s"
+description: "Leer hoe je inhoud kunt crawlen en extraheren van Stripe’s blogposts."
+---
+
+## Overzicht
+
+Deze gids laat je zien hoe je:
+
+- Een crawl start die specifiek gericht is op Stripe's blogposts
+- De voortgang van de crawl monitort
+- De gecrawlde inhoud ophaalt en verwerkt
+
+## Crawlen van Stripe's Blogpagina's
+
+Om Stripe's blogpagina's te crawlen, gebruik je de crawls endpoint met patroonherkenning om specifieke blog-URL's te targeten. Dit haalt de volledige HTML-inhoud van elke pagina op, die je vervolgens kunt verwerken om de informatie te extraheren die je nodig hebt.
+
+<CodeGroup>
+    ```python crawl_stripe_blog.py
+    import requests
+    import time
+    import json
+    from datetime import datetime
+
+    # Configuratie
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Starttijd registreren voor het bijhouden van de crawlduur
+    crawl_start_time = time.time()
+    
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Starten met crawlen van Stripe blog...")
+    
+    # Start een crawl gericht op Stripe's engineering blogposts
+    # Je kunt de patronen aanpassen op basis van je specifieke interesses
+    payload = {
+        "start_url": "https://stripe.com/blog",
+        "include_urls": ["/blog/engineering/**"],  # Focus op engineering posts
+        "max_pages": 25  # Beperk tot 25 pagina's voor dit voorbeeld
+    }
+
+    # Start de crawl
+    print("Starten met crawlen van Stripe's engineering blogposts...")
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=payload)
+    data = response.json()
+    crawl_id = data['id']
+    print(f"Crawl gestart met ID: {crawl_id}")
+
+    # Monitor de voortgang van de crawl
+    while True:
+        status_response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+        status_data = status_response.json()
+        print(f"Crawl status: {status_data['status']} - Pagina's gecrawld: {status_data.get('pages_count', 0)}")
+        
+        if status_data['status'] == 'completed' or status_data['status'] == 'failed':
+            break
+            
+        # Wacht 5 seconden voordat je opnieuw controleert
+        time.sleep(5)
+
+    # Bereken en toon de crawlduur
+    crawl_duration = time.time() - crawl_start_time
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Crawl voltooid in {crawl_duration:.2f} seconden")
+    ```
+</CodeGroup>
+
+## Bloginhoud Converteren naar Markdown
+
+Een krachtige manier om de gecrawlde inhoud te gebruiken, is door deze om te zetten naar markdown-formaat, wat ideaal is om in LLMs te voeren of een kennisbank te creëren. Hier is hoe je de bloginhoud ophaalt en omzet naar markdown:
+
+<CodeGroup>
+    ```python blog_to_markdown.py
+    import requests
+    import time
+    import json
+    from datetime import datetime
+    import os
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Configuratie
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Functie om inhoud op te halen in markdown-formaat
+    def retrieve_content(retrieve_id, formats):
+        params = {
+            "retrieve_id": retrieve_id,
+            "formats": json.dumps(formats)
+        }
+        response = requests.get(f"{API_URL}/retrieve", headers=HEADERS, params=params)
+        return response.json()
+
+    # Voortzetting van het vorige crawlvoorbeeld
+    if status_data['status'] == 'completed':
+        print(f"\nCrawl voltooid! {status_data['pages_count']} pagina's opgehaald.")
+        pages_response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS)
+        pages_data = pages_response.json()
+        
+        # Maak uitvoer directory aan als deze niet bestaat
+        os.makedirs("output", exist_ok=True)
+        
+        # Voorbereiden om markdown-inhoud te verzamelen
+        markdown_pages = []
+        total_pages = len(pages_data['pages'])
+        
+        # Verwerk pagina's parallel om markdown-inhoud te verkrijgen
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            # Maak futures voor inhoudsophaling
+            future_to_page = {
+                executor.submit(retrieve_content, page['retrieve_id'], ["markdown"]): page
+                for page in pages_data['pages']
+            }
+            
+            # Verwerk resultaten zodra ze gereed zijn
+            for i, future in enumerate(as_completed(future_to_page), 1):
+                page = future_to_page[future]
+                url = page['url']
+                print(f"Verwerken {i}/{total_pages}: {url}")
+                
+                try:
+                    content_data = future.result()
+                    if content_data and "markdown_content" in content_data:
+                        markdown_pages.append({
+                            'url': url,
+                            'title': page['title'],
+                            'markdown_content': content_data['markdown_content']
+                        })
+                        print(f"✓ Markdown-inhoud opgehaald voor {url}")
+                    else:
+                        print(f"⚠ Geen markdown-inhoud voor {url}")
+                except Exception as e:
+                    print(f"❌ Fout bij ophalen van inhoud voor {url}: {str(e)}")
+        
+        # Sla alle markdown-inhoud op in één bestand
+        output_file = "output/stripe_blog_markdown.md"
+        
+        with open(output_file, "w", encoding="utf-8") as f:
+            for page in markdown_pages:
+                # Schrijf paginakop met titel en URL
+                f.write(f"URL: {page['url']}\n\n")
+                
+                # Schrijf de markdown-inhoud
+                f.write(f"{page['markdown_content']}\n\n")
+                
+                # Voeg scheidingsteken tussen pagina's toe
+                f.write("---\n\n")
+                
+                print(f"✓ Markdown-inhoud toegevoegd van {page['url']}")
+
+        print(f"\n✅ Proces voltooid! Alle markdown-inhoud is opgeslagen in '{output_file}'")
+        print(f"Totaal aantal verwerkte pagina's: {len(markdown_pages)}")
+    else:
+        print(f"Crawl mislukt met status: {status_data['status']}")
+    ```
+</CodeGroup>
+
+### Voorbeeld Markdown Uitvoer
+
+Het resulterende markdown-bestand bevat alle gecrawlde bloginhoud in een schoon, gestructureerd formaat:
+
+```markdown
+URL: https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations
+
+## Gebruik van ML om prestatieverslechteringen te detecteren en erop te reageren
+
+Door Jane Smith, Senior Engineer bij Stripe
+
+Bij Stripe verwerken we dagelijks miljoenen API-verzoeken...
+
+---
+
+URL: https://stripe.com/blog/building-robust-payment-systems
+
+## Een robuust betalingssysteem bouwen
+
+Door John Doe, Engineering Manager
+
+Betrouwbaarheid staat centraal in de infrastructuur van Stripe...
+
+---
+```
+
+## Volgende Stappen
+
+Nu je succesvol inhoud van Stripe's blog hebt gecrawld en geëxtraheerd, kun je:
+
+1. **Je crawl uitbreiden**: Pas de `include_urls` parameter aan om andere secties van Stripe's blog te crawlen
+2. **Regelmatige updates implementeren**: Stel een geplande taak in om periodiek nieuwe inhoud te crawlen
+3. **Diepere analyse uitvoeren**: Gebruik NLP-tools om inzichten uit de bloginhoud te extraheren
+4. **Een zoekmachine bouwen**: Creëer een doorzoekbare database van Stripe's bloginhoud
+5. **Voer in LLMs**: Gebruik de markdown-inhoud als context voor LLMs om vragen te beantwoorden over Stripe's engineeringpraktijken
+
+Met Olostep's mogelijkheden voor inhoudscrawling kun je krachtige tools bouwen voor het monitoren en analyseren van de contentstrategie van elke website.

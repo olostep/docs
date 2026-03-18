@@ -1,0 +1,91 @@
+---
+icon: "file-lines"
+sidebarTitle: "ウェブサイトのMarkdownを取得"
+title: "ウェブサイトのMarkdownを取得"
+description: "任意のウェブページからLLMに適したMarkdown形式でコンテンツを抽出する方法を学びます。"
+---
+
+## 概要
+
+Olostepの[scrape](../../features/scrapes/scrapes)エンドポイントを使用すると、任意のウェブサイトからコンテンツを抽出できます。Markdown形式のコンテンツは、HTMLを含まずにLLMに供給したい場合に便利です。
+
+このガイドでは、`https://www.nea.com/team`のようなウェブサイトからMarkdownを抽出する方法を見ていきます。
+
+## 前提条件
+
+始める前に、以下のものを用意してください：
+
+- 有効なOlostep APIキー。これは[Olostep](https://www.olostep.com/dashboard)にサインアップすることで取得できます。
+- システムにインストールされたPython
+- `requests`と`json`ライブラリ（これらはPythonにプリインストールされていますが、必要に応じて`pip install requests`でインストールできます）
+
+## ウェブサイトからのテキスト抽出
+
+以下のPythonスクリプトは、OlostepのAPIを使用してウェブサイトからテキストとMarkdownコンテンツを抽出する方法を示しています。
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.nea.com/team",
+    "country": "US",
+    "formats": ["markdown"],
+    "wait_before_scraping": 0,
+    "remove_css_selectors": "default",
+}
+
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+print(json.dumps(response.json(), indent=4))
+```
+
+## 例のレスポンス
+
+成功したレスポンスは次のようになります：
+
+```json
+{
+    "id": "scrape_63x2e5sf5r",
+    "object": "scrape",
+    "created": 1740341743,
+    "metadata": {},
+    "retrieve_id": "63x2e5sf5r",
+    "url_to_scrape": "https://www.nea.com/team",
+    "result": {
+        "html_content": null,
+        "markdown_content": "NEA ….",
+        "text_content": null,
+        "json_content": null,
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_63x2e5sf5r.txt",
+        "json_hosted_url": null,
+        "text_hosted_url": null,
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+## 説明
+
+- `url_to_scrape`: コンテンツを抽出するウェブサイトのURLを指定します。
+- `formats`: 出力形式を定義します（この場合はテキスト）。
+- `Authorization`: リクエストを認証するためのAPIキーを含みます。
+- レスポンスはJSON形式でフォーマットされ、読みやすく出力されます。
+
+## 結論
+
+Olostepを使用すると、任意のウェブサイトから簡単にMarkdownコンテンツを抽出できます。これは、ウェブサイトからコンテンツを取得し、データ抽出や分析のためにLLMに供給したい場合に便利です。同じウェブサイトから繰り返しコンテンツを大規模に抽出したい場合（例：データの監視、価格の追跡など）、[カスタムパーサー](../../features/structured-content/parsers)を使用してJSON形式でコンテンツを取得することをお勧めします。

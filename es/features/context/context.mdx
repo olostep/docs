@@ -1,0 +1,58 @@
+---
+sidebarTitle: "Contexto"
+icon: "cookie"
+title: "Contexto"
+description: "Reutiliza cookies personalizadas, autenticación y datos en caché para automatizaciones de IA"
+---
+
+> **Nota:** Esta función está actualmente habilitada solo para usuarios seleccionados. Para solicitar acceso, por favor contáctanos en info@olostep.com.
+
+Con los contextos puedes pasar cookies personalizadas a la API. Esto te permite reutilizar cookies, autenticación y datos almacenados para potenciar las automatizaciones de IA.
+
+### Creando un Contexto
+
+Así es como puedes crear un contexto para pasar cookies personalizadas a la API:
+
+1. Instala el plugin del navegador Olostep desde aquí: [Olostep browser plugin](https://chromewebstore.google.com/detail/olostep/mjalbmdidmklbojfgakdpbifkgjjilkh)
+2. Visita el sitio web para el cual deseas guardar las cookies/autenticación
+3. Inicia sesión en el sitio web con las credenciales que deseas guardar
+4. Haz clic en el ícono del plugin de Olostep y selecciona "Enviar Contexto"
+5. Copia el context_id (que será algo como `ctx_yylqbfayto`) del plugin y úsalo en tus solicitudes a la API
+
+### Usando Contexto en las solicitudes a la API
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.feizy.com/account-dashboard",
+    "formats": ["html", "markdown"],
+    "remove_css_selectors": "none",
+    "country": "US",
+    "context": {
+        "id": "ctx_yylqbfayto"
+    }
+}
+
+headers = {
+    "Authorization": "Bearer <API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+# Analiza la respuesta JSON
+data = response.json()
+
+# Imprime el JSON con la indentación adecuada
+print(json.dumps(data, indent=4))
+```
+
+### Conclusión
+
+Esta función te permite reutilizar cookies, autenticación y datos almacenados para tus solicitudes a la API.
+
+Esta función está en Beta para empresas que desarrollan automatizaciones de IA. Para obtener acceso a esta función, contáctanos en `info@olostep.com`

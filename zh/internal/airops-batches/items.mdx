@@ -1,0 +1,165 @@
+---
+title: "获取批次项目"
+description: "检索所有项目及其提取的元数据"
+openapi: "GET /v1/batches-airops/{batch_id}/items"
+---
+
+## 概述
+
+返回批次中的所有项目及其提取的元数据。项目包括成功提取和任何阶段的失败。
+
+<Note>
+  只有当批次的 `status` 为 `"completed"` 时，此端点才会返回完整结果。如果批次仍在处理中，您将收到一个空的 `items` 数组和一条消息。
+</Note>
+
+## 响应结构
+
+<ResponseField name="batch_id" type="string">
+  批次标识符。
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  批次完成时的 ISO 8601 时间戳。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  批次状态：`"completed"` 或 `"in_progress"`。
+</ResponseField>
+
+<ResponseField name="counts" type="object">
+  汇总计数：
+  - `total` - 批次中的总项目数
+  - `succeeded` - 成功处理的项目数
+  - `failed` - 在任何阶段失败的项目数
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  包含所有项目及其结果的数组。
+</ResponseField>
+
+---
+
+## 项目模式
+
+### 成功项目
+
+完成的项目在根级别有提取的字段：
+
+```json
+{
+  "custom_id": "post-1",
+  "url": "https://example.com/blog/post-1",
+  "status": "completed",
+  "page_type": "informational_article",
+  "author": "John Doe",
+  "date_published": "2024-01-15",
+  "date_modified": null,
+  "brand_mentions": ["Acme Corp", "TechBrand"]
+}
+```
+
+| 字段 | 类型 | 描述 |
+|-------|------|-------------|
+| `custom_id` | string | 您在请求中的标识符 |
+| `url` | string | 抓取的 URL |
+| `status` | string | 成功项目的 `"completed"` |
+| `page_type` | string | 分类页面类型（参见 [概述](/internal/airops-batches/overview#page-types)） |
+| `author` | string \| null | 内容的作者 |
+| `date_published` | string \| null | 发布日期（如果可用则为 ISO 8601） |
+| `date_modified` | string \| null | 最后修改日期 |
+| `brand_mentions` | array | 页面上找到的输入列表中的品牌 |
+
+### 失败项目
+
+在任何阶段失败的项目具有错误结构：
+
+```json
+{
+  "custom_id": "post-failed",
+  "url": "https://example.com/broken-page",
+  "status": "failed",
+  "failed_stage": "scraping",
+  "error": {
+    "code": "SCRAPE_FAILED",
+    "message": "连接超时 30 秒"
+  }
+}
+```
+
+| 字段 | 类型 | 描述 |
+|-------|------|-------------|
+| `status` | string | 失败项目的 `"failed"` |
+| `failed_stage` | string | 发生失败的阶段：`scraping`、`analyzing` 或 `enriching` |
+| `error` | object | 包含 `code` 和 `message` 的错误详情 |
+
+---
+
+## 提取来源
+
+字段通过多种方法按优先级顺序提取：
+
+1. **Classifier** - URL 模式分析（即时）
+2. **Parser** - 结构化元数据提取
+3. **LLM** - AI 驱动的缺失字段提取
+
+---
+
+## 示例响应
+
+### 完成的批次
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "completed_at": "2024-01-15T12:30:00.000Z",
+  "status": "completed",
+  "counts": {
+    "total": 100,
+    "succeeded": 98,
+    "failed": 2
+  },
+  "items": [
+    {
+      "custom_id": "post-1",
+      "url": "https://example.com/blog/post-1",
+      "status": "completed",
+      "page_type": "informational_article",
+      "author": "John Doe",
+      "date_published": "2024-01-15",
+      "date_modified": null,
+      "brand_mentions": ["OpenAI", "Google"]
+    },
+    {
+      "custom_id": "post-2",
+      "url": "https://example.com/pricing",
+      "status": "completed",
+      "page_type": "pricing_page",
+      "author": null,
+      "date_published": null,
+      "date_modified": null,
+      "brand_mentions": []
+    },
+    {
+      "custom_id": "post-3",
+      "url": "https://example.com/broken",
+      "status": "failed",
+      "failed_stage": "scraping",
+      "error": {
+        "code": "SCRAPE_FAILED",
+        "message": "URL 抓取失败"
+      }
+    }
+  ]
+}
+```
+
+### 进行中的批次
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "status": "in_progress",
+  "items": [],
+  "message": "批次仍在处理中。项目将在状态为 \"completed\" 时可用。"
+}
+```

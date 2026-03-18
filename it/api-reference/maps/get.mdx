@@ -1,0 +1,52 @@
+---
+title: "Ottieni Mappa"
+openapi: "it/openapi/maps.json GET /v1/maps/{map_id}"
+---
+
+# Ottieni Mappa
+
+Questa API ti permette di recuperare i dettagli di una mappa specifica utilizzando il suo `map_id`.
+
+## Richiesta HTTP
+
+```http
+GET /v1/maps/{map_id}
+```
+
+## Parametri
+
+| Nome    | Tipo   | Descrizione                           |
+|---------|--------|---------------------------------------|
+| map_id  | string | L'identificatore univoco della mappa. |
+
+## Risposta
+
+Una risposta di successo restituirà i dettagli della mappa richiesta.
+
+### Esempio di risposta
+
+```json
+{
+  "id": "12345",
+  "name": "Mappa di esempio",
+  "description": "Questa è una mappa di esempio.",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Errori
+
+| Codice | Messaggio                | Descrizione                                |
+|--------|--------------------------|--------------------------------------------|
+| 404    | Mappa non trovata        | La mappa con l'ID specificato non esiste.  |
+| 401    | Non autorizzato          | Non hai i permessi per accedere a questa risorsa. |
+
+## Esempio di utilizzo
+
+Ecco un esempio di come puoi utilizzare questa API con `curl`:
+
+```bash
+curl -X GET "https://api.olostep.com/v1/maps/12345" -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Assicurati di sostituire `YOUR_ACCESS_TOKEN` con il tuo token di accesso effettivo.

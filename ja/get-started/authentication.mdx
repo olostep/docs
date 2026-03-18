@@ -1,0 +1,59 @@
+---
+title: "認証"
+icon: "key"
+---
+
+APIエンドポイントは、APIトークンを使用して認証する必要があります。
+
+## トークンを生成する
+
+トークンはOlostepダッシュボードから生成できます。アカウントを[こちら](https://www.olostep.com/auth/)で作成してください。
+
+## トークンを使用する
+
+すべてのHTTPコールに`Authorization`ヘッダーを追加することで認証できます。Authorizationヘッダーは次のようにフォーマットされます: `Authorization: Bearer <API-TOKEN>`（`<API-TOKEN>`をあなたのトークンに置き換えてください。トークンがない場合は、Olostepの[ダッシュボード](https://www.olostep.com/dashboard/)から無料で生成できます）。
+
+例:
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+
+endpoint = 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>'
+headers = {
+    'Authorization': 'Bearer <API-TOKEN>',
+    'Accept': 'application/json'
+}
+
+response = requests.get(endpoint, headers=headers)
+print(response.status_code)
+print(response.json())
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+const endpoint = 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>'
+const res = await fetch(endpoint, {
+  headers: {
+    'Authorization': 'Bearer <API-TOKEN>',
+    'Accept': 'application/json'
+  }
+})
+console.log(res.status)
+console.log(await res.json())
+```
+
+```bash cURL
+curl -L -X GET 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>' \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer <API-TOKEN>'
+```
+
+</CodeGroup>

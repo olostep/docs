@@ -1,0 +1,759 @@
+---
+title: "Ottimizzazione del Motore Generativo"
+icon: "bolt-lightning"
+---
+
+Olostep fornisce una soluzione pronta all'uso per le aziende che operano nel settore dell'Ottimizzazione del Motore Generativo (GEO).
+
+<img 
+  src="/images/geo/geo-preview.png" 
+  alt="Anteprima GEO"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+## Panoramica
+
+Le API di Olostep offrono capacità di web scraping, ricerca e crawling per alimentare la tua piattaforma GEO/SEO.
+
+Questo include tutto, dal [crawling](/features/crawls/crawls) su larga scala, alla [mappatura](/features/maps/maps) dei siti web (identificando tutti gli URL di un sito), al scraping e parsing dei dati (da fonti come Google AIOs, AI Mode, Perplexity, ChatGPT, Microsoft Copilot, G2, Reddit, siti web aziendali, ecc.) fino a eseguire questi compiti su un programma e altro ancora.
+
+L'API è utilizzata da diverse startup supportate da VC nel settore.
+
+## Perché usare Olostep per GEO?
+
+- **Scalabilità:** Elabora milioni di URL eseguendo batch di 100k URL in parallelo.
+- **Convenienza economica:** È l'API più conveniente sul mercato. È anche il 40% più economica delle soluzioni interne (senza nemmeno considerare le risorse ingegneristiche dedicate).
+- **Affidabilità/Tasso di attivazione:** Gli endpoint sono progettati per essere affidabili e offrire la migliore qualità dei dati della categoria.
+- **Formati multipli:** Recupera i dati analizzati direttamente in formato JSON, html o markdown.
+- **Parser personalizzati:** Estrai solo le informazioni JSON rilevanti con i nostri parser o crea e passa i tuoi all'API.
+- **Automazione:** Imposta attività programmate che si eseguono a tempi predefiniti/intervalli regolari.
+- **Buona DX:** Offriamo SDK per Python e NodeJS, un'API orientata agli oggetti, supporto Webhook e altro ancora.
+- **Supporto dedicato:** Offriamo supporto dedicato tramite Slack per aiutarti a ottenere il massimo dalla nostra API.
+- **Know How:** Olostep alimenta una parte significativa delle aziende SEO & GEO supportate da VC.
+
+## Fonti del motore di ricerca LLM
+
+Ecco un elenco più completo delle fonti supportate, dei loro formati di dati e della disponibilità geografica. Nota, se hai bisogno di una fonte o di un paese non elencato qui, contattaci a [info@olostep.com](mailto:info@olostep.com) o su [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email) e lo aggiungeremo alla lista.
+
+Se desideri un parsing dei dati diverso, ciascuno di questi Parser può essere distribuito sulla tua dashboard personale e puoi ulteriormente personalizzare il parsing secondo le tue esigenze o chiedere al nostro team di farlo per te. Per la maggior parte dei Parser, incluso ChatGPT, permettiamo anche di analizzare direttamente la risposta di rete per identificare dettagli interni come `search_groups`.
+
+### Panoramica Google AI
+
+<img 
+  src="/images/geo/ai-overview.png" 
+  alt="Anteprima Panoramica AI"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 480, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+#### Esempio di risposta
+
+Ecco un esempio dei dati che puoi estrarre dalla Panoramica Google AI:
+```json
+{
+  "prompt": "cosa sono i mitocondri",
+  "answer_markdown": "I mitocondri sono organelli vitali nelle cellule eucariotiche, spesso chiamati \"centrali elettriche\", che convertono cibo e ossigeno in energia utilizzabile (ATP) attraverso la respirazione cellulare, alimentando la maggior parte delle attività cellulari come crescita e movimento. Queste strutture a doppia membrana hanno il proprio DNA e svolgono ruoli nella segnalazione cellulare, nel metabolismo e persino nella morte cellulare programmata, rendendoli cruciali per la vita, con alcune cellule che ne hanno centinaia o migliaia.\n\nFunzioni chiave:\nProduzione di energia: Generano oltre il 90% dell'energia (ATP) di una cellula.\nRespirazione cellulare: Eseguono la respirazione aerobica, utilizzando ossigeno e nutrienti.\nSegnalazione cellulare: Producono molecole di segnalazione che influenzano altre cellule.\nMetabolismo: Coinvolti nella scomposizione di grassi e carboidrati.\nApoptosi: Iniziano il processo di rimozione delle cellule danneggiate.\n\nStruttura:\nDoppia membrana: Una membrana esterna e una membrana interna piegata (cristae) che aumenta la superficie per le reazioni.\nMatrice: Il compartimento interno dove avviene il ciclo di Krebs e si trova il DNA mitocondriale (mtDNA).\nDNA mitocondriale (mtDNA): DNA unico ereditato dalla madre, separato dal DNA nucleare.\n\nImportanza:\nEssenziale per la sopravvivenza, con alcune cellule (come le cellule muscolari) che ne hanno molte, mentre alcune cellule (come i globuli rossi maturi) ne sono prive.\nLe disfunzioni sono legate a numerose malattie, rendendoli un obiettivo per nuovi trattamenti.",
+  "sources": [
+    {
+      "title": "Mitocondri e salute | National Institutes of Health (NIH)",
+      "url": "https://www.nih.gov/news-events/nih-research-matters/mitochondria-health",
+      "snippet": null,
+      "source": "National Institutes of Health (.gov)",
+      "index": 1
+    },
+    {
+      "title": "Cosa sono i mitocondri e perché sono importanti - MitoCanada",
+      "url": "https://mitocanada.org/what-are-mitochondria/",
+      "snippet": null,
+      "source": "MitoCanada",
+      "index": 2
+    },
+    {
+      "title": "Definizione di mitocondri - NCI Dictionary of Cancer Terms",
+      "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/mitochondria",
+      "snippet": null,
+      "source": "National Cancer Institute (.gov)",
+      "index": 3
+    },
+    {
+      "title": "Tutto sui mitocondri: Definizione e malattia",
+      "url": "https://www.genomicseducation.hee.nhs.uk/blog/all-about-mitochondria-definition-and-disease/",
+      "snippet": null,
+      "source": "Genomics Education Programme",
+      "index": 4
+    },
+    {
+      "title": "Mitocondrio - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "snippet": null,
+      "source": "Wikipedia",
+      "index": 5
+    },
+    {
+      "title": "Mitocondri - La Cellula - NCBI Bookshelf",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK9896/",
+      "snippet": null,
+      "source": "National Institutes of Health (.gov)",
+      "index": 6
+    },
+    {
+      "title": "Struttura e Funzione dei Mitocondri",
+      "url": "https://www.youtube.com/watch?v=4F9dDAD3_ZI&t=522",
+      "snippet": null,
+      "source": "YouTube",
+      "index": 7
+    },
+    {
+      "title": "cosa sono, cosa fanno e come mantenerli sani",
+      "url": "https://corconinternational.com/mitochondria-what-they-are-what-they-do-and-how-to-keep-them-healthy/",
+      "snippet": null,
+      "source": "Cor.Con. International",
+      "index": 8
+    },
+    {
+      "title": "Cosa sono i mitocondri e perché sono chiamati la centrale elettrica di una ...",
+      "url": "https://www.quora.com/What-is-mitochondria-and-why-is-it-called-the-powerhouse-of-a-cell",
+      "snippet": null,
+      "source": "Quora",
+      "index": 9
+    },
+    {
+      "title": "Mitocondri - Physiopedia",
+      "url": "https://www.physio-pedia.com/Mitochondria",
+      "snippet": null,
+      "source": "Physiopedia",
+      "index": 10
+    }
+  ],
+  "text_blocks": [
+    {
+      "snippet": "I mitocondri sono organelli vitali nelle cellule eucariotiche, spesso chiamati \"centrali elettriche\", che convertono cibo e ossigeno in energia utilizzabile (ATP) attraverso la respirazione cellulare, alimentando la maggior parte delle attività cellulari come crescita e movimento. Queste strutture a doppia membrana hanno il proprio DNA e svolgono ruoli nella segnalazione cellulare, nel metabolismo e persino nella morte cellulare programmata, rendendoli cruciali per la vita, con alcune cellule che ne hanno centinaia o migliaia.\n\nFunzioni chiave:\nProduzione di energia: Generano oltre il 90% dell'energia (ATP) di una cellula.\nRespirazione cellulare: Eseguono la respirazione aerobica, utilizzando ossigeno e nutrienti.\nSegnalazione cellulare: Producono molecole di segnalazione che influenzano altre cellule.\nMetabolismo: Coinvolti nella scomposizione di grassi e carboidrati.\nApoptosi: Iniziano il processo di rimozione delle cellule danneggiate.\n\nStruttura:\nDoppia membrana: Una membrana esterna e una membrana interna piegata (cristae) che aumenta la superficie per le reazioni.\nMatrice: Il compartimento interno dove avviene il ciclo di Krebs e si trova il DNA mitocondriale (mtDNA).\nDNA mitocondriale (mtDNA): DNA unico ereditato dalla madre, separato dal DNA nucleare.\n\nImportanza:\nEssenziale per la sopravvivenza, con alcune cellule (come le cellule muscolari) che ne hanno molte, mentre alcune cellule (come i globuli rossi maturi) ne sono prive.\nLe disfunzioni sono legate a numerose malattie, rendendoli un obiettivo per nuovi trattamenti."
+    }
+  ],
+  "organic_results": [
+    {
+      "position": 1,
+      "title": "Mitocondri",
+      "link": "https://www.genome.gov/genetics-glossary/Mitochondria",
+      "snippet": "I mitocondri sono organelli cellulari legati alla membrana (mitocondrio, singolare) che generano la maggior parte dell'energia chimica necessaria per alimentare le reazioni biochimiche della cellula ..."
+    },
+    {
+      "position": 2,
+      "title": "Mitocondrio",
+      "link": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "snippet": "Un mitocondrio (pl. mitocondri) è un organello presente nelle cellule della maggior parte degli eucarioti, come animali, piante e funghi. I mitocondri hanno una doppia ..."
+    },
+    {
+      "position": 3,
+      "title": "Mitocondrio | Definizione, Funzione, Struttura e Fatti",
+      "link": "https://www.britannica.com/science/mitochondrion",
+      "snippet": "19 Nov 2025 — Conosciuti come le “centrali elettriche della cellula”, i mitocondri producono l'energia necessaria per la sopravvivenza e il funzionamento della cellula. Attraverso una serie di ..."
+    },
+    {
+      "position": 4,
+      "title": "Mitocondri: cosa sono e perché li abbiamo?",
+      "link": "https://qbi.uq.edu.au/brain/brain-anatomy/mitochondria-what-are-they-and-why-do-we-have-them",
+      "snippet": "Il genoma mitocondriale è vitale per il ruolo principale dei mitocondri: bruciare le calorie che mangiamo con l'ossigeno che respiriamo per generare l'energia necessaria per alimentare tutte ..."
+    },
+    {
+      "position": 5,
+      "title": "cosa sono, cosa fanno e come mantenerli sani",
+      "link": "https://corconinternational.com/mitochondria-what-they-are-what-they-do-and-how-to-keep-them-healthy/",
+      "snippet": "I mitocondri sono organelli trovati all'interno delle cellule eucariotiche. La loro struttura, caratterizzata da una doppia membrana, è progettata per svolgere una delle più essenziali ..."
+    },
+    {
+      "position": 6,
+      "title": "Cosa sono i Mitocondri | MRC Mitochondrial Biology Unit",
+      "link": "https://www.mrc-mbu.cam.ac.uk/what-are-mitochondria",
+      "snippet": "I mitocondri sono compartimenti speciali (organelli) nelle nostre cellule che sono meglio conosciuti per il loro ruolo come centrali elettriche, poiché scompongono le molecole alimentari e le trasformano ..."
+    },
+    {
+      "position": 7,
+      "title": "Mitocondri e salute",
+      "link": "https://www.nih.gov/news-events/nih-research-matters/mitochondria-health",
+      "snippet": "22 Lug 2025 — I mitocondri delle tue cellule producono quasi tutta l'energia di cui il tuo corpo ha bisogno per sopravvivere. Svolgono anche un ruolo in molte altre funzioni cellulari vitali."
+    },
+    {
+      "position": 8,
+      "title": "Cosa sono i mitocondri e perché sono chiamati la centrale elettrica ...",
+      "link": "https://www.quora.com/What-is-mitochondria-and-why-is-it-called-the-powerhouse-of-a-cell",
+      "snippet": "I mitocondri sono organelli legati alla membrana presenti nel citoplasma di tutte le cellule eucariotiche, che producono adenosina trifosfato (ATP), ..."
+    }
+  ],
+  "url": "https://www.google.com/search?q=what%20is%20mitochondria"
+}
+```
+
+#### Paesi supportati
+
+- Stati Uniti
+- Regno Unito
+- Canada
+- Australia
+- Nuova Zelanda
+- Irlanda
+- India
+- Italia
+- Francia
+- Germania
+- Spagna
+- Paesi Bassi
+- Belgio
+- Svizzera
+- Austria
+- Svezia
+- Norvegia
+- Danimarca
+
+### Modalità Google AI
+
+<img 
+  src="/images/geo/ai-mode.png" 
+  alt="Anteprima Panoramica AI"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 480, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+#### Esempio di risposta
+
+```json
+{
+  "url": "https://www.google.com//search?q=what+is+mitochondria&hl=en&udm=50&aep=11&newwindow=1&sei=hzA8acTQB5v6kPIPq9S3-Ac&mstk=AUtExfCLP2fvgaMf1soQAnxZquvJa4U4ZeY2UOzcjdV8a1DHUR1sTlm5jnoP_7c_xODSuiok8ipNW5OqJed6mnSgcszpiNCnQ9BBYzxXSF83FoBZep8Ytk1JkOU2QbC7vTfZ6-TR7ZCgXMtO8B-pggVV9_98cl-LC5ZMizo&csuir=1",
+  "prompt": "cosa sono i mitocondri",
+  "answer_markdown": "I mitocondri (singolare: mitocondrio) sono \n\n**organelli legati alla membrana trovati in quasi tutte le cellule eucariotiche**. Sono comunemente noti come le **\"centrali elettriche della cellula\"** perché generano la maggior parte dell'energia chimica necessaria per alimentare le reazioni biochimiche della cellula.  \n\nFunzione principale: Produzione di energia  \n\nLa funzione principale dei mitocondri è produrre la molecola principale di trasporto dell'energia della cellula, l'adenosina trifosfato (ATP). Questo processo è chiamato respirazione cellulare o fosforilazione ossidativa, che comporta la scomposizione dei nutrienti (come glucosio e acidi grassi) utilizzando l'ossigeno per rilasciare una grande quantità di energia.  \n\nLe cellule che richiedono una grande quantità di energia, come le cellule muscolari, epatiche, cerebrali e renali, contengono centinaia o addirittura migliaia di mitocondri per soddisfare le loro esigenze metaboliche.  \n\nAltre Funzioni Chiave  \n\nOltre alla produzione di energia, i mitocondri sono coinvolti in diversi altri processi cellulari critici:  \n\n* **Segnalazione Cellulare**  Partecipano a vari percorsi di segnalazione, comunicando con altri organelli per regolare le attività cellulari.\n* **Morte Cellulare Programmata (Apoptosi)**  I mitocondri svolgono un ruolo centrale nell'iniziare l'apoptosi, un processo necessario per rimuovere le cellule danneggiate o infette dal corpo.\n* **Conservazione e Regolazione del Calcio**  Agiscono come siti di conservazione e tamponi per gli ioni di calcio, che sono vitali per processi come la contrazione muscolare e il rilascio di neurotrasmettitori.\n* **Sintesi di Molecole Importanti**  Contribuiscono alla sintesi di ormoni steroidei, alcune parti del sangue (come l'eme) e alcuni neurotrasmettitori.\n\nCaratteristiche Uniche  \n\nI mitocondri hanno diverse caratteristiche uniche che li distinguono da altri organelli:  \n\n* **Doppia Membrana**  Sono racchiusi da due membrane—una membrana esterna e una membrana interna altamente piegata (chiamata cristae). Le pieghe nella membrana interna aumentano la superficie disponibile per le reazioni chimiche di produzione di energia.\n* **Il loro DNA**  I mitocondri contengono il proprio piccolo genoma di DNA circolare (mtDNA), che è separato dal DNA nucleare della cellula. Questo mtDNA è quasi esclusivamente ereditato dalla madre.\n* **Origine Batterica**  La presenza del proprio DNA e altre somiglianze strutturali supportano fortemente la teoria endosimbiotica, che suggerisce che i mitocondri fossero una volta batteri liberi che furono inglobati da una cellula ospite più grande oltre un miliardo di anni fa, formando una relazione reciprocamente vantaggiosa.\n\nI mitocondri disfunzionali possono portare a vari problemi di salute, incluse condizioni ereditarie rare e malattie più comuni come il Parkinson, malattie cardiache, diabete e cancro.  \n\nL'IA può commettere errori, quindi controlla le risposte \n\nCreazione di un link pubblico... \n\nPuoi ora condividere questo thread con altri.\n\nGrazie\n\nIl tuo feedback aiuta Google a migliorare. Vedi la nostra [Informativa sulla Privacy](https://policies.google.com/privacy?hl=en).\n\nCondividi più feedback Segnala un problema Chiudi \n\nCosa collega la disfunzione mitocondriale a malattie specifiche?\n\nQuali reazioni avvengono nella matrice mitocondriale?\n\nSpiega di più sulla teoria endosimbiotica dei mitocondri",
+  "sources": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "title": "Wikipedia",
+      "description": "Mitocondrio - Wikipedia",
+      "icon": null,
+      "domain": "https://en.wikipedia.org",
+      "cited": true
+    },
+    {
+      "url": "https://byjus.com/biology/mitochondria/",
+      "title": "BYJU'S",
+      "description": "Definizione di Mitocondri - BYJU'S",
+      "icon": null,
+      "domain": "https://byjus.com",
+      "cited": true
+    },
+    {
+      "url": "https://medschool.ucla.edu/research/themed-areas/metabolism-research/mitochondria",
+      "title": "UCLA Medical School",
+      "description": "Cosa fanno i mitocondri? - UCLA Medical School",
+      "icon": null,
+      "domain": "https://medschool.ucla.edu",
+      "cited": true
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Mitochondrion",
+      "title": "Wikipedia",
+      "description": "Mitocondrio - Wikipedia",
+      "icon": null,
+      "domain": "https://en.wikipedia.org",
+      "cited": true
+    },
+    {
+      "url": "https://byjus.com/biology/mitochondria/",
+      "title": "BYJU'S",
+      "description": "Definizione di Mitocondri - BYJU'S",
+      "icon": null,
+      "domain": "https://byjus.com",
+      "cited": true
+    },
+    {
+      "url": "https://my.clevelandclinic.org/health/diseases/15612-mitochondrial-diseases",
+      "title": "Cleveland Clinic",
+      "description": "Malattie Mitocondriali: Cause, Sintomi & Trattamento",
+      "icon": null,
+      "domain": "https://my.clevelandclinic.org",
+      "cited": true
+    },
+    {
+      "url": "https://bio.libretexts.org/Bookshelves/Introductory_and_General_Biology/General_Biology_(Boundless)/04%3A_Cell_Structure/4.09%3A_Eukaryotic_Cells_-_Mitochondria",
+      "title": "Biology LibreTexts",
+      "description": "4.9: Cellule Eucariotiche - Mitocondri - Biology LibreTexts",
+      "icon": null,
+      "domain": "https://bio.libretexts.org",
+      "cited": true
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3513836/",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Meccanismi cellulari e molecolari della funzione mitocondriale - PMC",
+      "icon": null,
+      "domain": "https://pmc.ncbi.nlm.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.medicalnewstoday.com/articles/320875",
+      "title": "Medical News Today",
+      "description": "Mitocondri: Forma, funzione e malattia - Medical News Today",
+      "icon": null,
+      "domain": "https://www.medicalnewstoday.com",
+      "cited": true
+    },
+    {
+      "url": "https://www.nature.com/scitable/topicpage/mitochondria-14053590/",
+      "title": "Nature",
+      "description": "Mitocondri, Energia Cellulare, ATP Sintasi | Impara la Scienza su Scitable",
+      "icon": null,
+      "domain": "https://www.nature.com",
+      "cited": true
+    },
+    {
+      "url": "https://www.britannica.com/science/mitochondrion",
+      "title": "Britannica",
+      "description": "Mitocondrio | Definizione, Funzione, Struttura e Fatti - Britannica",
+      "icon": null,
+      "domain": "https://www.britannica.com",
+      "cited": true
+    },
+    {
+      "url": "https://medschool.ucla.edu/research/themed-areas/metabolism-research/mitochondria",
+      "title": "UCLA Medical School",
+      "description": "Cosa fanno i mitocondri? - UCLA Medical School",
+      "icon": null,
+      "domain": "https://medschool.ucla.edu",
+      "cited": true
+    },
+    {
+      "url": "https://www.genome.gov/genetics-glossary/Mitochondria",
+      "title": "National Human Genome Research Institute (NHGRI) (.gov)",
+      "description": "Mitocondri - National Human Genome Research Institute",
+      "icon": null,
+      "domain": "https://www.genome.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.khanacademy.org/science/ap-biology/cell-structure-and-function/cell-compartmentalization-and-its-origins/a/chloroplasts-and-mitochondria",
+      "title": "Khan Academy",
+      "description": "Mitocondri e cloroplasti (articolo) - Khan Academy",
+      "icon": null,
+      "domain": "https://www.khanacademy.org",
+      "cited": true
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK9896/",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Mitocondri - La Cellula - NCBI Bookshelf - NIH",
+      "icon": null,
+      "domain": "https://www.ncbi.nlm.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.chop.edu/mitochondria-facts",
+      "title": "Children's Hospital of Philadelphia",
+      "description": "Fatti sui Mitocondri - Children's Hospital of Philadelphia",
+      "icon": null,
+      "domain": "https://www.chop.edu",
+      "cited": true
+    },
+    {
+      "url": "https://www.nih.gov/news-events/nih-research-matters/mitochondria-health",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Mitocondri e salute | National Institutes of Health (NIH)",
+      "icon": null,
+      "domain": "https://www.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.news-medical.net/life-sciences/What-are-Mitochondria.aspx",
+      "title": "News-Medical",
+      "description": "Cosa sono i Mitocondri? - News-Medical.Net",
+      "icon": null,
+      "domain": "https://www.news-medical.net",
+      "cited": true
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10167337/",
+      "title": "National Institutes of Health (.gov)",
+      "description": "Mitocondri: È tutta una questione di energia - PMC - PubMed Central",
+      "icon": null,
+      "domain": "https://pmc.ncbi.nlm.nih.gov",
+      "cited": true
+    },
+    {
+      "url": "https://www.vedantu.com/question-answer/are-mitochondria-called-the-powerhouse-of-the-class-11-biology-cbse-608a2e28d658fd6b4d2593cf",
+      "title": "Vedantu",
+      "description": "Perché i mitocondri sono chiamati la centrale elettrica della cellula? - Vedantu",
+      "icon": null,
+      "domain": "https://www.vedantu.com",
+      "cited": true
+    },
+    {
+      "url": "https://qbi.uq.edu.au/brain/brain-anatomy/mitochondria-what-are-they-and-why-do-we-have-them",
+      "title": "Queensland Brain Institute",
+      "description": "Mitocondri: cosa sono e perché li abbiamo?",
+      "icon": null,
+      "domain": "https://qbi.uq.edu.au",
+      "cited": true
+    },
+    {
+      "url": "https://www.pfizer.com/news/articles/why_mitochondria_is_the_organelle_of_the_moment",
+      "title": "Pfizer",
+      "description": "Perché i Mitocondri Sono l'Organello del Momento - Pfizer",
+      "icon": null,
+      "domain": "https://www.pfizer.com",
+      "cited": true
+    }
+  ]
+}
+```
+#### Paesi supportati
+
+- Stati Uniti
+- Regno Unito
+- Canada
+- Australia
+- Nuova Zelanda
+- Irlanda
+- India
+- Italia
+- Francia
+- Germania
+- Spagna
+- Paesi Bassi
+- Belgio
+- Svizzera
+- Austria
+- Svezia
+- Norvegia
+- Danimarca
+
+
+### ChatGPT
+
+<img 
+  src="/images/geo/chatgpt.png" 
+  alt="Anteprima ChatGPT"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 500, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+#### Esempio di risposta
+
+```json
+{
+  "url": "https://chatgpt.com/?q=best%20leather%20shoes%20for%20men",
+  "prompt": "migliori scarpe in pelle per uomini",
+  "answer_markdown": "Ecco alcune delle **migliori scarpe in pelle per uomini** in una gamma di stili — dalle scarpe eleganti e classiche casual ai versatili sneakers. Le ho raggruppate per categoria così puoi facilmente trovare il paio perfetto per le tue esigenze 👇\n\n![Allen Edmonds Park Avenue Cap Toe Oxford](https://images.openai.com/static-rsc-1/14XMTUPwjjZJjmC68MzLfCcHqGs_7bwkONzBhcG4MmKOK5Ti2jC-cRJrcE0yJyRS5jBBt8hm3dy_Zd7oHXmVDUxs92KclzIuhBcB8U9_cOc8OBsTQ0_E-G-CV_uuvSF1S9LqhiCxU7zm33RuQ60cU25ukgPrBwKgM7d1UDFdDM41O8n4d49Yklah25o9_SXCCH3JGlrQsw2ilkvBm2LWQ89L6fDqzGDNbscjCd-lEmP8XaLBXy7VMRb3A0wzbP7a) \n\nAllen Edmonds Park Avenue Cap Toe Oxford\n\n$379.98\n\n•\n\nAllen Edmonds\n\n![Amberjack Men's The Original](https://images.openai.com/static-rsc-1/0KrE1f1Gu9PLxbbjk4RZFcs9aAKqLZVhgPM70_uWHz1P2NleprLpSyoW4Ew0odsIu6yvbAUQZTh_FgMFLJyQ3vAgb-8aF8gr_N4eEP8FatrOTA90otAP-JxDIQxLd2rVYrkyNe_YLKvwoZAjFbrZ6goV2986izKJOEoTcVvqvlX7JmhRF3uHzRw2J7OtdlhZmCD2wp_BiiBFK6yhrlHdj0ArBT18hfa442ZoEPr3H2G6aWgudJqZDO0ghYQZh1dtEyYlbu4Hc_c0jqk8Am_IEA) \n\nAmberjack Men's The Original\n\n$156.00\n\n•\n\nAmberjack + altri\n\n![Florsheim Men's Leather Cap Toe Oxford](https://images.openai.com/static-rsc-1/Y26RpwbB4MRr5wcvVgvRju6w5i8N9VPjRVCGuUUpyojoXwQA6MG9S7jXcFAVQ2atGeand34_v2b7woseK046PRVl9D7qptsBj4t16Q4goaTNlQ0JBfAHb7rSnwI6mVZuv2RLfhPI2l8xo8jIbzfIyA70AqcHwNwnRlifGdcpUItF8rKywlZY7MNWMOOvEw-l-vyh5UQc34dwHux09eyWJA) \n\nFlorsheim Men's Leather Cap Toe Oxford\n\n$134.99\n\n•\n\nMen's Wearhouse\n\n![Cole Haan Original Grand 2.0](https://images.openai.com/static-rsc-1/ugTwpcIGevr0OKoKxcmFcAJIFmpaQx18FfKUS8CK6HFiCuOVaGfltQEuYQZkyM9tIJai9H7VjVPvWkiK-ZziZy6ZbW7Dmi7QpRmR3l1Q5GzPsUPmkwuD1UlVmJEvB-1gbppHsW132JqSQpe1-LnjNCQgY8pHW9gpsDBqlkEuha53UqxzonI5GlU3fmdAomM2FDmBCCZzLsvwmq7du69OH-eoHkFvxm4uMcIhUEhzuidEdiPCM7QKhAN7dQ08iLQ5) \n\nCole Haan Original Grand 2.0\n\n$229.99\n\n•\n\nMen's Wearhouse + altri\n\n![Nike Killshot 2 Leather](https://images.openai.com/static-rsc-1/f5idIh1FPUyES4ADdwPC7zDjrbGTcErq4gqZ9tLjrpdMiuhJqGzv8MfeBiq14QcAhT5Bct_195df1kZ9QHdknrGsCVMp6RDsizoxdx2xZfas1nh-Nwbj_BXUUExsxLI1-chrIMo7WA-o1ieOltij6eSi5U2kmOZCwle0rxjp9-dUVqTaLuw4GijrKP0vXXnavBC5tbY3MV2vC9h5ahataA) \n\nNike Killshot 2 Leather\n\n$100.00\n\n•\n\nNike + altri\n\n![Reebok Classic Leather](https://images.openai.com/static-rsc-1/ttBGBcmS9RfUetDiscFxQ60VaZJSNPQKgcVEvPlYhMRK-YKy1UAjLKqj6R_R40mnbMD-MHgNNloq4jT6ajMkTX-KeGtEXZvUInf2Co9U42q1YJl_SzxmNDWjWRih1BmA79sdCvaLIJe1J8G0gRV3Uh4GFl8whWuWyN6IP4MNlyuMggs218MiXdRfRu6Mv0fc2Z7UzKJhAxoXRC2ALS5qWkr5XJAj2iJMD1IpFIilyOI) \n\nReebok Classic Leather\n\n$45.00\n\n•\n\nJD Sports + altri\n\n![Clarks Un Briley Step](https://images.openai.com/static-rsc-1/vMgGbUlVej0Lpo05qmFzfP-bUFUV5ROywy86CaQdz_TbxLcNdlaRh0pi69f3sW9DToxYP-Yj0fYbF4n-aEOIz_FbcJK722hTZ-diKH9OJABsh-6UJ14KxJFkHvjxXK_Du1dLi-OOYCYj6svKYwcwySZ1mIUy7BC-71nxwlXOBShlYTKl1o9eHMtYIUFqXrXhvqrhG4ahjpXkydvbJ7v6Di5-Bz8kBZcpUXHs3eCcOcUc02wMslWhLf3jBw-IbCJxGsqgAb6AGY2iRM1zgfNggQ) \n\nClarks Un Briley Step\n\n$170.00\n\n•\n\nClarks Shoes + altri\n\n![Thursday Boot Company Classic Cap Toe](https://images.openai.com/static-rsc-1/HMxvWc6R4ddGT9B4lwaS-_iqGaMcGZfCfqvz7jjpEsgPjhmOOd2cOSl1jOKegwTZ3-RQIzyZcY_ZMIO1AvqidOHYWfJYPfNBnaqamlIvNb6b5nMCepsFdQHb_oiC8rSBCeCp8pcyKroxTahKpTZRN8gz9SB-CQP944UJ4QfU_F_tK3XzkzRfm_avJCR-N3dmjr8flkEo3ueBQm2nTALPioUrJXHssC21MzONp57dOlf4dGBJMQ-xzp87VONWP94f) \n\nThursday Boot Company Classic Cap Toe\n\n$168.00\n\n•\n\nThursday Boot Company + altri\n\n### 👔 Scarpe Classiche & Formali in Pelle\n\n_Perfette per ufficio, matrimoni e occasioni formali._ \n\n* **Allen Edmonds Park Avenue Cap Toe Oxford**  – Oxford americano di alta qualità con stile senza tempo e artigianato di qualità, ideale se vuoi un paio di investimento duraturo.\n* **Amberjack Men's The Original**  – Eccellente miscela di comfort e look da scarpa elegante; ampiamente amata per l'uso quotidiano.\n* **Florsheim Men's Leather Cap Toe Oxford**  – Opzione formale classica a un ottimo valore con una silhouette elegante.\n* **Cole Haan Original Grand 2.0**  – La scarpa elegante incontra la tecnologia del comfort — dettagli brogue eleganti con costruzione flessibile e ammortizzata.\n\n### 👞 Scarpe in Pelle Casual & Quotidiane\n\n_Ideali per outfit smart-casual e uso quotidiano._ \n\n* **Nike Killshot 2 Leather**  – Una sneaker in pelle che si abbina bene con jeans o chinos — stile retrò senza tempo.\n* **Reebok Classic Leather**  – Sneaker in pelle iconica e confortevole che funziona con outfit casual.\n* **Clarks Un Briley Step**  – Una scarpa casual in pelle comoda, ideale per camminare e uso quotidiano.\n\n### 🥾 Versatile & Smart Casual\n\n_Transizioni facilmente dall'ufficio al weekend._ \n\n* **Thursday Boot Company Classic Cap Toe**  – Un robusto lace-up in pelle che è elegante ma pratico — ottimo per look business casual.\n\n---\n\n## 👞 Consigli Rapidi per Scegliere Scarpe in Pelle\n\n**1\\. Conosci lo stile di cui hai bisogno** \n\n* **Scarpe Oxford & Derby** \\= più formali ed eleganti. [FashionBeans](https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com)\n* **Sneakers in pelle** \\= casual e versatili. [FashionBeans](https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com)\n* **Stivali & lace-up** \\= mix di eleganza e robustezza a seconda del design. [Men's](https://www.mensjournal.com/style/essential-mens-shoes?utm_source=chatgpt.com)\n\n**2\\. La qualità della pelle conta**   \nLe pelli a pieno fiore e di vitello sono generalmente più durevoli e invecchiano magnificamente con l'uso. [FashionBeans](https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com) \n\n**3\\. La tecnologia del comfort è un bonus**   \nAlcune scarpe eleganti moderne ora includono ammortizzazione e suole flessibili — ideali se sei spesso in piedi. [Yahoo](https://www.yahoo.com/lifestyle/best-mens-dress-shoes-203007687.html?utm_source=chatgpt.com) \n\n---\n\nSe mi dici il tuo **budget e lo stile che stai cercando** (ad es., ufficio formale, weekend casual, robusto/outdoor), posso personalizzare ulteriormente le raccomandazioni!",
+  "inline_references": [
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "text": "FashionBeans",
+      "position": 1
+    },
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "text": "FashionBeans",
+      "position": 2
+    },
+    {
+      "url": "https://www.mensjournal.com/style/essential-mens-shoes?utm_source=chatgpt.com",
+      "text": "Men's Journal",
+      "position": 3
+    },
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "text": "FashionBeans",
+      "position": 4
+    },
+    {
+      "url": "https://www.yahoo.com/lifestyle/best-mens-dress-shoes-203007687.html?utm_source=chatgpt.com",
+      "text": "Yahoo",
+      "position": 5
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.fashionbeans.com/article/best-leather-shoes-for-men/?utm_source=chatgpt.com",
+      "title": "7 Best Leather Shoes for Men: Effortless Style Anywhere 2025 | FashionBeans",
+      "snippet": "October 2, 2024",
+      "cited": true
+    },
+    {
+      "url": "https://www.mensjournal.com/style/essential-mens-shoes?utm_source=chatgpt.com",
+      "title": "Essential Men's Shoes That Every Guy Should Own | Men's Journal - Men's Journal",
+      "snippet": "January 12, 2022",
+      "cited": true
+    },
+    {
+      "url": "https://www.yahoo.com/lifestyle/best-mens-dress-shoes-203007687.html?utm_source=chatgpt.com",
+      "title": "The 13 best men's dress shoes to buy — Cole Haan, Rothy's and more",
+      "snippet": null,
+      "cited": true
+    },
+    {
+      "url": "https://legendsonlyleague.com/best-leather-sneakers-for-men/?utm_source=chatgpt.com",
+      "title": "Best Leather Sneakers for Men - 2025 Reviews - Legends Only League",
+      "snippet": "— Let’s be real—finding the perfect pair of leather sneakers is like hunting for that one comfortable chair you never want to get up from. You want something that looks sharp enough for a casual Friday...December 5, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://footwind.net/best-mens-leather-dress-shoes/?utm_source=chatgpt.com",
+      "title": "7 Best Men's Leather Dress Shoes of 2026",
+      "snippet": "— This post contains affiliate links. As an Amazon Associate, we earn from qualifying purchases.  Finding the right men’s leather dress shoes can be a challenge, especially when balancing style, comfort...December 3, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://rustictools.com/best-leather-dress-shoes/?utm_source=chatgpt.com",
+      "title": "Best Leather Dress Shoes For Every Occasion",
+      "snippet": "— The Allen Edmonds Park Avenue is a timeless classic for a reason. Its sleek, cap-toe design is impeccably executed, exuding sophistication and elegance that complements any formal or business attire....October 7, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://www.alldressy.com/best-mens-dress-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Dress Shoes - All Dress",
+      "snippet": "— 4. SKECHERS MORENO EDERSON OXFORD WITH MEMORY FOAM  Check price on Amazon  Description: A casual dress-style Oxford with Skechers comfort tech: memory foam insole, relaxed fit, and simple lace-up styl...August 2, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://toptenreviewed.com/best-mens-leather-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Leather Shoes to Elevate Your Style Game - TopTenReviewed",
+      "snippet": "— BEST MENS LEATHER SHOES – REVIEWS  1. ALLEN EDMONDS PARK AVENUE CAP-TOE OXFORD  The Allen Edmonds Park Avenue Cap-Toe Oxford is a quintessential choice for men seeking an elegant footwear option for f...May 29, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://thesmalltools.com/best-mens-leather-shoes/?utm_source=chatgpt.com",
+      "title": "Best Mens Leather Shoes: A Guide To Timeless Style - TheSmallTools",
+      "snippet": "— Looking ahead, the men’s leather shoe market is poised for continued innovation and adaptation. Advancements in 3D printing, personalized fitting technologies, and smart shoe features are likely to s...May 29, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://comparisonlive.com/mens-leather-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Leather Shoes to Elevate Your Style Game - Comparison Live",
+      "snippet": "— 1. ALLEN EDMONDS PARK AVENUE CAP-TOE OXFORD  The Allen Edmonds Park Avenue Cap-Toe Oxford is a staple in men’s formal footwear. Crafted from premium calfskin leather, these shoes are not only stylish...May 7, 2025",
+      "cited": false
+    },
+    {
+      "url": "https://www.menshealth.com/style/g19545927/best-dress-shoes//?utm_source=chatgpt.com",
+      "title": "10 Best Dress Shoes for Men in 2024, Tested by Our Fashion Director",
+      "snippet": "— * ### Best Leather  Suit Supply Brown DerbyRead more  We even explored hybrid types that blend formal style with casual comfort. Finding the best dress shoes for men doesn't have to be expensive, com...September 26, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://totallyreviewed.com/best-mens-leather-dress-shoes/?utm_source=chatgpt.com",
+      "title": "Best Men's Leather Dress Shoes: Elevate Your Style with Timeless Elegance - Totally Reviewed",
+      "snippet": "— BEST MENS LEATHER DRESS SHOES  01. ALLEN EDMONDS PARK AVENUE CAP-TOE OXFORD  Crafted with precision and elegance, the Allen Edmonds Park Avenue Cap-Toe Oxford exudes timeless sophistication. The impec...August 6, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://www.esquire.com/style/mens-fashion/g36384400/best-mens-leather-sneakers//?utm_source=chatgpt.com",
+      "title": "13 Best Leather Sneakers for Men 2024",
+      "snippet": "— If you're in the market for something vintage inspired, we've got that, too—plus designer options, revamped runners, and more.  * ### Best Leather Sneakers Under $100  Cole Haan Grand Crosscourt II Sn...April 12, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://www.esquire.com/style/mens-fashion/g36384400/best-mens-leather-sneakers/?utm_source=chatgpt.com",
+      "title": "13 Best Leather Sneakers for Men 2024",
+      "snippet": "— * ### Best Leather Sneakers Under $100  Cole Haan Grand Crosscourt II SneakersRead more  * ### Best All-White Leather Sneakers  Greats Royale SneakersRead more  * ### Best Nostalgic Leather Sneakers...April 12, 2024",
+      "cited": false
+    },
+    {
+      "url": "https://smallbiztrends.com/best-dress-shoes-for-men/?utm_source=chatgpt.com",
+      "title": "Best Dress Shoes for Men: Our Picks and Info",
+      "snippet": "— COLE HAAN MEN’S PINCH TASSEL LOAFER  Cole Haan’s Pinch Tassel Loafer, a symbol of nearly 80 years of craftsmanship, offers an impeccable blend of luxury and style. A choice for the dapper gentleman, t...December 17, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://www.askdeb.com/reviews/10-best-mens-dress-shoes-us/?utm_source=chatgpt.com",
+      "title": "10 Best Mens Dress Shoes Us - AskDeb",
+      "snippet": "— 1. DOCKERS MENS GORDON LEATHER OXFORD DRESS SHOE,BLACK,11 W US  9.7/10 our score  Buy Now  I recently bought the Dockers Mens Gordon Leather Oxford Dress Shoe and I am absolutely loving it! The leathe...November 8, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://www.menshealth.com/style/g42053085/best-mens-leather-sneakers/?utm_source=chatgpt.com",
+      "title": "20 Best Leather Sneakers for Men in 2024, Tested by Style Experts",
+      "snippet": "— Skip to Content  sign in  Subscribe  Courtesy of Retailer  Our product picks are editor-tested, expert-approved. We may earn a commission through links on our site. Why Trust Us?  WHETHER YOU'RE runni...March 22, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://stridewise.com/best-leather-sneakers/?utm_source=chatgpt.com",
+      "title": "9 Best Leather Sneakers for Men 2025 | Minimalist, Low Profile, Dressy Sneaks | Stridewise",
+      "snippet": "— BEST VALUE LEATHER SNEAKER: THURSDAY BOOT CO. PREMIER LOW TOP SNEAKERS  * Wide and extra wide sizes * Excellent selection of leathers and colors * $129  If you’ve been in the boot game for a while, Th...February 24, 2023",
+      "cited": false
+    },
+    {
+      "url": "https://explorenationalparks.store/best-leather-shoes-for-men?utm_source=chatgpt.com",
+      "title": "Best Leather Shoes for Men: Complete 2024 Buyer's Guide | Explore National Parks",
+      "snippet": "TOP 5 BEST LEATHER SHOES FOR MEN IN 2024  1. ALLEN EDMONDS FIFTH AVENUE OXFORD  ★★★★★  (4.4/5 - 1,247 reviews)  The gold standard for American-made dress shoes. This cap-toe oxford features premium ca...",
+      "cited": false
+    },
+    {
+      "url": "https://www.mic.com/shopping/the-12-best-leather-sneakers-for-men-82393043?utm_source=chatgpt.com",
+      "title": "The 12 best leather sneakers for men",
+      "snippet": "1. THE SPERRY SNEAKERS  Sperry Men's Striper II LTT Leather ShoeSee price on AmazonSee on Amazon  These leather sneakers from Sperry have uppers made from 100% premium full-grain leather, so they stri...",
+      "cited": false
+    },
+    {
+      "url": "https://www.greats.com/collections/leather-shoes?utm_source=chatgpt.com",
+      "title": "Leather Shoes for Men | GREATS Premium Men’s Footwear",
+      "snippet": "Free standard shipping on all US orders over $100 and free exchanges  New In: The Ravine. Shop Now  New Colors. Same Icon. Shop Royale 2.0.  CART  LEATHER SHOES FOR MEN  STEP FORWARD  Step up your sty...",
+      "cited": false
+    },
+    {
+      "url": "https://www.michiganfootdoctors.com/best-mens-dress-shoes-2022-birchbury-brenston-bramford-reviews/?utm_source=chatgpt.com",
+      "title": "11 Best Men’s Dress Shoes for 2025 – Stylish, Comfortable & Built to Last",
+      "snippet": "The authors or speakers are not associated with any of the above products.  11 BEST MEN’S DRESS SHOES FOR ANY EVENT  STEP INTO STYLE, COMFORT, AND CONFIDENCE  When it comes to elevating your wardrobe...",
+      "cited": false
+    }
+  ],
+  "products": [
+    {
+      "title": "Allen Edmonds Park Avenue Cap Toe Oxford",
+      "image": "https://images.openai.com/static-rsc-1/14XMTUPwjjZJjmC68MzLfCcHqGs_7bwkONzBhcG4MmKOK5Ti2jC-cRJrcE0yJyRS5jBBt8hm3dy_Zd7oHXmVDUxs92KclzIuhBcB8U9_cOc8OBsTQ0_E-G-CV_uuvSF1S9LqhiCxU7zm33RuQ60cU25ukgPrBwKgM7d1UDFdDM41O8n4d49Yklah25o9_SXCCH3JGlrQsw2ilkvBm2LWQ89L6fDqzGDNbscjCd-lEmP8XaLBXy7VMRb3A0wzbP7a",
+      "description": null,
+      "link": null,
+      "tag": null,
+      "images": [
+        "https://images.openai.com/static-rsc-1/oThgY6kIOn5NDPEFkHUb9HffTgX1vS3j_DTWIjlOZHXDoieBiNBipj6ziTCTCswxR1Lgv0ItSGoVFNsD1b7pZS1RSTNoBKAORcXkOJEdJgVx9wSrrMsRsamrI3bLXQa_JvpPxSG-HHmY-SbbcJCH-Ti5mrhJnJa1ZhJQEejyflUgFiekrruz-tXAxsEEOSEnVD6GblYCI8JXhmEZfbUu_iYlCAG9ZLvIcgvxgo00VOoxbnQJ-stXIdY1Ms4ca1yJ"
+      ],
+      "rating": 4.4,
+      "vendors": [
+        {
+          "price": 379.98,
+          "currency": "$",
+          "website": "Allen Edmonds",
+          "link": "https://www.allenedmonds.com/product/mens-park-avenue-cap-toe-oxford-dress-shoe-3023014/espresso-leather-ec4501224?utm_source=chatgpt.com"
+        }
+      ],
+      "summary": null,
+      "feedback": null,
+      "reviews": null
+    },
+    {
+      "title": "Amberjack Men's The Original",
+      "image": "https://images.openai.com/static-rsc-1/0KrE1f1Gu9PLxbbjk4RZFcs9aAKqLZVhgPM70_uWHz1P2NleprLpSyoW4Ew0odsIu6yvbAUQZTh_FgMFLJyQ3vAgb-8aF8gr_N4eEP8FatrOTA90otAP-JxDIQxLd2rVYrkyNe_YLKvwoZAjFbrZ6goV2986izKJOEoTcVvqvlX7JmhRF3uHzRw2J7OtdlhZmCD2wp_BiiBFK6yhrlHdj0ArBT18hfa442ZoEPr3H2G6aWgudJqZDO0ghYQZh1dtEyYlbu4Hc_c0jqk8Am_IEA",
+      "description": null,
+      "link": null,
+      "tag": null,
+      "images": [
+        "https://images.openai.com/static-rsc-1/2tR81d5V5KB5BZnmf_cxkMVwdV1URbNYVZHC7N0spaaHeYJXG1smFdzkXeEcJFzLHUW0tS8l8Z-OqiF1rcFt4g7rX80e1p4ydNdKkIhO20M8oXXB1r2KnVSJ69mGx0dE1P8M3RKhsbcJApBOG4MyKM0SM6GAsZgxCjvg23A5xyx6XtAW1YWBqLoHAWbMsICD6ziwNdiGlueHad0fazPZY_-jf_BHBlD_lizQVlPPM4wuBUuV3wdR9kPNBMmWXBoMtVRJr4u8gg_WzCwgkW-w3g",
+        "https://images.openai.com/static-rsc-1/hhFgnzrJ3b-JQ3deBIiUnb-vvXp6uOiUZcx3vfda2PBZMpvCk6c8WwUrZFnBADK0b4TYOviSFjWr8GG-tWW0-95rHBfaC5RZFhnTU7k5zM2MKhoeQleA0GiSrK7UiwNPc1E1gLfeVsxivy43XKvtW9jIWXoX6P0wkfj8diBcdEhbjFCL2xHMYNbhWcxFcs4CMhL4TMl8ssZwWPy0Y6Kzo-Cq2yhxA0TWayLp36nHS7bBrWi5Kzj5M2d5wnWpMc29",
+        "https://images.openai.com/static-rsc-1/QlWM9c8HPkvIW8trV0sIACXSm28Rtmg55hvjb56uO2l54XWV51lpimJLkuqMqR4N4nGRkfatTv8gyuJJpV-dwzodqzshYU2sx7rrFWqf4ccS5LtWSkQfVY5jubacySrs7E53wSvMa2Epqs0y2TalgxS0h7hbVomB8wVMrKoYu7tHPpkmS7edIju4AePgBDepM7erJGHkTQFC8nDvoOZO9vKrJZE0rzk5JS5oM9RO9AH1umHYluoF2YxwVxIdjVEjxSyHdfrIshGbF1fRm849pg"
+      ],
+      "rating": 4.8,
+      "vendors": [
+        {
+          "price": 156,
+          "currency": "$",
+          "website": "Amberjack",
+          "link": "https://www.amberjack.shop/products/original-chestnut?currency=USD&variant=45255816872168&stkn=fe745cbe4099&utm_source=chatgpt.com"
+        },
+        {
+          "price": 195,
+          "currency": "$",
+          "website": "ODION",
+          "link": "https://odionmenswear.com/products/amberjack-dress-shoe?variant=42411239833798&country=US&currency=USD&utm_source=chatgpt.com"
+        },
+        {
+          "price": 195,
+          "currency": "$",
+          "website": "Brown's Shoe Fit Co. Dubuque",
+          "link": "https://www.brownsdbq.com/products/mens-amberjack-the-original?variant=46810980679892&country=US&currency=USD&utm_source=chatgpt.com"
+        }
+      ],
+      "summary": null,
+      "feedback": null,
+      "reviews": null
+    },
+    {
+      "title": "Florsheim Men's Leather Cap Toe Oxford",
+      "image": "https://images.openai.com/static-rsc-1/Y26RpwbB4MRr5wcvVgvRju6w5i8N9VPjRVCGuUUpyojoXwQA6MG9S7jXcFAVQ2atGeand34_v2b7woseK046PRVl9D7qptsBj4t16Q4goaTNlQ0JBfAHb7rSnwI6mVZuv2RLfhPI2l8xo8jIbzfIyA70AqcHwNwnRlifGdcpUItF8rKywlZY7MNWMOOvEw-l-vyh5UQc34dwHux09eyWJA",
+      "description": null,
+      "link": null,
+      "tag": null,
+      "images": [
+        "https://images.openai.com/static-rsc-1/yFBFLFmwh9zwuC_G23zzYjJP2q4FYmU-7VMG0SgcqWSWewgyqqmzcWxf0HK106L1Qz0YMdsoCX7XKGDZRxNukwfGV1kAjtoh9aySvbY-OXkhminp5YpRU2iQ1QBRh5gmpJN4-g1XL3FuIGe87Jm8ceZAUPhZDZ1iy-D-3UGrw2oSxCc86uUyQfq7pbDNhuz5Vw9neJY9BjC0CZxAliZExw",
+        "https://images.openai.com/static-rsc-1/Gc6uSKaq901g52kcFoLfiSnqYGYDiUivhen8Rxnl73FTwp1oOpL-eqMUBWsWJ4CjVrV-yIV3LkYiWZ8rCugwvjJWxkH5nORiLfNpy-ZWmfnkxHi8z4XKPBkWZGiIjYrFyO2k9_WXC_-xfPK1ZXOMEAo81pPPd9JLNk-07M2mUHNfoWbt8lBIFR2PUN8iTwo-irvA7UBlY2RdSGcIy4T4fw",
+        "https://images.openai.com/static-rsc-1/SjvokTU-Yu7j603BgwHqxvq5RBMjz0942jh92qm3TZBfG9H0SxgCoYSvK76D3Lzf6P554FYy40M09AiT7bwb8lRJv85kq91rX-u4LhLsgkMgsEYdrFTor8poS4_cTP1WOU0zpeb1FcZUMyEAjVpFlGEC4lgVY8XAl8ELiATMC2LQoUNsQFdkg4I-5Zn6rT-vQF8nulu9pWt9sa7uKxefeQ"
+      ],
+      "rating": 4.7,
+      "vendors": [
+        {
+          "price": 134.99,
+          "currency": "$",
+          "website": "Men's Wearhouse",
+          "link": "https://www.menswearhouse.com/p/florsheim-remi-cap-toe-oxfords-tmw-41bc?CAWELAID=120259610001936103&utm_source=chatgpt.com#color=black%26size=8.5%26width=D"
+        }
+      ],
+      "summary": null,
+      "feedback": null,
+      "reviews": null
+    },
+    {
+      "title": "Cole Haan Original Grand 2.0",
+      "image": "https://images.openai.com/static-rsc-1/ugTwpcIGevr0OKoKxcmFcAJIFmpaQx18FfKUS8CK6HFiCuOVaGfltQEuYQZkyM9tIJai9H7VjVPvWkiK-ZziZy6ZbW7Dmi7QpRmR3l1Q5GzPsUPmkwuD1UlVmJEvB-1gbppHsW132JqSQpe1-LnjNCQgY8pHW9gpsDBqlkEuha53UqxzonI5GlU3fmdAomM2FDmBCCZzLsvwmq7du69OH-eoHkFvxm4uMcIhUEhzuidEdiPCM7QKhAN7dQ08iLQ5",
+      "description": null,
+      "link": null,
+      "tag": null,
+      "images": [
+        "https://images.openai.com/static-rsc-1/qvc7sTAItbqunqCdncUTzicvJtj_-ZPD1fU1_syE8FdrKc4wX3kh4uuMSSN0-y4b7MX97W1VJ1gJRrrTByLSdsffUV3fBUoZ7R7PNRofajCK9SB5L7bXCtFVUyg3ajPTxFrGQTPZ_qo4EosZM_954LaYAohrgslK1UM8jPuIC2_FLK4gGKdsqzMNO9Zyc-fpGObTcQLNx09nuBVeROEv5Bzga1PE_GcqoDede1lSAraUnXbov5L_7LtIrKIgm_7r",
+        "https://images.openai.com/static-rsc-1/F-ij-wGpUdSgCtstAQUq7VEDVeGpyaIzl6K3sadn1YWCpmITcg2mTkQTpSu8SMg-ZjOZsCK4OxBWr6WRQyjt0Qdm0-1zDVRGmcFfIyKmDQwk9ig9Bs3SIpgbivxZUz5UHdi9sW-jhkN8AEsgb7yOXG8KIj_bgqYU-fFRCmro-smNpAehdzV0U0xMtlNcQYHQQ8geh8x59AvKYK4dEcCV_qLc6d9kdqXfwmzHc_8i2ZNMAFnnj1XemKjhj2xDKPp_J1hOt990MFSqHXeE4czMFQ",
+        "https://images.openai.com/static-rsc-1/NMC4GlBKrrFLuXuKChHzdRAsiRdYRXEzl5rUT93KVz5i50aUYe2SCswbsUVLOsSmUnwRgdrAQ5G1E_TVbMY2BKf-uAGzjrKcLS3URn0OuxM5kIzXzQxHNoID6SlGu40_xt7YG12DX1J52jFEWHFIKNA-8yZqCQ3k9xA27BfJBr3ySl8FqowvHBzjyVdYpMNw3yBMzoskcvTNHUAmdKLXEhgNGFrmz8dMRJgrydEQ6d68RTv1fgBPZcXjzzGt3eAAeoR3dVtQMWk3Apayv5UgiA"
+      ],
+      "rating": 4.3,
+      "vendors": [
+        {
+          "price": 229.99,
+          "currency": "$",
+          "website": "Men's Wearhouse",
+          "link": "https://www.menswearhouse.com/p/cole-haan-originalgrand-2-0-wingtip-oxfords-tmw-42z7?CAWELAID=120259610002039604&utm_source=chatgpt.com#color=brit-tan-/-optic-white%26size=10%26width=D"
+        },
+        {
+          "price": 230,
+          "currency": "$",
+          "website": "Saks Fifth Avenue",
+          "link": "https://www.saksfifthavenue.com/product/Cole-Haan-OriginalGrand-2.0-Leather-Oxfords-0400021768344.html?dwvar_0400021768344_size=7&dwvar_0400021768344_color=BRITISH+TAN+WHITE&site_refer=NPLA_GGL_Shopping&country=US&currency=USD&utm_source=chatgpt.com"
+        },
+        {
+          "price": 230,
+          "currency": "$",
+          "website": "Zappos.com",
+          "link": "https://www.zappos.com/product/9981416/color/527112?utm_source=chatgpt.com"
+        },
+        {
+          "price": 240,
+          "currency": "$",
+          "website": "Nordstrom",
+          "link": "https://www.nordstrom.com/s/cole-haan-originalgrand-2-0-derby-men/8003204?color=BRITISH+TA&size=7.5&country=US&currency=USD&utm_source=chatgpt.com"
+        }
+      ],
+      "summary": null,
+      "feedback": null,
+      "reviews": null
+    },
+    {
+      "title": "Nike Killshot 2 Leather",
+      "image": "https://images.openai.com/static-rsc-1/f5idIh1FPUyES4ADdwPC7zDjrbGTcErq4gqZ9t

@@ -1,0 +1,213 @@
+---
+title: "Metadatos"
+sidebarTitle: "Metadatos"
+description: "Adjunta pares clave-valor personalizados a recursos de la API"
+icon: "tag"
+---
+
+<Info>
+**Actualmente disponible para [Lotes](/api-reference/batches/create).** El soporte para scrapes, crawls, maps y answers llegará pronto.
+</Info>
+
+Los metadatos te permiten adjuntar pares clave-valor personalizados a los recursos de Olostep. Esto es útil para el seguimiento, filtrado, organización y almacenamiento de contexto junto con tus solicitudes de API.
+
+Los metadatos siguen el enfoque de [Stripe](https://stripe.com/docs/api/metadata): simple, flexible y consistente en todos los endpoints.
+
+---
+
+## Casos de Uso
+
+<CardGroup cols={2}>
+  <Card title="Seguimiento y Organización" icon="folder">
+    Vincula recursos a sistemas internos con IDs de pedido, IDs de cliente o nombres de proyectos.
+  </Card>
+  <Card title="Filtrado y Búsqueda" icon="magnifying-glass">
+    Etiqueta recursos para una fácil recuperación y filtrado en tu aplicación.
+  </Card>
+  <Card title="Contexto de Flujo de Trabajo" icon="diagram-project">
+    Almacena la etapa de la tubería, el nivel de prioridad o las instrucciones de procesamiento.
+  </Card>
+  <Card title="Rastro de Auditoría" icon="clock-rotate-left">
+    Registra quién inició una solicitud, marcas de tiempo o información de versión.
+  </Card>
+</CardGroup>
+
+---
+
+## Añadiendo Metadatos al Crear
+
+Incluye el parámetro `metadata` al crear un recurso:
+
+<CodeGroup>
+
+```json Request Body
+{
+  "url": "https://example.com",
+  "metadata": {
+    "order_id": "12345",
+    "customer_name": "John Doe",
+    "priority": "high",
+    "internal_ref": "proj-2024-001"
+  }
+}
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <your_token>"},
+    json={
+        "items": [{"custom_id": "1", "url": "https://example.com"}],
+        "metadata": {
+            "project": "q4-analysis",
+            "team": "data-ops",
+            "priority": "high"
+        }
+    }
+)
+```
+
+```javascript Node.js
+const response = await fetch("https://api.olostep.com/v1/batches", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <your_token>",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    items: [{ custom_id: "1", url: "https://example.com" }],
+    metadata: {
+      project: "q4-analysis",
+      team: "data-ops",
+      priority: "high"
+    }
+  })
+});
+```
+
+</CodeGroup>
+
+Los metadatos se devuelven en todas las respuestas GET posteriores para ese recurso.
+
+---
+
+## Reglas de Validación
+
+| Restricción | Límite | Ejemplo de Error |
+|-------------|--------|------------------|
+| Máximo de claves | 50 | `"Los metadatos pueden tener un máximo de 50 claves. Proporcionaste 51 claves."` |
+| Longitud de la clave | 40 caracteres | `"La clave de metadatos \"my_very_long_key_name...\" excede el límite de 40 caracteres."` |
+| Formato de la clave | Sin corchetes | `"La clave de metadatos \"items[0]\" no puede contener corchetes ([ o ])."` |
+| Longitud del valor | 500 caracteres | `"El valor de metadatos para la clave \"description\" excede el límite de 500 caracteres."` |
+| Tipo de valor | Solo cadenas | `"El valor de metadatos para la clave \"count\" debe ser una cadena. Se obtuvo un objeto."` |
+
+<Note>
+**Coerción de Tipo**: Los números y booleanos se convierten automáticamente a cadenas.
+- `42` → `"42"`
+- `true` → `"true"`
+- `3.14` → `"3.14"`
+
+Los objetos y arreglos son rechazados.
+</Note>
+
+---
+
+## Actualizando Metadatos (PATCH)
+
+<Info>
+**Actualmente disponible para:** [Lotes](/api-reference/batches/update) solamente.
+
+Crawls, Scrapes, Maps y Answers aún no soportan la actualización de metadatos después de la creación.
+</Info>
+
+Puedes actualizar los metadatos en lotes existentes usando el [endpoint PATCH](/api-reference/batches/update). Las actualizaciones utilizan un comportamiento de fusión.
+
+### Operaciones de Actualización
+
+<AccordionGroup>
+
+<Accordion title="Añadir nuevas claves" icon="plus">
+Se añaden nuevas claves mientras se preservan las existentes.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"new_key": "new_value"}}'
+```
+
+**Antes:** `{"project": "alpha"}`  
+**Después:** `{"project": "alpha", "new_key": "new_value"}`
+</Accordion>
+
+<Accordion title="Actualizar claves existentes" icon="pen">
+Las claves existentes se sobrescriben con nuevos valores.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "beta"}}'
+```
+
+**Antes:** `{"project": "alpha", "priority": "high"}`  
+**Después:** `{"project": "beta", "priority": "high"}`
+</Accordion>
+
+<Accordion title="Eliminar claves específicas" icon="trash">
+Establece una clave en `null` o `""` (cadena vacía) para eliminarla.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"priority": null}}'
+```
+
+**Antes:** `{"project": "alpha", "priority": "high"}`  
+**Después:** `{"project": "alpha"}`
+</Accordion>
+
+<Accordion title="Limpiar todos los metadatos" icon="eraser">
+Establece todo el campo de metadatos en `null` o `""` para eliminar todas las claves.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": null}'
+```
+
+**Antes:** `{"project": "alpha", "priority": "high"}`  
+**Después:** `{}`
+</Accordion>
+
+<Accordion title="Operaciones mixtas" icon="shuffle">
+Añade, actualiza y elimina claves en una sola solicitud.
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "gamma", "new_field": "value", "old_field": null}}'
+```
+
+**Antes:** `{"project": "alpha", "old_field": "remove_me"}`  
+**Después:** `{"project": "gamma", "new_field": "value"}`
+</Accordion>
+
+</AccordionGroup>
+
+### Resumen del Comportamiento de PATCH
+
+| Operación | Solicitud | Resultado |
+|-----------|-----------|-----------|
+| Añadir clave | `{"metadata": {"new": "value"}}` | Clave añadida, otras preservadas |
+| Actualizar clave | `{"metadata": {"existing": "new_value"}}` | Clave actualizada, otras preservadas |
+| Eliminar clave | `{"metadata": {"key": null}}` | Clave eliminada, otras preservadas |
+| Eliminar clave | `{"metadata": {"key": ""}}` | Clave eliminada, otras preservadas |
+| Limpiar todo | `{"metadata": null}` | Todas las claves eliminadas |
+| Limpiar todo | `{"metadata": ""}` | Todas las claves eliminadas |
+| Sin cambios | `{"metadata": {}}` | Sin cambios |

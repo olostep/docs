@@ -1,0 +1,228 @@
+---
+icon: "bell"
+sidebarTitle: "Monitoraggio dei Prezzi"
+title: "Tracciamento dei Prezzi con Olostep"
+description: "Scopri come utilizzare Olostep per monitorare i prezzi dei prodotti su larga scala in un e-commerce."
+---
+
+## Panoramica
+
+Olostep fornisce un'API di web scraping che consente il monitoraggio in tempo reale dei prezzi di milioni di prodotti su un e-commerce a intervalli regolari (ad esempio, ogni poche ore) in modo scalabile ed economico.
+
+Questo è utile per le aziende che vogliono monitorare le fluttuazioni dei prezzi, confrontare i prezzi su più siti web o tracciare le strategie di prezzo dei concorrenti.
+
+In questa guida, vedremo come un cliente utilizza Olostep per impostare il tracciamento automatico dei prezzi per milioni di prodotti Amazon ogni giorno.
+
+## Perché Usare Olostep per il Tracciamento dei Prezzi?
+
+- **Scalabilità:** Monitora i prezzi di milioni di prodotti ogni poche ore.
+- **Automazione:** Imposta compiti di scraping programmati che si eseguono a tempi predefiniti/intervalli regolari.
+- **Formati Multipli:** Recupera i dati in formato JSON, html o markdown.
+- **Parser Personalizzati:** Estrai solo le informazioni JSON rilevanti con i nostri parser o passa il tuo all'API.
+
+## Come Tracciare i Prezzi Usando Olostep
+
+### Panoramica del Processo di Configurazione
+
+Quando si tracciano prodotti su larga scala, consigliamo di utilizzare l'[endpoint Batches di Olostep](https://docs.olostep.com/api-reference/batches/create).
+
+Questo endpoint ti permette di inviare più batch di URL (ciascuno fino a 10k) da elaborare in parallelo e poi recuperare i risultati dopo 5-8 minuti. Puoi inviare più batch contemporaneamente, monitorare il loro progresso e recuperare i risultati una volta completati. In questo modo puoi elaborare milioni di URL in 15-20 minuti.
+
+Il flusso complessivo per il tracciamento dei prezzi usando Olostep è il seguente:
+
+1. **Leggi i prodotti dal database e salva gli URL che vuoi tracciare in un file CSV.**
+2. **Leggi i dati dal file CSV e avvia un batch usando l'endpoint batch di Olostep.** Questo viene fatto inviando i dati all'endpoint in blocchi di massimo 10.000 URL alla volta.
+3. **Controlla lo stato del batch ogni 60 secondi** per monitorare il progresso.
+4. **Una volta che il batch è completo, leggi il contenuto e usalo nel tuo flusso di lavoro.**
+
+Puoi avviare un batch e ricevere il contenuto html/markdown della pagina e poi analizzarlo tu stesso per estrarre i dati che desideri. Ma consigliamo di avviare il batch con un parser in modo che ti venga restituito un oggetto JSON con solo i dati analizzati di cui hai bisogno.
+Puoi passare il tuo parser all'API o usare uno di quelli pre-costruiti che abbiamo per alcuni siti comuni (ad esempio pagine prodotto Amazon, risultati di ricerca Google, profili Linkedin, ecc...).
+
+Conserviamo i dati per ogni batch per 7 giorni in modo che tu possa recuperarli più volte se necessario.
+
+### Passo 1: Esporta i Dati dei Prodotti dal tuo Database
+
+Il primo passo è recuperare le informazioni sui prodotti dal tuo database e salvarle in formato CSV. Questo file dovrebbe contenere identificatori di prodotto, URL e qualsiasi metadato aggiuntivo richiesto per il tracciamento.
+
+### Passo 2: Avvia un Batch con Olostep
+
+Per avviare un batch, leggi i dati dei prodotti dal CSV e inviali all'endpoint batch di Olostep. Questo viene fatto usando una richiesta HTTP POST con un payload JSON.
+
+Ogni batch può contenere fino a 10k URL. Per dataset di grandi dimensioni (>10.000 URL), dividili in più batch e inviali in parallelo.
+
+Un batch consiste in un array di elementi, dove ogni elemento rappresenta un URL di prodotto da elaborare. Ecco la struttura di una richiesta batch
+
+```python
+import requests
+
+def start_batch(batch_array):
+    payload = {
+        "batch_array": batch_array,                 # Array di elementi da elaborare
+        "batch_country": "IT",                      # Codice paese per il batch
+        "parser": "@olostep/amazon-it-product"      # Opzionale: Specifica un parser personalizzato in modo da ottenere solo i dati JSON di cui hai bisogno
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()["id"]
+```
+
+#### Struttura dell'Array del Batch
+Ogni elemento nel batch_array dovrebbe seguire questa struttura:
+<CodeGroup>
+    ```json filename="batch_item.json"
+    {
+        "custom_id": "unique_identifier",    // Richiesto: Il tuo identificatore unico per l'elemento
+        "url": "product_url",               // Richiesto: URL da elaborare
+        "wait_before_scraping": 0,         // Opzionale: Tempo di attesa prima di eseguire lo scraping di ogni url nel batch (in millisecondi)
+    }
+    ```
+</CodeGroup>
+Parametri
+<ResponseField name="batch_array" type="array" required>
+    Array di elementi da elaborare. Massimo di 10.000 URL per batch. Ogni elemento deve avere un `custom_id` unico.
+</ResponseField>
+<ResponseField name="batch_country" type="string" required>
+    Codice paese a due lettere (ad esempio, "IT" per l'Italia).
+</ResponseField>
+<ResponseField name="parser" type="string">
+    Nome del parser personalizzato da usare (ad esempio, "@olostep/amazon-it-product"). Contattaci a info@olostep.com per ottenere accesso ai parser pre-costruiti o per crearne uno tuo.
+</ResponseField>
+Risposta
+<CodeGroup>
+    ```json filename="response.json"
+    {
+        "id": "batch_54ikwskmt8"
+    }
+    ```
+</CodeGroup>
+L'endpoint restituisce un oggetto JSON contenente il batch_id, che può essere utilizzato per monitorare lo stato e poi recuperare i risultati.
+
+Esempio di Utilizzo
+<CodeGroup>
+    ```python
+    # Prepara l'array del batch
+    batch_array = [
+    {
+        "custom_id": "product_123",
+        "url": "https://www.amazon.it/dp/B0CHF6Z393/?coliid=INQXTGFQF4FM4&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    },
+    {
+        "custom_id": "product_124",
+        "url": "https://www.amazon.it/dp/B0CHMJL774/?coliid=I6CFYA5EHVHE2&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    }
+    ]
+
+    # Avvia l'elaborazione del batch
+    batch_id = start_batch(batch_array)
+    print(f"Batch avviato: {batch_id}")
+    ```
+</CodeGroup>
+
+### Passo 3: Monitora lo Stato del Batch
+Una volta avviato un batch, dovrai monitorare il suo stato per determinare quando l'elaborazione è completa. L'API fornisce un endpoint di stato che può essere interrogato periodicamente (ad esempio, ogni 60 secondi) con il batch_id
+
+<CodeGroup>
+    ```python filename="check_status.py"
+    import requests
+
+    def check_batch_status(batch_id):
+    headers = {"Authorization": "Bearer " + API_KEY}
+    response = requests.request(
+    "GET",
+    f"https://api.olostep.com/v1/batches/{batch_id}",
+    headers=headers
+    )
+    return response.json()["status"]
+    ```
+</CodeGroup>
+
+Per l'uso in produzione, è consigliato implementare un monitoraggio asincrono per gestire più batch in modo efficiente:
+<CodeGroup>
+    ```python
+    import asyncio
+
+    async def monitor_batch(batch_id: str) -> None:
+    """Monitora un singolo batch fino al suo completamento"""
+    while True:
+        status = check_batch_status(batch_id)
+        if status == "completed":
+            print(f"Batch {batch_id} completato!")
+            return
+        print(f"Batch {batch_id} ancora in elaborazione... Controllo di nuovo tra 60 secondi")
+        await asyncio.sleep(60)
+    ```
+</CodeGroup>
+
+
+### Passo 4: Recupera gli ID per gli Elementi Completati
+
+Una volta che il batch è contrassegnato come completato, puoi recuperare l'elenco degli elementi completati. Ogni elemento avrà un retrieve_id. Se vuoi il contenuto effettivo, usa l'endpoint retrieve passando il `retrieve_id`
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    response = requests.get(f"https://api.olostep.com/v1/batches/{batch_id}/items", headers=headers)
+    return response.json()["items"]
+```
+Questo restituirà gli elementi completati che hanno ciascuno un `retrieve_id` per ogni URL inviato. Puoi quindi usare l'endpoint retrieve per recuperare e memorizzare i dati estratti (html, markdown o JSON) per ogni URL.
+
+Puoi ottenere il `retrieve_id` per ogni elemento nel batch usando il seguente codice:
+
+```python
+items = get_completed_items("your_batch_id")
+for item in items:
+    print(f"""
+    URL: {item['url']}
+    Custom ID: {item['custom_id']}
+    Retrieve ID: {item['retrieve_id']}
+    ---
+    """)
+```
+
+### Passo 5: Recupera il Contenuto per ogni Elemento
+
+Una volta che hai il `retrieve_id` per ogni elemento, puoi recuperare il suo contenuto (HTML, Markdown o JSON) usando l'endpoint retrieve:
+
+<CodeGroup>
+    ```python filename="retrieve_content.py"
+    def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(
+    url,
+    headers=headers,
+    params=params
+    )
+    return response.json()
+
+    # Esempio di utilizzo
+    retrieve_id = "product_123"
+    content = retrieve_content(retrieve_id)
+
+    # Se vuoi elaborare più elementi
+    def process_batch_content(batch_id):
+    items = get_completed_items(batch_id)
+    for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    # Elabora o memorizza il contenuto come necessario
+    ```
+</CodeGroup>
+
+
+## Conclusione
+
+Seguendo questi passaggi, puoi impostare un sistema di tracciamento dei prezzi automatizzato utilizzando Olostep. A breve pubblicheremo un repository open-source su GitHub con il codice completo per questo esempio.

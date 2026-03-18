@@ -1,0 +1,592 @@
+---
+sidebarTitle: "LangChain"
+icon: "link"
+title: "LangChain-integratie"
+description: "Bouw intelligente AI-agenten met webscraping- en zoekmogelijkheden met behulp van LangChain"
+---
+
+De Olostep LangChain-integratie biedt uitgebreide tools om AI-agenten te bouwen die data van elke website kunnen doorzoeken, scrapen, analyseren en structureren. Perfect voor LangChain- en LangGraph-toepassingen.
+
+## Kenmerken
+
+De integratie biedt toegang tot alle 5 Olostep API-mogelijkheden:
+
+<CardGroup cols={2}>
+  <Card title="Scrapes" icon="file-lines">
+    Haal inhoud op van elke enkele URL in meerdere formaten (Markdown, HTML, JSON, tekst)
+  </Card>
+  
+  <Card title="Batches" icon="layer-group">
+    Verwerk tot 10.000 URL's parallel. Batchtaken zijn voltooid in 5-8 minuten
+  </Card>
+  
+  <Card title="Answers" icon="question">
+    AI-gestuurde webzoekopdrachten met natuurlijke taalvragen en gestructureerde output
+  </Card>
+  
+  <Card title="Maps" icon="map">
+    Haal alle URL's van een website op voor analyse van de sitestructuur
+  </Card>
+  
+  <Card title="Crawls" icon="spider-web">
+    Ontdek en scrape zelfstandig volledige websites door links te volgen
+  </Card>
+</CardGroup>
+
+## Installatie
+
+<CodeGroup>
+```bash pip
+pip install langchain-olostep
+```
+
+```bash poetry
+poetry add langchain-olostep
+```
+</CodeGroup>
+
+## Setup
+
+Stel je Olostep API-sleutel in als een omgevingsvariabele:
+
+```bash
+export OLOSTEP_API_KEY="your_olostep_api_key_here"
+```
+
+Verkrijg je API-sleutel van het [Olostep Dashboard](https://olostep.com/dashboard).
+
+## Beschikbare Tools
+
+### scrape_website
+
+Haal inhoud op van een enkele URL. Ondersteunt meerdere formaten en JavaScript-rendering.
+
+<ParamField path="url" type="string" required>
+  Website-URL om te scrapen (moet http:// of https:// bevatten)
+</ParamField>
+
+<ParamField path="format" type="string" default="markdown">
+  Uitvoerformaat: `markdown`, `html`, `json`, of `text`
+</ParamField>
+
+<ParamField path="country" type="string">
+  Landcode voor locatie-specifieke inhoud (bijv. "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="integer">
+  Wachttijd in milliseconden voor JavaScript-rendering (0-10000)
+</ParamField>
+
+<ParamField path="parser" type="string">
+  Optionele parser-ID voor gespecialiseerde extractie (bijv. "@olostep/amazon-product")
+</ParamField>
+
+<CodeGroup>
+```python Basic Scraping
+from langchain_olostep import scrape_website
+import asyncio
+
+# Scrape een website
+content = asyncio.run(scrape_website.ainvoke({
+    "url": "https://example.com",
+    "format": "markdown"
+}))
+
+print(content)
+```
+
+```python With JavaScript
+# Wacht op dynamische inhoud
+content = asyncio.run(scrape_website.ainvoke({
+    "url": "https://example.com",
+    "format": "markdown",
+    "wait_before_scraping": 2000
+}))
+```
+
+```python With Parser
+# Gebruik gespecialiseerde parser
+content = asyncio.run(scrape_website.ainvoke({
+    "url": "https://www.amazon.com/dp/PRODUCT_ID",
+    "parser": "@olostep/amazon-product",
+    "format": "json"
+}))
+```
+</CodeGroup>
+
+### scrape_batch
+
+Verwerk meerdere URL's parallel (tot 10.000 tegelijk).
+
+<ParamField path="urls" type="array" required>
+  Lijst van URL's om te scrapen
+</ParamField>
+
+<ParamField path="format" type="string" default="markdown">
+  Uitvoerformaat voor alle URL's: `markdown`, `html`, `json`, of `text`
+</ParamField>
+
+<ParamField path="country" type="string">
+  Landcode voor locatie-specifieke inhoud
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="integer">
+  Wachttijd in milliseconden voor JavaScript-rendering
+</ParamField>
+
+<ParamField path="parser" type="string">
+  Optionele parser-ID voor gespecialiseerde extractie
+</ParamField>
+
+<CodeGroup>
+```python Batch Scraping
+from langchain_olostep import scrape_batch
+import asyncio
+
+# Scrape meerdere URL's
+result = asyncio.run(scrape_batch.ainvoke({
+    "urls": [
+        "https://example1.com",
+        "https://example2.com",
+        "https://example3.com"
+    ],
+    "format": "markdown"
+}))
+
+print(result)
+# Geeft terug: {"batch_id": "batch_xxx", "status": "in_progress", ...}
+```
+</CodeGroup>
+
+### answer_question
+
+Doorzoek het web en krijg AI-gestuurde antwoorden met bronnen. Perfect voor data verrijking en onderzoek.
+
+<ParamField path="task" type="string" required>
+  Vraag of taak om naar te zoeken
+</ParamField>
+
+<ParamField path="json_schema" type="object">
+  Optioneel JSON-schema dict/string dat het gewenste uitvoerformaat beschrijft
+</ParamField>
+
+<CodeGroup>
+```python Simple Question
+from langchain_olostep import answer_question
+import asyncio
+
+# Stel een eenvoudige vraag
+result = asyncio.run(answer_question.ainvoke({
+    "task": "Wat is de hoofdstad van Frankrijk?"
+}))
+
+print(result)
+# Geeft terug: {"answer": {"result": "Parijs"}, "sources": [...]}
+```
+
+```python Structured Output
+# Krijg gestructureerde data met JSON-schema
+result = asyncio.run(answer_question.ainvoke({
+    "task": "Wat is het laatste boek van J.K. Rowling?",
+    "json_schema": {
+        "book_title": "",
+        "author": "",
+        "release_date": ""
+    }
+}))
+
+print(result)
+# Geeft gestructureerd antwoord met bronnen
+```
+
+```python Data Enrichment
+# Verrijk bedrijfsgegevens
+result = asyncio.run(answer_question.ainvoke({
+    "task": "Vind de CEO en het hoofdkantoor van Stripe",
+    "json_schema": {
+        "ceo_name": "",
+        "headquarters": "",
+        "founded_year": ""
+    }
+}))
+
+# Behandelt onzekerheid met "NOT_FOUND" waarden
+```
+</CodeGroup>
+
+### extract_urls
+
+Haal alle URL's van een website op voor analyse van de sitestructuur.
+
+<ParamField path="url" type="string" required>
+  Website-URL om URL's van op te halen
+</ParamField>
+
+<ParamField path="search_query" type="string">
+  Optionele zoekopdracht om URL's te filteren
+</ParamField>
+
+<ParamField path="top_n" type="integer">
+  Beperk het aantal geretourneerde URL's
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  Glob-patronen om op te nemen (bijv. ["/blog/**"])
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  Glob-patronen om uit te sluiten (bijv. ["/admin/**"])
+</ParamField>
+
+<CodeGroup>
+```python Extract All URLs
+from langchain_olostep import extract_urls
+import asyncio
+
+# Haal alle URL's van een website op
+result = asyncio.run(extract_urls.ainvoke({
+    "url": "https://example.com",
+    "top_n": 100
+}))
+
+print(result)
+# Geeft terug: {"urls": [...], "total_urls": 100, ...}
+```
+
+```python Filter URLs
+# Haal alleen blog-URL's op
+result = asyncio.run(extract_urls.ainvoke({
+    "url": "https://example.com",
+    "include_urls": ["/blog/**"],
+    "exclude_urls": ["/admin/**", "/private/**"],
+    "top_n": 50
+}))
+```
+</CodeGroup>
+
+### crawl_website
+
+Ontdek en scrape zelfstandig volledige websites door links te volgen.
+
+<ParamField path="start_url" type="string" required>
+  Start-URL voor de crawl
+</ParamField>
+
+<ParamField path="max_pages" type="integer" default="100">
+  Maximum aantal pagina's om te crawlen
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  Glob-patronen om op te nemen (bijv. ["/**"] voor alles)
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  Glob-patronen om uit te sluiten (bijv. ["/admin/**"])
+</ParamField>
+
+<ParamField path="max_depth" type="integer">
+  Maximale diepte om te crawlen vanaf start_url
+</ParamField>
+
+<ParamField path="include_external" type="boolean" default="false">
+  Inclusief externe URL's
+</ParamField>
+
+<CodeGroup>
+```python Crawl Website
+from langchain_olostep import crawl_website
+import asyncio
+
+# Crawl volledige documentatiesite
+result = asyncio.run(crawl_website.ainvoke({
+    "start_url": "https://docs.example.com",
+    "max_pages": 100
+}))
+
+print(result)
+# Geeft terug: {"crawl_id": "crawl_xxx", "status": "in_progress", ...}
+```
+
+```python With Filters
+# Crawl met URL-filters
+result = asyncio.run(crawl_website.ainvoke({
+    "start_url": "https://example.com",
+    "max_pages": 200,
+    "include_urls": ["/**"],
+    "exclude_urls": ["/admin/**", "/private/**"],
+    "max_depth": 3
+}))
+```
+</CodeGroup>
+
+## LangChain Agent Integratie
+
+Bouw intelligente agenten die het web kunnen doorzoeken en scrapen:
+
+<CodeGroup>
+```python Basic Agent
+from langchain.agents import initialize_agent, AgentType
+from langchain_openai import ChatOpenAI
+from langchain_olostep import (
+    scrape_website,
+    answer_question,
+    extract_urls
+)
+
+# Maak agent met Olostep-tools
+tools = [scrape_website, answer_question, extract_urls]
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+
+# Gebruik de agent
+result = agent.run("""
+Onderzoek het bedrijf op https://company.com:
+1. Scrape hun over ons pagina
+2. Zoek naar hun laatste financieringsronde
+3. Haal al hun productpagina's op
+""")
+
+print(result)
+```
+</CodeGroup>
+
+## LangGraph Integratie
+
+Bouw complexe meerstapsworkflows met LangGraph:
+
+<CodeGroup>
+```python Research Agent
+from langgraph.graph import StateGraph, END
+from langchain_olostep import (
+    scrape_website,
+    scrape_batch,
+    answer_question,
+    extract_urls
+)
+from langchain_openai import ChatOpenAI
+import json
+
+def create_research_agent():
+    workflow = StateGraph(dict)
+    
+    def discover_pages(state):
+        # Haal alle URL's van de doelwebsite op
+        result = extract_urls.invoke({
+            "url": state["target_url"],
+            "include_urls": ["/product/**"],
+            "top_n": 50
+        })
+        state["urls"] = json.loads(result)["urls"]
+        return state
+    
+    def scrape_pages(state):
+        # Scrape ontdekte pagina's in batch
+        result = scrape_batch.invoke({
+            "urls": state["urls"],
+            "format": "markdown"
+        })
+        state["batch_id"] = json.loads(result)["batch_id"]
+        return state
+    
+    def answer_questions(state):
+        # Gebruik AI om vragen over de data te beantwoorden
+        result = answer_question.invoke({
+            "task": state["research_question"],
+            "json_schema": state["desired_format"]
+        })
+        state["answer"] = json.loads(result)["answer"]
+        return state
+    
+    workflow.add_node("discover", discover_pages)
+    workflow.add_node("scrape", scrape_pages)
+    workflow.add_node("analyze", answer_questions)
+    
+    workflow.set_entry_point("discover")
+    workflow.add_edge("discover", "scrape")
+    workflow.add_edge("scrape", "analyze")
+    workflow.add_edge("analyze", END)
+    
+    return workflow.compile()
+
+# Gebruik de agent
+agent = create_research_agent()
+result = agent.invoke({
+    "target_url": "https://store.com",
+    "research_question": "Wat zijn de top 5 duurste producten?",
+    "desired_format": {
+        "products": [{"name": "", "price": "", "url": ""}]
+    }
+})
+```
+</CodeGroup>
+
+## Geavanceerde Gebruiksscenario's
+
+### Data Verrijking
+
+Verrijk spreadsheetgegevens met webinformatie:
+
+```python
+from langchain_olostep import answer_question
+
+bedrijven = ["Stripe", "Shopify", "Square"]
+
+for bedrijf in bedrijven:
+    result = answer_question.invoke({
+        "task": f"Vind informatie over {bedrijf}",
+        "json_schema": {
+            "ceo": "",
+            "headquarters": "",
+            "employee_count": "",
+            "latest_funding": ""
+        }
+    })
+    print(f"{bedrijf}: {result}")
+```
+
+### E-commerce Product Scraping
+
+Scrape productgegevens met gespecialiseerde parsers:
+
+```python
+from langchain_olostep import scrape_website
+
+# Scrape Amazon-product
+result = scrape_website.invoke({
+    "url": "https://www.amazon.com/dp/PRODUCT_ID",
+    "parser": "@olostep/amazon-product",
+    "format": "json"
+})
+# Geeft gestructureerde productgegevens terug: prijs, titel, beoordeling, enz.
+```
+
+### SEO Audit
+
+Analyseer volledige websites voor SEO:
+
+```python
+from langchain_olostep import extract_urls, scrape_batch
+import json
+
+# 1. Ontdek alle pagina's
+urls_result = extract_urls.invoke({
+    "url": "https://yoursite.com",
+    "top_n": 1000
+})
+
+# 2. Scrape alle pagina's
+urls = json.loads(urls_result)["urls"]
+batch_result = scrape_batch.invoke({
+    "urls": urls,
+    "format": "html"
+})
+```
+
+### Documentatie Scraping
+
+Crawl en haal documentatie op:
+
+```python
+from langchain_olostep import crawl_website
+
+# Crawl volledige documentatiesite
+result = crawl_website.invoke({
+    "start_url": "https://docs.example.com",
+    "max_pages": 500,
+    "include_urls": ["/docs/**"],
+    "exclude_urls": ["/api/**", "/v1/**"]
+})
+```
+
+## Gespecialiseerde Parsers
+
+Olostep biedt vooraf gebouwde parsers voor populaire websites:
+
+- `@olostep/google-search` - Google zoekresultaten
+
+Gebruik ze met de `parser` parameter:
+
+```python
+scrape_website.invoke({
+    "url": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "parser": "@olostep/google-search"
+})
+```
+
+## Foutafhandeling
+
+```python
+from langchain_core.exceptions import LangChainException
+
+try:
+    result = await scrape_website.ainvoke({
+        "url": "https://example.com"
+    })
+except LangChainException as e:
+    print(f"Scraping mislukt: {e}")
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Gebruik Batchverwerking voor Meerdere URL's">
+    Wanneer je meer dan 3-5 URL's scrapt, gebruik `scrape_batch` in plaats van meerdere `scrape_website` oproepen. Batchverwerking is veel sneller en kosteneffectiever.
+  </Accordion>
+
+  <Accordion title="Stel Passende Time-outs In">
+    Voor JavaScript-intensieve sites, gebruik de `wait_before_scraping` parameter (2000-5000ms is typisch). Dit zorgt ervoor dat dynamische inhoud volledig is geladen.
+  </Accordion>
+
+  <Accordion title="Gebruik Gespecialiseerde Parsers">
+    Voor populaire websites (Amazon, LinkedIn, Google), gebruik onze vooraf gebouwde parsers om automatisch gestructureerde data te krijgen.
+  </Accordion>
+
+  <Accordion title="Filter URL's Efficiënt">
+    Bij het gebruik van `extract_urls` of `crawl_website`, gebruik glob-patronen om je te richten op relevante pagina's en onnodige verwerking te vermijden.
+  </Accordion>
+
+  <Accordion title="Behandel Snelheidslimieten">
+    Implementeer exponentiële backoff voor snelheidslimietfouten. De API behandelt de meeste snelheidslimieten intern automatisch.
+  </Accordion>
+</AccordionGroup>
+
+## Ondersteuning
+
+- **PyPI Package**: [langchain-olostep](https://pypi.org/project/langchain-olostep/)
+- **Documentatie**: [docs.olostep.com](https://docs.olostep.com)
+- **Problemen**: [GitHub Issues](https://github.com/olostep/langchain-olostep/issues)
+- **E-mail**: info@olostep.com
+
+## Gerelateerde Bronnen
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Leer meer over het Scrapes eindpunt
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Leer meer over het Batches eindpunt
+  </Card>
+  
+  <Card title="Answers API" icon="question" href="/features/answers/answers">
+    Leer meer over het Answers eindpunt
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Leer meer over het Maps eindpunt
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Leer meer over het Crawls eindpunt
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    Ontdek de Python SDK
+  </Card>
+</CardGroup>

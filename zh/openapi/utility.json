@@ -1,0 +1,113 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "实用程序 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer 认证头的格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/retrieve": {
+      "get": {
+        "summary": "获取页面内容",
+        "description": "使用其 `retrieve_id` 获取已抓取页面的内容。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "retrieve_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "要获取的页面内容的 ID。可在 `/v1/crawls/{crawl_id}/pages`、`/v1/scrapes/{scrape_id}` 或 `/v1/batches/{batch_id}/items` 端点的响应中找到。"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown",
+                  "json"
+                ]
+              }
+            },
+            "description": "可选数组，用于在生产中仅获取特定格式。如果未提供，将返回所有格式。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应页面内容。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "html_content": {
+                      "type": "string",
+                      "description": "页面 HTML 内容（如果请求并可用）。"
+                    },
+                    "markdown_content": {
+                      "type": "string",
+                      "description": "页面 Markdown 内容（如果请求并可用）。"
+                    },
+                    "json_content": {
+                      "type": "string",
+                      "description": "从解析器返回的页面 JSON 内容（如果请求并可用）。"
+                    },
+                    "html_hosted_url": {
+                      "type": "string",
+                      "description": "HTML 的 S3 存储桶 URL。7 天后过期。"
+                    },
+                    "markdown_hosted_url": {
+                      "type": "string",
+                      "description": "Markdown 的 S3 存储桶 URL。7 天后过期。"
+                    },
+                    "json_hosted_url": {
+                      "type": "string",
+                      "description": "JSON 的 S3 存储桶 URL。7 天后过期。"
+                    },
+                    "size_exceeded": {
+                      "type": "boolean",
+                      "description": "如果内容对象的大小超过 6MB 限制。如果为 true，请使用托管的 S3 URL 获取内容。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数错误或缺失导致的错误请求。"
+          },
+          "404": {
+            "description": "未找到提供的 `retrieve_id` 的内容。"
+          },
+          "500": {
+            "description": "内部服务器错误。"
+          }
+        }
+      }
+    }
+  }
+}

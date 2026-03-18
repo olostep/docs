@@ -1,0 +1,565 @@
+---
+sidebarTitle: "スケジュール"
+title: "スケジュール"
+description: "指定した時間に自動的に実行されるようにAPIコールをスケジュールする"
+icon: "clock"
+---
+
+Olostepの`/v1/schedules`エンドポイントを通じて、指定した時間に自動的に実行されるようにAPIコールをスケジュールできます。cron式や自然言語を使用して、一度だけの実行や定期的なタスクをスケジュールします。
+
+- 特定の日時に一度だけの実行をスケジュール
+- cron式を使用して定期的なスケジュールを作成
+- 自然言語テキストを使用してcron式を自動生成
+- HTTPエンドポイント（GETまたはPOST）をスケジュール
+- POSTリクエストの場合、短縮形のOlostepエンドポイント（自動的にプレフィックスが付与される）または完全なURLを使用
+- 任意のペイロードを渡すことが可能 - ペイロードは指定した通りに送信されます
+- スケジュールのライフサイクルを自動管理
+
+APIの詳細については、[スケジュールエンドポイントAPIリファレンス](/api-reference/schedules/create)を参照してください。
+
+## インストール
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: ビルトインのcurlで問題ありません
+```
+
+</CodeGroup>
+
+## スケジュールを作成する
+
+APIコールを自動的に実行するスケジュールを作成します。一度だけのスケジュールやcron式を使用した定期的なスケジュールを作成できます。`endpoint`は任意のURL（Olostepエンドポイントに限定されません）であり、`payload`には送信したい任意のデータを含めることができます。
+
+### 一度だけのスケジュール
+
+特定の日時に一度だけ実行するAPIコールをスケジュールします。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 1時間後にスクレイプを実行するようにスケジュール
+execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
+
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "execute_at": execute_at,
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1時間後
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### cron式を使用した定期的なスケジュール
+
+cron式を使用して定期的なスケジュールを作成します。cron式は6つのフィールド形式を使用します：分 時間 日 月 曜日 年。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 毎日10時にスクレイプを実行するようにスケジュール
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    cron_expression: '0 10 * * ? *', // 毎日10時
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### 自然言語によるスケジューリング
+
+自然言語テキストを使用してcron式を自動生成します。システムはあなたのテキストを有効なcron式に変換します。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 自然言語を使用してスケジュール
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "text": "every 3 minutes",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    text: 'every Monday at 9am',
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "text": "every day at 10am",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+## レスポンス形式
+
+スケジュールを作成すると、以下のプロパティを持つスケジュールオブジェクトを受け取ります：
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "recurring",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "cron_expression": "0 10 * * ? *",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T10:00:00.000Z"
+}
+```
+
+一度だけのスケジュールの場合、レスポンスには`cron_expression`の代わりに`execute_at`が含まれます：
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "onetime",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "execute_at": "2025-01-15T10:00:00.000Z",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T09:00:00.000Z"
+}
+```
+
+## スケジュールを一覧表示
+
+チームのすべてのスケジュールを取得します。デフォルトでは、削除されたスケジュールはフィルタリングされます。`include_deleted`クエリパラメータを使用して、削除されたスケジュールを含めることができます。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules", headers=headers)
+result = response.json()
+print(f"Total schedules: {result['count']}")
+for schedule in result['schedules']:
+    print(json.dumps(schedule, indent=2))
+
+# 削除されたスケジュールを含めるには:
+# response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(`Total schedules: ${result.count}`)
+result.schedules.forEach(s => console.log(s))
+
+// 削除されたスケジュールを含めるには:
+// const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# 削除されたスケジュールを含めるには:
+# curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
+#   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## スケジュールを取得
+
+IDで単一のスケジュールを取得します。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## スケジュールを削除
+
+IDでスケジュールを削除します。これにより、将来の実行が停止します。
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.delete(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## サポートされているエンドポイント
+
+### Olostepエンドポイント（短縮形）
+
+POSTリクエストの場合、Olostepエンドポイントの短縮形を使用できます。システムはこれらに自動的に`https://api.olostep.com/`をプレフィックスします：
+
+- `v1/scrapes` - ウェブスクレイピングタスクをスケジュール
+- `v1/batches` - バッチ処理ジョブをスケジュール
+- `v1/crawls` - ウェブサイトクロール操作をスケジュール
+- `v1/maps` - マップデータ抽出をスケジュール
+- `v1/answers` - 回答生成をスケジュール
+
+### 完全なURL
+
+エンドポイントに完全なURLを提供することもできます。これは外部APIやWebhookに必要です：
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# 外部APIへのコールをスケジュール
+payload = {
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+        "custom_field": "any value",
+        "data": {"nested": "structure"},
+        "timestamp": datetime.now().isoformat()
+    },
+    "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'https://api.example.com/webhook',
+    payload: {
+      custom_field: 'any value',
+      data: { nested: 'structure' },
+      timestamp: new Date().toISOString()
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+      "custom_field": "any value",
+      "data": {"nested": "structure"}
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+`payload`フィールドは任意のJSONオブジェクトを受け入れます - ターゲットエンドポイントに必要なように構造化できます。
+
+## Cron式の形式
+
+Cron式は6つのフィールド形式を使用します：
+
+```
+minute hour day month day-of-week year
+```
+
+例:
+- `0/3 * * * ? *` - 3分ごと
+- `0 10 * * ? *` - 毎日10:00 AM
+- `0 9 ? * MON *` - 毎週月曜日の9:00 AM
+- `0 0 1 * ? *` - 毎月の最初の日の真夜中
+
+指定されていない場合は、日または曜日に`?`を使用します。
+
+## 自然言語の例
+
+スケジュールを記述するために自然言語を使用できます。システムはそれらを自動的にcron式に変換します：
+
+- "every 3 minutes" → `0/3 * * * ? *`
+- "every day at 10am" → `0 10 * * ? *`
+- "every Monday at 9am" → `0 9 ? * MON *`
+- "every hour" → `0 * * * ? *`
+- "every week on Monday" → `0 0 ? * MON *`
+
+## 重要な注意事項
+
+- 一度だけのスケジュールは実行後に自動的に削除されます
+- 定期的なスケジュールは手動で削除されるまで続行します
+- タイムゾーンは有効なIANAタイムゾーン識別子でなければなりません（例："UTC", "America/New_York", "Europe/London"）
+- `execute_at`の日時は未来でなければなりません
+- 自然言語の変換には再試行が必要な場合があります。システムは最大3回試行します
+- 自然言語テキスト（`text`パラメータ）を使用する場合、タイムゾーンはデフォルトで"UTC"になります
+- スケジュールは指定されたペイロードでAPIコールを正確に実行します - 必要な任意のJSON構造を渡すことができます
+- POSTリクエストの場合、短縮形のOlostepエンドポイント（`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`）は自動的に`https://api.olostep.com/`がプレフィックスされます
+- 他のエンドポイントの場合、完全なURLを提供してください
+- `payload`は任意のデータ構造を含むことができます - ターゲットエンドポイントにそのまま送信されます
+- 既に削除されたスケジュールを削除すると400エラーが返されます
+
+## 料金
+
+スケジュール自体は無料です。スケジュールが実行されたときに実行されるAPIコールに対してのみ料金が発生します。例えば、スクレイプをスケジュールした場合、実行ごとに1クレジット（またはパーサーやLLM抽出を使用する場合はそれ以上）が課金されます。

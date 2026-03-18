@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API des Réponses",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    }
+  },
+  "paths": {
+    "/v1/answers": {
+      "post": {
+        "summary": "Créer une Réponse",
+        "description": "L'IA effectuera des actions comme la recherche et la navigation sur des pages web pour trouver la réponse à la tâche fournie. Le temps d'exécution est de 3 à 30 secondes selon la complexité.  Pour les tâches plus longues, utilise plutôt le point de terminaison agent. Voir [Fonctionnalité Agent](/features/agents/agents). Voir [Fonctionnalité Réponses](/features/answers/answers).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "La tâche à effectuer."
+                  },
+                  "json_format": {
+                    "type": "object",
+                    "description": "L'objet JSON de sortie souhaité avec des valeurs vides comme schéma, ou décris simplement les données que tu veux sous forme de chaîne."
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec la réponse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise Requête (Tâche Manquante)"
+          },
+          "402": {
+            "description": "Clé API Invalide"
+          },
+          "500": {
+            "description": "Erreur Interne du Serveur"
+          }
+        }
+      }
+    },
+    "/v1/answers/{answer_id}": {
+      "get": {
+        "summary": "Obtenir une Réponse",
+        "description": "Ce point de terminaison récupère une réponse précédemment complétée par son ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "answer_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour la réponse à récupérer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec l'objet réponse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Clé API Invalide"
+          },
+          "404": {
+            "description": "Réponse Non Trouvée"
+          },
+          "500": {
+            "description": "Erreur Interne du Serveur"
+          }
+        }
+      }
+    }
+  }
+}

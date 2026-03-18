@@ -1,0 +1,565 @@
+---
+sidebarTitle: "Pianificazione"
+title: "Pianificazione"
+description: "Pianifica chiamate API per eseguirle automaticamente a orari specificati"
+icon: "clock"
+---
+
+Attraverso l'endpoint Olostep `/v1/schedules` puoi pianificare chiamate API da eseguire automaticamente a orari specificati. Pianifica esecuzioni una tantum o attività ricorrenti utilizzando espressioni cron o linguaggio naturale.
+
+- Pianifica esecuzioni una tantum a una data e ora specifica
+- Crea pianificazioni ricorrenti utilizzando espressioni cron
+- Usa testo in linguaggio naturale per generare automaticamente espressioni cron
+- Pianifica endpoint HTTP (GET o POST)
+- Per richieste POST, usa endpoint Olostep in forma breve (prefissi automatici) o URL completi
+- Passa qualsiasi payload desideri - il payload viene inviato esattamente come lo specifichi
+- Gestisci automaticamente il ciclo di vita della pianificazione
+
+Per i dettagli sull'API, consulta la [Riferimento API dell'Endpoint di Pianificazione](/api-reference/schedules/create).
+
+## Installazione
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: il curl integrato va bene
+```
+
+</CodeGroup>
+
+## Crea una pianificazione
+
+Crea una pianificazione per eseguire automaticamente chiamate API. Puoi creare pianificazioni una tantum o ricorrenti utilizzando espressioni cron. L'`endpoint` può essere qualsiasi URL (non limitato agli endpoint Olostep), e il `payload` può contenere qualsiasi dato tu voglia inviare.
+
+### Pianificazione una tantum
+
+Pianifica una chiamata API da eseguire una volta a una data e ora specifica.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Pianifica uno scraping da eseguire tra 1 ora
+execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
+
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "execute_at": execute_at,
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 ora da adesso
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### Pianificazione ricorrente con espressione cron
+
+Crea una pianificazione ricorrente utilizzando un'espressione cron. Le espressioni cron usano un formato a 6 campi: minuto ora giorno mese giorno-della-settimana anno.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Pianifica uno scraping da eseguire ogni giorno alle 10:00 UTC
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    cron_expression: '0 10 * * ? *', // Ogni giorno alle 10:00 UTC
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### Pianificazione con linguaggio naturale
+
+Usa testo in linguaggio naturale per generare automaticamente espressioni cron. Il sistema convertirà il tuo testo in un'espressione cron valida.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Pianifica usando il linguaggio naturale
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "text": "ogni 3 minuti",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    text: 'ogni lunedì alle 9:00',
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "text": "ogni giorno alle 10:00",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+## Formato della risposta
+
+Quando crei una pianificazione, riceverai un oggetto pianificazione con le seguenti proprietà:
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "recurring",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "cron_expression": "0 10 * * ? *",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T10:00:00.000Z"
+}
+```
+
+Per le pianificazioni una tantum, la risposta include `execute_at` invece di `cron_expression`:
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "onetime",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "execute_at": "2025-01-15T10:00:00.000Z",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T09:00:00.000Z"
+}
+```
+
+## Elenco delle pianificazioni
+
+Recupera tutte le pianificazioni per il tuo team. Per impostazione predefinita, le pianificazioni eliminate sono filtrate. Usa il parametro di query `include_deleted` per includerle.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules", headers=headers)
+result = response.json()
+print(f"Totale pianificazioni: {result['count']}")
+for schedule in result['schedules']:
+    print(json.dumps(schedule, indent=2))
+
+# Per includere le pianificazioni eliminate:
+# response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(`Totale pianificazioni: ${result.count}`)
+result.schedules.forEach(s => console.log(s))
+
+// Per includere le pianificazioni eliminate:
+// const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Per includere le pianificazioni eliminate:
+# curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
+#   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Ottieni una pianificazione
+
+Recupera una singola pianificazione tramite il suo ID.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Elimina una pianificazione
+
+Elimina una pianificazione tramite il suo ID. Questo interromperà qualsiasi esecuzione futura.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.delete(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Endpoint supportati
+
+### Endpoint Olostep (forma breve)
+
+Per le richieste POST, puoi usare forme brevi per gli endpoint Olostep. Il sistema premetterà automaticamente `https://api.olostep.com/` per questi:
+
+- `v1/scrapes` - Pianifica attività di web scraping
+- `v1/batches` - Pianifica lavori di elaborazione batch
+- `v1/crawls` - Pianifica operazioni di crawling di siti web
+- `v1/maps` - Pianifica estrazioni di dati da mappe
+- `v1/answers` - Pianifica generazione di risposte
+
+### URL completi
+
+Puoi anche fornire URL completi per i tuoi endpoint. Questo è richiesto per API esterne o webhook:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Pianifica una chiamata a un'API esterna
+payload = {
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+        "custom_field": "any value",
+        "data": {"nested": "structure"},
+        "timestamp": datetime.now().isoformat()
+    },
+    "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'https://api.example.com/webhook',
+    payload: {
+      custom_field: 'any value',
+      data: { nested: 'structure' },
+      timestamp: new Date().toISOString()
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+      "custom_field": "any value",
+      "data": {"nested": "structure"}
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+Il campo `payload` accetta qualsiasi oggetto JSON - puoi strutturarlo come necessario per il tuo endpoint di destinazione.
+
+## Formato delle espressioni cron
+
+Le espressioni cron usano un formato a 6 campi:
+
+```
+minuto ora giorno mese giorno-della-settimana anno
+```
+
+Esempi:
+- `0/3 * * * ? *` - Ogni 3 minuti
+- `0 10 * * ? *` - Ogni giorno alle 10:00
+- `0 9 ? * MON *` - Ogni lunedì alle 9:00
+- `0 0 1 * ? *` - Primo giorno di ogni mese a mezzanotte
+
+Usa `?` per giorno del mese o giorno della settimana quando non specificato.
+
+## Esempi di linguaggio naturale
+
+Puoi usare il linguaggio naturale per descrivere le pianificazioni. Il sistema le convertirà automaticamente in espressioni cron:
+
+- "ogni 3 minuti" → `0/3 * * * ? *`
+- "ogni giorno alle 10:00" → `0 10 * * ? *`
+- "ogni lunedì alle 9:00" → `0 9 ? * MON *`
+- "ogni ora" → `0 * * * ? *`
+- "ogni settimana il lunedì" → `0 0 ? * MON *`
+
+## Note importanti
+
+- Le pianificazioni una tantum vengono automaticamente eliminate dopo l'esecuzione
+- Le pianificazioni ricorrenti continuano fino a quando non vengono eliminate manualmente
+- Il fuso orario deve essere un identificatore di fuso orario IANA valido (es. "UTC", "America/New_York", "Europe/London")
+- La data e ora `execute_at` deve essere nel futuro
+- La conversione del linguaggio naturale potrebbe richiedere tentativi; il sistema tenterà fino a 3 volte
+- Quando si utilizza il testo in linguaggio naturale (parametro `text`), il fuso orario predefinito è "UTC"
+- Le pianificazioni eseguono la chiamata API con il payload fornito esattamente come specificato - puoi passare qualsiasi struttura JSON necessaria
+- Per le richieste POST, gli endpoint Olostep in forma breve (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) sono automaticamente prefissi con `https://api.olostep.com/`
+- Per altri endpoint, fornisci l'URL completo
+- Il `payload` può contenere qualsiasi struttura dati - viene inviato così com'è al tuo endpoint di destinazione
+- Eliminare una pianificazione già eliminata restituirà un errore 400
+
+## Prezzi
+
+Le pianificazioni stesse sono gratuite. Paghi solo per le chiamate API che vengono eseguite quando la pianificazione viene eseguita. Ad esempio, se pianifichi uno scraping, ti verrà addebitato 1 credito per esecuzione (o di più se utilizzi parser o estrazione LLM).

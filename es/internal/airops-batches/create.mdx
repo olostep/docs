@@ -1,0 +1,88 @@
+---
+title: "Crear Lote de AirOps"
+description: "Inicia un lote con extracción automatizada de metadatos de página y detección de marca"
+openapi: "POST /v1/batches-airops"
+---
+
+## Resumen
+
+Crea un nuevo lote de AirOps que:
+1. Raspa todas las URLs proporcionadas
+2. Extrae metadatos estructurados automáticamente
+3. Identifica elementos con campos faltantes
+4. Enriquece elementos incompletos a través de LLM
+5. Devuelve resultados unificados para todas las URLs
+
+## Parámetros de Solicitud
+
+<ParamField body="items" type="array" required>
+  Array de URLs a procesar. Cada elemento requiere:
+  - `url` - URL válida para raspar
+  - `custom_id` - Tu identificador único (1-255 caracteres)
+</ParamField>
+
+<ParamField body="brands" type="array" default="[]">
+  Nombres de marcas a buscar en el contenido de la página. El LLM detectará menciones de estas marcas específicas y devolverá coincidencias en el campo `brand_mentions`.
+  
+  ```json
+  {
+    "brands": ["Acme Corp", "TechBrand", "SaaS Pro"]
+  }
+  ```
+</ParamField>
+
+<ParamField body="country" type="string" default="RANDOM">
+  País para raspado geo-dirigido. Usa códigos ISO 3166-1 alfa-2 (`US`, `GB`, `DE`) o `RANDOM`.
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  URL para recibir notificaciones de webhook. Todos los eventos del ciclo de vida para este lote se enviarán aquí.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Pares clave-valor personalizados adjuntos al lote. Estilo Stripe: máximo 50 claves, clave ≤40 caracteres, valor ≤500 caracteres.
+</ParamField>
+
+## Respuesta
+
+La respuesta incluye el ID del lote y el estado inicial del flujo de trabajo:
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch_airops",
+  "created": 1705315200000,
+  "total_urls": 100,
+  "status": {
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```

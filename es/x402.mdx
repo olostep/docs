@@ -1,0 +1,220 @@
+---
+title: "Pago por uso (x402)"
+icon: "dollar-sign"
+description: "Endpoints de API de pago por uso con stablecoins"
+---
+
+## Descripción general
+
+Ahora también puedes usar los endpoints de la API de Olostep con pagos por uso utilizando stablecoins.
+
+Estos endpoints utilizan el protocolo de pago x402, permitiendo acceso de pago por uso con pagos en stablecoins. Cada solicitud requiere un encabezado de pago para autenticación y pago.
+
+<Info>
+  **Endpoints de Pago por Uso**
+  
+  Todos los endpoints listados a continuación aceptan pagos en stablecoins a través del protocolo x402. No se requiere suscripción: paga solo por lo que usas.
+</Info>
+
+## Autenticación
+
+Incluye el encabezado de pago con tus solicitudes:
+
+```
+X-Payment: {{paymentHeader}}
+```
+
+El pago se procesa y verifica automáticamente antes de que se cumpla tu solicitud.
+
+---
+
+## API de Olostep
+
+### Endpoints habilitados para pago
+
+#### POST /v1/maps
+
+Este endpoint permite a los usuarios obtener todas las URLs de un sitio web determinado. Puede tardar hasta 120 segundos para sitios web complejos. Para sitios web grandes, los resultados se paginan utilizando paginación basada en cursor.
+
+**Precio:** $0.01 por solicitud
+
+**Red:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/maps' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url": "example",
+    "search_query": "example",
+    "top_n": 123,
+    "include_subdomain": true,
+    "include_urls": "",
+    "exclude_urls": "",
+    "cursor": "example"
+  }'
+```
+
+#### POST /v1/scrapes
+
+Inicia un raspado de página web
+
+**Precio:** $0.01 por solicitud
+
+**Red:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/scrapes' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url_to_scrape": "example",
+    "wait_before_scraping": "",
+    "formats": "",
+    "remove_css_selectors": "example",
+    "actions": "",
+    "country": "example",
+    "transformer": "example",
+    "remove_images": true,
+    "remove_class_names": "",
+    "parser": "",
+    "llm_extract": "",
+    "links_on_page": "",
+    "screen_size": "",
+    "metadata": ""
+  }'
+```
+
+#### POST /v1/crawls
+
+Inicia un nuevo rastreo. Recibirás un `id` para seguir el progreso. La operación puede tardar de 1 a 10 minutos dependiendo del sitio y los parámetros de profundidad y páginas.
+
+**Precio:** Dinámico - calculado por solicitud basado en el uso
+
+<Note>
+  Este endpoint utiliza precios dinámicos. El costo real se determina por tus parámetros de solicitud y se mostrará en la respuesta 402 Payment Required antes de procesar.
+</Note>
+
+**Red:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/crawls' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "start_url": "example",
+    "max_pages": 123,
+    "include_urls": "",
+    "exclude_urls": "",
+    "max_depth": 123,
+    "include_external": true,
+    "include_subdomain": true,
+    "search_query": "example",
+    "top_n": 123,
+    "webhook_url": "example",
+    "timeout": 123
+  }'
+```
+
+#### POST /v1/answers
+
+La IA realizará acciones como buscar y navegar por páginas web para encontrar la respuesta a la tarea proporcionada. El tiempo de ejecución es de 3-30s dependiendo de la complejidad. Para tareas más largas, utiliza el endpoint de agente en su lugar.
+
+**Precio:** $0.05 por solicitud
+
+**Red:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/answers' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "task": "example",
+    "json_format": ""
+  }'
+```
+
+### Endpoints estándar
+
+Estos endpoints no requieren pago:
+
+- **GET** `/v1/crawls/{crawl_id}` - Obtiene información sobre un rastreo específico.
+- **GET** `/v1/batches/{batch_id}/items` - Recupera la lista de elementos procesados para un lote. Luego puedes usar el `retrieve_id` para obtener el contenido con el Endpoint de Recuperación.
+- **GET** `/v1/crawls/{crawl_id}/pages` - Obtiene la lista de páginas para un rastreo específico.
+- **GET** `/v1/batches/{batch_id}` - Recupera el estado y la información de progreso sobre un lote. Para recuperar el contenido de un lote, consulta aquí.
+- **GET** `/v1/answers/{answer_id}` - Este endpoint recupera una respuesta previamente completada por su ID.
+- **GET** `/v1/scrapes/{scrape_id}` - Puede usarse para recuperar la respuesta de un raspado.
+- **GET** `/v1/retrieve` - Recupera el contenido de la página de lotes procesados y URLs rastreadas.
+
+---
+
+## Cómo funciona x402
+
+El flujo de pago es manejado automáticamente por el SDK de x402:
+
+1. **Hacer Solicitud** - Envía una solicitud al endpoint
+2. **Pago Requerido** - El servidor responde con los requisitos de pago (estado 402)
+3. **Pago Automático** - El SDK crea y envía el pago automáticamente
+4. **Obtener Respuesta** - Recibe tu respuesta de la API
+
+## Empezando
+
+Instala el SDK de x402 para tu lenguaje:
+
+```bash
+# Node.js
+npm install x402-fetch viem
+
+# Python  
+pip install x402 eth-account
+```
+
+## Ejemplo de Uso
+
+<CodeGroup>
+```javascript Node.js
+import { wrapFetchWithPayment } from "x402-fetch";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY);
+const fetchWithPayment = wrapFetchWithPayment(fetch, account);
+
+// Realiza una solicitud pagada - el pago es automático
+const response = await fetchWithPayment("https://api.olostep.com/x402/v1/maps", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ /* tus datos */ })
+});
+
+const result = await response.json();
+console.log(result);
+```
+
+```python Python
+import requests
+from eth_account import Account
+from x402.clients.requests import x402_http_adapter
+
+account = Account.from_key(os.getenv("PRIVATE_KEY"))
+session = requests.Session()
+adapter = x402_http_adapter(account)
+session.mount("https://", adapter)
+
+# Realiza una solicitud pagada - el pago es automático
+response = session.post(
+    "https://api.olostep.com/x402/v1/maps",
+    json={"key": "value"}
+)
+
+print(response.json())
+```
+</CodeGroup>
+
+## Aprende Más
+
+- [Documentación del Protocolo x402](https://x402.org)
+- [Guía de Coinbase x402](https://docs.cdp.coinbase.com/x402/)
+
+---
+
+Desarrollado por [Orthogonal](https://orthogonal.sh)

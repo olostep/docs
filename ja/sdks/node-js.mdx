@@ -1,0 +1,244 @@
+---
+sidebarTitle: "NodeJS"
+title: "Olostep NodeJS SDK"
+icon: "node-js"
+description: "Webからデータを検索、抽出、構造化するための公式NodeJS SDK"
+---
+
+**NPMパッケージ**: [olostep](https://www.npmjs.com/package/olostep)
+
+## はじめに
+
+```bash
+npm install olostep
+```
+
+```ts
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
+
+// 最小限のスクレイピング例
+const result = await client.scrapes.create('https://example.com');
+console.log(result.id, result.html_content);
+```
+
+## 使用方法
+
+### スクレイピング
+
+さまざまなオプションを使用して単一のURLをスクレイピングします：
+
+```ts
+import Olostep, {Format} from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// シンプルなスクレイピング
+const scrape = await client.scrapes.create('https://example.com');
+
+// 複数のフォーマットで
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  formats: [Format.HTML, Format.MARKDOWN, Format.TEXT],
+  waitBeforeScraping: 1000,
+  removeImages: true
+});
+
+// コンテンツにアクセス
+console.log(scrape.html_content);
+console.log(scrape.markdown_content);
+
+// IDでスクレイプを取得
+const fetched = await client.scrapes.get(scrape.id);
+```
+
+### バッチ処理
+
+複数のURLを一度に処理します：
+
+```ts
+// URL文字列を使用（カスタムIDは自動生成）
+const batch = await client.batches.create([
+  'https://example.com',
+  'https://example.org',
+  'https://example.net'
+]);
+
+// または明示的なカスタムIDで
+const batch = await client.batches.create([
+  {url: 'https://example.com', customId: 'site-1'},
+  {url: 'https://example.org', customId: 'site-2'}
+]);
+
+console.log(`バッチ${batch.id}が${batch.total_urls}個のURLで作成されました`);
+
+// 完了を待つ
+await batch.waitTillDone({
+  checkEveryNSecs: 5,
+  timeoutSeconds: 120
+});
+
+// バッチ情報を取得
+const info = await batch.info();
+console.log(info);
+
+// 個々の結果をストリーム
+for await (const item of batch.items()) {
+  console.log(item.customId);
+}
+```
+
+### クロール
+
+ウェブサイト全体をクロールします：
+
+```ts
+const crawl = await client.crawls.create({
+  url: 'https://example.com',
+  maxPages: 100,
+  maxDepth: 3,
+  includeUrls: ['*/blog/*'],
+  excludeUrls: ['*/admin/*']
+});
+
+console.log(`クロール${crawl.id}が開始されました`);
+
+// 完了を待つ
+await crawl.waitTillDone({
+  checkEveryNSecs: 10,
+  timeoutSeconds: 300
+});
+
+// クロール情報を取得
+const info = await crawl.info();
+console.log(`クロールされたページ数: ${info.pages_crawled}`);
+
+// クロールされたページをストリーム
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.status_code);
+}
+```
+
+### サイトマッピング
+
+ウェブサイトからURLのサイトマップを生成します：
+
+```ts
+const map = await client.maps.create({
+  url: 'https://example.com',
+  topN: 100,
+  includeSubdomain: true,
+  searchQuery: 'blog posts'
+});
+
+console.log(`マップ${map.id}が作成されました`);
+
+// URLをストリーム
+for await (const url of map.urls()) {
+  console.log(url);
+}
+
+// マップ情報を取得
+const info = await map.info();
+```
+
+### コンテンツの取得
+
+以前にスクレイプされたコンテンツを取得します：
+
+```ts
+// 特定のフォーマットでコンテンツを取得
+const content = await client.retrieve(retrieveId, Format.MARKDOWN);
+console.log(content.markdown_content);
+
+// 複数のフォーマット
+const content = await client.retrieve(retrieveId, [
+  Format.HTML,
+  Format.MARKDOWN
+]);
+```
+
+### 高度なオプション
+
+#### カスタムアクション
+
+スクレイピング前にブラウザアクションを実行します：
+
+```ts
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  actions: [
+    {type: 'wait', milliseconds: 2000},
+    {type: 'click', selector: '#load-more'},
+    {type: 'scroll', distance: 1000},
+    {type: 'fill_input', selector: '#search', value: 'query'}
+  ]
+});
+```
+
+#### 地理的ロケーション
+
+事前定義された国コードまたは有効な国コード文字列を使用して異なる国からスクレイプします：
+
+```ts
+import Olostep, {Country} from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// 事前定義された列挙値を使用（US, DE, FR, GB, SG）
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  country: Country.DE  // ドイツ
+});
+
+// または有効な国コードを文字列として使用
+const scrape2 = await client.scrapes.create({
+  url: 'https://example.com',
+  country: 'jp'  // 日本
+});
+```
+
+#### LLM抽出
+
+LLMを使用して構造化データを抽出します：
+
+```ts
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  llmExtract: {
+    schema: {
+      title: 'string',
+      price: 'number',
+      description: 'string'
+    },
+    // オプションで抽出をガイドするプロンプトを提供
+    prompt: 'このページから製品情報を抽出してください'
+  }
+});
+```
+
+### クライアント設定
+
+```ts
+import Olostep from 'olostep';
+
+const client = new Olostep({
+  apiKey: 'your_api_key',
+  apiBaseUrl: 'https://api.olostep.com/v1',  // オプション
+  timeoutMs: 150000,  // 150秒（オプション）
+  retry: {
+    maxRetries: 3,
+    initialDelayMs: 1000
+  },
+  userAgent: 'MyApp/1.0'  // オプション
+});
+```
+
+### 機能のハイライト
+
+- 非同期ファーストのクライアントで、完全なTypeScriptサポート。
+- TypeScriptの列挙型とインターフェースを使用した型安全な入力（Formats, Countries, Actionsなど）。
+- 簡潔な呼び出し（`client.scrapes.create()`）と明示的なメソッド（`client.scrapes.get()`）を備えた豊富なリソースネームスペース。
+- リトライ、タイムアウト、JSONデコードを備えた共有トランスポートレイヤー。
+- 包括的なエラーハイアラーキー。

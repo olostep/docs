@@ -1,0 +1,565 @@
+---
+sidebarTitle: "Programar"
+title: "Programar"
+description: "Programa llamadas a la API para que se ejecuten automáticamente en momentos específicos"
+icon: "clock"
+---
+
+A través del endpoint de Olostep `/v1/schedules`, puedes programar llamadas a la API para que se ejecuten automáticamente en momentos específicos. Programa ejecuciones únicas o tareas recurrentes usando expresiones cron o lenguaje natural.
+
+- Programa ejecuciones únicas en una fecha y hora específicas
+- Crea programaciones recurrentes usando expresiones cron
+- Usa texto en lenguaje natural para generar automáticamente expresiones cron
+- Programa endpoints HTTP (GET o POST)
+- Para solicitudes POST, usa endpoints de Olostep en forma corta (prefijados automáticamente) o URLs completas
+- Envía cualquier payload que desees - el payload se envía exactamente como lo especifiques
+- Gestiona automáticamente el ciclo de vida de la programación
+
+Para detalles de la API, consulta la [Referencia de la API del Endpoint de Programación](/api-reference/schedules/create).
+
+## Instalación
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: el curl incorporado está bien
+```
+
+</CodeGroup>
+
+## Crear una programación
+
+Crea una programación para ejecutar llamadas a la API automáticamente. Puedes crear programaciones únicas o recurrentes usando expresiones cron. El `endpoint` puede ser cualquier URL (no limitado a endpoints de Olostep), y el `payload` puede contener cualquier dato que desees enviar.
+
+### Programación única
+
+Programa una llamada a la API para que se ejecute una vez en una fecha y hora específicas.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Programa un scrape para ejecutarse en 1 hora
+execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
+
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "execute_at": execute_at,
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hora desde ahora
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### Programación recurrente con expresión cron
+
+Crea una programación recurrente usando una expresión cron. Las expresiones cron usan un formato de 6 campos: minuto hora día mes día-de-la-semana año.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Programa un scrape para ejecutarse todos los días a las 10am UTC
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    cron_expression: '0 10 * * ? *', // Todos los días a las 10am UTC
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### Programación con lenguaje natural
+
+Usa texto en lenguaje natural para generar automáticamente expresiones cron. El sistema convertirá tu texto en una expresión cron válida.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Programa usando lenguaje natural
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "text": "every 3 minutes",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    text: 'every Monday at 9am',
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "text": "every day at 10am",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+## Formato de respuesta
+
+Cuando creas una programación, recibirás un objeto de programación con las siguientes propiedades:
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "recurring",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "cron_expression": "0 10 * * ? *",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T10:00:00.000Z"
+}
+```
+
+Para programaciones únicas, la respuesta incluye `execute_at` en lugar de `cron_expression`:
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "onetime",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "execute_at": "2025-01-15T10:00:00.000Z",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T09:00:00.000Z"
+}
+```
+
+## Listar programaciones
+
+Recupera todas las programaciones para tu equipo. Por defecto, las programaciones eliminadas están filtradas. Usa el parámetro de consulta `include_deleted` para incluirlas.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules", headers=headers)
+result = response.json()
+print(f"Total de programaciones: {result['count']}")
+for schedule in result['schedules']:
+    print(json.dumps(schedule, indent=2))
+
+# Para incluir programaciones eliminadas:
+# response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(`Total de programaciones: ${result.count}`)
+result.schedules.forEach(s => console.log(s))
+
+// Para incluir programaciones eliminadas:
+// const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Para incluir programaciones eliminadas:
+# curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
+#   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Obtener una programación
+
+Recupera una sola programación por su ID.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Eliminar una programación
+
+Elimina una programación por su ID. Esto detendrá cualquier ejecución futura.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.delete(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Endpoints soportados
+
+### Endpoints de Olostep (forma corta)
+
+Para solicitudes POST, puedes usar formas cortas para los endpoints de Olostep. El sistema automáticamente añadirá `https://api.olostep.com/` a estos:
+
+- `v1/scrapes` - Programa tareas de scraping web
+- `v1/batches` - Programa trabajos de procesamiento por lotes
+- `v1/crawls` - Programa operaciones de rastreo de sitios web
+- `v1/maps` - Programa extracción de datos de mapas
+- `v1/answers` - Programa generación de respuestas
+
+### URLs completas
+
+También puedes proporcionar URLs completas para tus endpoints. Esto es necesario para APIs externas o webhooks:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Programa una llamada a una API externa
+payload = {
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+        "custom_field": "any value",
+        "data": {"nested": "structure"},
+        "timestamp": datetime.now().isoformat()
+    },
+    "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'https://api.example.com/webhook',
+    payload: {
+      custom_field: 'any value',
+      data: { nested: 'structure' },
+      timestamp: new Date().toISOString()
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+      "custom_field": "any value",
+      "data": {"nested": "structure"}
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+El campo `payload` acepta cualquier objeto JSON - puedes estructurarlo como necesites para tu endpoint objetivo.
+
+## Formato de expresión cron
+
+Las expresiones cron usan un formato de 6 campos:
+
+```
+minuto hora día mes día-de-la-semana año
+```
+
+Ejemplos:
+- `0/3 * * * ? *` - Cada 3 minutos
+- `0 10 * * ? *` - Todos los días a las 10:00 AM
+- `0 9 ? * MON *` - Todos los lunes a las 9:00 AM
+- `0 0 1 * ? *` - Primer día de cada mes a medianoche
+
+Usa `?` para día-del-mes o día-de-la-semana cuando no esté especificado.
+
+## Ejemplos de lenguaje natural
+
+Puedes usar lenguaje natural para describir programaciones. El sistema las convertirá automáticamente en expresiones cron:
+
+- "cada 3 minutos" → `0/3 * * * ? *`
+- "todos los días a las 10am" → `0 10 * * ? *`
+- "todos los lunes a las 9am" → `0 9 ? * MON *`
+- "cada hora" → `0 * * * ? *`
+- "cada semana el lunes" → `0 0 ? * MON *`
+
+## Notas importantes
+
+- Las programaciones únicas se eliminan automáticamente después de la ejecución
+- Las programaciones recurrentes continúan hasta que se eliminen manualmente
+- La zona horaria debe ser un identificador de zona horaria IANA válido (por ejemplo, "UTC", "America/New_York", "Europe/London")
+- La fecha y hora de `execute_at` debe estar en el futuro
+- La conversión de lenguaje natural puede requerir reintentos; el sistema intentará hasta 3 veces
+- Al usar texto en lenguaje natural (parámetro `text`), la zona horaria predeterminada es "UTC"
+- Las programaciones ejecutan la llamada a la API con el payload proporcionado exactamente como se especifica - puedes pasar cualquier estructura JSON que necesites
+- Para solicitudes POST, los endpoints de Olostep en forma corta (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) se prefijan automáticamente con `https://api.olostep.com/`
+- Para otros endpoints, proporciona la URL completa
+- El `payload` puede contener cualquier estructura de datos - se envía tal cual a tu endpoint objetivo
+- Eliminar una programación ya eliminada devolverá un error 400
+
+## Precios
+
+Las programaciones en sí son gratuitas. Solo pagas por las llamadas a la API que se ejecutan cuando la programación se ejecuta. Por ejemplo, si programas un scrape, se te cobrará 1 crédito por ejecución (o más si usas parsers o extracción LLM).

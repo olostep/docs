@@ -1,0 +1,512 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Scrapes API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/scrapes": {
+      "post": {
+        "summary": "ウェブページのスクレイピングを開始する",
+        "description": "このエンドポイントでは、さまざまな設定でウェブページのスクレイピングを開始できます。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url_to_scrape": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "スクレイピングを開始するためのURL。"
+                  },
+                  "wait_before_scraping": {
+                    "type": "integer",
+                    "description": "スクレイピングを開始する前に待つ時間（ミリ秒）。"
+                  },
+                  "formats": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "html",
+                        "markdown",
+                        "text",
+                        "json",
+                        "raw_pdf",
+                        "screenshot"
+                      ]
+                    },
+                    "description": "コンテンツを取得したい形式。"
+                  },
+                  "remove_css_selectors": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "array"
+                    ],
+                    "description": "コンテンツから特定のCSSセレクタを削除するオプション。オプションで、削除したい特定のセレクタのJSON文字列化された配列を渡すこともできます。このオプションがデフォルトに設定されている場合に削除されるCSSセレクタは、['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]です。"
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "discriminator": {
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "title": "待機",
+                          "required": [
+                            "type",
+                            "milliseconds"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "wait"
+                              ],
+                              "description": "指定されたミリ秒数待機"
+                            },
+                            "milliseconds": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "description": "待機する時間（ミリ秒単位）"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "クリック",
+                          "required": [
+                            "type",
+                            "selector"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "click"
+                              ],
+                              "description": "要素をクリック"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "クリックする要素のCSSセレクタ"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "入力を埋める",
+                          "required": [
+                            "type",
+                            "selector",
+                            "value"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "fill_input"
+                              ],
+                              "description": "入力要素に値を入力する"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "入力要素のCSSセレクタ"
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "入力するテキスト"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "スクロール",
+                          "required": [
+                            "type",
+                            "direction",
+                            "amount"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "scroll"
+                              ],
+                              "description": "ページをスクロールする"
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "up",
+                                "down",
+                                "left",
+                                "right"
+                              ],
+                              "description": "スクロールする方向"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "description": "ピクセル単位でスクロールする量"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "description": "コンテンツを取得する前にページで実行するアクション。"
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "リクエストをロードする居住国。  サポートされている値は次の通りです： - US (United States) - CA (Canada) - IT (Italy) - IN (India) - GB (England) - JP (Japan) - MX (Mexico) - AU (Australia) - ID (Indonesia) - UA (UAE) - RU (Russia) - RANDOM  Google SearchやGoogle Newsのスクレイピングのような一部の操作は、すべての国をサポートしています。"
+                  },
+                  "transformer": {
+                    "type": "string",
+                    "enum": [
+                      "postlight",
+                      "none"
+                    ],
+                    "description": "使用するHTMLトランスフォーマーを指定します（ある場合）。PostlightのMercury Parserライブラリを使用して、広告やその他の不要なコンテンツをスクレイピングしたコンテンツから削除します。"
+                  },
+                  "remove_images": {
+                    "type": "boolean",
+                    "description": "スクレイピングされたコンテンツから画像を削除するオプション。デフォルトはfalseです。",
+                    "default": false
+                  },
+                  "remove_class_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "コンテンツから削除するクラス名のリスト。"
+                  },
+                  "parser": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "使用するパーサーのID。"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "description": "フォーマットとしてjsonを定義する場合、このパラメータを使用して使用するパーサーを指定できます。パーサーは、ウェブページから構造化されたコンテンツを抽出するのに役立ちます。Olostepには、一般的なウェブページ用のいくつかのパーサーが組み込まれており、自分自身でパーサーを作成することもできます。"
+                  },
+                  "llm_extract": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "object",
+                        "description": "LLM抽出のスキーマ。"
+                      }
+                    }
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "trueの場合、相対パス（例: '/page'）の代わりに完全なURL（例: 'https://example.com/page'）を返すよ。"
+                      },
+                      "query_to_order_links_by": {
+                        "type": "string",
+                        "description": "提供されたクエリテキストとの類似性によって返されたリンクを順序付け、最も関連性の高い一致を優先します。"
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "`include_links`を使用してグロブパターンで抽出されたリンクをフィルタリングします。ファイル拡張子に一致する\"*.pdf\"や、特定のパス用の\"/blog/*\"、または\" https://example.com/*\"のような完全なURLを使用します。ワイルドカード（*）、文字クラス（[a-z]）、および交互（{pattern1,pattern2}）をサポートします。"
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "`exclude_links`を使用してグロブパターンで抽出されたリンクをフィルタリングします。ファイル拡張子に一致する\"*.pdf\"や、特定のパス用の\"/blog/*\"、または\" https://example.com/*\"のような完全なURLを使用します。ワイルドカード（*）、文字クラス（[a-z]）、および交互（{pattern1,pattern2}）をサポートします。"
+                      }
+                    },
+                    "description": "このオプションを使用すると、スクレイピングしたページに存在するすべてのリンクを取得できます。"
+                  },
+                  "screen_size": {
+                    "type": "object",
+                    "properties": {
+                      "screen_type": {
+                        "type": "string",
+                        "enum": [
+                          "default",
+                          "mobile",
+                          "desktop"
+                        ],
+                        "description": "スクリーンのタイプ。デスクトップは1920x1080ピクセル、モバイルは414x896ピクセル、デフォルトは1024x768ピクセルを使用します。"
+                      },
+                      "screen_width": {
+                        "type": "integer",
+                        "description": "スクリーンの幅（ピクセル）。デスクトップ：1920px、モバイル：414px、デフォルト：768px。"
+                      },
+                      "screen_height": {
+                        "type": "integer",
+                        "description": "スクリーンの高さ（ピクセル）。デスクトップ：1080px、モバイル：896px、デフォルト：1024px。"
+                      }
+                    },
+                    "description": "画面サイズの設定。プリセットの寸法は、screen_typeを通じて利用可能：desktop (1920x1080)、mobile (414x896)、またはdefault (768x1024)。"
+                  },
+                  "screenshot": {
+                    "type": "object",
+                    "properties": {
+                      "full_page": {
+                        "type": "boolean",
+                        "description": "trueが渡された場合、サイトの一番下までスクロールした後に全ページのスクリーンショットが撮られます。"
+                      }
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "ユーザー定義のメタデータ。まだサポートされていません。"
+                  }
+                },
+                "required": [
+                  "url_to_scrape"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "スクレイピング開始の詳細を含む成功レスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "スクレイプID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは「scrape」。"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "作成されたエポック"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "ユーザー定義のメタデータ。"
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "スクレイピングされたURL。"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "text_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "パーサーからのコンテンツ"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "text_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "402": {
+            "description": "無効なAPIキーのため支払いが必要です。"
+          },
+          "404": {
+            "description": "リクエストされたスクレイプが見つからない場合のエラー。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    },
+    "/v1/scrapes/{scrape_id}": {
+      "get": {
+        "summary": "スクレイプ結果を取得",
+        "description": "このエンドポイントは、以前に開始されたスクレイプの結果を取得することを可能にします。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scrape_id",
+            "in": "path",
+            "required": true,
+            "description": "取得するスクレイプのユニークな識別子。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "スクレイプ結果を含む成功レスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "スクレイプID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは「scrape」。"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "作成されたエポック"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "ユーザー定義のメタデータ。"
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "スクレイピングされたURL。"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "パーサーからのコンテンツ"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "size_exceeded": {
+                          "type": "boolean",
+                          "description": "コンテンツのサイズが制限を超える場合。もしそうなら、ホストされたS3のURLを使ってコンテンツを取得してください。"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "402": {
+            "description": "無効なAPIキーのため支払いが必要です。"
+          },
+          "404": {
+            "description": "リクエストされたスクレイプが見つからない場合のエラー。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+---
+title: "创建答案"
+openapi: "zh/openapi/answers.json POST /v1/answers"
+---
+
+## 创建答案
+
+使用此端点创建一个新的答案。
+
+### 请求
+
+**路径**
+
+`POST /v1/answers`
+
+**参数**
+
+| 名称       | 类型   | 描述                   |
+| ---------- | ------ | ---------------------- |
+| `question` | string | 需要回答的问题文本。   |
+| `context`  | string | 提供答案的上下文信息。 |
+
+### 响应
+
+成功的响应将返回一个包含答案的 JSON 对象。
+
+### 示例
+
+```jsx
+import { useState } from 'react';
+
+function CreateAnswerExample() {
+  const [question, setQuestion] = useState('');
+  const [context, setContext] = useState('');
+  const [answer, setAnswer] = useState(null);
+
+  const createAnswer = async () => {
+    const response = await fetch('/v1/answers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ question, context }),
+    });
+    const data = await response.json();
+    setAnswer(data.answer);
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="输入你的问题"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+      />
+      <textarea
+        placeholder="输入上下文"
+        value={context}
+        onChange={(e) => setContext(e.target.value)}
+      />
+      <button onClick={createAnswer}>创建答案</button>
+      {answer && <div>答案: {answer}</div>}
+    </div>
+  );
+}
+```
+
+在上面的示例中，用户可以输入一个问题和相关的上下文，然后点击“创建答案”按钮来获取答案。

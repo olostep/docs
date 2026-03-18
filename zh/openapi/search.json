@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "搜索 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer 认证头的格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "获取搜索",
+        "description": "通过其 ID 检索之前完成的搜索。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "要检索的搜索的唯一标识符。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应包含搜索对象。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "404": {
+            "description": "未找到搜索"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "创建搜索",
+        "description": "使用自然语言查询搜索网络，并返回一个去重的相关链接列表，包括标题和描述。  它将在网络上语义搜索查询并返回结果。  查看 [搜索功能](/searches/searches)。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "自然语言的搜索查询。"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应包含搜索结果。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "完整搜索结果的字符串化 JSON。"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "在 S3 上托管的 JSON 文件的 URL。",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "在多个搜索中找到的去重的相关链接列表。",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "结果的 URL。"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "结果页面的标题。"
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "结果的简短片段或描述。"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求（缺少查询）"
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    }
+  }
+}

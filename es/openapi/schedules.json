@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Horarios",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Encabezado de autenticación Bearer del formato Bearer <token>, donde <token> es tu token de autenticación."
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "Crear Horario",
+        "description": "Crea un nuevo horario para ejecutar llamadas de API en momentos específicos. Soporta tanto ejecuciones únicas como horarios recurrentes usando expresiones cron. También puedes usar texto en lenguaje natural para generar expresiones cron automáticamente. Para solicitudes POST, puedes usar los endpoints de Olostep en forma corta (por ejemplo, 'v1/scrapes') que serán automáticamente prefijados, o proporcionar una URL completa. La carga útil puede contener cualquier estructura JSON que quieras enviar.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST"
+                    ],
+                    "description": "Método HTTP para la llamada de API programada. Debe ser GET o POST."
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "La URL del endpoint a llamar cuando se ejecute el horario. Para solicitudes POST con endpoints de Olostep, puedes usar la forma corta (por ejemplo, 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') que será automáticamente prefijada con 'https://api.olostep.com/'. Para otros endpoints, proporciona la URL completa."
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "La carga útil a enviar con la llamada de API. Puede contener cualquier estructura JSON que necesites. Para solicitudes GET, esto suele estar vacío. Para solicitudes POST, esto debe contener los datos que quieres enviar al endpoint.",
+                    "default": {}
+                  },
+                  "cron_expression": {
+                    "type": "string",
+                    "description": "Expresión cron en formato de 6 campos (minuto hora día mes día-de-la-semana año) para horarios recurrentes. Requerido para horarios recurrentes. Mutuamente exclusivo con execute_at y text."
+                  },
+                  "execute_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Cadena de fecha y hora ISO 8601 para la ejecución de un horario único. Debe ser una fecha y hora futura válida. Requerido para horarios únicos. Mutuamente exclusivo con cron_expression."
+                  },
+                  "expression_timezone": {
+                    "type": "string",
+                    "description": "Identificador de zona horaria IANA (por ejemplo, 'UTC', 'America/New_York', 'Europe/London') para el horario. Requerido para horarios recurrentes, opcional para horarios únicos. Al usar texto en lenguaje natural, esto por defecto es 'UTC'."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Texto en lenguaje natural para generar automáticamente una expresión cron. El sistema convertirá tu texto en una expresión cron válida. Ejemplos: 'cada 3 minutos', 'todos los días a las 10am', 'todos los lunes a las 9am'. Mutuamente exclusivo con cron_expression y execute_at. Cuando se usa, expression_timezone por defecto es 'UTC'."
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Horario creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Identificador único del horario"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recurring",
+                        "onetime"
+                      ],
+                      "description": "Tipo de horario: 'recurring' para horarios basados en cron, 'onetime' para horarios de ejecución única"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "description": "Método HTTP para la llamada programada"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "La URL del endpoint que será llamada"
+                    },
+                    "cron_expression": {
+                      "type": "string",
+                      "description": "Expresión cron (solo presente para horarios recurrentes)"
+                    },
+                    "execute_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Fecha y hora de ejecución (solo presente para horarios de una sola vez)"
+                    },
+                    "expression_timezone": {
+                      "type": "string",
+                      "description": "Zona horaria para el horario"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Fecha y hora ISO 8601 cuando se creó el horario"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a parámetros incorrectos o faltantes. Errores comunes: método inválido, endpoint faltante, cron_expression inválida, datetime execute_at inválido, zona horaria inválida, o formato de schedule_id inválido."
+          },
+          "401": {
+            "description": "Clave de API inválida. Intenta verificarla o contacta a info@olostep.com si tienes problemas."
+          },
+          "500": {
+            "description": "Error interno del servidor al crear el horario."
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar Horarios",
+        "description": "Recupera todos los horarios para tu equipo. Devuelve una lista de horarios con su configuración, estado y metadatos. Por defecto, los horarios eliminados se filtran.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "Establece en 'true' para incluir horarios eliminados en la respuesta. Por defecto, los horarios eliminados se filtran.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con lista de horarios.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "Identificador del equipo"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "Identificador único del horario"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "recurring",
+                              "onetime"
+                            ],
+                            "description": "Tipo de horario"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "La URL del endpoint"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "La carga útil para enviar con la llamada API"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "Expresión cron (solo presente para horarios recurrentes)"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Fecha y hora de ejecución (solo presente para horarios de una sola vez)"
+                          },
+                          "expression_timezone": {
+                            "type": "string",
+                            "description": "Zona horaria para el horario"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Texto en lenguaje natural usado para generar la expresión cron"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "Nombre interno del horario en EventBridge"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "Nombre del grupo de horarios"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Fecha y hora ISO 8601 cuando se creó el horario"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Fecha y hora ISO 8601 cuando el horario fue actualizado por última vez"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "ENABLED",
+                              "DELETED"
+                            ],
+                            "description": "Estado actual del horario"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": [
+                              "GET",
+                              "POST"
+                            ],
+                            "description": "Método HTTP para la llamada programada"
+                          }
+                        }
+                      },
+                      "description": "Arreglo de objetos de horario"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Número total de horarios"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clave de API inválida."
+          },
+          "500": {
+            "description": "Error interno del servidor al obtener los horarios."
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "Obtener Horario",
+        "description": "Recupera un único horario por su ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para el horario. Debe comenzar con 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horario recuperado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "Identificador del equipo"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "Identificador único del horario"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "recurring",
+                            "onetime"
+                          ],
+                          "description": "Tipo de horario"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "GET",
+                            "POST"
+                          ],
+                          "description": "Método HTTP para la llamada programada"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "La URL del endpoint"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "La carga útil para enviar con la llamada API"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "Expresión cron (solo presente para horarios recurrentes)"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Fecha y hora de ejecución (solo presente para horarios de una sola vez)"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "Zona horaria para el horario"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "Texto en lenguaje natural usado para generar la expresión cron"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "Nombre interno del horario en EventBridge"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "Nombre del grupo de horarios"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Fecha y hora ISO 8601 cuando se creó el horario"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Fecha y hora ISO 8601 cuando el horario fue actualizado por última vez"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ENABLED",
+                            "DELETED"
+                          ],
+                          "description": "Estado actual del horario"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a un formato de schedule_id no válido. El ID del horario debe comenzar con 'schedule_'."
+          },
+          "401": {
+            "description": "Clave de API inválida."
+          },
+          "404": {
+            "description": "Horario no encontrado para el ID proporcionado."
+          },
+          "500": {
+            "description": "Error interno del servidor al obtener el horario."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar Horario",
+        "description": "Elimina un horario por su ID. Esto detendrá cualquier ejecución futura y eliminará el horario de EventBridge.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador único para el horario a eliminar. Debe comenzar con 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horario eliminado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensaje de éxito"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "El ID del horario eliminado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a un formato de schedule_id no válido o el horario ya fue eliminado. El ID del horario debe comenzar con 'schedule_'."
+          },
+          "401": {
+            "description": "Clave de API inválida."
+          },
+          "404": {
+            "description": "Horario no encontrado para el ID proporcionado."
+          },
+          "500": {
+            "description": "Error interno del servidor al eliminar el horario."
+          }
+        }
+      }
+    }
+  }
+}

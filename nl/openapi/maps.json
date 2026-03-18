@@ -1,0 +1,255 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Maps API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/maps/{map_id}": {
+      "get": {
+        "summary": "Haal Kaart op",
+        "description": "Haal een eerder voltooide kaart op met zijn ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor de kaart die moet worden opgehaald.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met het kaartobject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unieke identificatie voor deze kaart"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "Aantal URLs in de huidige respons"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array van URLs gevonden op de pagina"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Paginering cursor om de volgende set URLs op te halen. Als null, zijn alle URLs opgehaald."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ongeldige API Sleutel"
+          },
+          "404": {
+            "description": "Kaart Niet Gevonden"
+          },
+          "500": {
+            "description": "Interne Serverfout"
+          }
+        }
+      }
+    },
+    "/v1/maps": {
+      "post": {
+        "summary": "Haal alle urls op een bepaalde website op",
+        "description": "Deze endpoint stelt gebruikers in staat om alle urls op een bepaalde website op te halen. Het kan tot 120 seconden duren voor complexe websites. Voor grote websites worden resultaten gepagineerd met cursor-gebaseerde paginering.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "De URL van de website waarvoor je de links wilt"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "Een optionele zoekopdracht om de links te sorteren op zoekrelevantie."
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "Een optioneel nummer om te beperken tot alleen de top n links voor een zoekopdracht."
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "Inclusief subdomeinen van de gegeven URL. `true` standaard."
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL-padpatronen om op te nemen met behulp van glob-syntaxis. Bijvoorbeeld: `/blog/**` om alleen blog-URLs op te nemen. Alleen URLs die aan deze patronen voldoen, worden geretourneerd."
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL-padpatronen om uit te sluiten met behulp van glob-syntaxis. Bijvoorbeeld: `/careers/**`. Uitgesloten URLs zullen de opgenomen URLs overschrijven."
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "description": "OPTIONEEL: Paginering cursor van een vorige respons. Wanneer verstrekt, retourneert het de volgende set URLs vanaf waar het vorige verzoek stopte vanwege de responsgrootte limiet."
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "examples": {
+                "basic": {
+                  "value": {
+                    "url": "https://docs.olostep.com"
+                  }
+                },
+                "withFilters": {
+                  "value": {
+                    "url": "https://docs.olostep.com",
+                    "include_urls": [
+                      "/api-reference/**"
+                    ],
+                    "exclude_urls": [
+                      "/api-reference/deprecated/**"
+                    ]
+                  }
+                },
+                "withCursor": {
+                  "value": {
+                    "cursor": "abc123_xyz456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met URLs gevonden op de pagina",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "urls_count",
+                    "urls"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unieke identificatie voor deze kaart"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "Aantal URLs in de huidige respons"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array van URLs gevonden op de pagina"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "Paginatiecursor om de volgende set URLs op te halen die beperkt zijn door de 10MB grootte limiet. Als deze null is of niet aanwezig, zijn alle URLs opgehaald."
+                    }
+                  }
+                },
+                "examples": {
+                  "basicResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 22,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/batches/create",
+                        "https://docs.olostep.com/api-reference/batches/info",
+                        "https://docs.olostep.com/api-reference/batches/items"
+                      ]
+                    }
+                  },
+                  "cursorResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 15,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/crawls/create",
+                        "https://docs.olostep.com/api-reference/crawls/info",
+                        "https://docs.olostep.com/api-reference/crawls/pages"
+                      ],
+                      "cursor": "abc123_def789"
+                    }
+                  },
+                  "allRetrievedResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 10,
+                      "urls": [
+                        "https://docs.olostep.com/features/maps/maps",
+                        "https://docs.olostep.com/get-started/authentication",
+                        "https://docs.olostep.com/get-started/welcome"
+                      ],
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "401": {
+            "description": "Ongeautoriseerde toegang vanwege ontbrekende of ongeldige API-token."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    }
+  }
+}

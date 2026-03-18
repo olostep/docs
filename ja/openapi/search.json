@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "検索API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/searches/{search_id}": {
+      "get": {
+        "summary": "検索を取得",
+        "description": "IDで以前に完了した検索を取得します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "description": "取得する検索の一意の識別子。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "検索オブジェクトを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "404": {
+            "description": "検索が見つかりません"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    },
+    "/v1/searches": {
+      "post": {
+        "summary": "検索を作成",
+        "description": "自然言語クエリでウェブを検索し、タイトルと説明付きの関連リンクの重複排除リストを取得します。  クエリをウェブ全体で意味的に検索し、結果を返します。  [検索機能](/searches/searches)を参照してください。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "自然言語での検索クエリ。"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "検索結果を含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "search_9bi0sbj9xa"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "search"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "example": 1760327323
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "query": {
+                      "type": "string",
+                      "example": "Best Answer Engine Optimization startups"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string",
+                          "description": "検索結果全体の文字列化されたJSON。"
+                        },
+                        "json_hosted_url": {
+                          "type": "string",
+                          "description": "S3上のホストされたJSONファイルのURL。",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "複数の検索で見つかった関連リンクの重複排除リスト。",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "結果のURL。"
+                              },
+                              "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "結果ページのタイトル。"
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "結果の短いスニペットまたは説明。"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト（クエリがありません）"
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    }
+  }
+}

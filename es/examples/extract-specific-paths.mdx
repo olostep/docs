@@ -1,0 +1,112 @@
+---
+icon: "list-ol"
+sidebarTitle: "Obtener URLs específicas en el sitio web"
+title: "Extraer URLs de Blog del Sitio Web de Stripe"
+description: "Filtra y extrae solo las URLs de blog del sitio web de Stripe para un análisis de contenido específico."
+---
+
+## Visión General
+
+En lugar de [mapear todo el sitio web](/use-cases/get-website-structure), podrías querer enfocarte en secciones específicas. En esta guía, te mostraremos cómo extraer solo las URLs de blog del sitio web de Stripe.
+
+## Extrayendo Solo URLs de Blog
+
+Para extraer solo las URLs de blog del sitio web de Stripe, usa el endpoint de mapas con filtros de patrones de ruta. El parámetro `include_urls` te permite especificar exactamente qué patrones de URL deseas incluir en los resultados.
+
+<CodeGroup>
+    ```python extract_stripe_blog_urls.py
+    import requests
+    import time
+    import json
+
+    # Configuración
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Hora de inicio para el seguimiento de latencia
+    start_time = time.time()
+    
+    # Define la carga útil con patrones de URL para incluir
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog", "/blog/**"]  # Coincide con /blog y todos los caminos bajo /blog
+    }
+    
+    # Realiza la solicitud
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Calcula la latencia
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"Solicitud completada en {latency}ms")
+    
+    # Procesa los resultados
+    data = response.json()
+    print(f"Se encontraron {data['urls_count']} URLs de blog en el sitio web de Stripe")
+    
+    # Imprime las primeras 10 URLs como muestra
+    print("\nMuestra de URLs de blog:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Guarda las URLs de blog en un archivo para un procesamiento posterior
+    with open('stripe_blog_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nTodas las URLs de blog guardadas en stripe_blog_urls.json")
+    ```
+</CodeGroup>
+
+### Entendiendo los Patrones de URL
+
+En el ejemplo anterior, estamos usando dos especificaciones de patrones:
+
+- `/blog` - Coincide exactamente con la página principal del blog (https://stripe.com/blog)
+- `/blog/**` - Coincide con todos los subcaminos bajo /blog, incluyendo publicaciones individuales del blog, páginas de categorías, etc.
+
+Esta combinación asegura que capturemos todo el contenido relacionado con el blog mientras excluimos otras secciones del sitio web.
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "id": "map_xyz789abc",
+  "urls_count": 278,
+  "urls": [
+    "https://stripe.com/blog",
+    "https://stripe.com/blog/page/1",
+    "https://stripe.com/blog/page/2",
+    "https://stripe.com/blog/engineering",
+    "https://stripe.com/blog/product",
+    "https://stripe.com/blog/how-we-built-it-usage-based-billing",
+    "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+    "https://stripe.com/blog/stripe-radar-responded-to-card-testing",
+    "https://stripe.com/blog/future-of-real-time-payments",
+    "https://stripe.com/blog/ml-flywheel-improve-models"
+    // ... URLs adicionales omitidas por brevedad
+  ]
+}
+```
+
+## Filtrando URLs de Blog por Categoría
+
+Puedes refinar aún más tu extracción para enfocarte en categorías específicas del blog. Por ejemplo, si solo te interesan las publicaciones del blog de ingeniería de Stripe:
+
+<CodeGroup>
+    ```python extract_engineering_blog_urls.py
+    # Define la carga útil con patrones de URL más específicos
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog/engineering", "/blog/engineering/**"]
+    }
+    ```
+</CodeGroup>
+
+## Próximos Pasos
+
+Ahora que has extraído todas las URLs de blog de Stripe,
+
+1. Puedes obtener su contenido individualmente usando la [API de scraping](../../api-reference/scrapes/create).
+2. O, usa la [siguiente guía](/use-cases/crawl-matching-pages) para rastrear y extraer el contenido real de estas páginas de blog directamente con filtros integrados.

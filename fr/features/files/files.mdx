@@ -1,0 +1,682 @@
+---
+sidebarTitle: "Fichiers"
+title: "Fichiers"
+description: "Téléchargez et gérez des fichiers JSON à utiliser comme contexte dans les requêtes API"
+icon: "file-upload"
+---
+
+Via le point de terminaison Olostep `/v1/files`, tu peux télécharger des fichiers JSON qui peuvent être utilisés comme contexte dans tes requêtes API. Cela te permet de fournir des données structurées pour améliorer tes extractions, réponses et autres opérations.
+
+- Télécharge des fichiers JSON jusqu'à 200 Mo
+- Les fichiers sont automatiquement validés pour un format JSON correct
+- Utilise les fichiers comme contexte dans les extractions, réponses et autres points de terminaison
+- Les fichiers expirent après 30 jours
+- Processus de téléchargement sécurisé via URL pré-signée
+
+Pour les détails de l'API, consulte la [Référence de l'API du point de terminaison Fichiers](/api-reference/files/create).
+
+## Installation
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS : curl intégré est suffisant
+```
+
+</CodeGroup>
+
+## Télécharger un fichier
+
+Le processus de téléchargement de fichier se compose de deux étapes :
+1. **Créer une URL de téléchargement** : Demande une URL pré-signée pour télécharger ton fichier
+2. **Compléter le téléchargement** : Télécharge ton fichier sur l'URL pré-signée, puis appelle le point de terminaison de complétion pour valider et finaliser
+
+### Étape 1 : Créer une URL de téléchargement
+
+Tout d'abord, crée une URL de téléchargement en fournissant le nom du fichier et le but optionnel. Le paramètre `purpose` ne prend en charge que deux valeurs : `"context"` (par défaut) ou `"batch"`.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Étape 1 : Créer une URL de téléchargement
+payload = {
+    "filename": "my-data.json",
+    "purpose": "context"  # Optionnel, par défaut "context". Valeurs prises en charge : "context" ou "batch"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/files", headers=headers, json=payload)
+upload_data = response.json()
+
+print(json.dumps(upload_data, indent=2))
+# La réponse inclut : id, upload_url, expires_in
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    filename: 'my-data.json',
+    purpose: 'context'  // Optionnel, par défaut "context". Valeurs prises en charge : "context" ou "batch"
+  })
+})
+const uploadData = await res.json()
+console.log(uploadData)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "my-data.json",
+    "purpose": "context"
+  }'
+
+# Exemple avec le but "batch" :
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-data.json",
+    "purpose": "batch"
+  }'
+```
+
+</CodeGroup>
+
+La réponse inclut une `upload_url` pré-signée qui expire dans 10 minutes :
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file.upload",
+  "created": 1760329882,
+  "upload_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
+### Étape 2 : Télécharger le fichier et compléter
+
+Télécharge ton fichier JSON sur l'URL pré-signée, puis appelle le point de terminaison de complétion pour valider et finaliser le téléchargement.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Après avoir obtenu upload_url de l'Étape 1
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Prépare tes données JSON
+json_data = {
+    "users": [
+        {"name": "John Doe", "email": "john@example.com"},
+        {"name": "Jane Smith", "email": "jane@example.com"}
+    ]
+}
+
+# Étape 2a : Télécharger le fichier sur l'URL pré-signée
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(json_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Étape 2b : Compléter le téléchargement
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(json.dumps(file_info, indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Après avoir obtenu upload_url de l'Étape 1
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Prépare tes données JSON
+const jsonData = {
+  users: [
+    { name: 'John Doe', email: 'john@example.com' },
+    { name: 'Jane Smith', email: 'jane@example.com' }
+  ]
+}
+
+// Étape 2a : Télécharger le fichier sur l'URL pré-signée
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData)
+})
+
+// Étape 2b : Compléter le téléchargement
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+console.log(fileInfo)
+```
+
+```bash cURL
+# Étape 2a : Télécharger le fichier sur l'URL pré-signée
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @my-data.json
+
+# Étape 2b : Compléter le téléchargement
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+Le point de terminaison de complétion valide le fichier JSON et renvoie les métadonnées du fichier :
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "my-data.json",
+  "bytes": 1024,
+  "purpose": "context",
+  "status": "completed"
+}
+```
+
+## Récupérer les métadonnées d'un fichier par ID
+
+Récupère les métadonnées d'un fichier par son ID.
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+response = requests.get(
+    f"{API_URL}/files/{file_id}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = response.json()
+print(json.dumps(file_info, indent=2))
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+const res = await fetch(`${API_URL}/files/${fileId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await res.json()
+console.log(fileInfo)
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Récupérer l'objet fichier par ID
+
+Obtiens une URL pré-signée pour télécharger le contenu JSON d'un fichier complété. Spécifie éventuellement le temps d'expiration pour l'URL de téléchargement en utilisant le paramètre de requête `expires_in` (par défaut à 600 secondes / 10 minutes).
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+# Obtenir l'URL de téléchargement (expiration par défaut : 600 secondes)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+download_url = download_info["download_url"]
+
+# Télécharger le contenu du fichier en utilisant l'URL pré-signée
+file_response = requests.get(download_url)
+file_content = file_response.json()
+print(json.dumps(file_content, indent=2))
+
+# Exemple avec expiration personnalisée (3600 secondes = 1 heure)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content?expires_in=3600",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+print(f"L'URL de téléchargement expire dans : {download_info['expires_in']} secondes")
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+
+// Obtenir l'URL de téléchargement (expiration par défaut : 600 secondes)
+const res = await fetch(`${API_URL}/files/${fileId}/content`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const downloadInfo = await res.json()
+const downloadUrl = downloadInfo.download_url
+
+// Télécharger le contenu du fichier en utilisant l'URL pré-signée
+const fileRes = await fetch(downloadUrl)
+const fileContent = await fileRes.json()
+console.log(fileContent)
+
+// Exemple avec expiration personnalisée (3600 secondes = 1 heure)
+const customRes = await fetch(`${API_URL}/files/${fileId}/content?expires_in=3600`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const customDownloadInfo = await customRes.json()
+console.log(`L'URL de téléchargement expire dans : ${customDownloadInfo.expires_in} secondes`)
+```
+
+```bash cURL
+# Obtenir l'URL de téléchargement (expiration par défaut : 600 secondes)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Obtenir l'URL de téléchargement avec expiration personnalisée (3600 secondes = 1 heure)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content?expires_in=3600" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Télécharger le fichier en utilisant l'URL pré-signée
+curl -s "$DOWNLOAD_URL"
+```
+
+</CodeGroup>
+
+La réponse inclut une `download_url` pré-signée qui expire après le temps spécifié :
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "my-data.json",
+  "bytes": 1024,
+  "download_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
+## Lister les fichiers
+
+Liste tous les fichiers complétés pour ton équipe. Filtre éventuellement par but (valeurs prises en charge : `"context"` ou `"batch"`).
+
+<CodeGroup>
+
+```python Python
+# Lister tous les fichiers
+response = requests.get(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+files = response.json()
+print(json.dumps(files, indent=2))
+
+# Lister les fichiers filtrés par but
+response = requests.get(
+    f"{API_URL}/files?purpose=context",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+context_files = response.json()
+print(json.dumps(context_files, indent=2))
+```
+
+```js Node
+// Lister tous les fichiers
+const res = await fetch(`${API_URL}/files`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const files = await res.json()
+console.log(files)
+
+// Lister les fichiers filtrés par but
+const contextRes = await fetch(`${API_URL}/files?purpose=context`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const contextFiles = await contextRes.json()
+console.log(contextFiles)
+```
+
+```bash cURL
+# Lister tous les fichiers
+curl -s -X GET "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Lister les fichiers filtrés par but
+curl -s -X GET "https://api.olostep.com/v1/files?purpose=context" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+La réponse inclut une liste de fichiers :
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "file_abc123xyz789",
+      "object": "file",
+      "created": 1760329882,
+      "filename": "my-data.json",
+      "bytes": 1024,
+      "purpose": "context",
+      "status": "completed"
+    }
+  ]
+}
+```
+
+## Supprimer un fichier
+
+Supprime un fichier et ses données associées du stockage.
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+response = requests.delete(
+    f"{API_URL}/files/{file_id}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+result = response.json()
+print(json.dumps(result, indent=2))
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+const res = await fetch(`${API_URL}/files/${fileId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(result)
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Exemple de téléchargement complet (but context)
+
+Voici un exemple complet qui télécharge un fichier JSON avec `purpose="context"` :
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Étape 1 : Créer une URL de téléchargement
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "user-data.json", "purpose": "context"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Étape 2 : Préparer et télécharger les données JSON
+json_data = {
+    "users": [
+        {"id": 1, "name": "Alice", "role": "admin"},
+        {"id": 2, "name": "Bob", "role": "user"}
+    ]
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(json_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Étape 3 : Compléter le téléchargement
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Fichier téléchargé avec succès : {file_info['id']}")
+print(f"Taille du fichier : {file_info['bytes']} octets")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Étape 1 : Créer une URL de téléchargement
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'user-data.json', purpose: 'context' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Étape 2 : Préparer et télécharger les données JSON
+const jsonData = {
+  users: [
+    { id: 1, name: 'Alice', role: 'admin' },
+    { id: 2, name: 'Bob', role: 'user' }
+  ]
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData)
+})
+
+// Étape 3 : Compléter le téléchargement
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Fichier téléchargé avec succès : ${fileInfo.id}`)
+console.log(`Taille du fichier : ${fileInfo.bytes} octets`)
+```
+
+</CodeGroup>
+
+## Exemple de téléchargement de fichier batch
+
+Voici un exemple qui télécharge un fichier JSON avec `purpose="batch"` contenant des données batch valides pouvant être utilisées avec le point de terminaison `/v1/batches` :
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Étape 1 : Créer une URL de téléchargement avec purpose="batch"
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "batch-items.json", "purpose": "batch"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Étape 2 : Préparer les données JSON batch (format valide pour le point de terminaison /v1/batches)
+batch_data = {
+    "items": [
+        {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+        {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+        {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+    ],
+    "parser": {"id": "@olostep/google-search"},
+    "country": "US"
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(batch_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Étape 3 : Compléter le téléchargement
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Fichier batch téléchargé avec succès : {file_info['id']}")
+print(f"Taille du fichier : {file_info['bytes']} octets")
+print(f"But : {file_info['purpose']}")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Étape 1 : Créer une URL de téléchargement avec purpose="batch"
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'batch-items.json', purpose: 'batch' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Étape 2 : Préparer les données JSON batch (format valide pour le point de terminaison /v1/batches)
+const batchData = {
+  items: [
+    { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
+    { custom_id: 'item-2', url: 'https://www.google.com/search?q=paddle&gl=us&hl=en' },
+    { custom_id: 'item-3', url: 'https://www.google.com/search?q=payment+gateway&gl=us&hl=en' }
+  ],
+  parser: { id: '@olostep/google-search' },
+  country: 'US'
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(batchData)
+})
+
+// Étape 3 : Compléter le téléchargement
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Fichier batch téléchargé avec succès : ${fileInfo.id}`)
+console.log(`Taille du fichier : ${fileInfo.bytes} octets`)
+console.log(`But : ${fileInfo.purpose}`)
+```
+
+```bash cURL
+# Étape 1 : Créer une URL de téléchargement avec purpose="batch"
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-items.json",
+    "purpose": "batch"
+  }'
+
+# Étape 2 : Télécharger les données JSON batch (enregistrer d'abord dans batch-items.json)
+# Contenu de batch-items.json :
+# {
+#   "items": [
+#     {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+#     {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+#     {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+#   ],
+#   "parser": {"id": "@olostep/google-search"},
+#   "country": "US"
+# }
+
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @batch-items.json
+
+# Étape 3 : Compléter le téléchargement
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+Le fichier batch téléchargé contient une structure JSON valide qui correspond au format du point de terminaison `/v1/batches` :
+- `items` : Tableau d'objets avec les champs `custom_id` et `url`
+- `parser` : Configuration optionnelle du parser
+- `country` : Code de pays optionnel
+
+Ce fichier peut être utilisé comme entrée pour les opérations de traitement par lots.
+
+## Exigences pour les fichiers
+
+- **Format de fichier** : Seuls les fichiers JSON sont pris en charge (extension `.json` requise)
+- **Taille de fichier** : Maximum 200 Mo par fichier
+- **Expiration** : Les fichiers expirent après 30 jours
+- **URL de téléchargement** : Les URL pré-signées expirent après 10 minutes
+- **Paramètre purpose** : Prend uniquement en charge les valeurs `"context"` ou `"batch"` (par défaut à `"context"`)
+
+## Tarification
+
+Les téléchargements de fichiers sont gratuits. Les fichiers sont stockés de manière sécurisée et expirent automatiquement après 30 jours.

@@ -1,0 +1,113 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Utilitaire",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    }
+  },
+  "paths": {
+    "/v1/retrieve": {
+      "get": {
+        "summary": "Récupérer le contenu de la page",
+        "description": "Récupère le contenu d'une page explorée en utilisant son `retrieve_id`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "retrieve_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "L'ID du contenu de la page à récupérer. Disponible dans la réponse des endpoints `/v1/crawls/{crawl_id}/pages`, `/v1/scrapes/{scrape_id}` ou `/v1/batches/{batch_id}/items`"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown",
+                  "json"
+                ]
+              }
+            },
+            "description": "Tableau optionnel pour récupérer uniquement des formats spécifiques en production. Si non fourni, tous les formats seront retournés."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec le contenu de la page.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "html_content": {
+                      "type": "string",
+                      "description": "Contenu HTML de la page, si demandé et disponible."
+                    },
+                    "markdown_content": {
+                      "type": "string",
+                      "description": "Contenu Markdown de la page, si demandé et disponible."
+                    },
+                    "json_content": {
+                      "type": "string",
+                      "description": "Contenu JSON de la page retourné par les parseurs, si demandé et disponible."
+                    },
+                    "html_hosted_url": {
+                      "type": "string",
+                      "description": "URL du bucket S3 de html. Expire dans 7 jours."
+                    },
+                    "markdown_hosted_url": {
+                      "type": "string",
+                      "description": "URL du bucket S3 de markdown. Expire dans 7 jours."
+                    },
+                    "json_hosted_url": {
+                      "type": "string",
+                      "description": "URL du bucket S3 de json. Expire dans 7 jours."
+                    },
+                    "size_exceeded": {
+                      "type": "boolean",
+                      "description": "Si la taille des objets de contenu dépasse la limite de 6MB. Si vrai, utilise les URLs S3 hébergées pour obtenir le contenu."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison de paramètres incorrects ou manquants."
+          },
+          "404": {
+            "description": "Contenu non trouvé pour le `retrieve_id` fourni."
+          },
+          "500": {
+            "description": "Erreur interne du serveur."
+          }
+        }
+      }
+    }
+  }
+}

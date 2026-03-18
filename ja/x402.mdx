@@ -1,0 +1,220 @@
+---
+title: "従量課金制 (x402)"
+icon: "dollar-sign"
+description: "ステーブルコインを使用した従量課金制APIエンドポイント"
+---
+
+## 概要
+
+Olostep APIエンドポイントをステーブルコインを使用した従量課金制で利用できるようになりました。
+
+これらのエンドポイントはx402支払いプロトコルを使用しており、ステーブルコインでの従量課金アクセスを可能にします。各リクエストには認証と支払いのための支払いヘッダーが必要です。
+
+<Info>
+  **従量課金制エンドポイント**
+  
+  以下にリストされているすべてのエンドポイントは、x402プロトコルを介したステーブルコイン支払いを受け入れます。サブスクリプションは不要で、使用した分だけ支払います。
+</Info>
+
+## 認証
+
+リクエストに支払いヘッダーを含めてください：
+
+```
+X-Payment: {{paymentHeader}}
+```
+
+支払いは自動的に処理および検証され、リクエストが完了します。
+
+---
+
+## Olostep API
+
+### 支払い対応エンドポイント
+
+#### POST /v1/maps
+
+このエンドポイントは、特定のウェブサイト上のすべてのURLを取得することを可能にします。複雑なウェブサイトの場合、最大120秒かかることがあります。大規模なウェブサイトの場合、結果はカーソルベースのページネーションを使用してページ分けされます。
+
+**価格:** 1リクエストあたり$0.01
+
+**ネットワーク:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/maps' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url": "example",
+    "search_query": "example",
+    "top_n": 123,
+    "include_subdomain": true,
+    "include_urls": "",
+    "exclude_urls": "",
+    "cursor": "example"
+  }'
+```
+
+#### POST /v1/scrapes
+
+ウェブページのスクレイピングを開始します
+
+**価格:** 1リクエストあたり$0.01
+
+**ネットワーク:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/scrapes' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url_to_scrape": "example",
+    "wait_before_scraping": "",
+    "formats": "",
+    "remove_css_selectors": "example",
+    "actions": "",
+    "country": "example",
+    "transformer": "example",
+    "remove_images": true,
+    "remove_class_names": "",
+    "parser": "",
+    "llm_extract": "",
+    "links_on_page": "",
+    "screen_size": "",
+    "metadata": ""
+  }'
+```
+
+#### POST /v1/crawls
+
+新しいクロールを開始します。進捗を追跡するための`id`を受け取ります。操作にはサイトや深さ、ページ数のパラメータに応じて1〜10分かかることがあります。
+
+**価格:** 動的 - 使用に基づいてリクエストごとに計算
+
+<Note>
+  このエンドポイントは動的価格を使用します。実際のコストはリクエストパラメータによって決定され、処理前に402 Payment Requiredレスポンスで表示されます。
+</Note>
+
+**ネットワーク:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/crawls' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "start_url": "example",
+    "max_pages": 123,
+    "include_urls": "",
+    "exclude_urls": "",
+    "max_depth": 123,
+    "include_external": true,
+    "include_subdomain": true,
+    "search_query": "example",
+    "top_n": 123,
+    "webhook_url": "example",
+    "timeout": 123
+  }'
+```
+
+#### POST /v1/answers
+
+AIは提供されたタスクに対する答えを見つけるために検索やウェブページの閲覧などのアクションを実行します。実行時間は複雑さに応じて3〜30秒です。長時間のタスクには、代わりにエージェントエンドポイントを使用してください。
+
+**価格:** 1リクエストあたり$0.05
+
+**ネットワーク:** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/answers' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "task": "example",
+    "json_format": ""
+  }'
+```
+
+### 標準エンドポイント
+
+これらのエンドポイントは支払いを必要としません：
+
+- **GET** `/v1/crawls/{crawl_id}` - 特定のクロールに関する情報を取得します。
+- **GET** `/v1/batches/{batch_id}/items` - バッチで処理されたアイテムのリストを取得します。その後、`retrieve_id`を使用してRetrieve Endpointでコンテンツを取得できます。
+- **GET** `/v1/crawls/{crawl_id}/pages` - 特定のクロールのページリストを取得します。
+- **GET** `/v1/batches/{batch_id}` - バッチのステータスと進捗情報を取得します。バッチのコンテンツを取得するには、こちらを参照してください。
+- **GET** `/v1/answers/{answer_id}` - このエンドポイントは、以前に完了した答えをIDで取得します。
+- **GET** `/v1/scrapes/{scrape_id}` - スクレイプのレスポンスを取得するために使用できます。
+- **GET** `/v1/retrieve` - 処理されたバッチやクロールのURLのページコンテンツを取得します。
+
+---
+
+## x402の仕組み
+
+支払いフローはx402 SDKによって自動的に処理されます：
+
+1. **リクエストを送信** - エンドポイントにリクエストを送信
+2. **支払い要求** - サーバーが支払い要件（402ステータス）で応答
+3. **自動支払い** - SDKが自動的に支払いを作成し送信
+4. **レスポンスを取得** - APIレスポンスを受け取る
+
+## 始めに
+
+使用する言語のx402 SDKをインストール：
+
+```bash
+# Node.js
+npm install x402-fetch viem
+
+# Python  
+pip install x402 eth-account
+```
+
+## 使用例
+
+<CodeGroup>
+```javascript Node.js
+import { wrapFetchWithPayment } from "x402-fetch";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY);
+const fetchWithPayment = wrapFetchWithPayment(fetch, account);
+
+// 有料リクエストを行う - 支払いは自動
+const response = await fetchWithPayment("https://api.olostep.com/x402/v1/maps", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ /* your data */ })
+});
+
+const result = await response.json();
+console.log(result);
+```
+
+```python Python
+import requests
+from eth_account import Account
+from x402.clients.requests import x402_http_adapter
+
+account = Account.from_key(os.getenv("PRIVATE_KEY"))
+session = requests.Session()
+adapter = x402_http_adapter(account)
+session.mount("https://", adapter)
+
+# 有料リクエストを行う - 支払いは自動
+response = session.post(
+    "https://api.olostep.com/x402/v1/maps",
+    json={"key": "value"}
+)
+
+print(response.json())
+```
+</CodeGroup>
+
+## 詳細情報
+
+- [x402 Protocol Docs](https://x402.org)
+- [Coinbase x402 Guide](https://docs.cdp.coinbase.com/x402/)
+
+---
+
+Powered by [Orthogonal](https://orthogonal.sh)

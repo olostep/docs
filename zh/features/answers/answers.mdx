@@ -1,0 +1,198 @@
+---
+sidebarTitle: "答案"
+title: "答案 API"
+icon: "globe-pointer"
+---
+
+通过 Olostep 的 `/v1/answers` 端点，你可以使用自然语言搜索网络，并以你想要的 JSON 形式返回由 AI 驱动的答案和数据。这使你能够将产品建立在真实世界的数据和来源之上，丰富数据点或电子表格。
+
+- 提出一个问题或提供一个你想要丰富的数据点
+- 可选：指定你想要返回的 JSON 结构
+
+它将会：
+- 搜索、清理、验证并返回它在网络上找到的数据
+- 返回用于生成答案的来源
+- 当数据无法验证时，用 `NOT_FOUND` 值处理不确定性
+
+有关 API 详细信息，请参见 [答案端点 API 参考](/api-reference/answers/create)。
+
+默认情况下，我们使用通用的网络索引和具有成本效益的 LLM 验证器。
+
+企业客户可以访问专有的行业特定网络索引、独家私人数据（包括电话号码和电子邮件）以及最适合其用例的自定义 LLM 模型。联系我们以获取访问权限：info@olostep.com
+
+
+
+## 使用案例
+答案端点可以用于：
+ - 将 AI 应用程序建立在真实世界的数据和事实之上
+ - 为招聘、金融、咨询和销售丰富电子表格和数据点
+
+这是一个由答案端点驱动的 AI 电子表格演示：
+https://www.olostep.com/demos/spreadsheet-enrich
+
+
+
+## 安装
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: 内置的 curl 就可以
+```
+
+</CodeGroup>
+
+## 使用方法
+
+提出一个问题并传递一个 JSON 架构来指导输出。你也可以不传递 `json` 参数，API 将返回一个包含答案文本的 `result` 字段的 json 对象。
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "J.K. Rowling 的最新一本书是什么？",
+  "json": {"book_title": "", "author": "", "release_date": ""}
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/answers', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    task: 'J.K. Rowling 的最新一本书是什么？',
+    json: { book_title: '', author: '', release_date: '' }
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/answers" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "J.K. Rowling 的最新一本书是什么？",
+    "json": {"book_title": "", "author": "", "release_date": ""}
+  }'
+```
+
+</CodeGroup>
+
+## 响应
+
+像其他 Olostep 端点一样，你将收到一个 `answer` 对象作为响应。`answer` 对象有几个属性，比如 `id` 和 `result`。
+
+```json
+{
+  "id": "answer_9bi0sbj9xa",
+  "object": "answer",
+  "created": 1760327323,
+  "metadata": {},
+  "task": "J.K. Rowling 的最新一本书是什么？",
+  "result": {
+    "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
+    "sources": [
+      "https://strikefans.com/the-books/",
+      "https://www.facebook.com/groups/496943608606523/posts/1136830134617864/",
+      "https://robert-galbraith.com/strike-books/",
+      "https://www.novelsuspects.com/series-list/robert-galbraith-cormoran-strike-series-in-order/",
+      "https://www.reddit.com/r/books/comments/1na833a/jk_rowlings_new_strike_novel_900_pages_of_romance/",
+      "https://www.harrypotter.com/writing-by-jk-rowling",
+      "https://stories.jkrowling.com/book-news/",
+      "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+      "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+      "https://www.jkrowling.com/news/"
+    ]
+  }
+}
+```
+
+你请求的答案，根据 `json` 参数格式化，位于 `response.result.json_content` 中，来源列表位于 `response.result.sources` 中。你可以解析字符串化的 JSON 来访问结构化数据。
+
+```json
+{
+  "book_title": "The Hallmarked Man",
+  "author": "J.K. Rowling",
+  "release_date": "2025年9月2日"
+}
+```
+
+来源示例：
+
+```json
+[
+    "https://www.harrypotter.com/writing-by-jk-rowling",
+    "https://stories.jkrowling.com/book-news/",
+    "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+    "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+    "https://www.jkrowling.com/news/"
+]
+```
+
+当你不传递 `json` 参数时，API 将返回一个包含答案文本的 `result` 字段的 json 对象。
+
+```json
+{
+  "result": "J.K. Rowling 的最新一本书是 The Hallmarked Man。"
+}
+```
+
+### 灵活的 `json` 参数
+
+- 提供一个具有空值的 JSON 对象作为架构，或描述你想要的数据的字符串。
+- 如果代理不确定，它会为该字段返回 `NOT_FOUND`。
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "Olostep 融资了多少？", 
+  "json": {
+    "amount": ""
+  }
+}
+headers = {
+  "Authorization": "Bearer <YOUR_API_KEY>",
+  "Content-Type": "application/json"
+}
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+这将返回：
+
+```json
+{
+  "amount": "NOT_FOUND"
+}
+```
+
+## 价格
+
+每次请求答案需要 20 个积分。

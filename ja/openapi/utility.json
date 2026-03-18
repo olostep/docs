@@ -1,0 +1,113 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ユーティリティAPI",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/retrieve": {
+      "get": {
+        "summary": "ページコンテンツを取得",
+        "description": "`retrieve_id`を使ってクロールされたページのコンテンツを取得します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "retrieve_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "取得するページコンテンツのID。`/v1/crawls/{crawl_id}/pages`、`/v1/scrapes/{scrape_id}`、または`/v1/batches/{batch_id}/items`エンドポイントのレスポンスで利用可能"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown",
+                  "json"
+                ]
+              }
+            },
+            "description": "本番環境で特定のフォーマットのみを取得するためのオプションの配列。指定しない場合、すべてのフォーマットが返されます。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ページコンテンツを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "html_content": {
+                      "type": "string",
+                      "description": "リクエストされ、利用可能な場合のページのHTMLコンテンツ。"
+                    },
+                    "markdown_content": {
+                      "type": "string",
+                      "description": "リクエストされ、利用可能な場合のページのMarkdownコンテンツ。"
+                    },
+                    "json_content": {
+                      "type": "string",
+                      "description": "リクエストされ、利用可能な場合のパーサーから返されたページのJSONコンテンツ。"
+                    },
+                    "html_hosted_url": {
+                      "type": "string",
+                      "description": "HTMLのS3バケットURL。7日間有効。"
+                    },
+                    "markdown_hosted_url": {
+                      "type": "string",
+                      "description": "MarkdownのS3バケットURL。7日間有効。"
+                    },
+                    "json_hosted_url": {
+                      "type": "string",
+                      "description": "JSONのS3バケットURL。7日間有効。"
+                    },
+                    "size_exceeded": {
+                      "type": "boolean",
+                      "description": "コンテンツオブジェクトのサイズが6MBの制限を超える場合。trueの場合、ホストされたS3のURLを使用してコンテンツを取得してください。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "404": {
+            "description": "提供された`retrieve_id`に対するコンテンツが見つかりません。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Antwoorden API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/answers": {
+      "post": {
+        "summary": "Antwoord Aanmaken",
+        "description": "De AI zal acties uitvoeren zoals zoeken en bladeren door webpagina's om het antwoord op de gegeven taak te vinden. De uitvoeringstijd is 3-30s afhankelijk van de complexiteit.  Voor langere taken, gebruik in plaats daarvan de agent endpoint. Zie [Agent functie](/features/agents/agents). Zie [Antwoorden functie](/features/answers/answers).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "De taak die uitgevoerd moet worden."
+                  },
+                  "json_format": {
+                    "type": "object",
+                    "description": "Het gewenste output JSON object met lege waarden als een schema, of beschrijf simpelweg de data die je wilt als een string."
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met het antwoord.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foutieve Aanvraag (Ontbrekende Taak)"
+          },
+          "402": {
+            "description": "Ongeldige API Sleutel"
+          },
+          "500": {
+            "description": "Interne Serverfout"
+          }
+        }
+      }
+    },
+    "/v1/answers/{answer_id}": {
+      "get": {
+        "summary": "Antwoord Ophalen",
+        "description": "Deze endpoint haalt een eerder voltooid antwoord op via zijn ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "answer_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het antwoord dat opgehaald moet worden.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met het antwoordobject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "task": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "json_content": {
+                          "type": "string"
+                        },
+                        "json_hosted_url": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Ongeldige API Sleutel"
+          },
+          "404": {
+            "description": "Antwoord Niet Gevonden"
+          },
+          "500": {
+            "description": "Interne Serverfout"
+          }
+        }
+      }
+    }
+  }
+}

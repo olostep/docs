@@ -1,0 +1,486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "爬虫 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer 认证头的格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/crawls": {
+      "post": {
+        "summary": "开始新的爬虫",
+        "description": "使用指定的参数启动新的爬虫过程。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_url": {
+                    "type": "string",
+                    "description": "爬虫的起始点。"
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "使用 glob 语法在爬虫中包含的 URL 路径模式。  默认为 `/**`，包括所有 URL。使用类似 `/blog/**` 的模式来爬取特定部分（例如，仅博客页面），`/products/*.html` 用于产品页面，或多个模式用于不同部分。支持标准的 glob 功能，如 *（任意字符）和 **（递归匹配）。"
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "在 glob 模式中排除的 URL 路径名称。例如：`/careers/**`。排除的 URL 将优先于包含的 URL。"
+                  },
+                  "max_pages": {
+                    "type": "number",
+                    "description": "爬虫的最大页面数量。推荐用于大多数用例，如爬取整个网站。"
+                  },
+                  "max_depth": {
+                    "type": "number",
+                    "description": "爬虫的最大深度。用于仅提取最多 n 级链接。"
+                  },
+                  "include_external": {
+                    "type": "boolean",
+                    "description": "爬取一级外部链接。"
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "包含网站的子域名。默认 `false`。"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "可选的搜索查询，用于查找特定链接并按相关性排序结果。"
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "可选的数字，仅爬取每个页面上最相关的前 N 个链接，依据搜索查询。"
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "爬虫完成时接收 POST 请求的 HTTPS URL。必须是使用 `http://` 或 `https://` 协议的公开可访问 URL。不能指向 localhost 或私有 IP 地址。查看 [Webhooks](/api-reference/common/webhooks) 了解负载格式和重试行为。"
+                  },
+                  "timeout": {
+                    "type": "number",
+                    "description": "在 n 秒后结束爬虫，并完成到那时为止的页面。可能会比提供的超时时间多花费约 10 秒。"
+                  },
+                  "follow_robots_txt": {
+                    "type": "boolean",
+                    "description": "是否遵守 robots.txt 规则。如果设置为 `false`，爬虫将不顾 robots.txt 的禁止指令抓取网站。默认 `true`。",
+                    "default": true
+                  },
+                  "scrape_options": {
+                    "type": "object",
+                    "description": "控制每个页面抓取请求从 Olostep API 获取的内容。所有字段都是可选的。",
+                    "properties": {
+                      "formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "html",
+                            "markdown",
+                            "text",
+                            "json",
+                            "screenshot"
+                          ]
+                        },
+                        "description": "请求每个抓取页面的输出格式。省略时默认为 `[\"html\", \"markdown\"]`。`html` 总是自动包含。当提供 `parser` 时，`json` 会自动添加。注意：`raw_pdf` 不支持 — PDF 无法被爬取。",
+                        "example": [
+                          "markdown",
+                          "screenshot"
+                        ]
+                      },
+                      "parser": {
+                        "type": "string",
+                        "description": "在每个页面上运行的解析器名称，并生成结构化的 `json` 输出（例如 `\"@olostep/extract-emails\"`）。设置时自动将 `json` 添加到 `formats`。",
+                        "example": "@olostep/extract-emails"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "start_url",
+                  "max_pages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "爬虫启动成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "爬虫 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象的类型。此端点为 \"crawl\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` 或 `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "创建时间（epoch格式）"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "创建时间（日期格式）"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "爬取过程的当前深度。"
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "已爬取页面的数量"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数错误或缺失导致的错误请求。"
+          },
+          "500": {
+            "description": "内部服务器错误。"
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}": {
+      "get": {
+        "summary": "获取爬取信息",
+        "description": "使用特定的 `crawl_id` 获取关于某次爬取的信息。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "要获取信息的爬取ID。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应，包含爬取信息。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "爬虫 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象的类型。此端点为 \"crawl\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` 或 `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "创建时间（epoch格式）"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "创建时间（日期格式）"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "爬取过程的当前深度。"
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "已爬取页面的数量"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数错误或缺失导致的错误请求。"
+          },
+          "404": {
+            "description": "提供的ID未找到爬取。"
+          },
+          "500": {
+            "description": "内部服务器错误。"
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}/pages": {
+      "get": {
+        "summary": "获取已爬取页面的列表，可选择包含内容",
+        "description": "获取已处理的特定爬取ID的页面和内容列表。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "要获取URL列表的爬取ID。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "可选整数，表示开始获取内容的索引。用于分页，直到获取所有URL。从0开始，然后提供上次请求的 `response['cursor']` 值。"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "可选整数，用于限制返回结果的数量。建议一次返回10-50个结果。使用*cursor*分页。单次请求最多可获取10MB的内容。"
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "可选的搜索查询，用于按相关性排序结果。如果提供，默认使用原始search_query。"
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
+            },
+            "description": "**已弃用：** 使用带有 `retrieve_id` 的 `/retrieve` 端点。  要获取的格式数组（例如，[\"html\", \"markdown\"]）。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应，包含URL列表。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "crawl_id": {
+                      "type": "string",
+                      "description": "爬虫 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象的类型。此端点为 \"crawl\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` 或 `completed`"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "pages_count": {
+                      "type": "number"
+                    },
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string",
+                            "description": "从 `/retrieve` 端点获取内容。"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "is_external": {
+                            "type": "boolean"
+                          },
+                          "html_content": {
+                            "type": "string",
+                            "description": "已弃用：使用 `/retrieve` 端点和 `retrieve_id`。"
+                          },
+                          "markdown_content": {
+                            "type": "string",
+                            "description": "已弃用：使用 `/retrieve` 端点和 `retrieve_id`。"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "external_urls": {
+                          "type": "array",
+                          "description": "在爬取过程中发现的外部 URL",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "failed_urls": {
+                          "type": "array",
+                          "description": "找到但无法抓取的 URL",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "在下一个请求的查询中传递以获取下一个项目。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数错误或缺失导致的错误请求。"
+          },
+          "404": {
+            "description": "提供的ID未找到爬取。"
+          },
+          "500": {
+            "description": "内部服务器错误。"
+          }
+        }
+      }
+    }
+  }
+}

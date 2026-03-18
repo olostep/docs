@@ -1,0 +1,96 @@
+---
+icon: "list"
+sidebarTitle: "ウェブサイトのすべてのURLを取得"
+title: "StripeのウェブサイトからすべてのURLを抽出"
+description: "Stripeのウェブサイト構造を完全に把握し、その組織を理解し、利用可能なコンテンツを発見する。"
+---
+
+## 概要
+
+ウェブサイトの特定のセクションに入る前に、その構造を完全に把握することはよくあります。このガイドでは、StripeのウェブサイトからすべてのURLを抽出する方法を紹介します。これにより、以下のことが可能になります：
+
+- サイト全体のアーキテクチャを理解する
+- 知らなかったコンテンツセクションを発見する
+- どのURLをさらにスクレイプするかをLLMで決定する
+
+## StripeのすべてのURLを抽出
+
+StripeのウェブサイトからすべてのURLを抽出するには、Stripeのドメインを使用してmapsエンドポイントを使用します。これにより、サイト上のすべての発見可能なURLの包括的なリストが返されます。
+
+<CodeGroup>
+    ```python get_stripe_urls.py
+    import requests
+    import time
+    import json
+
+    # 設定
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # レイテンシー追跡のための開始時間
+    start_time = time.time()
+    
+    # ベースURLのみを含むペイロードを定義
+    payload = {
+        "url": "https://stripe.com"
+    }
+    
+    # リクエストを送信
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # レイテンシーを計算
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"リクエスト完了までに{latency}msかかりました")
+    
+    # 結果を処理
+    data = response.json()
+    print(f"Stripeのウェブサイトで{data['urls_count']}個のURLが見つかりました")
+    
+    # サンプルとして最初の10個のURLを表示
+    print("\nサンプルURL:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # さらなる分析のためにすべてのURLをファイルに保存
+    with open('stripe_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nすべてのURLがstripe_urls.jsonに保存されました")
+    ```
+</CodeGroup>
+
+### レスポンスの例
+
+```json
+{
+  "id": "map_abc123xyz",
+  "urls_count": 3842,
+  "urls": [
+    "https://stripe.com",
+    "https://stripe.com/about",
+    "https://stripe.com/blog",
+    "https://stripe.com/docs",
+    "https://stripe.com/pricing",
+    "https://stripe.com/customers",
+    "https://stripe.com/partners",
+    "https://stripe.com/enterprise",
+    "https://stripe.com/payments",
+    "https://stripe.com/billing"
+    // ... 数千のURLが続く
+  ]
+}
+```
+
+## Stripeのウェブサイト構造を分析
+
+すべてのURLを抽出した後、その構造を分析してパターンを特定することができます。これは、Stripeがどのようにコンテンツを整理しているかを理解するのに特に役立ちます。例えば、次のようなURLパターンに気付くかもしれません：
+
+- `/blog/**` - ブログ記事
+- `/docs/**` - ドキュメントページ
+- `/payments/**` - 支払い製品情報
+- `/billing/**` - 請求製品情報
+
+場合によっては、ウェブサイトの特定のセクションのURLのみを取得したいことがあります。例えば、すべてのブログ記事です。[次のガイド](/use-cases/extract-specific-paths)で組み込みのフィルターを使用できます。

@@ -1,0 +1,512 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Scrapes API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/scrapes": {
+      "post": {
+        "summary": "Start een webpagina scrape",
+        "description": "Deze endpoint stelt gebruikers in staat om een webpagina scrape te starten met verschillende configuraties.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url_to_scrape": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "De URL om te beginnen met scrapen."
+                  },
+                  "wait_before_scraping": {
+                    "type": "integer",
+                    "description": "Tijd om te wachten in milliseconden voordat de scraping begint."
+                  },
+                  "formats": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "html",
+                        "markdown",
+                        "text",
+                        "json",
+                        "raw_pdf",
+                        "screenshot"
+                      ]
+                    },
+                    "description": "Formaten waarin je de inhoud wilt."
+                  },
+                  "remove_css_selectors": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "array"
+                    ],
+                    "description": "Optie om bepaalde CSS-selectors uit de inhoud te verwijderen. Optioneel kun je ook een JSON-stringified array van specifieke selectors doorgeven die je wilt verwijderen. De CSS-selectors die worden verwijderd wanneer deze optie is ingesteld op standaard zijn ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "discriminator": {
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "title": "Wachten",
+                          "required": [
+                            "type",
+                            "milliseconds"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "wait"
+                              ],
+                              "description": "Wacht een gespecificeerde hoeveelheid milliseconden"
+                            },
+                            "milliseconds": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "description": "Tijd om te wachten in milliseconden"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Klik",
+                          "required": [
+                            "type",
+                            "selector"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "click"
+                              ],
+                              "description": "Klik op een element"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "CSS-selector voor het element om op te klikken"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Vul Invoer In",
+                          "required": [
+                            "type",
+                            "selector",
+                            "value"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "fill_input"
+                              ],
+                              "description": "Vul een invoerelement met een waarde in"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "CSS-selector voor het invoerelement"
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "Tekst om in te voeren in de invoer"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Scrollen",
+                          "required": [
+                            "type",
+                            "direction",
+                            "amount"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "scroll"
+                              ],
+                              "description": "Scroll de pagina"
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "up",
+                                "down",
+                                "left",
+                                "right"
+                              ],
+                              "description": "Richting om te scrollen"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "description": "Hoeveelheid om te scrollen in pixels"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "description": "Acties om uit te voeren op de pagina voordat de inhoud wordt verkregen."
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Woonland van waaruit het verzoek wordt geladen.  Ondersteunde waarden zijn: - US (Verenigde Staten) - CA (Canada) - IT (Italië) - IN (India) - GB (Engeland) - JP (Japan) - MX (Mexico) - AU (Australië) - ID (Indonesië) - UA (VAE) - RU (Rusland) - RANDOM  Sommige operaties, zoals het scrapen van Google Search en Google News, ondersteunen alle landen."
+                  },
+                  "transformer": {
+                    "type": "string",
+                    "enum": [
+                      "postlight",
+                      "none"
+                    ],
+                    "description": "Specificeer de HTML-transformer die je wilt gebruiken, indien van toepassing. De Mercury Parser-bibliotheek van Postlight wordt gebruikt om advertenties en andere ongewenste inhoud uit de gescrapete inhoud te verwijderen."
+                  },
+                  "remove_images": {
+                    "type": "boolean",
+                    "description": "Optie om afbeeldingen uit de gescrapete inhoud te verwijderen. Standaard is false.",
+                    "default": false
+                  },
+                  "remove_class_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Lijst van class-namen om uit de inhoud te verwijderen."
+                  },
+                  "parser": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "ID van de parser die je wilt gebruiken."
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "description": "Wanneer je json als formaat definieert, kun je deze parameter gebruiken om de parser te specificeren die je wilt gebruiken. Parsers zijn nuttig om gestructureerde inhoud uit webpagina's te halen. Olostep heeft een paar ingebouwde parsers voor de meest voorkomende webpagina's, en je kunt ook je eigen parsers maken."
+                  },
+                  "llm_extract": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "object",
+                        "description": "Schema voor de LLM-extractie."
+                      }
+                    }
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Wanneer waar, retourneert het volledige URLs (bijv. 'https://example.com/page') in plaats van relatieve paden (bijv. '/page')"
+                      },
+                      "query_to_order_links_by": {
+                        "type": "string",
+                        "description": "Sorteert de geretourneerde links op hun gelijkenis met de opgegeven zoektekst, waarbij de meest relevante overeenkomsten eerst worden geprioriteerd."
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter geëxtraheerde links met behulp van glob-patronen met `include_links`. Gebruik patronen zoals \"*.pdf\" om bestandsextensies te matchen, \"/blog/*\" voor specifieke paden, of volledige URLs zoals \"https://example.com/*\". Ondersteunt wildcards (*), tekenklassen ([a-z]), en alternatie ({pattern1,pattern2})."
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter geëxtraheerde links met behulp van glob-patronen met `exclude_links`. Gebruik patronen zoals \"*.pdf\" om bestandsextensies te matchen, \"/blog/*\" voor specifieke paden, of volledige URLs zoals \"https://example.com/*\". Ondersteunt wildcards (*), tekenklassen ([a-z]), en alternatie ({pattern1,pattern2})."
+                      }
+                    },
+                    "description": "Met deze optie kun je alle links krijgen die aanwezig zijn op de pagina die je scrapt."
+                  },
+                  "screen_size": {
+                    "type": "object",
+                    "properties": {
+                      "screen_type": {
+                        "type": "string",
+                        "enum": [
+                          "default",
+                          "mobile",
+                          "desktop"
+                        ],
+                        "description": "Type scherm. Desktop gebruikt 1920x1080 pixels, mobiel gebruikt 414x896 pixels, en standaard gebruikt 1024x768 pixels."
+                      },
+                      "screen_width": {
+                        "type": "integer",
+                        "description": "Breedte van het scherm in pixels. Desktop: 1920px, mobiel: 414px, standaard: 768px."
+                      },
+                      "screen_height": {
+                        "type": "integer",
+                        "description": "Hoogte van het scherm in pixels. Desktop: 1080px, mobiel: 896px, standaard: 1024px."
+                      }
+                    },
+                    "description": "Configuratie voor schermgrootte. Vooraf ingestelde afmetingen zijn beschikbaar via screen_type: desktop (1920x1080), mobile (414x896), of default (768x1024)."
+                  },
+                  "screenshot": {
+                    "type": "object",
+                    "properties": {
+                      "full_page": {
+                        "type": "boolean",
+                        "description": "Als true wordt doorgegeven, wordt de volledige pagina screenshot gemaakt nadat naar de onderkant van de site is gescrold."
+                      }
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "Door de gebruiker gedefinieerde metadata. Nog niet ondersteund."
+                  }
+                },
+                "required": [
+                  "url_to_scrape"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met de details van de scrape-initiatief.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Scrape ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"scrape\" voor dit endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Gemaakt epoch"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Door de gebruiker gedefinieerde metadata."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "De URL die is gescraped."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "text_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Inhoud van parser"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "text_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "402": {
+            "description": "Betaling vereist vanwege een ongeldige API-sleutel."
+          },
+          "404": {
+            "description": "Niet gevonden fout wanneer de gevraagde scrape niet wordt gevonden."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    },
+    "/v1/scrapes/{scrape_id}": {
+      "get": {
+        "summary": "Haal scrape-resultaat op",
+        "description": "Dit endpoint stelt gebruikers in staat om het resultaat van een eerder geïnitieerde scrape op te halen.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scrape_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor de scrape die moet worden opgehaald.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met het scrape-resultaat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Scrape ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"scrape\" voor dit endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Gemaakt epoch"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Door de gebruiker gedefinieerde metadata."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "De URL die is gescraped."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Inhoud van parser"
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "size_exceeded": {
+                          "type": "boolean",
+                          "description": "Als de grootte van de inhoud de limiet overschrijdt. Zo ja, gebruik gehoste S3 urls om inhoud te verkrijgen."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
+          },
+          "402": {
+            "description": "Betaling vereist vanwege een ongeldige API-sleutel."
+          },
+          "404": {
+            "description": "Niet gevonden fout wanneer de gevraagde scrape niet wordt gevonden."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    }
+  }
+}

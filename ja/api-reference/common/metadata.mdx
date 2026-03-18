@@ -1,0 +1,213 @@
+---
+title: "メタデータ"
+sidebarTitle: "メタデータ"
+description: "APIリソースにカスタムのキーと値のペアを添付する"
+icon: "tag"
+---
+
+<Info>
+**現在は[Batches](/api-reference/batches/create)で利用可能です。** Scrapes、Crawls、Maps、Answersへのサポートは近日中に追加予定です。
+</Info>
+
+メタデータを使用すると、Olostepリソースにカスタムのキーと値のペアを添付できます。これは、APIリクエストと共にコンテキストを追跡、フィルタリング、整理、保存するのに役立ちます。
+
+メタデータは[Stripeのアプローチ](https://stripe.com/docs/api/metadata)に従っています。シンプルで柔軟、かつすべてのエンドポイントで一貫しています。
+
+---
+
+## ユースケース
+
+<CardGroup cols={2}>
+  <Card title="追跡と整理" icon="folder">
+    リソースを注文ID、顧客ID、またはプロジェクト名で内部システムにリンクします。
+  </Card>
+  <Card title="フィルタリングと検索" icon="magnifying-glass">
+    リソースにタグを付けて、アプリケーション内で簡単に取得およびフィルタリングできるようにします。
+  </Card>
+  <Card title="ワークフローコンテキスト" icon="diagram-project">
+    パイプラインのステージ、優先度レベル、または処理指示を保存します。
+  </Card>
+  <Card title="監査証跡" icon="clock-rotate-left">
+    リクエストを開始した人、タイムスタンプ、またはバージョン情報を記録します。
+  </Card>
+</CardGroup>
+
+---
+
+## 作成時のメタデータの追加
+
+リソースを作成する際に`metadata`パラメータを含めます:
+
+<CodeGroup>
+
+```json Request Body
+{
+  "url": "https://example.com",
+  "metadata": {
+    "order_id": "12345",
+    "customer_name": "John Doe",
+    "priority": "high",
+    "internal_ref": "proj-2024-001"
+  }
+}
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <your_token>"},
+    json={
+        "items": [{"custom_id": "1", "url": "https://example.com"}],
+        "metadata": {
+            "project": "q4-analysis",
+            "team": "data-ops",
+            "priority": "high"
+        }
+    }
+)
+```
+
+```javascript Node.js
+const response = await fetch("https://api.olostep.com/v1/batches", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <your_token>",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    items: [{ custom_id: "1", url: "https://example.com" }],
+    metadata: {
+      project: "q4-analysis",
+      team: "data-ops",
+      priority: "high"
+    }
+  })
+});
+```
+
+</CodeGroup>
+
+メタデータは、そのリソースに対するすべての後続のGETレスポンスで返されます。
+
+---
+
+## 検証ルール
+
+| 制約 | 制限 | エラー例 |
+|------|------|----------|
+| 最大キー数 | 50 | `"メタデータは最大50個のキーを持つことができます。あなたは51個のキーを提供しました。"` |
+| キーの長さ | 40文字 | `"メタデータキー \"my_very_long_key_name...\" が40文字の制限を超えています。"` |
+| キーの形式 | 角括弧なし | `"メタデータキー \"items[0]\" に角括弧（[ または ]）を含めることはできません。"` |
+| 値の長さ | 500文字 | `"キー \"description\" のメタデータ値が500文字の制限を超えています。"` |
+| 値の型 | 文字列のみ | `"キー \"count\" のメタデータ値は文字列でなければなりません。オブジェクトを取得しました。"` |
+
+<Note>
+**型の強制**: 数字とブール値は自動的に文字列に変換されます。
+- `42` → `"42"`
+- `true` → `"true"`
+- `3.14` → `"3.14"`
+
+オブジェクトと配列は拒否されます。
+</Note>
+
+---
+
+## メタデータの更新 (PATCH)
+
+<Info>
+**現在利用可能:** [Batches](/api-reference/batches/update) のみ。
+
+Crawls、Scrapes、Maps、Answersは作成後のメタデータ更新をまだサポートしていません。
+</Info>
+
+既存のバッチに対して[PATCHエンドポイント](/api-reference/batches/update)を使用してメタデータを更新できます。更新はマージ動作を使用します。
+
+### 更新操作
+
+<AccordionGroup>
+
+<Accordion title="新しいキーの追加" icon="plus">
+既存のキーを保持しながら新しいキーを追加します。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"new_key": "new_value"}}'
+```
+
+**前:** `{"project": "alpha"}`  
+**後:** `{"project": "alpha", "new_key": "new_value"}`
+</Accordion>
+
+<Accordion title="既存のキーの更新" icon="pen">
+既存のキーは新しい値で上書きされます。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "beta"}}'
+```
+
+**前:** `{"project": "alpha", "priority": "high"}`  
+**後:** `{"project": "beta", "priority": "high"}`
+</Accordion>
+
+<Accordion title="特定のキーの削除" icon="trash">
+キーを`null`または`""`（空文字列）に設定して削除します。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"priority": null}}'
+```
+
+**前:** `{"project": "alpha", "priority": "high"}`  
+**後:** `{"project": "alpha"}`
+</Accordion>
+
+<Accordion title="すべてのメタデータをクリア" icon="eraser">
+メタデータフィールド全体を`null`または`""`に設定してすべてのキーを削除します。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": null}'
+```
+
+**前:** `{"project": "alpha", "priority": "high"}`  
+**後:** `{}`
+</Accordion>
+
+<Accordion title="混合操作" icon="shuffle">
+1つのリクエストでキーを追加、更新、削除します。
+
+```bash
+curl -X PATCH "https://api.olostep.com/v1/batches/batch_abc123" \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"metadata": {"project": "gamma", "new_field": "value", "old_field": null}}'
+```
+
+**前:** `{"project": "alpha", "old_field": "remove_me"}`  
+**後:** `{"project": "gamma", "new_field": "value"}`
+</Accordion>
+
+</AccordionGroup>
+
+### PATCH動作の概要
+
+| 操作 | リクエスト | 結果 |
+|------|-----------|------|
+| キーの追加 | `{"metadata": {"new": "value"}}` | キーが追加され、他のキーは保持される |
+| キーの更新 | `{"metadata": {"existing": "new_value"}}` | キーが更新され、他のキーは保持される |
+| キーの削除 | `{"metadata": {"key": null}}` | キーが削除され、他のキーは保持される |
+| キーの削除 | `{"metadata": {"key": ""}}` | キーが削除され、他のキーは保持される |
+| すべてをクリア | `{"metadata": null}` | すべてのキーが削除される |
+| すべてをクリア | `{"metadata": ""}` | すべてのキーが削除される |
+| 変更なし | `{"metadata": {}}` | 変更なし |

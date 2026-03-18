@@ -1,0 +1,91 @@
+---
+icon: "file-lines"
+sidebarTitle: "Obtener Markdown de un Sitio Web"
+title: "Obtener el Markdown de un Sitio Web"
+description: "Aprende cómo extraer contenido en formato markdown amigable para LLM desde cualquier página web."
+---
+
+## Descripción General
+
+El endpoint [scrape](../../features/scrapes/scrapes) de Olostep permite extraer contenido de cualquier sitio web. El contenido en markdown es útil si quieres proporcionarlo a un LLM sin todo el HTML.
+
+En esta guía veremos cómo extraer markdown de un sitio web como `https://www.nea.com/team`.
+
+## Requisitos Previos
+
+Antes de comenzar, asegúrate de tener lo siguiente:
+
+- Una clave de API válida de Olostep. Puedes obtener una registrándote en [Olostep](https://www.olostep.com/dashboard).
+- Python instalado en tu sistema
+- Las bibliotecas `requests` y `json` (estas vienen preinstaladas con Python, pero puedes instalarlas usando `pip install requests` si es necesario)
+
+## Extrayendo Texto de un Sitio Web
+
+El siguiente script de Python demuestra cómo extraer texto y contenido en markdown de un sitio web usando la API de Olostep.
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.nea.com/team",
+    "country": "US",
+    "formats": ["markdown"],
+    "wait_before_scraping": 0,
+    "remove_css_selectors": "default",
+}
+
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+print(json.dumps(response.json(), indent=4))
+```
+
+## Respuesta de Ejemplo
+
+Una respuesta exitosa se verá algo así:
+
+```json
+{
+    "id": "scrape_63x2e5sf5r",
+    "object": "scrape",
+    "created": 1740341743,
+    "metadata": {},
+    "retrieve_id": "63x2e5sf5r",
+    "url_to_scrape": "https://www.nea.com/team",
+    "result": {
+        "html_content": null,
+        "markdown_content": "NEA ….",
+        "text_content": null,
+        "json_content": null,
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_63x2e5sf5r.txt",
+        "json_hosted_url": null,
+        "text_hosted_url": null,
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+## Explicación
+
+- `url_to_scrape`: especifica la URL del sitio web del que se extraerá el contenido.
+- `formats`: define los formatos de salida (texto en este caso).
+- `Authorization`: contiene tu clave de API para autenticar la solicitud.
+- La respuesta está formateada como JSON y se imprime para facilitar la lectura.
+
+## Conclusión
+
+Usando Olostep, puedes extraer fácilmente contenido en markdown de cualquier sitio web. Esto es útil si deseas obtener contenido de un sitio web y proporcionarlo a un LLM para extracción y análisis de datos. Si quieres extraer contenido a gran escala del mismo sitio web repetidamente (por ejemplo, monitoreo de datos, seguimiento de precios, etc.) te recomendamos usar un [parser personalizado](../../features/structured-content/parsers) para obtener el contenido en formato JSON.

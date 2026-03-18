@@ -1,0 +1,512 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API di Scraping",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    }
+  },
+  "paths": {
+    "/v1/scrapes": {
+      "post": {
+        "summary": "Inizia uno scraping di una pagina web",
+        "description": "Questo endpoint permette agli utenti di avviare uno scraping di una pagina web con varie configurazioni.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url_to_scrape": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "L'URL da cui iniziare lo scraping."
+                  },
+                  "wait_before_scraping": {
+                    "type": "integer",
+                    "description": "Tempo di attesa in millisecondi prima di iniziare lo scraping."
+                  },
+                  "formats": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "html",
+                        "markdown",
+                        "text",
+                        "json",
+                        "raw_pdf",
+                        "screenshot"
+                      ]
+                    },
+                    "description": "Formati nei quali vuoi il contenuto."
+                  },
+                  "remove_css_selectors": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "array"
+                    ],
+                    "description": "Opzione per rimuovere determinati selettori CSS dal contenuto. Facoltativamente, puoi anche passare un array JSON stringificato di selettori specifici che vuoi rimuovere. I selettori CSS rimossi quando questa opzione è impostata su default sono ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "discriminator": {
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "title": "Attendere",
+                          "required": [
+                            "type",
+                            "milliseconds"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "wait"
+                              ],
+                              "description": "Attendere per un determinato numero di millisecondi"
+                            },
+                            "milliseconds": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "description": "Tempo di attesa in millisecondi"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Clic",
+                          "required": [
+                            "type",
+                            "selector"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "click"
+                              ],
+                              "description": "Clicca su un elemento"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "Selettore CSS per l'elemento su cui cliccare"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Compila Input",
+                          "required": [
+                            "type",
+                            "selector",
+                            "value"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "fill_input"
+                              ],
+                              "description": "Compila un elemento di input con un valore"
+                            },
+                            "selector": {
+                              "type": "string",
+                              "description": "Selettore CSS per l'elemento di input"
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "Testo da inserire nell'input"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "Scorri",
+                          "required": [
+                            "type",
+                            "direction",
+                            "amount"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "scroll"
+                              ],
+                              "description": "Scorri la pagina"
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "up",
+                                "down",
+                                "left",
+                                "right"
+                              ],
+                              "description": "Direzione dello scorrimento"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "description": "Quantità di scorrimento in pixel"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "description": "Azioni da eseguire sulla pagina prima di ottenere il contenuto."
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Paese residenziale da cui caricare la richiesta.  Valori supportati sono: - US (Stati Uniti) - CA (Canada) - IT (Italia) - IN (India) - GB (Inghilterra) - JP (Giappone) - MX (Messico) - AU (Australia) - ID (Indonesia) - UA (UAE) - RU (Russia) - RANDOM  Alcune operazioni, come lo scraping di Google Search e Google News, supportano tutti i paesi."
+                  },
+                  "transformer": {
+                    "type": "string",
+                    "enum": [
+                      "postlight",
+                      "none"
+                    ],
+                    "description": "Specifica il trasformatore HTML da usare, se presente. La libreria Mercury Parser di Postlight viene utilizzata per rimuovere annunci e altri contenuti indesiderati dal contenuto estratto."
+                  },
+                  "remove_images": {
+                    "type": "boolean",
+                    "description": "Opzione per rimuovere le immagini dal contenuto estratto. Il valore predefinito è false.",
+                    "default": false
+                  },
+                  "remove_class_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Elenco dei nomi di classe da rimuovere dal contenuto."
+                  },
+                  "parser": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "ID del parser da utilizzare."
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "description": "Quando definisci json come formato, puoi usare questo parametro per specificare il parser da utilizzare. I parser sono utili per estrarre contenuti strutturati dalle pagine web. Olostep ha alcuni parser integrati per le pagine web più comuni, e puoi anche creare i tuoi parser."
+                  },
+                  "llm_extract": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "object",
+                        "description": "Schema per l'estrazione LLM."
+                      }
+                    }
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Quando è vero, restituisce URL completi (es., 'https://example.com/page') invece di percorsi relativi (es., '/page')"
+                      },
+                      "query_to_order_links_by": {
+                        "type": "string",
+                        "description": "Ordina i link restituiti in base alla loro somiglianza con il testo della query fornita, dando priorità alle corrispondenze più rilevanti per prime."
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filtra i link estratti usando pattern glob con `include_links`. Usa pattern come \"*.pdf\" per abbinare le estensioni dei file, \"/blog/*\" per percorsi specifici, o URL completi come \"https://example.com/*\". Supporta caratteri jolly (*), classi di caratteri ([a-z]), e alternanza ({pattern1,pattern2})."
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filtra i link estratti usando pattern glob con `exclude_links`. Usa pattern come \"*.pdf\" per abbinare le estensioni dei file, \"/blog/*\" per percorsi specifici, o URL completi come \"https://example.com/*\". Supporta caratteri jolly (*), classi di caratteri ([a-z]), e alternanza ({pattern1,pattern2})."
+                      }
+                    },
+                    "description": "Con questa opzione, puoi ottenere tutti i link presenti sulla pagina che stai scrappando."
+                  },
+                  "screen_size": {
+                    "type": "object",
+                    "properties": {
+                      "screen_type": {
+                        "type": "string",
+                        "enum": [
+                          "default",
+                          "mobile",
+                          "desktop"
+                        ],
+                        "description": "Tipo di schermo. Desktop usa 1920x1080 pixel, mobile usa 414x896 pixel, e default usa 1024x768 pixel."
+                      },
+                      "screen_width": {
+                        "type": "integer",
+                        "description": "Larghezza dello schermo in pixel. Desktop: 1920px, mobile: 414px, default: 768px."
+                      },
+                      "screen_height": {
+                        "type": "integer",
+                        "description": "Altezza dello schermo in pixel. Desktop: 1080px, mobile: 896px, default: 1024px."
+                      }
+                    },
+                    "description": "Configurazione per la dimensione dello schermo. Le dimensioni preimpostate sono disponibili tramite screen_type: desktop (1920x1080), mobile (414x896) o default (768x1024)."
+                  },
+                  "screenshot": {
+                    "type": "object",
+                    "properties": {
+                      "full_page": {
+                        "type": "boolean",
+                        "description": "Se passato true, lo screenshot dell'intera pagina viene effettuato dopo aver scrollato fino in fondo al sito."
+                      }
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "Metadati definiti dall'utente. Non ancora supportato."
+                  }
+                },
+                "required": [
+                  "url_to_scrape"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con i dettagli dell'inizio dello scrape.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID dello scrape."
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"scrape\" per questo endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Epoch creato"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Metadati definiti dall'utente."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "L'URL che è stato sottoposto a scraping."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "text_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Contenuto dal parser."
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "text_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+          },
+          "402": {
+            "description": "Pagamento richiesto a causa di una chiave API non valida."
+          },
+          "404": {
+            "description": "Errore di non trovato quando lo scrape richiesto non viene trovato."
+          },
+          "500": {
+            "description": "Errore interno del server."
+          }
+        }
+      }
+    },
+    "/v1/scrapes/{scrape_id}": {
+      "get": {
+        "summary": "Recupera il risultato dello scrape.",
+        "description": "Questo endpoint permette agli utenti di recuperare il risultato di uno scrape avviato in precedenza.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scrape_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per lo scrape da recuperare.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con il risultato dello scrape.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID dello scrape."
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"scrape\" per questo endpoint."
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Epoch creato"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Metadati definiti dall'utente."
+                    },
+                    "url_to_scrape": {
+                      "type": "string",
+                      "description": "L'URL che è stato sottoposto a scraping."
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "html_content": {
+                          "type": "string"
+                        },
+                        "markdown_content": {
+                          "type": "string"
+                        },
+                        "json_content": {
+                          "type": "string",
+                          "description": "Contenuto dal parser."
+                        },
+                        "screenshot_hosted_url": {
+                          "type": "string"
+                        },
+                        "html_hosted_url": {
+                          "type": "string"
+                        },
+                        "markdown_hosted_url": {
+                          "type": "string"
+                        },
+                        "links_on_page": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "page_metadata": {
+                          "type": "object",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "size_exceeded": {
+                          "type": "boolean",
+                          "description": "Se la dimensione del contenuto supera il limite. Se sì, usa gli URL S3 ospitati per ottenere il contenuto."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+          },
+          "402": {
+            "description": "Pagamento richiesto a causa di una chiave API non valida."
+          },
+          "404": {
+            "description": "Errore di non trovato quando lo scrape richiesto non viene trovato."
+          },
+          "500": {
+            "description": "Errore interno del server."
+          }
+        }
+      }
+    }
+  }
+}

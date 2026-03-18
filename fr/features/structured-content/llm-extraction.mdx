@@ -1,0 +1,118 @@
+---
+sidebarTitle: "Utilisation de l’extraction LLM"
+title: "Utilisation de l’extraction LLM"
+---
+
+Pour les sites web avec des structures changeantes ou des besoins d'extraction ponctuels, Olostep propose une extraction alimentée par LLM. Cette approche :
+
+- Alimente le contenu à un Large Language Model
+- Instruis le modèle pour analyser et retourner uniquement les données spécifiées
+- Retourne une structure JSON propre contenant exactement ce dont tu as besoin
+
+```python
+import requests
+import json
+
+def extract_with_llm():
+    url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": [
+            "markdown", 
+            "json"
+        ],
+        "llm_extract": {
+            "schema": {
+                "event": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "date": {"type": "string"},
+                        "description": {"type": "string"},
+                        "venue": {"type": "string"},
+                        "address": {"type": "string"},
+                        "start_time": {"type": "string"}
+                    }
+                }
+            }
+        },
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # L'extraction LLM sera disponible dans le résultat
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+    extract_with_llm()
+```
+
+Tu peux soit passer le `schema` soit un `prompt` au LLM.
+
+```python
+
+import requests
+import json
+
+def extract_with_llm():
+    url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": [
+            "markdown", 
+            "json"
+        ],
+        "llm_extract": {
+            "prompt": "Extract the event title, date, description, venue, address, and start time from the event page."
+        },
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # L'extraction LLM sera disponible dans le résultat
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+    extract_with_llm()
+```
+
+Le `prompt` est une chaîne en langage naturel qui est passée au LLM pour extraire les données. Le LLM décide comment extraire les données en fonction du prompt. Tu peux l'utiliser lorsque tu ne veux pas utiliser un `schema`.
+
+Réponse Exemple :
+
+```json
+{
+    "id": "scrape_94iqy385ty",
+    ...
+    "result": {
+        "json_content":  "{\"event\":{\"title\":\"Stefano Marchese and Friends\",\"date\":\"Wednesday / January 22, 2025\",\"description\":\"Join acclaimed Italian singer-songwriter and educator Stefano Marchese for an unforgettable evening of musical magic as he takes the stage alongside a constellation of extraordinary talent in a concert titled Concerto di Duetti.\",\"venue\":\"David Friend Recital Hall (DFRH)\",\"address\":\"921 Boylston Street Boston MA 02115 United States\",\"start_time\":\"7:30 p.m. (EST)\"}}"
+    }
+}
+```
+
+json_content est le contenu JSON sous forme de chaîne de l'événement. Tu peux y accéder comme un objet JSON en analysant la chaîne.
+
+```python
+import json
+
+event = json.loads(result["json_content"])
+print(event["event"]["title"])
+```

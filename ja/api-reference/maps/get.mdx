@@ -1,0 +1,61 @@
+---
+title: "マップを取得"
+openapi: "ja/openapi/maps.json GET /v1/maps/{map_id}"
+---
+
+# マップを取得
+
+このエンドポイントを使用して、特定のマップの詳細を取得します。
+
+## リクエスト
+
+### HTTP リクエスト
+
+`GET /v1/maps/{map_id}`
+
+### パスパラメータ
+
+- `map_id`: 取得したいマップの一意の識別子。
+
+## レスポンス
+
+成功した場合、このメソッドはマップオブジェクトを返します。
+
+### レスポンスボディ
+
+```json
+{
+  "id": "123",
+  "name": "Sample Map",
+  "created_at": "2023-01-01T00:00:00Z",
+  "updated_at": "2023-01-02T00:00:00Z"
+}
+```
+
+## エラー
+
+- `404 Not Found`: 指定された `map_id` のマップが存在しない場合。
+- `401 Unauthorized`: 認証されていない、または無効なトークンを使用している場合。
+
+## 例
+
+### リクエストの例
+
+```http
+GET /v1/maps/123 HTTP/1.1
+Host: api.olostep.com
+Authorization: Bearer your-access-token
+```
+
+### レスポンスの例
+
+```json
+{
+  "id": "123",
+  "name": "Sample Map",
+  "created_at": "2023-01-01T00:00:00Z",
+  "updated_at": "2023-01-02T00:00:00Z"
+}
+```
+
+このエンドポイントを使用することで、マップの詳細を簡単に取得できます。

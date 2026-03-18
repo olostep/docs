@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API dei File",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "Crea Caricamento File",
+        "description": "Genera un URL pre-firmato per caricare un file JSON. Dopo il caricamento, devi chiamare l'endpoint di completamento per finalizzare il caricamento. L'URL di caricamento scade in 10 minuti.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "Il nome del file. Deve terminare con l'estensione .json.",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Lo scopo del file. Valori supportati: 'context' o 'batch'. Predefinito a 'context'.",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con URL di caricamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del file"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"file.upload\" per questo endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Timestamp epoch creato"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL pre-firmato per caricare il file. Scade in 10 minuti."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Numero di secondi fino alla scadenza dell'URL di caricamento (600 secondi = 10 minuti)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata. Nome del file mancante o tipo di file non valido (sono supportati solo file .json)."
+          },
+          "401": {
+            "description": "Chiave API non valida"
+          },
+          "500": {
+            "description": "Errore interno del server"
+          }
+        }
+      },
+      "get": {
+        "summary": "Elenca File",
+        "description": "Elenca tutti i file completati per il tuo team. Opzionalmente filtra per scopo. Restituisce solo file con stato 'completed'.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "Filtra i file per scopo. Valori supportati: 'context' o 'batch'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con elenco di file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"list\" per questo endpoint."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "ID del file"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "Il tipo di oggetto. \"file\" per questo endpoint."
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Timestamp epoch creato"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "Il nome del file caricato"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "Dimensione del file in byte"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "Lo scopo del file"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Stato del file. Sempre 'completed' per i file elencati."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chiave API non valida"
+          },
+          "500": {
+            "description": "Errore interno del server"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "Completa il caricamento del file",
+        "description": "Completa il processo di caricamento del file e valida il file JSON caricato. Questo endpoint verifica che il file esista, ne valida il formato JSON, controlla la dimensione del file (max 200MB) e aggiorna lo stato del file a completed.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per il file da completare.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Caricamento del file completato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del file"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"file\" per questo endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Timestamp epoch creato"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Il nome del file caricato"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Dimensione del file in byte"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Lo scopo del file"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Stato del file. Sarà 'completed' dopo il completamento con successo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata. File già completato, stato non valido, file troppo grande (max 200MB) o formato JSON non valido."
+          },
+          "401": {
+            "description": "Chiave API non valida"
+          },
+          "404": {
+            "description": "File non trovato o file non caricato su S3"
+          },
+          "500": {
+            "description": "Errore interno del server"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "Ottieni i metadati del file tramite ID",
+        "description": "Recupera i metadati di un file tramite il suo ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per il file da recuperare.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta positiva con i metadati del file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del file"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"file\" per questo endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Timestamp epoch creato"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Il nome del file caricato"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Dimensione del file in byte"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Lo scopo del file"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Stato del file (es. 'pending', 'completed')"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chiave API non valida"
+          },
+          "404": {
+            "description": "File non trovato"
+          },
+          "500": {
+            "description": "Errore interno del server"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Elimina file",
+        "description": "Elimina un file e i suoi dati associati dallo storage.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per il file da eliminare.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File eliminato con successo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del file"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"file\" per questo endpoint."
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "Indica che il file è stato eliminato con successo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chiave API non valida"
+          },
+          "404": {
+            "description": "File non trovato"
+          },
+          "500": {
+            "description": "Errore interno del server"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "Ottieni l'oggetto File tramite ID",
+        "description": "Ottieni un URL pre-firmato per scaricare il contenuto di un file \"completed\". Puoi specificare opzionalmente il tempo di scadenza per l'URL di download usando il parametro di query expires_in (predefinito a 600 secondi / 10 minuti).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identificatore univoco per il file da scaricare.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Numero di secondi fino alla scadenza dell'URL di download. Predefinito a 600 secondi (10 minuti).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risposta riuscita con URL di download.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del file"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Il tipo di oggetto. \"file\" per questo endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Timestamp epoch creato"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Il nome del file caricato"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Dimensione del file in byte"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL pre-firmato per scaricare il file. Scade dopo il tempo specificato in expires_in."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Numero di secondi fino alla scadenza dell'URL di download."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Richiesta errata. File non \"completed\"."
+          },
+          "401": {
+            "description": "Chiave API non valida"
+          },
+          "404": {
+            "description": "File non trovato"
+          },
+          "500": {
+            "description": "Errore interno del server"
+          }
+        }
+      }
+    }
+  }
+}

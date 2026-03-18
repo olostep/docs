@@ -1,0 +1,925 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AirOps Batches API",
+    "version": "1.0.0",
+    "description": "Interne API voor AirOps-specifieke batch scraping met geautomatiseerde LLM verrijking voor het extraheren van paginametadata."
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "paths": {
+    "/v1/batches-airops": {
+      "post": {
+        "operationId": "createAirOpsBatch",
+        "summary": "Maak AirOps Batch",
+        "description": "Start een batchproces dat scraping combineert met LLM-gebaseerde verrijking voor het extraheren van paginametadata. De workflow: scrape URLs → metadata extraheren → gapanalyse → LLM verrijking voor ontbrekende velden.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBatchRequest"
+              },
+              "example": {
+                "items": [
+                  {
+                    "url": "https://example.com/blog/post-1",
+                    "custom_id": "post-1"
+                  },
+                  {
+                    "url": "https://example.com/blog/post-2",
+                    "custom_id": "post-2"
+                  }
+                ],
+                "brands": [
+                  "Acme Corp",
+                  "TechBrand"
+                ],
+                "country": "US",
+                "webhook": "https://your-server.com/webhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch succesvol aangemaakt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBatchResponse"
+                },
+                "example": {
+                  "id": "batch_abc123xyz",
+                  "object": "batch_airops",
+                  "created": 1705315200000,
+                  "total_urls": 2,
+                  "status": {
+                    "overall": "in_progress",
+                    "scraping": {
+                      "state": "started",
+                      "submitted": 2,
+                      "valid": 2,
+                      "succeeded": 0,
+                      "failed": 0,
+                      "started_at": 1705315200000,
+                      "completed_at": null,
+                      "error": null
+                    },
+                    "analyzing": {
+                      "state": "pending",
+                      "items_analyzed": 0,
+                      "items_needing_enrichment": 0,
+                      "items_complete": 0,
+                      "fields_to_enrich": null,
+                      "started_at": null,
+                      "completed_at": null
+                    },
+                    "enriching": {
+                      "state": "pending",
+                      "items_to_enrich": 0,
+                      "items_enriched": 0,
+                      "items_failed": 0,
+                      "llm_batch_id": null,
+                      "started_at": null,
+                      "completed_at": null,
+                      "error": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validatiefout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authenticatiegegevens ontbreken of zijn ongeldig.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interne serverfout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches-airops/{batch_id}": {
+      "get": {
+        "operationId": "getAirOpsBatch",
+        "summary": "Haal AirOps Batch Status op",
+        "description": "Haal de huidige status en configuratie van een AirOps batch op.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "De ID van de batch om op te halen.",
+            "example": "batch_abc123xyz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batchstatus succesvol opgehaald.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchDetailResponse"
+                },
+                "example": {
+                  "id": "batch_abc123xyz",
+                  "object": "batch",
+                  "created_at": 1705315200000,
+                  "total_urls": 50,
+                  "status": "completed",
+                  "batch_mode": true,
+                  "scraping": {
+                    "state": "completed",
+                    "submitted": 50,
+                    "valid": 50,
+                    "succeeded": 48,
+                    "failed": 2,
+                    "started_at": 1705315200000,
+                    "completed_at": 1705315500000,
+                    "error": null
+                  },
+                  "analyzing": {
+                    "state": "completed",
+                    "items_analyzed": 48,
+                    "items_needing_enrichment": 30,
+                    "items_complete": 18,
+                    "started_at": 1705315500000,
+                    "completed_at": 1705315502000
+                  },
+                  "enriching": {
+                    "state": "completed",
+                    "items_to_enrich": 30,
+                    "items_enriched": 30,
+                    "items_failed": 0,
+                    "llm_batch_id": "batch_xyz789",
+                    "batch_mode": true,
+                    "started_at": 1705315502000,
+                    "completed_at": 1705316800000,
+                    "error": null
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch niet gevonden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches-airops/{batch_id}/items": {
+      "get": {
+        "operationId": "getAirOpsBatchItems",
+        "summary": "Haal AirOps Batch Items op",
+        "description": "Haal alle items in de batch op met hun parser en verrijkte data.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "De ID van de batch waarvoor je items wilt ophalen.",
+            "example": "batch_abc123xyz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batchitems succesvol opgehaald.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBatchItemsResponse"
+                },
+                "example": {
+                  "batch_id": "batch_abc123xyz",
+                  "completed_at": "2024-01-15T12:30:00.000Z",
+                  "status": "completed",
+                  "counts": {
+                    "total": 3,
+                    "succeeded": 2,
+                    "failed": 1
+                  },
+                  "items": [
+                    {
+                      "custom_id": "post-1",
+                      "url": "https://example.com/blog/post-1",
+                      "status": "completed",
+                      "page_type": "informational_article",
+                      "author": "John Doe",
+                      "date_published": "2024-01-15",
+                      "date_modified": null,
+                      "brand_mentions": [
+                        "Acme Corp"
+                      ]
+                    },
+                    {
+                      "custom_id": "post-2",
+                      "url": "https://example.com/pricing",
+                      "status": "completed",
+                      "page_type": "pricing_page",
+                      "author": null,
+                      "date_published": null,
+                      "date_modified": null,
+                      "brand_mentions": []
+                    },
+                    {
+                      "custom_id": "post-3",
+                      "url": "https://example.com/broken",
+                      "status": "failed",
+                      "failed_stage": "scraping",
+                      "error": {
+                        "code": "SCRAPE_FAILED",
+                        "message": "URL failed to scrape"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Batch niet gevonden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatieheader van de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    },
+    "schemas": {
+      "CreateBatchRequest": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/BatchItem"
+            },
+            "description": "Array van items om te verwerken."
+          },
+          "brands": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "default": [],
+            "description": "Merknamen om naar te zoeken in de pagina-inhoud. De LLM zal vermeldingen van deze merken uit elke pagina extraheren."
+          },
+          "country": {
+            "type": "string",
+            "default": "RANDOM",
+            "description": "Land voor geo-gerichte scraping. Gebruik ISO 3166-1 alpha-2 codes (US, GB, DE, etc.) of 'RANDOM' voor automatische selectie."
+          },
+          "webhook": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL om webhook notificaties te ontvangen voor batch levenscyclus evenementen."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        }
+      },
+      "BatchItem": {
+        "type": "object",
+        "required": [
+          "url",
+          "custom_id"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "De URL om te scrapen."
+          },
+          "custom_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Jouw unieke identificatie voor dit item."
+          }
+        }
+      },
+      "CreateBatchResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unieke batch identificatie."
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "batch_airops"
+            ],
+            "description": "Object type identificatie."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (milliseconden) wanneer de batch is aangemaakt."
+          },
+          "total_urls": {
+            "type": "integer",
+            "description": "Totaal aantal URLs in de batch."
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          }
+        }
+      },
+      "BatchDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "batch"
+            ]
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "Unix timestamp (ms)"
+          },
+          "total_urls": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed"
+            ],
+            "description": "Algemene workflow status."
+          },
+          "batch_mode": {
+            "type": "boolean",
+            "description": "Of async LLM batch modus is ingeschakeld."
+          },
+          "scraping": {
+            "$ref": "#/components/schemas/ScrapingStatus"
+          },
+          "analyzing": {
+            "$ref": "#/components/schemas/AnalyzingStatus"
+          },
+          "enriching": {
+            "$ref": "#/components/schemas/EnrichingStatus"
+          }
+        }
+      },
+      "ListBatchItemsResponse": {
+        "type": "object",
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "description": "De batch identificatie."
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "ISO 8601 timestamp wanneer batch voltooid is."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "in_progress"
+            ],
+            "description": "Batch status."
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Totaal aantal items in batch."
+              },
+              "succeeded": {
+                "type": "integer",
+                "description": "Succesvol verwerkte items."
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Mislukte items."
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchItemResult"
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "Statusbericht (aanwezig wanneer batch nog steeds verwerkt wordt)."
+          }
+        }
+      },
+      "BatchItemResult": {
+        "type": "object",
+        "description": "Een verwerkt item. Structuur varieert op basis van status.",
+        "properties": {
+          "custom_id": {
+            "type": "string",
+            "description": "Jouw identificatie van het verzoek."
+          },
+          "url": {
+            "type": "string",
+            "description": "De gescrapete URL."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "failed"
+            ],
+            "description": "Status van itemverwerking."
+          },
+          "page_type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "homepage",
+              "product_page",
+              "collection_page",
+              "pricing_page",
+              "informational_article",
+              "documentation",
+              "listicle_article",
+              "comparison_page",
+              "support_article",
+              "review_page",
+              "forum_thread",
+              "social_media_post",
+              "social_media_profile",
+              "video_page",
+              "news_article",
+              "case_study",
+              "marketplace_listing",
+              "landing_page",
+              "deal_page",
+              "job_posting",
+              "other"
+            ],
+            "description": "Geklasseerd paginatype (aanwezig wanneer status \"completed\" is)."
+          },
+          "author": {
+            "type": "string",
+            "nullable": true,
+            "description": "Auteur van de inhoud."
+          },
+          "date_published": {
+            "type": "string",
+            "nullable": true,
+            "description": "Publicatiedatum."
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true,
+            "description": "Datum van laatste wijziging."
+          },
+          "brand_mentions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Merken gevonden op de pagina."
+          },
+          "failed_stage": {
+            "type": "string",
+            "enum": [
+              "scraping",
+              "analyzing",
+              "enriching"
+            ],
+            "description": "Fase waarin de fout optrad (aanwezig wanneer status \"failed\" is)."
+          },
+          "error": {
+            "$ref": "#/components/schemas/StepError",
+            "description": "Foutdetails (aanwezig wanneer status \"failed\" is)."
+          }
+        }
+      },
+      "EnrichedData": {
+        "type": "object",
+        "nullable": true,
+        "description": "Definitieve samengevoegde output die parser- en LLM-extractieresultaten combineert.",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "page_type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "homepage",
+              "product_page",
+              "collection_page",
+              "pricing_page",
+              "informational_article",
+              "documentation",
+              "listicle_article",
+              "comparison_page",
+              "support_article",
+              "review_page",
+              "forum_thread",
+              "social_media_post",
+              "social_media_profile",
+              "video_page",
+              "news_article",
+              "case_study",
+              "marketplace_listing",
+              "landing_page",
+              "deal_page",
+              "job_posting",
+              "other"
+            ],
+            "description": "Geklasseerd paginatype."
+          },
+          "author": {
+            "type": "string",
+            "nullable": true,
+            "description": "Auteur van de inhoud."
+          },
+          "date_published": {
+            "type": "string",
+            "nullable": true,
+            "description": "Publicatiedatum (ISO 8601-formaat indien beschikbaar)."
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true,
+            "description": "Datum van laatste wijziging."
+          },
+          "brand_mentions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Merken uit je invoerlijst die op de pagina werden genoemd."
+          },
+          "methods": {
+            "type": "object",
+            "description": "Extractiemethode gebruikt voor elk veld.",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "classifier",
+                "parser",
+                "llm",
+                "not_found"
+              ]
+            }
+          }
+        }
+      },
+      "WorkflowStatus": {
+        "type": "object",
+        "description": "Geünificeerd statusobject dat alle workflowfasen toont.",
+        "properties": {
+          "overall": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed"
+            ],
+            "description": "Geaggregeerde workflowstatus."
+          },
+          "scraping": {
+            "$ref": "#/components/schemas/ScrapingStatus"
+          },
+          "analyzing": {
+            "$ref": "#/components/schemas/AnalyzingStatus"
+          },
+          "enriching": {
+            "$ref": "#/components/schemas/EnrichingStatus"
+          }
+        }
+      },
+      "ScrapingStatus": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed"
+            ]
+          },
+          "submitted": {
+            "type": "integer",
+            "description": "URLs ingediend bij scraper."
+          },
+          "valid": {
+            "type": "integer",
+            "description": "Geldige URLs na validatie."
+          },
+          "succeeded": {
+            "type": "integer",
+            "description": "Succesvol gescrapete URLs."
+          },
+          "failed": {
+            "type": "integer",
+            "description": "Mislukte scrapes."
+          },
+          "started_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "error": {
+            "$ref": "#/components/schemas/StepError"
+          }
+        }
+      },
+      "AnalyzingStatus": {
+        "type": "object",
+        "description": "Gap-analysefase - bepaalt welke verrijking door LLM nodig is.",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed"
+            ]
+          },
+          "items_analyzed": {
+            "type": "integer"
+          },
+          "items_needing_enrichment": {
+            "type": "integer"
+          },
+          "items_complete": {
+            "type": "integer",
+            "description": "Items met alle velden aanwezig van de parser."
+          },
+          "fields_to_enrich": {
+            "type": "object",
+            "nullable": true,
+            "description": "Aantal items dat elk veld nodig heeft.",
+            "properties": {
+              "page_type": {
+                "type": "integer"
+              },
+              "author": {
+                "type": "integer"
+              },
+              "date_published": {
+                "type": "integer"
+              },
+              "date_modified": {
+                "type": "integer"
+              },
+              "brand_mentions": {
+                "type": "integer"
+              }
+            }
+          },
+          "started_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "EnrichingStatus": {
+        "type": "object",
+        "description": "LLM-extractiefase via Batch API.",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed",
+              "skipped"
+            ]
+          },
+          "items_to_enrich": {
+            "type": "integer"
+          },
+          "items_enriched": {
+            "type": "integer"
+          },
+          "items_failed": {
+            "type": "integer"
+          },
+          "llm_batch_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "LLM Batch API ID"
+          },
+          "batch_mode": {
+            "type": "boolean",
+            "description": "Of de asynchrone batch API is gebruikt"
+          },
+          "llm": {
+            "$ref": "#/components/schemas/LLMInfo"
+          },
+          "started_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "integer",
+            "nullable": true
+          },
+          "error": {
+            "$ref": "#/components/schemas/StepError"
+          }
+        }
+      },
+      "LLMInfo": {
+        "type": "object",
+        "nullable": true,
+        "description": "LLM-provider en gebruiksdetails.",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Verwerkingsprovider"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model gebruikt voor extractie"
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "prompt_tokens": {
+                "type": "integer"
+              },
+              "completion_tokens": {
+                "type": "integer"
+              },
+              "total_tokens": {
+                "type": "integer"
+              }
+            }
+          },
+          "completion_time_ms": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Verwerkingstijd in ms"
+          }
+        }
+      },
+      "StepError": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "example": "validation_error"
+          },
+          "error_message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error_code": {
+            "type": "string"
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Sleutel-waardeparen voor aangepaste gegevens. Maximaal 50 sleutels, sleutel maximaal 40 tekens, waarde maximaal 500 tekens.",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "maxProperties": 50,
+        "example": {
+          "project_id": "12345",
+          "source": "weekly-crawl"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Builder API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://agent.olostep.com"
+    },
+    {
+      "url": "https://dataset.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/olostep-p2p-incomingAPI": {
+      "get": {
+        "summary": "Start met het scrapen van webpagina's met verschillende configuraties",
+        "description": "Deze endpoint stelt gebruikers in staat om webpagina's te scrapen met verschillende opties zoals het instellen van timeouts, wachttijd voor het scrapen, voorkeuren voor dataformaten, en meer.",
+        "servers": [
+          {
+            "url": "https://agent.olostep.com"
+          }
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "De URL om te beginnen met scrapen.",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "description": "Timeout in seconden voor het scrapeproces, met een maximum van 620 seconden.",
+            "schema": {
+              "type": "integer",
+              "default": 40
+            }
+          },
+          {
+            "name": "waitBeforeScraping",
+            "in": "query",
+            "required": false,
+            "description": "Tijd om te wachten in seconden voordat het scrapen begint, tot 500 seconden.",
+            "schema": {
+              "type": "integer",
+              "default": 3
+            }
+          },
+          {
+            "name": "saveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Optie om de gescrapete inhoud op te slaan als HTML.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "saveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Optie om de gescrapete inhoud op te slaan als Markdown.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "removeCSSselectors",
+            "in": "query",
+            "required": false,
+            "description": "Optie om bepaalde CSS-selectors uit de inhoud te verwijderen. Optioneel kun je ook een JSON-stringified array van specifieke selectors doorgeven die je wilt verwijderen. De CSS-selectors die worden verwijderd wanneer deze optie is ingesteld op `default` zijn `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "schema": {
+              "type": "string",
+              "default": "default",
+              "enum": [
+                "default",
+                "none",
+                "JSON stringified array of CSS selectors"
+              ]
+            }
+          },
+          {
+            "name": "htmlTransformer",
+            "in": "query",
+            "required": false,
+            "description": "Specificeer de HTML-transformer die je wilt gebruiken, indien van toepassing. De Mercury Parser-bibliotheek van Postlight wordt gebruikt om advertenties en andere ongewenste inhoud uit de gescrapete inhoud te verwijderen.",
+            "schema": {
+              "type": "string",
+              "default": "none",
+              "enum": [
+                "none",
+                "postlightParser"
+              ]
+            }
+          },
+          {
+            "name": "removeImages",
+            "in": "query",
+            "required": false,
+            "description": "Optie om afbeeldingen uit de gescrapete inhoud te verwijderen.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "expandMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Als dit waar is, wordt de markdown-inhoud geretourneerd in het markdown_content veld.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "expandHtml",
+            "in": "query",
+            "required": false,
+            "description": "Als dit waar is, wordt de HTML-inhoud geretourneerd in het html_content veld.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "description": "Acties om uit te voeren op de pagina voordat je de inhoud krijgt",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "Wachten",
+                    "required": [
+                      "type",
+                      "milliseconds"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "wait"
+                        ],
+                        "description": "Wacht een gespecificeerde hoeveelheid milliseconden"
+                      },
+                      "milliseconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Tijd om te wachten in milliseconden"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Klik",
+                    "required": [
+                      "type",
+                      "selector"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "click"
+                        ],
+                        "description": "Klik op een element"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "CSS-selector voor het element om op te klikken"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Vul Invoer In",
+                    "required": [
+                      "type",
+                      "selector",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fill_input"
+                        ],
+                        "description": "Vul een invoerelement met een waarde in"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "CSS-selector voor het invoerelement"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Tekst om in te voeren in de invoer"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Scrollen",
+                    "required": [
+                      "type",
+                      "direction",
+                      "amount"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scroll"
+                        ],
+                        "description": "Scroll de pagina"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "up",
+                          "down",
+                          "left",
+                          "right"
+                        ],
+                        "description": "Richting om te scrollen"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "Hoeveelheid om te scrollen in pixels"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle reactie met de gevraagde gegevens."
+          },
+          "400": {
+            "description": "Slechte aanvraag vanwege onjuiste of ontbrekende parameters."
+          },
+          "401": {
+            "description": "Ongeautoriseerde toegang vanwege ontbrekende of ongeldige API-token."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    },
+    "/olostep-p2p-dataset-API": {
+      "get": {
+        "servers": [
+          {
+            "url": "https://dataset.olostep.com"
+          }
+        ],
+        "summary": "Datasetinformatie ophalen",
+        "description": "Stelt gebruikers in staat om datasetinformatie in Markdown- en/of HTML-formaat op te halen op basis van de verstrekte dataset-ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasetId",
+            "in": "query",
+            "required": true,
+            "description": "Unieke identificatie voor de dataset die moet worden opgehaald.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "retrieveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Optie om de dataset in Markdown-formaat op te halen.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "retrieveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Optie om de dataset in HTML-formaat op te halen.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "fastLane",
+            "in": "query",
+            "required": false,
+            "description": "Experimentele optie om het scrapingproces te versnellen",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle reactie met de datasetinformatie."
+          },
+          "400": {
+            "description": "Slechte aanvraag vanwege onjuiste of ontbrekende parameters."
+          },
+          "404": {
+            "description": "Dataset niet gevonden voor de verstrekte ID."
+          },
+          "500": {
+            "description": "Interne serverfout."
+          }
+        }
+      }
+    }
+  }
+}

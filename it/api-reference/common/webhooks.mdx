@@ -1,0 +1,387 @@
+---
+title: "Webhooks"
+description: "Ricevi notifiche in tempo reale quando le operazioni asincrone sono completate"
+icon: "webhook"
+---
+
+<Check>
+**Stiamo espandendo attivamente il supporto per i webhook.**
+
+Appena arrivato: tentativi automatici con backoff esponenziale — le consegne fallite vengono ora ritentate fino a 5 volte in 30 minuti.
+
+**Prossimamente:**
+- URL webhook predefiniti per tutto il team
+- Firme crittografiche per la verifica del payload
+
+Vuoi accesso anticipato? Contattaci a [info@olostep.com](mailto:info@olostep.com) o unisciti alla nostra [comunità Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg).
+</Check>
+
+## Panoramica
+
+I webhook inviano notifiche HTTP POST in tempo reale al tuo server quando le operazioni di lunga durata sono completate. Invece di effettuare polling per lo stato, la tua applicazione riceve aggiornamenti istantanei.
+
+### Casi d'uso
+
+<CardGroup cols={2}>
+  <Card title="Elaborazione asincrona" icon="clock">
+    Ricevi notifiche quando i batch o i crawl sono completati invece di effettuare polling
+  </Card>
+  <Card title="Trigger della pipeline" icon="diagram-project">
+    Attiva automaticamente l'elaborazione a valle quando i dati sono pronti
+  </Card>
+  <Card title="Allerta" icon="bell">
+    Invia avvisi a Slack, email o altri sistemi al completamento
+  </Card>
+  <Card title="Sincronizzazione dati" icon="arrows-rotate">
+    Mantieni il tuo database sincronizzato con i risultati di Olostep
+  </Card>
+</CardGroup>
+
+## Eventi supportati
+
+<AccordionGroup>
+  <Accordion title="batch.completed" icon="layer-group">
+    Attivato quando un batch termina l'elaborazione (tutti gli elementi completati o falliti).
+    
+    ```json
+    {
+      "id": "event_a1b2c3d4e5f6g7h8",
+      "object": "event.batch.completed",
+      "timestamp": 1737570000000,
+      "delivery_attempt": "1/5",
+      "data": {
+        "id": "batch_xyz123",
+        "object": "batch",
+        "status": "completed",
+        "items_total": 100,
+        "items_completed": 98,
+        "items_failed": 2,
+        "created_at": "2024-01-15T10:00:00Z",
+        "completed_at": "2024-01-15T10:05:32Z"
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="crawl.completed" icon="spider-web">
+    Attivato quando un crawl termina e tutte le pagine scoperte sono state elaborate.
+    
+    ```json
+    {
+      "id": "event_x9y8z7w6v5u4t3s2",
+      "object": "event.crawl.completed",
+      "timestamp": 1737570000000,
+      "delivery_attempt": "1/5",
+      "data": {
+        "id": "crawl_abc789",
+        "object": "crawl",
+        "status": "completed",
+        "start_url": "https://example.com",
+        "urls_count": 87,
+        "max_pages": 100,
+        "max_depth": 3,
+        "actual_max_depth": 3,
+        "start_epoch": 1737569500000,
+        "start_date": "2024-01-15"
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Configurazione dei Webhooks
+
+Passa `webhook` quando crei una risorsa. Questo URL riceve la notifica di completamento.
+
+<Note>
+**Nome del parametro:** Il parametro canonico è `webhook`. Per compatibilità retroattiva, `webhook_url` è accettato come alias.
+</Note>
+
+<CodeGroup>
+
+```python Python
+import requests
+
+# Esempio di batch
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <YOUR_API_KEY>"},
+    json={
+        "items": [
+            {"url": "https://example.com/page1", "custom_id": "1"},
+            {"url": "https://example.com/page2", "custom_id": "2"}
+        ],
+        "webhook": "https://your-server.com/webhooks/olostep"
+    }
+)
+
+# Esempio di crawl
+response = requests.post(
+    "https://api.olostep.com/v1/crawls",
+    headers={"Authorization": "Bearer <YOUR_API_KEY>"},
+    json={
+        "start_url": "https://example.com",
+        "max_pages": 50,
+        "webhook": "https://your-server.com/webhooks/olostep"
+    }
+)
+```
+
+```js Node
+// Esempio di batch
+const batchResponse = await fetch('https://api.olostep.com/v1/batches', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    items: [
+      { url: 'https://example.com/page1', custom_id: "1" },
+      { url: 'https://example.com/page2', custom_id: "2" }
+    ],
+    webhook: 'https://your-server.com/webhooks/olostep'
+  })
+});
+
+// Esempio di crawl
+const crawlResponse = await fetch('https://api.olostep.com/v1/crawls', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    start_url: 'https://example.com',
+    max_pages: 50,
+    webhook: 'https://your-server.com/webhooks/olostep'
+  })
+});
+```
+
+```bash cURL
+# Esempio di batch
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      {"url": "https://example.com/page1", "custom_id": "1"},
+      {"url": "https://example.com/page2", "custom_id": "2"}
+    ],
+    "webhook": "https://your-server.com/webhooks/olostep"
+  }'
+
+# Esempio di crawl
+curl -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://example.com",
+    "max_pages": 50,
+    "webhook": "https://your-server.com/webhooks/olostep"
+  }'
+```
+
+</CodeGroup>
+
+---
+
+## Payload del Webhook
+
+Tutti i payload dei webhook seguono una struttura unificata:
+
+```json
+{
+  "id": "event_a1b2c3d4e5f6g7h8",
+  "object": "event.batch.completed",
+  "timestamp": 1737570000000,
+  "delivery_attempt": "1/5",
+  "data": {
+    "id": "batch_xyz123",
+    "object": "batch",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 98,
+    "items_failed": 2
+  }
+}
+```
+
+### Campi dell'involucro
+
+| Campo | Descrizione |
+|-------|-------------|
+| `id` | ID dell'evento — **stesso in tutti i tentativi di ritrasmissione** |
+| `object` | Tipo di evento (es. `event.batch.completed`) |
+| `timestamp` | Quando è stato inviato questo tentativo di consegna (epoch ms) |
+| `delivery_attempt` | Tentativo corrente / tentativi massimi (es. `1/5`, `3/5`) |
+| `data` | I dati effettivi della risorsa (stesso formato della risposta API) |
+
+<Tip>
+Usa il campo `id` per deduplicare le consegne dei webhook nel tuo ricevitore. Lo stesso ID evento appare in tutti i tentativi di ritrasmissione.
+</Tip>
+
+---
+
+## Comportamento di Ritrasmissione
+
+Le consegne dei webhook fallite vengono automaticamente ritentate con backoff esponenziale in una finestra di 30 minuti:
+
+| Tentativo | Ritardo prima del tentativo | Tempo cumulativo |
+|-----------|-----------------------------|------------------|
+| 1 | Immediato | 0 min |
+| 2 | ~2 min | ~2 min |
+| 3 | ~4 min | ~6 min |
+| 4 | ~7 min | ~13 min |
+| 5 | ~15 min | ~28 min |
+
+**Finestra totale di ritrasmissione:** 30 minuti  
+**Timeout per richiesta:** 30 secondi
+
+### Cosa Conta come Successo
+
+Il tuo endpoint deve restituire un codice di stato `2xx` entro 30 secondi. Qualsiasi altra risposta attiva un ritentativo.
+
+| Risposta | Risultato |
+|----------|-----------|
+| `200 OK` | ✅ Consegnato |
+| `201 Created` | ✅ Consegnato |
+| `301 Redirect` | ❌ Ritenta (non seguiamo i redirect) |
+| `400 Bad Request` | ❌ Ritenta |
+| `500 Server Error` | ❌ Ritenta |
+| Timeout (>30s) | ❌ Ritenta |
+| Connessione rifiutata | ❌ Ritenta |
+
+---
+
+## Migliori Pratiche
+
+<AccordionGroup>
+  <Accordion title="Rispondi rapidamente, elabora in modo asincrono">
+    Restituisci `200 OK` immediatamente ed elabora il webhook in modo asincrono. Se la tua elaborazione richiede più di 30 secondi, ritenteremo — causando consegne duplicate.
+    
+    ```python
+    from queue import Queue
+    import threading
+    
+    webhook_queue = Queue()
+    
+    @app.route('/webhooks/olostep', methods=['POST'])
+    def handle_webhook():
+        # Metti in coda per l'elaborazione asincrona
+        webhook_queue.put(request.json)
+        
+        # Restituisci immediatamente
+        return 'OK', 200
+    
+    def process_webhooks():
+        while True:
+            event = webhook_queue.get()
+            # L'elaborazione lenta avviene qui
+            process_event(event)
+    
+    threading.Thread(target=process_webhooks, daemon=True).start()
+    ```
+  </Accordion>
+  
+  <Accordion title="Implementa gestori idempotenti">
+    Usa il campo `id` per deduplicare. Memorizza gli ID degli eventi elaborati e salta i duplicati.
+    
+    ```python
+    processed_events = set()  # Usa Redis/DB in produzione
+    
+    def handle_event(event):
+        if event['id'] in processed_events:
+            return  # Già elaborato
+        
+        # Elabora l'evento
+        process_batch_completed(event['data'])
+        
+        # Segna come elaborato
+        processed_events.add(event['id'])
+    ```
+  </Accordion>
+  
+  <Accordion title="Registra le ricevute dei webhook">
+    Registra tutte le ricevute dei webhook per il debug. Includi l'ID dell'evento, il timestamp e il risultato dell'elaborazione.
+    
+    ```python
+    import logging
+    
+    @app.route('/webhooks/olostep', methods=['POST'])
+    def handle_webhook():
+        event = request.json
+        logging.info(f"Webhook ricevuto: id={event['id']} tipo={event['object']} tentativo={event['delivery_attempt']}")
+        
+        try:
+            process_event(event)
+            logging.info(f"Webhook elaborato: id={event['id']}")
+        except Exception as e:
+            logging.error(f"Webhook fallito: id={event['id']} errore={e}")
+            raise
+        
+        return 'OK', 200
+    ```
+  </Accordion>
+  
+  <Accordion title="Usa endpoint HTTPS">
+    Usa sempre HTTPS per gli endpoint dei webhook. Gli endpoint HTTP sono vulnerabili a intercettazioni e attacchi man-in-the-middle.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Risoluzione dei Problemi
+
+<AccordionGroup>
+  <Accordion title="Non ricevo i webhooks">
+    1. Verifica che il parametro `webhook` sia stato incluso nella tua richiesta
+    2. Verifica che il tuo endpoint sia pubblicamente accessibile (non localhost)
+    3. Controlla i log del tuo server per le richieste in arrivo
+    4. Assicurati di restituire un codice di stato `2xx`
+  </Accordion>
+  
+  <Accordion title="Ricevo webhooks duplicati">
+    Questo è previsto durante i ritentativi. Implementa una gestione idempotente usando il campo `id`:
+    
+    ```python
+    def handle_event(event):
+        if already_processed(event['id']):
+            return  # Salta il duplicato
+        
+        process_event(event)
+        mark_processed(event['id'])
+    ```
+  </Accordion>
+  
+  <Accordion title="I webhooks vanno in timeout">
+    Il tuo endpoint deve rispondere entro 30 secondi. Elabora i webhooks in modo asincrono:
+    
+    ```python
+    @app.route('/webhooks', methods=['POST'])
+    def webhook():
+        queue.enqueue(process_webhook, request.json)
+        return 'OK', 200  # Rispondi immediatamente
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Prossimamente
+
+<CardGroup cols={2}>
+  <Card title="URL predefinito per il team" icon="gear">
+    Configura un URL webhook predefinito nelle impostazioni del tuo account. Tutte le richieste utilizzeranno questo URL a meno che non venga sovrascritto.
+  </Card>
+  <Card title="Verifica della firma" icon="shield-check">
+    Firme crittografiche (HMAC-SHA256) per verificare che i payload dei webhook provengano da Olostep.
+  </Card>
+</CardGroup>
+
+<Note>
+Vuoi accesso anticipato a queste funzionalità? Contattaci a [info@olostep.com](mailto:info@olostep.com) o unisciti alla nostra [comunità Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg).
+</Note>

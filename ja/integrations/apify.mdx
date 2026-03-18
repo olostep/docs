@@ -1,0 +1,399 @@
+---
+sidebarTitle: "Apify"
+icon: "robot"
+title: "Apify インテグレーション"
+description: "Olostepを使用してApify Actorsでウェブ検索、スクレイピング、クロールを自動化し、ウェブデータを検索、抽出、構造化します。"
+---
+
+Olostepはウェブ検索、スクレイピング、クロールのAPIで、ウェブデータを検索、抽出、構造化するためのAPIです。このガイドでは、OlostepをApify Actorsと組み合わせて、信頼性の高いウェブデータパイプラインをエンドツーエンドで構築する方法を紹介します。
+
+## 作成できるもの
+
+<CardGroup cols={2}>
+  <Card title="ウェブサイトをスクレイプ" icon="file-lines">
+    任意の単一URLからMarkdown、HTML、JSON、またはテキストでコンテンツを抽出
+  </Card>
+  <Card title="URLをバッチスクレイプ" icon="layer-group">
+    構造化された出力で大規模なURLリストを並行して処理
+  </Card>
+  <Card title="クロールを作成" icon="spider-web">
+    リンクされたページを発見し、スクレイプして完全なデータセットを構築
+  </Card>
+  <Card title="マップを作成" icon="map">
+    ウェブサイトからすべてのURLを抽出（サイトマップのような発見）
+  </Card>
+  <Card title="AI駆動の回答" icon="robot">
+    質問をして、ソース付きの構造化されたJSON回答を取得
+  </Card>
+</CardGroup>
+
+## クイックスタート
+
+### 1) Apify CLIをインストール
+
+```bash
+npm install -g apify-cli
+apify --version
+```
+
+### 2) Olostep APIキーを取得
+
+Olostep ダッシュボード → APIキーから。
+
+### 3) Olostep Actorをローカルで実行
+
+```bash
+cd olostep-tools/integrations/apify
+apify run
+```
+
+デフォルトのローカル入力ファイルは次の場所にあります：
+`olostep-tools/integrations/apify/storage/key_value_stores/default/INPUT.json`
+
+入力例：
+```json
+{
+  "operation": "scrape",
+  "apiKey": "YOUR_OLostep_API_KEY",
+  "url_to_scrape": "https://example.com",
+  "formats": "markdown"
+}
+```
+
+### 4) Apifyにデプロイ（クラウド）
+
+```bash
+apify login
+apify push
+```
+
+その後、Apifyコンソールを開き、Actors → 任意の入力でアクターを実行します。
+
+### Apifyコンソールで実行（ステップバイステップ）
+
+1. Apifyコンソールでアクターを開く → ソース → 入力。  
+2. マニュアルタブで「Olostep APIキー」フィールドが表示されます。Olostepダッシュボードからキーを貼り付けます。  
+3. 操作を選択（デフォルトは「scrape」）。  
+4. 関連フィールドを入力（「scrape」の場合は「URL to Scrape」を設定）。  
+5. 保存 → 開始をクリック。  
+6. 実行が終了したら、データセットタブを開いて結果をダウンロード（JSON/CSV/Excel）。
+
+注意：
+- 「URL to Scrape」にはスキームを付けても付けなくても構いません。欠けている場合、アクターは自動的に`https://`を追加します。  
+- サイトがJavaScriptを多用していてタイムアウトが発生する場合は、「Wait Before Scraping」を2000–5000 msに設定して再実行してください。
+
+## 利用可能な操作
+
+### ウェブサイトをスクレイプ
+単一のURLからコンテンツを抽出。ページレベルの自動化に最適。
+
+<ParamField path="operation" type="constant" default="scrape">
+  "scrape"である必要があります
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー（Bearer）
+</ParamField>
+<ParamField path="url_to_scrape" type="string" required>
+  スクレイプするURL（http://またはhttps://を含む必要があります）
+</ParamField>
+<ParamField path="formats" type="dropdown" default="markdown">
+  Markdown、HTML、JSON、Textのいずれか
+</ParamField>
+<ParamField path="country" type="string">
+  オプションの国コード（例："US"、"GB"、"CA"）
+</ParamField>
+<ParamField path="wait_before_scraping" type="integer">
+  JavaScriptレンダリングのためのオプションの待機時間（0–10000）
+</ParamField>
+<ParamField path="parser" type="string">
+  オプションのパーサーID（例："@olostep/amazon-product"）
+</ParamField>
+
+出力フィールド：
+- id, url, status, formats
+- markdown_content / html_content / json_content / text_content
+- ホストされたURL（利用可能な場合）、ページメタデータ
+
+### URLをバッチスクレイプ
+多くのURLを一度に処理し、一貫したフォーマットと構造を持つ。
+
+<ParamField path="operation" type="constant" default="batch">
+  "batch"である必要があります
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+<ParamField path="batch_array" type="text" required>
+  `url`とオプションの`custom_id`を持つオブジェクトのJSON配列  
+  例：`[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+<ParamField path="formats" type="dropdown" default="markdown">
+  Markdown、HTML、JSON、Textのいずれか
+</ParamField>
+<ParamField path="country" type="string">
+  オプションの国コード
+</ParamField>
+<ParamField path="wait_before_scraping" type="integer">
+  JSサイトのためのオプションの待機時間
+</ParamField>
+<ParamField path="parser" type="string">
+  オプションのパーサーID
+</ParamField>
+
+出力フィールド：
+- batch_id, status, total_urls, created_at, formats, country, parser, urls[]
+
+### クロールを作成
+リンクをたどり、開始URLから複数のページをスクレイプ。
+
+<ParamField path="operation" type="constant" default="crawl">
+  "crawl"である必要があります
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+<ParamField path="start_url" type="string" required>
+  クロールの開始URL
+</ParamField>
+<ParamField path="max_pages" type="integer" default="10">
+  クロールする最大ページ数
+</ParamField>
+<ParamField path="follow_links" type="boolean" default="true">
+  ページ内リンクをたどる
+</ParamField>
+<ParamField path="formats" type="dropdown" default="markdown">
+  Markdown、HTML、JSON、Textのいずれか
+</ParamField>
+<ParamField path="country" type="string">
+  オプションの国コード
+</ParamField>
+<ParamField path="parser" type="string">
+  オプションのパーサーID
+</ParamField>
+
+出力フィールド：
+- crawl_id, object, status, start_url, max_pages, follow_links, created, formats
+
+### マップを作成
+ウェブサイト上のすべてのURLを発見し、後でバッチスクレイプの準備をする。
+
+<ParamField path="operation" type="constant" default="map">
+  "map"である必要があります
+</ParamField>
+<ParamField path="apiKey" type="string" required>
+  あなたのOlostep APIキー
+</ParamField>
+<ParamField path="website_url" type="string" required>
+  マップするウェブサイト
+</ParamField>
+<ParamField path="search_query" type="string">
+  オプションのクエリフィルター
+</ParamField>
+<ParamField path="top_n" type="integer">
+  URLの制限数
+</ParamField>
+<ParamField path="include_patterns" type="string">
+  含めるグロブ（例："/products/**"）
+</ParamField>
+<ParamField path="exclude_patterns" type="string">
+  除外するグロブ（例："/admin/**"）
+</ParamField>
+
+出力フィールド：
+- map_id, object, website_url, total_urls, urls[], search_query, top_n
+
+## JSON例をコピー＆ペースト（コンソール → 入力 → JSON）
+
+### スクレイプ
+```json
+{
+  "operation": "scrape",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "url_to_scrape": "https://www.wikipedia.org",
+  "formats": "markdown",
+  "wait_before_scraping": 2000
+}
+```
+
+### バッチ
+```json
+{
+  "operation": "batch",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "batch_array": "[{\"url\":\"https://example.com\",\"custom_id\":\"site1\"},{\"url\":\"https://olostep.com\",\"custom_id\":\"site2\"}]",
+  "formats": "json"
+}
+```
+
+### クロール
+```json
+{
+  "operation": "crawl",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "start_url": "https://docs.example.com",
+  "max_pages": 50,
+  "follow_links": true,
+  "formats": "markdown"
+}
+```
+
+### マップ
+```json
+{
+  "operation": "map",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "website_url": "https://example.com",
+  "include_patterns": "/blog/**",
+  "top_n": 200
+}
+```
+
+### 回答
+```json
+{
+  "operation": "answers",
+  "apiKey": "YOUR_OLOSTEP_API_KEY",
+  "task": "Olostepの最新の資金調達ラウンドは何ですか？会社、ラウンド、日付、金額を提供してください。",
+  "json": "{\"company\":\"\",\"round\":\"\",\"date\":\"\",\"amount\":\"\"}"
+}
+```
+
+## ワークフローの例
+
+<AccordionGroup>
+  <Accordion title="製品を発見してスクレイプ">
+    1) マップを作成 → "/products/**"を含める  
+    2) URLを解析 → バッチ配列を構築  
+    3) URLをバッチスクレイプ → フォーマット：JSON  
+    4) Google Sheets / Airtableに送信
+  </Accordion>
+  <Accordion title="日次コンテンツモニタリング">
+    1) アクターをスケジュール（毎日）  
+    2) ウェブサイトをスクレイプ → フォーマット：Markdown  
+    3) LLMで要約  
+    4) Slackで通知
+  </Accordion>
+  <Accordion title="競合知識ベース">
+    1) クロールを作成（ブログ/ドキュメント）  
+    2) 出力をNotionに保存  
+    3) スケジュールで毎週更新
+  </Accordion>
+</AccordionGroup>
+
+## 専門のパーサー
+
+Olostepは人気のあるサイト向けにデータを構造化するためのパーサーをサポートしています。
+
+<CardGroup cols={2}>
+  <Card title="Amazon製品" icon="amazon">
+    `@olostep/amazon-product` → タイトル、価格、評価、レビュー、画像、バリエーション
+  </Card>
+  <Card title="Google検索" icon="google">
+    `@olostep/google-search` → 結果、タイトル、スニペット、URL
+  </Card>
+  <Card title="Googleマップ" icon="map">
+    `@olostep/google-maps` → ビジネス情報、レビュー、評価、場所
+  </Card>
+  <Card title="その他のパーサー" icon="cart-shopping" href="https://www.olostep.com/store">
+    メール抽出器、ソーシャルハンドルファインダー、カレンダーリンク抽出器などを探る
+  </Card>
+</CardGroup>
+
+## ベストプラクティス
+
+<AccordionGroup>
+  <Accordion title="3つ以上のURLにはバッチを推奨">
+    より速く、安価で、監視が容易で、レート制限を尊重します。
+  </Accordion>
+  <Accordion title="適切な待機時間を使用">
+    JSを多用するサイト：`wait_before_scraping`を増やす（例：2000–5000ms）。
+  </Accordion>
+  <Accordion title="スクレイプ前にフィルター">
+    不要なタスクを避ける — まず変更を確認し、重複除去状態を保持。
+  </Accordion>
+  <Accordion title="大きなコンテンツはホストされたURLで保存">
+    Apifyフローでのペイロードサイズ制限を回避するためにホストされた出力を使用。
+  </Accordion>
+  <Accordion title="非同期操作を長時間実行として扱う">
+    バッチ/クロール/マップはIDを返します。後で取得するか、遅延を伴ってチェーンします。
+  </Accordion>
+  <Accordion title="一時的なタイムアウトをクリーンに処理">
+    504または一時的なタイムアウトが発生した場合、アクターは短い待機時間で一度自動的に再試行します。  
+    JSを多用するページには「Wait Before Scraping」を2000–5000 msに設定することもできます。
+  </Accordion>
+</AccordionGroup>
+
+## トラブルシューティング
+
+<AccordionGroup>
+  <Accordion title="認証に失敗しました">
+    - ダッシュボードからAPIキーを確認  
+    - 末尾のスペースを削除  
+    - Apify入力フォームに再入力
+  </Accordion>
+  <Accordion title="コンテンツが空">
+    - 待機時間を増やす  
+    - URLが公開されているか/ログイン制限がないか確認  
+    - 異なる出力フォーマットを試す
+  </Accordion>
+  <Accordion title="レート制限を超えました">
+    - スケジュールで実行を分散  
+    - 多くのURLにはバッチを推奨  
+    - 必要に応じてOlostepプランをアップグレード
+  </Accordion>
+  <Accordion title="ブロックされたサイトまたは動的サイト">
+    - 国パラメータを試す  
+    - 待機時間とパーサーを調整  
+    - ガイダンスについてサポートに連絡
+  </Accordion>
+</AccordionGroup>
+
+## 料金
+
+OlostepはAPI使用量に基づいて課金されます（Apifyとは独立して）：
+- スクレイプ → スクレイプごと
+- バッチ → URLごと
+- クロール → ページごと
+- マップ → 操作ごと
+
+詳細は`https://olostep.com/pricing`をご覧ください。
+
+## セキュリティ
+
+- あなたのAPIキーは実行時にBearerトークンとして送信されます。  
+- キーをバージョン管理にコミットしないでください；Apifyは入力をKey-Value Storeに保存します。  
+- ローカル開発では、キーを`storage/key_value_stores/default/INPUT.json`に保持してください（gitignoreされています）。
+
+## 関連リソース
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    任意のURLからLLMフレンドリーなMarkdown、HTML、テキストまたは構造化されたJSONを抽出。
+  </Card>
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    最大10,000のURLを同時に処理し、後で結果を取得。
+  </Card>
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    サイトのコンテンツを再帰的に発見し、スクレイプ。
+  </Card>
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    バッチスクレイプの準備としてウェブサイト上のすべてのURLを取得。
+  </Card>
+</CardGroup>
+
+## サポート
+
+<CardGroup cols={2}>
+  <Card title="ドキュメンテーション" icon="book" href="https://docs.olostep.com">
+    完全なAPIドキュメント
+  </Card>
+  <Card title="サポートメール" icon="envelope" href="mailto:info@olostep.com">
+    info@olostep.com
+  </Card>
+  <Card title="ステータスページ" icon="signal" href="https://status.olostep.com">
+    プラットフォームのステータスを確認
+  </Card>
+  <Card title="Apifyドキュメント" icon="link" href="https://docs.apify.com">
+    Apifyプラットフォーム & SDKドキュメント
+  </Card>
+</CardGroup>

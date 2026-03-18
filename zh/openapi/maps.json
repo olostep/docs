@@ -1,0 +1,255 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "地图 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer 认证头的格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/maps/{map_id}": {
+      "get": {
+        "summary": "获取地图",
+        "description": "通过其 ID 检索之前完成的地图。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "description": "要检索的地图的唯一标识符。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应包含地图对象。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "此地图的唯一标识符"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "当前响应中的 URL 数量"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "页面上找到的 URL 数组"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "分页游标以检索下一组 URL。如果为 null，则表示所有 URL 已被检索。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "无效的 API 密钥"
+          },
+          "404": {
+            "description": "地图未找到"
+          },
+          "500": {
+            "description": "内部服务器错误"
+          }
+        }
+      }
+    },
+    "/v1/maps": {
+      "post": {
+        "summary": "获取某个网站上的所有 URL",
+        "description": "此端点允许用户获取某个网站上的所有 URL。对于复杂的网站，可能需要长达 120 秒。对于大型网站，结果使用基于游标的分页进行分页。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "你想要获取链接的网站的 URL"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "可选的搜索查询，用于按搜索相关性排序链接。"
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "可选的数字，用于限制搜索查询的前 n 个链接。"
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "包含给定 URL 的子域。默认值为 `true`。"
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "使用 glob 语法包含的 URL 路径模式。例如：`/blog/**` 仅包含博客 URL。只有匹配这些模式的 URL 才会被返回。"
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "使用 glob 语法排除的 URL 路径模式。例如：`/careers/**`。排除的 URL 将优先于包含的 URL。"
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "description": "可选：来自上一个响应的分页游标。当提供时，从上一个请求由于响应大小限制而停止的地方返回下一组 URL。"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "examples": {
+                "basic": {
+                  "value": {
+                    "url": "https://docs.olostep.com"
+                  }
+                },
+                "withFilters": {
+                  "value": {
+                    "url": "https://docs.olostep.com",
+                    "include_urls": [
+                      "/api-reference/**"
+                    ],
+                    "exclude_urls": [
+                      "/api-reference/deprecated/**"
+                    ]
+                  }
+                },
+                "withCursor": {
+                  "value": {
+                    "cursor": "abc123_xyz456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应包含页面上找到的 URL。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "urls_count",
+                    "urls"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "此地图的唯一标识符"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "当前响应中的 URL 数量"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "页面上找到的 URL 数组"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "分页游标用于检索由于10MB大小限制而受限的下一组URL。如果为null或不存在，则表示所有URL已被检索。"
+                    }
+                  }
+                },
+                "examples": {
+                  "basicResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 22,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/batches/create",
+                        "https://docs.olostep.com/api-reference/batches/info",
+                        "https://docs.olostep.com/api-reference/batches/items"
+                      ]
+                    }
+                  },
+                  "cursorResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 15,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/crawls/create",
+                        "https://docs.olostep.com/api-reference/crawls/info",
+                        "https://docs.olostep.com/api-reference/crawls/pages"
+                      ],
+                      "cursor": "abc123_def789"
+                    }
+                  },
+                  "allRetrievedResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 10,
+                      "urls": [
+                        "https://docs.olostep.com/features/maps/maps",
+                        "https://docs.olostep.com/get-started/authentication",
+                        "https://docs.olostep.com/get-started/welcome"
+                      ],
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数错误或缺失导致的错误请求。"
+          },
+          "401": {
+            "description": "由于缺少或无效的API令牌导致的未授权访问。"
+          },
+          "500": {
+            "description": "内部服务器错误。"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API des Horaires",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "Créer un Horaire",
+        "description": "Crée un nouvel horaire pour exécuter des appels API à des moments spécifiés. Prend en charge à la fois les exécutions uniques et les horaires récurrents utilisant des expressions cron. Tu peux aussi utiliser du texte en langage naturel pour générer automatiquement des expressions cron. Pour les requêtes POST, tu peux utiliser les points de terminaison Olostep en forme courte (par exemple, 'v1/scrapes') qui seront automatiquement préfixés, ou fournir une URL complète. La charge utile peut contenir n'importe quelle structure JSON que tu souhaites envoyer.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST"
+                    ],
+                    "description": "Méthode HTTP pour l'appel API programmé. Doit être soit GET soit POST."
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "L'URL du point de terminaison à appeler lorsque l'horaire s'exécute. Pour les requêtes POST avec des points de terminaison Olostep, tu peux utiliser la forme courte (par exemple, 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') qui sera automatiquement préfixée par 'https://api.olostep.com/'. Pour d'autres points de terminaison, fournis l'URL complète."
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "La charge utile à envoyer avec l'appel API. Peut contenir n'importe quelle structure JSON dont tu as besoin. Pour les requêtes GET, c'est généralement vide. Pour les requêtes POST, cela doit contenir les données que tu veux envoyer au point de terminaison.",
+                    "default": {}
+                  },
+                  "cron_expression": {
+                    "type": "string",
+                    "description": "Expression cron au format 6 champs (minute heure jour mois jour-de-la-semaine année) pour les horaires récurrents. Requis pour les horaires récurrents. Mutuellement exclusif avec execute_at et text."
+                  },
+                  "execute_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Chaîne datetime ISO 8601 pour l'exécution d'un horaire unique. Doit être un datetime futur valide. Requis pour les horaires uniques. Mutuellement exclusif avec cron_expression."
+                  },
+                  "expression_timezone": {
+                    "type": "string",
+                    "description": "Identifiant de fuseau horaire IANA (par exemple, 'UTC', 'America/New_York', 'Europe/London') pour l'horaire. Requis pour les horaires récurrents, optionnel pour les horaires uniques. Lors de l'utilisation de texte en langage naturel, cela par défaut à 'UTC'."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Texte en langage naturel pour générer automatiquement une expression cron. Le système convertira ton texte en une expression cron valide. Exemples : 'toutes les 3 minutes', 'tous les jours à 10h', 'tous les lundis à 9h'. Mutuellement exclusif avec cron_expression et execute_at. Lorsqu'il est utilisé, expression_timezone par défaut à 'UTC'."
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Horaire créé avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Identifiant unique de l'horaire"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recurring",
+                        "onetime"
+                      ],
+                      "description": "Type d'horaire : 'recurring' pour les horaires basés sur cron, 'onetime' pour les horaires d'exécution unique"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "description": "Méthode HTTP pour l'appel programmé"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "L'URL du point de terminaison qui sera appelée"
+                    },
+                    "cron_expression": {
+                      "type": "string",
+                      "description": "Expression cron (présente uniquement pour les horaires récurrents)"
+                    },
+                    "execute_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Datetime d'exécution (présent uniquement pour les horaires uniques)"
+                    },
+                    "expression_timezone": {
+                      "type": "string",
+                      "description": "Fuseau horaire pour l'horaire"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Datetime ISO 8601 lorsque l'horaire a été créé"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison de paramètres incorrects ou manquants. Erreurs courantes : méthode invalide, point de terminaison manquant, cron_expression invalide, datetime execute_at invalide, fuseau horaire invalide, ou format de schedule_id invalide."
+          },
+          "401": {
+            "description": "Clé API invalide. Essaie de la vérifier à nouveau ou contacte info@olostep.com si tu rencontres des problèmes."
+          },
+          "500": {
+            "description": "Erreur interne du serveur lors de la création du planning."
+          }
+        }
+      },
+      "get": {
+        "summary": "Lister les plannings",
+        "description": "Récupère tous les plannings pour ton équipe. Retourne une liste de plannings avec leur configuration, statut et métadonnées. Par défaut, les plannings supprimés sont filtrés.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "Défini sur 'true' pour inclure les plannings supprimés dans la réponse. Par défaut, les plannings supprimés sont filtrés.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec la liste des plannings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "Identifiant de l'équipe"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "Identifiant unique de l'horaire"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "recurring",
+                              "onetime"
+                            ],
+                            "description": "Type de planning"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "L'URL de l'endpoint"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "La charge utile à envoyer avec l'appel API"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "Expression cron (présente uniquement pour les horaires récurrents)"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Datetime d'exécution (présent uniquement pour les horaires uniques)"
+                          },
+                          "expression_timezone": {
+                            "type": "string",
+                            "description": "Fuseau horaire pour l'horaire"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Texte en langage naturel utilisé pour générer l'expression cron"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "Nom interne du planning dans EventBridge"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "Nom du groupe de plannings"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Datetime ISO 8601 lorsque l'horaire a été créé"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Date et heure ISO 8601 de la dernière mise à jour du planning"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "ENABLED",
+                              "DELETED"
+                            ],
+                            "description": "État actuel du planning"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": [
+                              "GET",
+                              "POST"
+                            ],
+                            "description": "Méthode HTTP pour l'appel programmé"
+                          }
+                        }
+                      },
+                      "description": "Tableau d'objets de planning"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Nombre total de plannings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clé API invalide."
+          },
+          "500": {
+            "description": "Erreur interne du serveur lors de la récupération des plannings."
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "Obtenir le planning",
+        "description": "Récupère un seul planning par son ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour le planning. Doit commencer par 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Planning récupéré avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "Identifiant de l'équipe"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "Identifiant unique de l'horaire"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "recurring",
+                            "onetime"
+                          ],
+                          "description": "Type de planning"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "GET",
+                            "POST"
+                          ],
+                          "description": "Méthode HTTP pour l'appel programmé"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "L'URL de l'endpoint"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "La charge utile à envoyer avec l'appel API"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "Expression cron (présente uniquement pour les horaires récurrents)"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Datetime d'exécution (présent uniquement pour les horaires uniques)"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "Fuseau horaire pour l'horaire"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "Texte en langage naturel utilisé pour générer l'expression cron"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "Nom interne du planning dans EventBridge"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "Nom du groupe de plannings"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Datetime ISO 8601 lorsque l'horaire a été créé"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Date et heure ISO 8601 de la dernière mise à jour du planning"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ENABLED",
+                            "DELETED"
+                          ],
+                          "description": "État actuel du planning"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison d'un format de schedule_id invalide. L'ID du planning doit commencer par 'schedule_'."
+          },
+          "401": {
+            "description": "Clé API invalide."
+          },
+          "404": {
+            "description": "Planning non trouvé pour l'ID fourni."
+          },
+          "500": {
+            "description": "Erreur interne du serveur lors de la récupération du planning."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer le planning",
+        "description": "Supprime un planning par son ID. Cela arrêtera toute exécution future et supprimera le planning de EventBridge.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour le planning à supprimer. Doit commencer par 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Planning supprimé avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message de succès"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "L'ID du planning supprimé"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête en raison d'un format de schedule_id invalide ou planning déjà supprimé. L'ID du planning doit commencer par 'schedule_'."
+          },
+          "401": {
+            "description": "Clé API invalide."
+          },
+          "404": {
+            "description": "Planning non trouvé pour l'ID fourni."
+          },
+          "500": {
+            "description": "Erreur interne du serveur lors de la suppression du planning."
+          }
+        }
+      }
+    }
+  }
+}

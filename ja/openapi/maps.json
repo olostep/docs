@@ -1,0 +1,255 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Maps API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/maps/{map_id}": {
+      "get": {
+        "summary": "マップ取得",
+        "description": "以前に完了したマップをそのIDで取得します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "description": "取得するマップのユニークな識別子。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "マップオブジェクトを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "このマップのユニークな識別子"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "現在のレスポンスに含まれるURLの数"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "ページ上で見つかったURLの配列"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "次のURLセットを取得するためのページネーションカーソル。nullの場合、すべてのURLが取得されています。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "404": {
+            "description": "マップが見つかりません"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    },
+    "/v1/maps": {
+      "post": {
+        "summary": "特定のウェブサイト上のすべてのURLを取得",
+        "description": "このエンドポイントでは、特定のウェブサイト上のすべてのURLを取得できます。複雑なウェブサイトの場合、最大120秒かかることがあります。大規模なウェブサイトの場合、結果はカーソルベースのページネーションを使用してページ分けされます。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "リンクを取得したいウェブサイトのURL"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "検索の関連性でリンクをソートするためのオプションの検索クエリ。"
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "検索クエリの上位nリンクのみに制限するためのオプションの数。"
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "指定されたURLのサブドメインを含める。デフォルトは`true`です。"
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "グロブ構文を使用して含めるURLパスパターン。例えば、`/blog/**`はブログURLのみを含めます。これらのパターンに一致するURLのみが返されます。"
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "グロブ構文を使用して除外するURLパスパターン。例えば、`/careers/**`。除外されたURLは、含まれるURLよりも優先されます。"
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "description": "オプション: 前のレスポンスからのページネーションカーソル。提供された場合、前回のリクエストがレスポンスサイズ制限のために終了した場所から次のURLセットを返します。"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "examples": {
+                "basic": {
+                  "value": {
+                    "url": "https://docs.olostep.com"
+                  }
+                },
+                "withFilters": {
+                  "value": {
+                    "url": "https://docs.olostep.com",
+                    "include_urls": [
+                      "/api-reference/**"
+                    ],
+                    "exclude_urls": [
+                      "/api-reference/deprecated/**"
+                    ]
+                  }
+                },
+                "withCursor": {
+                  "value": {
+                    "cursor": "abc123_xyz456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ページ上で見つかったURLを含む成功したレスポンス",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "urls_count",
+                    "urls"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "このマップのユニークな識別子"
+                    },
+                    "urls_count": {
+                      "type": "integer",
+                      "description": "現在のレスポンスに含まれるURLの数"
+                    },
+                    "urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "ページ上で見つかったURLの配列"
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "10MBのサイズ制限のために制限された次のURLセットを取得するためのページネーションカーソル。nullまたは存在しない場合、すべてのURLが取得されています。"
+                    }
+                  }
+                },
+                "examples": {
+                  "basicResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 22,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/batches/create",
+                        "https://docs.olostep.com/api-reference/batches/info",
+                        "https://docs.olostep.com/api-reference/batches/items"
+                      ]
+                    }
+                  },
+                  "cursorResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 15,
+                      "urls": [
+                        "https://docs.olostep.com/api-reference/crawls/create",
+                        "https://docs.olostep.com/api-reference/crawls/info",
+                        "https://docs.olostep.com/api-reference/crawls/pages"
+                      ],
+                      "cursor": "abc123_def789"
+                    }
+                  },
+                  "allRetrievedResponse": {
+                    "value": {
+                      "id": "map_abc123",
+                      "urls_count": 10,
+                      "urls": [
+                        "https://docs.olostep.com/features/maps/maps",
+                        "https://docs.olostep.com/get-started/authentication",
+                        "https://docs.olostep.com/get-started/welcome"
+                      ],
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
+          },
+          "401": {
+            "description": "不正アクセス：APIトークンがないか無効です。"
+          },
+          "500": {
+            "description": "内部サーバーエラー。"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,220 @@
+---
+title: "按使用付费 (x402)"
+icon: "dollar-sign"
+description: "使用稳定币的按使用付费 API 端点"
+---
+
+## 概述
+
+你现在可以使用 Olostep API 端点，通过使用稳定币的按使用付费方式进行支付。
+
+这些端点使用 x402 支付协议，支持使用稳定币支付的按使用付费访问。每个请求都需要一个支付头用于认证和支付。
+
+<Info>
+  **按使用付费端点**
+  
+  下列所有端点均接受通过 x402 协议的稳定币支付。无需订阅 - 只需为你使用的部分付费。
+</Info>
+
+## 认证
+
+在你的请求中包含支付头：
+
+```
+X-Payment: {{paymentHeader}}
+```
+
+支付将在你的请求被处理前自动进行处理和验证。
+
+---
+
+## Olostep API
+
+### 支持支付的端点
+
+#### POST /v1/maps
+
+此端点允许用户获取某个网站上的所有网址。对于复杂的网站，可能需要最多 120 秒。对于大型网站，结果使用基于游标的分页。
+
+**价格：** 每次请求 $0.01
+
+**网络：** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/maps' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url": "example",
+    "search_query": "example",
+    "top_n": 123,
+    "include_subdomain": true,
+    "include_urls": "",
+    "exclude_urls": "",
+    "cursor": "example"
+  }'
+```
+
+#### POST /v1/scrapes
+
+启动网页抓取
+
+**价格：** 每次请求 $0.01
+
+**网络：** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/scrapes' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "url_to_scrape": "example",
+    "wait_before_scraping": "",
+    "formats": "",
+    "remove_css_selectors": "example",
+    "actions": "",
+    "country": "example",
+    "transformer": "example",
+    "remove_images": true,
+    "remove_class_names": "",
+    "parser": "",
+    "llm_extract": "",
+    "links_on_page": "",
+    "screen_size": "",
+    "metadata": ""
+  }'
+```
+
+#### POST /v1/crawls
+
+启动新的爬取。你将收到一个 `id` 用于跟踪进度。操作可能需要 1-10 分钟，具体取决于网站和深度及页面参数。
+
+**价格：** 动态 - 基于使用情况按请求计算
+
+<Note>
+  此端点使用动态定价。实际费用由你的请求参数决定，并将在 402 Payment Required 响应中显示。
+</Note>
+
+**网络：** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/crawls' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "start_url": "example",
+    "max_pages": 123,
+    "include_urls": "",
+    "exclude_urls": "",
+    "max_depth": 123,
+    "include_external": true,
+    "include_subdomain": true,
+    "search_query": "example",
+    "top_n": 123,
+    "webhook_url": "example",
+    "timeout": 123
+  }'
+```
+
+#### POST /v1/answers
+
+AI 将执行诸如搜索和浏览网页等操作，以找到提供任务的答案。执行时间为 3-30 秒，具体取决于复杂性。对于较长的任务，请使用代理端点。
+
+**价格：** 每次请求 $0.05
+
+**网络：** base (USDC)
+
+```bash
+curl -X POST 'https://api.olostep.com/x402/v1/answers' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Payment: {{paymentHeader}}' \\
+  -d '{
+    "task": "example",
+    "json_format": ""
+  }'
+```
+
+### 标准端点
+
+这些端点不需要支付：
+
+- **GET** `/v1/crawls/{crawl_id}` - 获取特定爬取的信息。
+- **GET** `/v1/batches/{batch_id}/items` - 检索批处理中处理的项目列表。然后你可以使用 `retrieve_id` 通过 Retrieve 端点获取内容。
+- **GET** `/v1/crawls/{crawl_id}/pages` - 获取特定爬取的页面列表。
+- **GET** `/v1/batches/{batch_id}` - 检索有关批次的状态和进度信息。要检索批次的内容，请参见此处。
+- **GET** `/v1/answers/{answer_id}` - 此端点通过其 ID 检索先前完成的答案。
+- **GET** `/v1/scrapes/{scrape_id}` - 可用于检索抓取的响应。
+- **GET** `/v1/retrieve` - 检索已处理批次和爬取网址的页面内容。
+
+---
+
+## x402 的工作原理
+
+支付流程由 x402 SDK 自动处理：
+
+1. **发起请求** - 向端点发送请求
+2. **需要支付** - 服务器响应支付要求（402 状态）
+3. **自动支付** - SDK 自动创建并提交支付
+4. **获取响应** - 接收你的 API 响应
+
+## 入门
+
+为你的语言安装 x402 SDK：
+
+```bash
+# Node.js
+npm install x402-fetch viem
+
+# Python  
+pip install x402 eth-account
+```
+
+## 示例用法
+
+<CodeGroup>
+```javascript Node.js
+import { wrapFetchWithPayment } from "x402-fetch";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY);
+const fetchWithPayment = wrapFetchWithPayment(fetch, account);
+
+// 发起付费请求 - 支付是自动的
+const response = await fetchWithPayment("https://api.olostep.com/x402/v1/maps", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ /* your data */ })
+});
+
+const result = await response.json();
+console.log(result);
+```
+
+```python Python
+import requests
+from eth_account import Account
+from x402.clients.requests import x402_http_adapter
+
+account = Account.from_key(os.getenv("PRIVATE_KEY"))
+session = requests.Session()
+adapter = x402_http_adapter(account)
+session.mount("https://", adapter)
+
+# 发起付费请求 - 支付是自动的
+response = session.post(
+    "https://api.olostep.com/x402/v1/maps",
+    json={"key": "value"}
+)
+
+print(response.json())
+```
+</CodeGroup>
+
+## 了解更多
+
+- [x402 协议文档](https://x402.org)
+- [Coinbase x402 指南](https://docs.cdp.coinbase.com/x402/)
+
+---
+
+由 [Orthogonal](https://orthogonal.sh) 提供技术支持

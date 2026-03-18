@@ -1,0 +1,96 @@
+---
+title: "バッチステータスを取得する"
+description: "AirOpsバッチの現在のステータスと進捗を取得する"
+openapi: "GET /v1/batches-airops/{batch_id}"
+---
+
+## 概要
+
+AirOpsバッチの現在のフェーズと進捗メトリクスを返します。Webhookを使用していない場合は、ポーリングにこれを使用してください。
+
+## レスポンスフィールド
+
+<ResponseField name="id" type="string">
+  バッチ識別子。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  常に `"batch"`。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+  バッチが作成されたときのUnixタイムスタンプ（ミリ秒）。
+</ResponseField>
+
+<ResponseField name="total_urls" type="integer">
+  提出されたURLの総数。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  全体のワークフローステータス：`pending`、`in_progress`、`completed`、または `failed`。
+</ResponseField>
+
+<ResponseField name="batch_mode" type="boolean">
+  非同期LLMバッチモードが有効かどうか（`true`）または同期モード（`false`）。
+</ResponseField>
+
+<ResponseField name="scraping" type="object">
+  完全なスクレイピングフェーズステータスオブジェクト（[Webhooks](/internal/airops-batches/webhooks#scraping-status)を参照）。
+</ResponseField>
+
+<ResponseField name="analyzing" type="object">
+  完全な分析フェーズステータスオブジェクト（[Webhooks](/internal/airops-batches/webhooks#analyzing-status)を参照）。
+</ResponseField>
+
+<ResponseField name="enriching" type="object">
+  完全なエンリッチフェーズステータスオブジェクト（[Webhooks](/internal/airops-batches/webhooks#enriching-status)を参照）。
+</ResponseField>
+
+## レスポンス例
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch",
+  "created_at": 1705315200000,
+  "total_urls": 100,
+  "status": "completed",
+  "batch_mode": true,
+  "scraping": {
+    "state": "completed",
+    "submitted": 100,
+    "valid": 100,
+    "succeeded": 98,
+    "failed": 2,
+    "started_at": 1705315200000,
+    "completed_at": 1705315500000,
+    "error": null
+  },
+  "analyzing": {
+    "state": "completed",
+    "items_analyzed": 98,
+    "items_needing_enrichment": 45,
+    "items_complete": 53,
+    "fields_to_enrich": {
+      "page_type": 98,
+      "author": 12,
+      "date_published": 8,
+      "date_modified": 25,
+      "brand_mentions": 98
+    },
+    "started_at": 1705315500000,
+    "completed_at": 1705315502000
+  },
+  "enriching": {
+    "state": "completed",
+    "items_to_enrich": 45,
+    "items_enriched": 44,
+    "items_failed": 1,
+    "llm_batch_id": "batch_xyz789def",
+    "batch_mode": true,
+    "started_at": 1705315505000,
+    "completed_at": 1705316800000,
+    "error": null
+  }
+}
+```

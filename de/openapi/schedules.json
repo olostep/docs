@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Zeitpläne API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "Zeitplan erstellen",
+        "description": "Erstellt einen neuen Zeitplan, um API-Aufrufe zu festgelegten Zeiten auszuführen. Unterstützt sowohl einmalige Ausführungen als auch wiederkehrende Zeitpläne mit Cron-Ausdrücken. Du kannst auch natürliche Sprache verwenden, um Cron-Ausdrücke automatisch zu generieren. Für POST-Anfragen kannst du die Kurzform der Olostep-Endpunkte verwenden (z.B. 'v1/scrapes'), die automatisch vorangestellt werden, oder eine vollständige URL angeben. Die Nutzlast kann jede JSON-Struktur enthalten, die du senden möchtest.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST"
+                    ],
+                    "description": "HTTP-Methode für den geplanten API-Aufruf. Muss entweder GET oder POST sein."
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "Die Endpunkt-URL, die aufgerufen wird, wenn der Zeitplan ausgeführt wird. Für POST-Anfragen mit Olostep-Endpunkten kannst du die Kurzform verwenden (z.B. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers'), die automatisch mit 'https://api.olostep.com/' vorangestellt wird. Für andere Endpunkte gib die vollständige URL an."
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird. Kann jede benötigte JSON-Struktur enthalten. Für GET-Anfragen ist dies typischerweise leer. Für POST-Anfragen sollte dies die Daten enthalten, die du an den Endpunkt senden möchtest.",
+                    "default": {}
+                  },
+                  "cron_expression": {
+                    "type": "string",
+                    "description": "Cron-Ausdruck im 6-Felder-Format (Minute Stunde Tag Monat Wochentag Jahr) für wiederkehrende Zeitpläne. Erforderlich für wiederkehrende Zeitpläne. Schließt sich gegenseitig mit execute_at und text aus."
+                  },
+                  "execute_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601-Datetime-String für die einmalige Ausführung des Zeitplans. Muss ein gültiges zukünftiges Datum sein. Erforderlich für einmalige Zeitpläne. Schließt sich gegenseitig mit cron_expression aus."
+                  },
+                  "expression_timezone": {
+                    "type": "string",
+                    "description": "IANA-Zeitzonenkennung (z.B. 'UTC', 'America/New_York', 'Europe/London') für den Zeitplan. Erforderlich für wiederkehrende Zeitpläne, optional für einmalige Zeitpläne. Bei Verwendung von natürlichem Sprachtext wird standardmäßig 'UTC' verwendet."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Natürlicher Sprachtext, um automatisch einen Cron-Ausdruck zu generieren. Das System wandelt deinen Text in einen gültigen Cron-Ausdruck um. Beispiele: 'alle 3 Minuten', 'jeden Tag um 10 Uhr', 'jeden Montag um 9 Uhr'. Schließt sich gegenseitig mit cron_expression und execute_at aus. Bei Verwendung wird expression_timezone standardmäßig auf 'UTC' gesetzt."
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Zeitplan erfolgreich erstellt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Eindeutige Zeitplankennung"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recurring",
+                        "onetime"
+                      ],
+                      "description": "Art des Zeitplans: 'recurring' für cron-basierte Zeitpläne, 'onetime' für einmalige Ausführungszeitpläne"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "description": "HTTP-Methode für den geplanten Aufruf"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "Die Endpunkt-URL, die aufgerufen wird"
+                    },
+                    "cron_expression": {
+                      "type": "string",
+                      "description": "Cron-Ausdruck (nur bei wiederkehrenden Zeitplänen vorhanden)"
+                    },
+                    "execute_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                    },
+                    "expression_timezone": {
+                      "type": "string",
+                      "description": "Zeitzone für den Zeitplan"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan erstellt wurde"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund falscher oder fehlender Parameter. Häufige Fehler: ungültige Methode, fehlender Endpunkt, ungültiger cron_expression, ungültiges execute_at-Datum, ungültige Zeitzone oder ungültiges schedule_id-Format."
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel. Überprüfe ihn noch einmal oder kontaktiere info@olostep.com, wenn du Probleme hast."
+          },
+          "500": {
+            "description": "Interner Serverfehler beim Erstellen des Zeitplans."
+          }
+        }
+      },
+      "get": {
+        "summary": "Zeitpläne auflisten",
+        "description": "Ruft alle Zeitpläne für dein Team ab. Gibt eine Liste von Zeitplänen mit ihrer Konfiguration, ihrem Status und ihren Metadaten zurück. Standardmäßig werden gelöschte Zeitpläne herausgefiltert.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "Auf 'true' setzen, um gelöschte Zeitpläne in die Antwort einzuschließen. Standardmäßig werden gelöschte Zeitpläne herausgefiltert.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Liste der Zeitpläne.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "Team-Identifikator"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "Eindeutige Zeitplankennung"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "recurring",
+                              "onetime"
+                            ],
+                            "description": "Art des Zeitplans"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "Die Endpoint-URL"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "Cron-Ausdruck (nur bei wiederkehrenden Zeitplänen vorhanden)"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                          },
+                          "expression_timezone": {
+                            "type": "string",
+                            "description": "Zeitzone für den Zeitplan"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "In natürlicher Sprache verfasster Text zur Generierung des Cron-Ausdrucks"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "Interner Zeitplanname in EventBridge"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "Name der Zeitplangruppe"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan erstellt wurde"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan zuletzt aktualisiert wurde"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "ENABLED",
+                              "DELETED"
+                            ],
+                            "description": "Aktueller Zustand des Zeitplans"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": [
+                              "GET",
+                              "POST"
+                            ],
+                            "description": "HTTP-Methode für den geplanten Aufruf"
+                          }
+                        }
+                      },
+                      "description": "Array von Zeitplanobjekten"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Gesamtanzahl der Zeitpläne"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel."
+          },
+          "500": {
+            "description": "Interner Serverfehler beim Abrufen der Zeitpläne."
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "Zeitplan abrufen",
+        "description": "Ruft einen einzelnen Zeitplan anhand seiner ID ab.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für den Zeitplan. Muss mit 'schedule_' beginnen.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zeitplan erfolgreich abgerufen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "Team-Identifikator"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "Eindeutige Zeitplankennung"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "recurring",
+                            "onetime"
+                          ],
+                          "description": "Art des Zeitplans"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "GET",
+                            "POST"
+                          ],
+                          "description": "HTTP-Methode für den geplanten Aufruf"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "Die Endpoint-URL"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "Cron-Ausdruck (nur bei wiederkehrenden Zeitplänen vorhanden)"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "Zeitzone für den Zeitplan"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "In natürlicher Sprache verfasster Text zur Generierung des Cron-Ausdrucks"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "Interner Zeitplanname in EventBridge"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "Name der Zeitplangruppe"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan erstellt wurde"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan zuletzt aktualisiert wurde"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ENABLED",
+                            "DELETED"
+                          ],
+                          "description": "Aktueller Zustand des Zeitplans"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund eines falschen schedule_id-Formats. Die Zeitplan-ID muss mit 'schedule_' beginnen."
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel."
+          },
+          "404": {
+            "description": "Kein Zeitplan für die angegebene ID gefunden."
+          },
+          "500": {
+            "description": "Interner Serverfehler beim Abrufen des Zeitplans."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Zeitplan löschen",
+        "description": "Löscht einen Zeitplan anhand seiner ID. Dies stoppt alle zukünftigen Ausführungen und entfernt den Zeitplan aus EventBridge.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für den zu löschenden Zeitplan. Muss mit 'schedule_' beginnen.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zeitplan erfolgreich gelöscht.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Erfolgsnachricht"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "Die ID des gelöschten Zeitplans"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund eines falschen schedule_id-Formats oder weil der Zeitplan bereits gelöscht wurde. Die Zeitplan-ID muss mit 'schedule_' beginnen."
+          },
+          "401": {
+            "description": "Ungültiger API-Schlüssel."
+          },
+          "404": {
+            "description": "Kein Zeitplan für die angegebene ID gefunden."
+          },
+          "500": {
+            "description": "Interner Serverfehler beim Löschen des Zeitplans."
+          }
+        }
+      }
+    }
+  }
+}

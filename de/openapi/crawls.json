@@ -1,0 +1,486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Crawl-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/v1/crawls": {
+      "post": {
+        "summary": "Starte einen neuen Crawl",
+        "description": "Startet einen neuen Crawl-Prozess mit den angegebenen Parametern.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_url": {
+                    "type": "string",
+                    "description": "Der Startpunkt des Crawls."
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL-Pfadmuster, die im Crawl mit Glob-Syntax eingeschlossen werden sollen.  Standardmäßig `/**`, was alle URLs einschließt. Verwende Muster wie `/blog/**`, um spezifische Abschnitte zu crawlen (z.B. nur Blog-Seiten), `/products/*.html` für Produktseiten oder mehrere Muster für verschiedene Abschnitte. Unterstützt Standard-Glob-Funktionen wie * (beliebige Zeichen) und ** (rekursives Matching)."
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL-Pfadnamen im Glob-Muster, die ausgeschlossen werden sollen. Zum Beispiel: `/careers/**`. Ausgeschlossene URLs haben Vorrang vor eingeschlossenen URLs."
+                  },
+                  "max_pages": {
+                    "type": "number",
+                    "description": "Maximale Anzahl von Seiten, die gecrawlt werden sollen. Empfohlen für die meisten Anwendungsfälle wie das Crawlen einer gesamten Website."
+                  },
+                  "max_depth": {
+                    "type": "number",
+                    "description": "Maximale Tiefe des Crawls. Nützlich, um nur bis zu einer n-Grad-Verlinkung zu extrahieren."
+                  },
+                  "include_external": {
+                    "type": "boolean",
+                    "description": "Crawl von externen Links ersten Grades."
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "Einbeziehen von Subdomains der Website. Standardmäßig `false`."
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "Eine optionale Suchanfrage, um spezifische Links zu finden und die Ergebnisse nach Relevanz zu sortieren."
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "Eine optionale Zahl, um nur die N relevantesten Links auf jeder Seite gemäß der Suchanfrage zu crawlen."
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "HTTPS-URL, um eine POST-Anfrage zu erhalten, wenn der Crawl abgeschlossen ist. Muss eine öffentlich zugängliche URL mit `http://` oder `https://`-Protokoll sein. Kann nicht auf localhost oder private IP-Adressen verweisen. Siehe [Webhooks](/api-reference/common/webhooks) für das Payload-Format und das Wiederholungsverhalten."
+                  },
+                  "timeout": {
+                    "type": "number",
+                    "description": "Beende den Crawl nach n Sekunden mit den bis dahin abgeschlossenen Seiten. Kann ~10s extra von der angegebenen Timeout-Zeit in Anspruch nehmen."
+                  },
+                  "follow_robots_txt": {
+                    "type": "boolean",
+                    "description": "Ob die Regeln von robots.txt beachtet werden sollen. Wenn auf `false` gesetzt, wird der Crawler die Website unabhängig von den Disallow-Direktiven in robots.txt scrapen. Standardmäßig `true`.",
+                    "default": true
+                  },
+                  "scrape_options": {
+                    "type": "object",
+                    "description": "Steuert, was jede einzelne Seitenabfrage von der Olostep-API anfordert. Alle Felder sind optional.",
+                    "properties": {
+                      "formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "html",
+                            "markdown",
+                            "text",
+                            "json",
+                            "screenshot"
+                          ]
+                        },
+                        "description": "Ausgabeformate, die für jede gecrawlte Seite angefordert werden. Standardmäßig `[\"html\", \"markdown\"]`, wenn weggelassen. `html` wird immer automatisch eingeschlossen. `json` wird automatisch hinzugefügt, wenn ein `parser` bereitgestellt wird. Hinweis: `raw_pdf` wird nicht unterstützt — PDFs können nicht gecrawlt werden.",
+                        "example": [
+                          "markdown",
+                          "screenshot"
+                        ]
+                      },
+                      "parser": {
+                        "type": "string",
+                        "description": "Parser-Name, der auf jeder Seite ausgeführt wird, um strukturierten `json`-Output zu erzeugen (z.B. `\"@olostep/extract-emails\"`). Fügt automatisch `json` zu `formats` hinzu, wenn gesetzt.",
+                        "example": "@olostep/extract-emails"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "start_url",
+                  "max_pages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crawl erfolgreich gestartet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"crawl\" für diesen Endpunkt."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` oder `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Erstellungszeit im Epoch-Format"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Erstellungszeit im Datumsformat"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "Die aktuelle Tiefe des Crawl-Prozesses."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Anzahl der gecrawlten Seiten"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund falscher oder fehlender Parameter."
+          },
+          "500": {
+            "description": "Interner Serverfehler."
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}": {
+      "get": {
+        "summary": "Crawl-Informationen abrufen",
+        "description": "Ruft Informationen über einen bestimmten Crawl mithilfe seiner `crawl_id` ab.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Die ID des Crawls, für den Informationen abgerufen werden sollen."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit Crawl-Informationen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Crawl-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"crawl\" für diesen Endpunkt."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` oder `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Erstellungszeit im Epoch-Format"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Erstellungszeit im Datumsformat"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "Die aktuelle Tiefe des Crawl-Prozesses."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Anzahl der gecrawlten Seiten"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund falscher oder fehlender Parameter."
+          },
+          "404": {
+            "description": "Crawl für die angegebene ID nicht gefunden."
+          },
+          "500": {
+            "description": "Interner Serverfehler."
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}/pages": {
+      "get": {
+        "summary": "Liste der gecrawlten Seiten optional mit Inhalt abrufen",
+        "description": "Ruft die Liste der gecrawlten Seiten und Inhalte ab, die für eine bestimmte Crawl-ID verarbeitet wurden.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Die ID des Crawls, für den die Liste der URLs abgerufen werden soll."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Optionaler Integer, der den Index darstellt, ab dem Inhalte abgerufen werden sollen. Nützlich, um zu paginieren, bis alle URLs abgerufen sind. Beginne mit 0 und gib dann den `response['cursor']`-Wert der letzten Anfrage an."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Optionaler Integer, um die Anzahl der zurückgegebenen Ergebnisse zu begrenzen. Empfohlen 10-50 Ergebnisse auf einmal. Paginierung mit *cursor*. Maximal 10MB Inhalt können in einer einzigen Anfrage abgerufen werden."
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Eine optionale Suchanfrage, um die Ergebnisse nach Relevanz zu sortieren. Verwendet standardmäßig die ursprüngliche search_query, falls angegeben."
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
+            },
+            "description": "**Veraltet:** Verwende den `/retrieve`-Endpunkt mit `retrieve_id`.  Array von Formaten zum Abrufen (z.B. [\"html\", \"markdown\"])."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit der Liste der URLs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "crawl_id": {
+                      "type": "string",
+                      "description": "Crawl-ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Die Art des Objekts. \"crawl\" für diesen Endpunkt."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` oder `completed`"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "pages_count": {
+                      "type": "number"
+                    },
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string",
+                            "description": "Um Inhalte vom `/retrieve`-Endpunkt abzurufen."
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "is_external": {
+                            "type": "boolean"
+                          },
+                          "html_content": {
+                            "type": "string",
+                            "description": "Veraltet: Verwende den `/retrieve`-Endpunkt mit `retrieve_id`."
+                          },
+                          "markdown_content": {
+                            "type": "string",
+                            "description": "Veraltet: Verwende den `/retrieve`-Endpunkt mit `retrieve_id`."
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "external_urls": {
+                          "type": "array",
+                          "description": "Externe URLs, die während des Crawls gefunden wurden",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "failed_urls": {
+                          "type": "array",
+                          "description": "URLs, die gefunden wurden, aber nicht abgerufen werden konnten",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "Im nächsten Anfrage-Query übergeben, um die nächsten Elemente zu erhalten."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage aufgrund falscher oder fehlender Parameter."
+          },
+          "404": {
+            "description": "Crawl für die angegebene ID nicht gefunden."
+          },
+          "500": {
+            "description": "Interner Serverfehler."
+          }
+        }
+      }
+    }
+  }
+}

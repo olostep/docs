@@ -1,0 +1,856 @@
+---
+sidebarTitle: "Python"
+title: "Olostep Python SDK"
+icon: "python"
+description: "Officiële Python SDK om gegevens van het web te zoeken, extraheren en structureren"
+---
+
+<Note>
+  **PyPI Pakket**: [olostep](https://pypi.org/project/olostep/) | **Vereisten**: Python 3.11+
+</Note>
+
+## Installatie
+
+<CodeGroup>
+
+```bash pip
+pip install olostep
+```
+
+```bash pip3
+pip3 install olostep
+```
+
+```bash poetry
+poetry add olostep
+```
+
+```bash uv
+uv pip install olostep
+```
+
+</CodeGroup>
+
+## Authenticatie
+
+Verkrijg je API-sleutel van het [Olostep Dashboard](https://www.olostep.com/dashboard/).
+
+## Snelle Start
+
+De SDK biedt twee clientopties, afhankelijk van je gebruikssituatie:
+
+<CardGroup cols={2}>
+  <Card
+    title="Sync Client (`Olostep`)"
+    href="/sdks/python#sync-client-olostep"
+    icon="sync"
+  >
+    Beste voor: Scripts en eenvoudige gebruikssituaties waar je voorkeur geeft aan blokkerende operaties.<br /><br />
+    De sync client biedt een eenvoudigere, blokkerende interface die gemakkelijker is om mee te beginnen als je nieuw bent met async/await.
+  </Card>
+  <Card
+    title="Async Client (`AsyncOlostep`)"
+    href="/sdks/python#async-client-asyncolostep"
+    icon="zap"
+  >
+    Beste voor: Productietoepassingen en het afhandelen van veel gelijktijdige verzoeken.<br /><br />
+    De async client biedt niet-blokkerende operaties en is de aanbevolen keuze voor productietoepassingen die hoge doorvoer vereisen.
+  </Card>
+</CardGroup>
+
+# Sync Client (Olostep)
+
+De sync client (`Olostep`) biedt een blokkerende interface die perfect is voor scripts en eenvoudige gebruikssituaties.
+
+```python
+from olostep import Olostep
+
+# Voorzie de API-sleutel via het 'api_key' parameter of
+# door de OLOSTEP_API_KEY omgevingsvariabele in te stellen
+
+# De sync client beheert automatisch de resourcebeheer
+# Geen expliciete sluiting nodig - resources worden opgeruimd na elke operatie
+client = Olostep(api_key="YOUR_REAL_KEY")
+scrape_result = client.scrapes.create(url_to_scrape="https://example.com")
+```
+
+### Basis Web Scraping
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Eenvoudig scrapen
+result = client.scrapes.create(url_to_scrape="https://example.com")
+print(f"Scraped {len(result.html_content)} karakters")
+
+# Meerdere formaten
+result = client.scrapes.create(
+    url_to_scrape="https://example.com",
+    formats=["html", "markdown"]
+)
+print(f"HTML: {len(result.html_content)} chars")
+print(f"Markdown: {len(result.markdown_content)} chars")
+```
+
+### Batchverwerking
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Verwerk meerdere URL's efficiënt
+batch = client.batches.create(
+    urls=[
+        "https://www.google.com/search?q=python",
+        "https://www.google.com/search?q=javascript",
+        "https://www.google.com/search?q=typescript"
+    ]
+)
+
+# Wacht op voltooiing en verwerk resultaten
+for item in batch.items():
+    content = item.retrieve(["html"])
+    print(f"Processed {item.url}: {len(content.html_content)} bytes")
+```
+
+### Slim Web Crawlen
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Crawl met intelligente filtering
+crawl = client.crawls.create(
+    start_url="https://www.bbc.com",
+    max_pages=100,
+    include_urls=["/articles/**", "/blog/**"],
+    exclude_urls=["/admin/**"]
+)
+
+for page in crawl.pages():
+    content = page.retrieve(["html"])
+    print(f"Crawled: {page.url}")
+```
+
+### Site Mapping
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Extraheer alle links van een website
+maps = client.maps.create(url="https://example.com")
+
+# Verkrijg alle ontdekte URL's
+urls = []
+for url in maps.urls():
+    urls.append(url)
+    if len(urls) >= 10:  # Limiet voor demo
+        break
+
+print(f"Found {len(urls)} URLs")
+```
+
+### AI-Gestuurde Antwoorden
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Verkrijg antwoorden van webpagina's met behulp van AI
+answer = client.answers.create(
+    task="What is the main topic of https://example.com?"
+)
+print(f"Answer: {answer.answer}")
+```
+
+# Async Client (AsyncOlostep)
+
+De async client (`AsyncOlostep`) is de aanbevolen client voor high-performance toepassingen, backend services en wanneer je veel gelijktijdige verzoeken moet afhandelen.
+
+```python
+from olostep import AsyncOlostep
+
+# Voorzie de API-sleutel via het 'api_key' parameter of
+# door de OLOSTEP_API_KEY omgevingsvariabele in te stellen
+
+# RESOURCE MANAGEMENT
+# ===================
+# De SDK ondersteunt twee gebruikspatronen voor resourcebeheer:
+
+# 1. Context Manager (Aanbevolen voor eenmalig gebruik):
+#    Behandelt automatisch resource opruiming
+async with AsyncOlostep(api_key="YOUR_REAL_KEY") as client:
+    scrape_result = await client.scrapes.create(url_to_scrape="https://example.com")
+# Transport wordt hier automatisch gesloten
+
+# 2. Expliciete Sluiting (Voor langlopende services):
+#    Vereist handmatige resource opruiming
+client = AsyncOlostep(api_key="YOUR_REAL_KEY")
+try:
+    scrape_result = await client.scrapes.create(url_to_scrape="https://example.com")
+finally:
+    await client.close()  # Handmatig het transport sluiten
+```
+
+### Basis Web Scraping
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Eenvoudig scrapen
+        result = await client.scrapes.create(url_to_scrape="https://example.com")
+        print(f"Scraped {len(result.html_content)} karakters")
+
+        # Meerdere formaten
+        result = await client.scrapes.create(
+            url_to_scrape="https://example.com",
+            formats=["html", "markdown"]
+        )
+        print(f"HTML: {len(result.html_content)} chars")
+        print(f"Markdown: {len(result.markdown_content)} chars")
+
+asyncio.run(main())
+```
+
+### Batchverwerking
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Verwerk meerdere URL's efficiënt
+        batch = await client.batches.create(
+            urls=[
+                "https://www.google.com/search?q=python",
+                "https://www.google.com/search?q=javascript",
+                "https://www.google.com/search?q=typescript"
+            ]
+        )
+
+        # Wacht op voltooiing en verwerk resultaten
+        async for item in batch.items():
+            content = await item.retrieve(["html"])
+            print(f"Processed {item.url}: {len(content.html_content)} bytes")
+
+asyncio.run(main())
+```
+
+### Slim Web Crawlen
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Crawl met intelligente filtering
+        crawl = await client.crawls.create(
+            start_url="https://www.bbc.com",
+            max_pages=100,
+            include_urls=["/articles/**", "/blog/**"],
+            exclude_urls=["/admin/**"]
+        )
+
+        async for page in crawl.pages():
+            content = await page.retrieve(["html"])
+            print(f"Crawled: {page.url}")
+
+asyncio.run(main())
+```
+
+### Site Mapping
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Extraheer alle links van een website
+        maps = await client.maps.create(url="https://example.com")
+
+        # Verkrijg alle ontdekte URL's
+        urls = []
+        async for url in maps.urls():
+            urls.append(url)
+            if len(urls) >= 10:  # Limiet voor demo
+                break
+
+        print(f"Found {len(urls)} URLs")
+
+asyncio.run(main())
+```
+
+### AI-Gestuurde Antwoorden
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Verkrijg antwoorden van webpagina's met behulp van AI
+        answer = await client.answers.create(
+            task="What is the main topic of https://example.com?"
+        )
+        print(f"Answer: {answer.answer}")
+
+asyncio.run(main())
+```
+
+## SDK Referentie
+
+### Methode Structuur
+
+Beide SDK-clients bieden dezelfde schone, pythonische interface georganiseerd in logische namespaces:
+
+| Namespace  | Doel                   | Belangrijkste Methoden          |
+| ---------- | --------------------- | ------------------------------- |
+| `scrapes`  | Enkel URL-extractie   | `create()`, `get()`             |
+| `batches`  | Multi-URL verwerking  | `create()`, `info()`, `items()` |
+| `crawls`   | Website navigatie     | `create()`, `info()`, `pages()` |
+| `maps`     | Link extractie        | `create()`, `urls()`            |
+| `answers`  | AI-gestuurde extractie| `create()`, `get()`             |
+| `retrieve` | Inhoud ophalen        | `get()`                         |
+
+Elke operatie retourneert stateful objecten met ergonomische methoden voor vervolgoperaties.
+
+## Foutafhandeling
+
+Vang alle SDK-fouten op met de basis uitzondering klasse:
+
+```python
+from olostep import Olostep, Olostep_BaseError
+
+client = Olostep(api_key="your-api-key")
+
+try:
+    result = client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Er is een fout opgetreden: {type(e).__name__}")
+    print(f"Foutmelding: {e}")
+```
+
+Voor gedetailleerde foutafhandelingsinformatie, inclusief de volledige uitzondering hiërarchie en gedetailleerde foutafhandelingsopties, zie [Gedetailleerde Foutafhandeling](/sdks/python#detailed-error-handling).
+
+## Automatische Herhalingen
+
+De SDK probeert automatisch opnieuw bij tijdelijke fouten (netwerkproblemen, tijdelijke serverproblemen) op basis van de `RetryStrategy` configuratie. Je kunt het herhalingsgedrag aanpassen door een `RetryStrategy` instantie door te geven bij het maken van de client:
+
+```python
+from olostep import Olostep, RetryStrategy
+
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+
+client = Olostep(api_key="your-api-key", retry_strategy=retry_strategy)
+result = client.scrapes.create("https://example.com")
+```
+
+Voor gedetailleerde herhalingsconfiguratie-opties en best practices, zie [Retry Strategie](/sdks/python#retry-strategy-configuration).
+
+## Geavanceerde Functies
+
+### Slimme Invoer Coercion
+
+De SDK behandelt intelligent verschillende invoerformaten voor maximaal gemak:
+
+```python
+from olostep import Olostep, Country
+
+client = Olostep(api_key="your-api-key")
+
+# Formaten: string, lijst, of enum
+client.scrapes.create(url_to_scrape="https://example.com", formats="html")
+client.scrapes.create(url_to_scrape="https://example.com", formats=["html", "markdown"])
+
+# Landen: hoofdletterongevoelige strings of enums
+client.scrapes.create(url_to_scrape="https://example.com", country="us")
+client.scrapes.create(url_to_scrape="https://example.com", country=Country.US)
+
+# Lijsten: enkele waarden of lijsten
+client.batches.create(urls="https://example.com")    # Enkele URL
+client.batches.create(urls=["https://a.com", "https://b.com"])  # Meerdere URL's
+```
+
+### Geavanceerde Scraping Opties
+
+```python
+from olostep import Olostep, Format, Country, WaitAction, FillInputAction
+
+client = Olostep(api_key="your-api-key")
+
+# Volledige controle over scraping gedrag
+result = client.scrapes.create(
+    url_to_scrape="https://news.google.com/",
+    wait_before_scraping=3000,
+    formats=[Format.HTML, Format.MARKDOWN],
+    remove_css_selectors=["script", ".popup"],
+    actions=[
+        WaitAction(milliseconds=1500),
+        FillInputAction(selector="searchbox", value="olostep")
+    ],
+    parser="@olostep/google-news",
+    country=Country.US,
+    remove_images=True
+)
+```
+
+### Batchverwerking met Aangepaste ID's
+
+```python
+from olostep import Olostep, Country
+
+client = Olostep(api_key="your-api-key")
+
+batch = client.batches.create([
+    {"url": "https://www.google.com/search?q=python", "custom_id": "search_1"},
+    {"url": "https://www.google.com/search?q=javascript", "custom_id": "search_2"},
+    {"url": "https://www.google.com/search?q=typescript", "custom_id": "search_3"}
+],
+country=Country.US,
+parser="@olostep/google-search"
+)
+
+# Verwerk resultaten per aangepast ID
+# Bij gebruik van een parser, haal JSON-inhoud op in plaats van HTML
+for item in batch.items():
+    if item.custom_id == "search_2":
+        content = item.retrieve(["json"])
+        print(f"Zoekresultaat: {content.json_content}")
+```
+
+### Intelligente Crawling
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Crawl met intelligente filtering
+crawl = client.crawls.create(
+    start_url="https://www.bbc.com",
+    max_pages=1000,
+    max_depth=3,
+    include_urls=["/articles/**", "/news/**"],
+    exclude_urls=["/ads/**", "/tracking/**"],
+    include_external=False,
+    include_subdomain=True,
+)
+
+for page in crawl.pages():
+    content = page.retrieve(["html"])
+    print(f"Crawled: {page.url}")
+```
+
+### Site Mapping met Filters
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Extraheer alle links met geavanceerde filtering
+maps = client.maps.create(
+    url="https://www.bbc.com",
+    include_subdomain=True,
+    include_urls=["/articles/**", "/news/**"],
+    exclude_urls=["/ads/**", "/tracking/**"]
+)
+
+# Verkrijg gefilterde URL's
+urls = []
+for url in maps.urls():
+    urls.append(url)
+
+print(f"Found {len(urls)} relevante URL's")
+```
+
+### Antwoorden Ophalen
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Maak eerst een antwoord aan
+created_answer = client.answers.create(
+    task="What is the main topic of https://example.com?"
+)
+
+# Haal het vervolgens op met behulp van het ID
+answer = client.answers.get(answer_id=created_answer.id)
+print(f"Answer: {answer.answer}")
+```
+
+### Inhoud Ophalen
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Verkrijg inhoud met retrieve ID
+result = client.retrieve.get(retrieve_id="ret_123")
+
+# Verkrijg meerdere formaten
+result = client.retrieve.get(retrieve_id="ret_123", formats=["html", "markdown", "text", "json"])
+```
+
+## Logging
+
+Schakel logging in om problemen op te sporen:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("olostep")
+logger.setLevel(logging.INFO)  # Gebruik DEBUG voor gedetailleerde output
+```
+
+**Logniveaus**: `INFO` (aanbevolen), `DEBUG` (gedetailleerd), `WARNING`, `ERROR`
+
+## Retry Strategie Configuratie
+
+De `RetryStrategy` klasse bepaalt hoe de Olostep SDK omgaat met tijdelijke API-fouten door middel van automatische herhalingen met exponentiële backoff en jitter. Dit helpt om betrouwbare werking te garanderen in productieomgevingen waar tijdelijke netwerkproblemen, snelheidslimieten en serveroverbelasting intermitterende fouten kunnen veroorzaken.
+
+### Standaard Gedrag
+
+Standaard gebruikt de SDK de volgende retry configuratie:
+
+- **Max retries**: 5 pogingen
+- **Initiële vertraging**: 2 seconden
+- **Backoff**: Exponentieel (2^poging)
+- **Jitter**: 10-90% van vertraging (willekeurig)
+
+Dit betekent:
+
+- Poging 1: Onmiddellijk
+- Poging 2: ~2-3.6s vertraging
+- Poging 3: ~4-7.2s vertraging
+- Poging 4: ~8-14.4s vertraging
+- Poging 5: ~16-28.8s vertraging
+
+Maximale duur: ~57 seconden voor alle herhalingen (slechtste geval)
+
+### Aangepaste Configuratie
+
+```python
+from olostep import AsyncOlostep, RetryStrategy
+
+# Maak aangepaste retry strategie
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,  # 20% minimale jitter
+    jitter_max=0.8,  # 80% maximale jitter
+)
+
+# Gebruik met client
+async with AsyncOlostep(
+    api_key="your-api-key",
+    retry_strategy=retry_strategy
+) as client:
+    result = await client.scrapes.create("https://example.com")
+```
+
+### Wanneer Herhalingen Plaatsvinden
+
+De SDK probeert automatisch opnieuw bij:
+
+- **Tijdelijke serverproblemen** (`OlostepServerError_TemporaryIssue`)
+- **Timeout reacties** (`OlostepServerError_NoResultInResponse`)
+
+Andere fouten (authenticatie, validatie, resource niet gevonden, etc.) falen onmiddellijk zonder herhaling.
+
+### Transport vs Caller Herhalingen
+
+De SDK heeft twee herhalingslagen:
+
+1. **Transportlaag**: Behandelt netwerkniveau verbindingsfouten (DNS, timeouts, etc.)
+2. **Callerlaag**: Behandelt API-niveau tijdelijke fouten (bepaald door `RetryStrategy`)
+
+Beide lagen zijn onafhankelijk en hebben aparte configuratie. De totale maximale duur is de som van beide lagen.
+
+### Berekening van Maximale Duur
+
+```python
+retry_strategy = RetryStrategy(max_retries=5, initial_delay=2.0)
+max_duration = retry_strategy.max_duration()
+print(f"Maximale oproepduur: {max_duration:.2f}s")
+```
+
+### Configuratie Voorbeelden
+
+Hier zijn enkele voorbeelden van hoe je de retry strategie kunt configureren voor verschillende gebruikssituaties.
+
+#### Conservatieve Strategie
+
+```python
+# Minder herhalingen, kortere vertragingen
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+# Max duur: ~12.6s
+```
+
+#### Agressieve Strategie
+
+```python
+# Meer herhalingen voor kritieke operaties
+retry_strategy = RetryStrategy(
+    max_retries=10,
+    initial_delay=0.5
+)
+# Max duur: ~969.75s
+```
+
+#### Geen Herhalingen (Snel Falen)
+
+```python
+# Schakel herhalingen uit voor onmiddellijke foutfeedback
+retry_strategy = RetryStrategy(max_retries=0)
+
+client = AsyncOlostep(api_key="your-api-key", retry_strategy=retry_strategy)
+```
+
+#### Hoge Doorvoer Strategie
+
+```python
+# Geoptimaliseerd voor hoge-volume operaties
+retry_strategy = RetryStrategy(
+    max_retries=2,
+    initial_delay=0.5,
+    jitter_min=0.1,
+    jitter_max=0.3  # Lagere jitter voor meer voorspelbare timing
+)
+# Max duur: ~1.95s
+```
+
+### Begrijpen van Jitter
+
+Jitter voegt randomisatie toe om "thundering herd" problemen te voorkomen wanneer veel clients tegelijkertijd opnieuw proberen. De jitter wordt berekend als:
+
+```python
+base_delay = initial_delay * (2 ** attempt)
+jitter_range = base_delay * (jitter_max - jitter_min)
+jitter = random.uniform(base_delay * jitter_min, base_delay * jitter_min + jitter_range)
+final_delay = base_delay + jitter
+```
+
+Bijvoorbeeld, met `initial_delay=2.0`, `jitter_min=0.1`, `jitter_max=0.9`:
+
+- Poging 0: base=2.0s, jitter=0.2-1.8s, final=2.2-3.8s
+- Poging 1: base=4.0s, jitter=0.4-3.6s, final=4.4-7.6s
+- Poging 2: base=8.0s, jitter=0.8-7.2s, final=8.8-15.2s
+
+### Best Practices
+
+#### Voor Productietoepassingen
+
+```python
+# Gebalanceerde aanpak voor productie
+retry_strategy = RetryStrategy(
+    max_retries=5,
+    initial_delay=2.0,
+    jitter_min=0.1,
+    jitter_max=0.9
+)
+```
+
+#### Voor Ontwikkeling/Testen
+
+```python
+# Snelle feedback voor ontwikkeling
+retry_strategy = RetryStrategy(
+    max_retries=2,
+    initial_delay=0.5,
+    jitter_min=0.1,
+    jitter_max=0.3
+)
+```
+
+#### Voor Batch Operaties
+
+```python
+# Conservatief voor grote batch taken
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+```
+
+### Monitoring en Debugging
+
+De SDK logt retry-informatie op het DEBUG-niveau:
+
+```
+DEBUG: Tijdelijk probleem, opnieuw proberen in 2.34s
+DEBUG: Geen resultaat in antwoord, opnieuw proberen in 4.67s
+```
+
+Schakel debug logging in om retry-gedrag te monitoren:
+
+```python
+import logging
+logging.getLogger("olostep").setLevel(logging.DEBUG)
+```
+
+### Foutafhandeling
+
+Wanneer alle herhalingen zijn uitgeput, wordt de oorspronkelijke fout opgeworpen:
+
+```python
+try:
+    result = await client.scrapes.create("https://example.com")
+except OlostepServerError_TemporaryIssue as e:
+    print(f"Gefaald na alle herhalingen: {e}")
+    # Behandel de permanente fout
+```
+
+### Prestatieoverwegingen
+
+- **Geheugen**: Elke herhalingspoging gebruikt extra geheugen voor verzoek/antwoord objecten
+- **Tijd**: Totale operatietijd kan aanzienlijk langer zijn met herhalingen ingeschakeld
+- **API Limieten**: Herhalingen tellen mee voor je API-gebruiksbeperkingen
+- **Netwerk**: Meer netwerkverkeer door herhalingspogingen
+
+Kies je retry strategie op basis van de vereisten van je applicatie voor betrouwbaarheid versus prestaties.
+
+## Gedetailleerde Foutafhandeling
+
+### Uitzondering Hiërarchie
+
+De Olostep SDK biedt een uitgebreide uitzondering hiërarchie voor verschillende faalscenario's. Alle uitzonderingen erven van `Olostep_BaseError`.
+
+Er zijn drie hoofdtype fouten die direct erven van `Olostep_BaseError`:
+
+1. **`Olostep_APIConnectionError`** - Netwerkniveau verbindingsfouten
+2. **`OlostepServerError_BaseError`** - Fouten opgeworpen (soort van) door de API-server
+3. **`OlostepClientError_BaseError`** - Fouten opgeworpen door de client SDK
+
+### Waarom Verbindingsfouten Apart Zijn
+
+`Olostep_APIConnectionError` is apart van serverfouten omdat het netwerkniveau fouten vertegenwoordigt die optreden voordat de API het verzoek kan verwerken. Dit zijn transportlaagproblemen (DNS of HTTP-fouten, timeouts, verbinding geweigerd, etc.) in plaats van API-niveau fouten. HTTP-statuscodes (4xx, 5xx) worden beschouwd als API-reacties en worden gecategoriseerd als serverfouten, ook al duiden ze op problemen.
+
+```
+Olostep_BaseError
+├── Olostep_APIConnectionError
+├── OlostepServerError_BaseError
+│   ├── OlostepServerError_TemporaryIssue
+│   │   ├── OlostepServerError_NetworkBusy
+│   │   └── OlostepServerError_InternalNetworkIssue
+│   ├── OlostepServerError_RequestUnprocessable
+│   │   ├── OlostepServerError_ParserNotFound
+│   │   └── OlostepServerError_OutOfResources
+│   ├── OlostepServerError_BlacklistedDomain
+│   ├── OlostepServerError_FeatureApprovalRequired
+│   ├── OlostepServerError_AuthFailed
+│   ├── OlostepServerError_CreditsExhausted
+│   ├── OlostepServerError_InvalidEndpointCalled
+│   ├── OlostepServerError_ResourceNotFound
+│   ├── OlostepServerError_NoResultInResponse
+│   └── OlostepServerError_UnknownIssue
+└── OlostepClientError_BaseError
+    ├── OlostepClientError_RequestValidationFailed
+    ├── OlostepClientError_ResponseValidationFailed
+    ├── OlostepClientError_NoAPIKey
+    ├── OlostepClientError_AsyncContext
+    ├── OlostepClientError_BetaFeatureAccessRequired
+    └── OlostepClientError_Timeout
+```
+
+### Aanbevolen Foutafhandeling
+
+Voor de meeste gebruikssituaties, vang de basisfout op en print de foutnaam:
+
+```python
+from olostep import AsyncOlostep, Olostep_BaseError
+
+try:
+    result = await client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Er is een fout opgetreden: {type(e).__name__}")
+    print(f"Foutmelding: {e}")
+```
+
+Deze aanpak vangt alle SDK-fouten op en biedt duidelijke informatie over wat er misging. De foutnaam (bijv. `OlostepServerError_AuthFailed`) is beschrijvend genoeg om het probleem te begrijpen.
+
+### Gedetailleerde Foutafhandeling
+
+Als je meer specifieke foutafhandeling nodig hebt, vang dan de specifieke fouttypes direct op. **Vermijd het gebruik van `OlostepServerError_BaseError` of `OlostepClientError_BaseError`** - deze basisklassen geven alleen aan wie de fout heeft opgeworpen (server vs client), niet wie verantwoordelijk is voor het oplossen ervan. Dit is een implementatiedetail die niet helpt bij foutafhandelingslogica.
+
+Vang in plaats daarvan specifieke fouttypes op die het daadwerkelijke probleem aangeven:
+
+```python
+from olostep import (
+    AsyncOlostep,
+    Olostep_BaseError,
+    Olostep_APIConnectionError,
+    OlostepServerError_AuthFailed,
+    OlostepServerError_CreditsExhausted,
+    OlostepClientError_NoAPIKey,
+)
+
+try:
+    result = await client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_APIConnectionError as e:
+    print(f"Netwerkfout: {type(e).__name__}")
+except OlostepServerError_AuthFailed:
+    print("Ongeldige API-sleutel")
+except OlostepServerError_CreditsExhausted:
+    print("Credits uitgeput")
+except OlostepClientError_NoAPIKey:
+    print("API-sleutel niet verstrekt")
+except Olostep_BaseError as e:
+    print(f"Er is een fout opgetreden: {type(e).__name__}")
+```
+
+## Configuratie
+
+### Omgevingsvariabelen
+
+| Variabele               | Beschrijving               | Standaard                      |
+| ---------------------- | ------------------------- | ---------------------------- |
+| `OLOSTEP_API_KEY`      | Je API-sleutel            | Vereist                     |
+| `OLOSTEP_BASE_API_URL` | API basis URL             | `https://api.olostep.com/v1` |
+| `OLOSTEP_API_TIMEOUT`  | Verzoek timeout (seconden)| `150`                        |
+
+## Hulp Krijgen
+
+- [Volledige Documentatie](https://docs.olostep.com)
+- [Community Slack](https://join.slack.com/t/olostep-users/shared_invite/zt-2pn2ce0uu-~591qIdhAfJy~LXCWQS5UQ)
+- [Ondersteuning Email](mailto:info@olostep.com)
+
+## Bronnen
+
+<CardGroup cols={2}>
+  <Card title="PyPI Pakket" icon="python" href="https://pypi.org/project/olostep/">
+    Bekijk op PyPI
+  </Card>
+  <Card title="Verkrijg API-sleutel" icon="key" href="https://www.olostep.com/auth">
+    Meld je gratis aan
+  </Card>
+</CardGroup>

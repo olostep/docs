@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Schema's API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/schedules": {
+      "post": {
+        "summary": "Schema aanmaken",
+        "description": "Maakt een nieuw schema aan om API-aanroepen op gespecificeerde tijden uit te voeren. Ondersteunt zowel eenmalige uitvoeringen als terugkerende schema's met behulp van cron-expressies. Je kunt ook natuurlijke taal gebruiken om automatisch cron-expressies te genereren. Voor POST-verzoeken kun je korte Olostep-eindpunten gebruiken (bijv. 'v1/scrapes') die automatisch worden geprefixed, of een volledige URL opgeven. De payload kan elke JSON-structuur bevatten die je wilt verzenden.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST"
+                    ],
+                    "description": "HTTP-methode voor de geplande API-aanroep. Moet GET of POST zijn."
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "De endpoint-URL om aan te roepen wanneer het schema wordt uitgevoerd. Voor POST-verzoeken met Olostep-eindpunten kun je korte vormen gebruiken (bijv. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') die automatisch worden geprefixed met 'https://api.olostep.com/'. Voor andere eindpunten geef je de volledige URL op."
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "De payload om mee te sturen met de API-aanroep. Kan elke JSON-structuur bevatten die je nodig hebt. Voor GET-verzoeken is dit meestal leeg. Voor POST-verzoeken moet dit de gegevens bevatten die je naar het eindpunt wilt sturen.",
+                    "default": {}
+                  },
+                  "cron_expression": {
+                    "type": "string",
+                    "description": "Cron-expressie in 6-velden formaat (minuut uur dag maand dag-van-de-week jaar) voor terugkerende schema's. Vereist voor terugkerende schema's. Wederzijds exclusief met execute_at en text."
+                  },
+                  "execute_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 datetime string voor eenmalige schema-uitvoering. Moet een geldige toekomstige datetime zijn. Vereist voor eenmalige schema's. Wederzijds exclusief met cron_expression."
+                  },
+                  "expression_timezone": {
+                    "type": "string",
+                    "description": "IANA tijdzone-identificator (bijv. 'UTC', 'America/New_York', 'Europe/London') voor het schema. Vereist voor terugkerende schema's, optioneel voor eenmalige schema's. Bij gebruik van natuurlijke taaltekst is de standaard 'UTC'."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Natuurlijke taaltekst om automatisch een cron-expressie te genereren. Het systeem zal je tekst omzetten in een geldige cron-expressie. Voorbeelden: 'elke 3 minuten', 'elke dag om 10 uur', 'elke maandag om 9 uur'. Wederzijds exclusief met cron_expression en execute_at. Bij gebruik is expression_timezone standaard 'UTC'."
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Schema succesvol aangemaakt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unieke schema-identificator"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recurring",
+                        "onetime"
+                      ],
+                      "description": "Type schema: 'recurring' voor cron-gebaseerde schema's, 'onetime' voor eenmalige uitvoeringsschema's"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "description": "HTTP-methode voor de geplande aanroep"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "De endpoint-URL die zal worden aangeroepen"
+                    },
+                    "cron_expression": {
+                      "type": "string",
+                      "description": "Cron-expressie (alleen aanwezig voor terugkerende schema's)"
+                    },
+                    "execute_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Uitvoeringsdatetime (alleen aanwezig voor eenmalige schema's)"
+                    },
+                    "expression_timezone": {
+                      "type": "string",
+                      "description": "Tijdzone voor het schema"
+                    },
+                    "created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "ISO 8601 datetime wanneer het schema is aangemaakt"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Slecht verzoek vanwege onjuiste of ontbrekende parameters. Veelvoorkomende fouten: ongeldige methode, ontbrekend eindpunt, ongeldige cron_expression, ongeldige execute_at datetime, ongeldige tijdzone, of ongeldige schedule_id formaat."
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel. Controleer deze nog eens of neem contact op met info@olostep.com als je problemen ondervindt."
+          },
+          "500": {
+            "description": "Interne serverfout bij het maken van schema."
+          }
+        }
+      },
+      "get": {
+        "summary": "Lijst Schema's",
+        "description": "Haalt alle schema's voor jouw team op. Geeft een lijst van schema's terug met hun configuratie, status en metadata. Standaard worden verwijderde schema's eruit gefilterd.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "description": "Stel in op 'true' om verwijderde schema's in de respons op te nemen. Standaard worden verwijderde schema's eruit gefilterd.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle respons met lijst van schema's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "team_id": {
+                            "type": "string",
+                            "description": "Teamidentificatie"
+                          },
+                          "schedule_id": {
+                            "type": "string",
+                            "description": "Unieke schema-identificator"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "recurring",
+                              "onetime"
+                            ],
+                            "description": "Type schema"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "De endpoint URL"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "De payload om mee te sturen met de API-aanroep"
+                          },
+                          "cron_expression": {
+                            "type": "string",
+                            "description": "Cron-expressie (alleen aanwezig voor terugkerende schema's)"
+                          },
+                          "execute_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Uitvoeringsdatetime (alleen aanwezig voor eenmalige schema's)"
+                          },
+                          "expression_timezone": {
+                            "type": "string",
+                            "description": "Tijdzone voor het schema"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Natuurlijke taaltekst gebruikt om cron-expressie te genereren"
+                          },
+                          "schedule_name": {
+                            "type": "string",
+                            "description": "Interne schedulenaam in EventBridge"
+                          },
+                          "schedule_group": {
+                            "type": "string",
+                            "description": "Naam van schemagroep"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 datetime wanneer het schema is aangemaakt"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 datum en tijd wanneer het schema voor het laatst is bijgewerkt"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "ENABLED",
+                              "DELETED"
+                            ],
+                            "description": "Huidige status van het schema"
+                          },
+                          "method": {
+                            "type": "string",
+                            "enum": [
+                              "GET",
+                              "POST"
+                            ],
+                            "description": "HTTP-methode voor de geplande aanroep"
+                          }
+                        }
+                      },
+                      "description": "Array van schema-objecten"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Totaal aantal schema's"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel."
+          },
+          "500": {
+            "description": "Interne serverfout bij het ophalen van schema's."
+          }
+        }
+      }
+    },
+    "/v1/schedules/{schedule_id}": {
+      "get": {
+        "summary": "Haal Schema op",
+        "description": "Haalt een enkel schema op via zijn ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het schema. Moet beginnen met 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schema succesvol opgehaald.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "team_id": {
+                          "type": "string",
+                          "description": "Teamidentificatie"
+                        },
+                        "schedule_id": {
+                          "type": "string",
+                          "description": "Unieke schema-identificator"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "recurring",
+                            "onetime"
+                          ],
+                          "description": "Type schema"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "GET",
+                            "POST"
+                          ],
+                          "description": "HTTP-methode voor de geplande aanroep"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "De endpoint URL"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "De payload om mee te sturen met de API-aanroep"
+                        },
+                        "cron_expression": {
+                          "type": "string",
+                          "description": "Cron-expressie (alleen aanwezig voor terugkerende schema's)"
+                        },
+                        "execute_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Uitvoeringsdatetime (alleen aanwezig voor eenmalige schema's)"
+                        },
+                        "expression_timezone": {
+                          "type": "string",
+                          "description": "Tijdzone voor het schema"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "Natuurlijke taaltekst gebruikt om cron-expressie te genereren"
+                        },
+                        "schedule_name": {
+                          "type": "string",
+                          "description": "Interne schedulenaam in EventBridge"
+                        },
+                        "schedule_group": {
+                          "type": "string",
+                          "description": "Naam van schemagroep"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 datetime wanneer het schema is aangemaakt"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 datum en tijd wanneer het schema voor het laatst is bijgewerkt"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ENABLED",
+                            "DELETED"
+                          ],
+                          "description": "Huidige status van het schema"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foutieve aanvraag vanwege ongeldig schedule_id-formaat. Schema-ID moet beginnen met 'schedule_'."
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel."
+          },
+          "404": {
+            "description": "Schema niet gevonden voor de opgegeven ID."
+          },
+          "500": {
+            "description": "Interne serverfout bij het ophalen van het schema."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Verwijder Schema",
+        "description": "Verwijdert een schema via zijn ID. Dit stopt alle toekomstige uitvoeringen en verwijdert het schema van EventBridge.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het te verwijderen schema. Moet beginnen met 'schedule_'.",
+            "schema": {
+              "type": "string",
+              "pattern": "^schedule_"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schema succesvol verwijderd.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Succesbericht"
+                    },
+                    "schedule_id": {
+                      "type": "string",
+                      "description": "De ID van het verwijderde schema"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foutieve aanvraag vanwege ongeldig schedule_id-formaat of schema al verwijderd. Schema-ID moet beginnen met 'schedule_'."
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel."
+          },
+          "404": {
+            "description": "Schema niet gevonden voor de opgegeven ID."
+          },
+          "500": {
+            "description": "Interne serverfout bij het verwijderen van het schema."
+          }
+        }
+      }
+    }
+  }
+}

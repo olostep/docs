@@ -1,0 +1,88 @@
+---
+title: "创建 AirOps 批次"
+description: "开始一个批次，自动提取页面元数据和品牌检测"
+openapi: "POST /v1/batches-airops"
+---
+
+## 概述
+
+创建一个新的 AirOps 批次，该批次将：
+1. 抓取所有提供的 URL
+2. 自动提取结构化元数据
+3. 识别缺少字段的项目
+4. 通过 LLM 丰富不完整的项目
+5. 返回所有 URL 的统一结果
+
+## 请求参数
+
+<ParamField body="items" type="array" required>
+  要处理的 URL 数组。每个项目需要：
+  - `url` - 有效的抓取 URL
+  - `custom_id` - 您的唯一标识符（1-255 个字符）
+</ParamField>
+
+<ParamField body="brands" type="array" default="[]">
+  要在页面内容中查找的品牌名称。LLM 将检测这些特定品牌的提及，并在 `brand_mentions` 字段中返回匹配结果。
+  
+  ```json
+  {
+    "brands": ["Acme Corp", "TechBrand", "SaaS Pro"]
+  }
+  ```
+</ParamField>
+
+<ParamField body="country" type="string" default="RANDOM">
+  用于地理定位抓取的国家。使用 ISO 3166-1 alpha-2 代码（`US`，`GB`，`DE`）或 `RANDOM`。
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  接收 webhook 通知的 URL。此批次的所有生命周期事件都将发送到此处。
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  附加到批次的自定义键值对。类似 Stripe：最多 50 个键，键 ≤40 个字符，值 ≤500 个字符。
+</ParamField>
+
+## 响应
+
+响应包括批次 ID 和初始工作流状态：
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch_airops",
+  "created": 1705315200000,
+  "total_urls": 100,
+  "status": {
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```

@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ファイル API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "ファイルアップロードの作成",
+        "description": "JSONファイルをアップロードするための事前署名付きURLを生成します。アップロード後、アップロードを完了するためにcompleteエンドポイントを呼び出す必要があります。アップロードURLは10分で期限切れになります。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "ファイルのファイル名。拡張子は.jsonで終わる必要があります。",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "ファイルの目的。サポートされている値: 'context' または 'batch'。デフォルトは 'context' です。",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "アップロードURLを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ファイルID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"file.upload\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "作成されたエポックタイムスタンプ"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "ファイルをアップロードするための事前署名付きURL。10分で期限切れになります。"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "アップロードURLが期限切れになるまでの秒数（600秒 = 10分）"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト。ファイル名がないか、無効なファイルタイプ（.jsonファイルのみサポート）。"
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      },
+      "get": {
+        "summary": "ファイル一覧",
+        "description": "チームのすべての完了したファイルを一覧表示します。目的でフィルタリングすることもできます。ステータスが 'completed' のファイルのみを返します。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "目的でファイルをフィルタリングします。サポートされている値: 'context' または 'batch'。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ファイルのリストを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"list\"。"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "ファイルID"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "オブジェクトの種類。このエンドポイントでは \"file\"。"
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "作成されたエポックタイムスタンプ"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "アップロードされたファイルのファイル名"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "ファイルサイズ（バイト単位）"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "ファイルの目的"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "ファイルのステータス。リストされたファイルの場合は常に 'completed'。"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "ファイルアップロードを完了する",
+        "description": "ファイルアップロードプロセスを完了し、アップロードされたJSONファイルを検証する。このエンドポイントはファイルの存在を確認し、JSON形式を検証し、ファイルサイズ（最大200MB）をチェックし、ファイルステータスをcompletedに更新する。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "完了するファイルのユニークな識別子。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ファイルのアップロードが正常に完了しました。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ファイルID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"file\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "作成されたエポックタイムスタンプ"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "アップロードされたファイルのファイル名"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "ファイルサイズ（バイト単位）"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "ファイルの目的"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "ファイルのステータス。正常に完了した後は 'completed' になる。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト。ファイルはすでに完了している、無効なステータス、ファイルが大きすぎる（最大200MB）、または無効なJSON形式。"
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "404": {
+            "description": "ファイルが見つからないか、S3にアップロードされていない"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "IDでファイルメタデータを取得",
+        "description": "ファイルのIDでメタデータを取得する。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "取得するファイルのユニークな識別子。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ファイルメタデータを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ファイルID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"file\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "作成されたエポックタイムスタンプ"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "アップロードされたファイルのファイル名"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "ファイルサイズ（バイト単位）"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "ファイルの目的"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "ファイルのステータス（例： 'pending', 'completed'）"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "404": {
+            "description": "ファイルが見つからない"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      },
+      "delete": {
+        "summary": "ファイルを削除",
+        "description": "ストレージからファイルとその関連データを削除する。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "削除するファイルのユニークな識別子。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ファイルが正常に削除されました。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ファイルID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"file\"。"
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "ファイルが正常に削除されたことを示します。"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "404": {
+            "description": "ファイルが見つからない"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "IDでファイルオブジェクトを取得",
+        "description": "完了したファイルの内容をダウンロードするための事前署名付きURLを取得します。ダウンロードURLの有効期限を`expires_in`クエリパラメータで指定することもできます（デフォルトは600秒/10分）。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "ダウンロードするファイルの一意の識別子。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "ダウンロードURLの有効期限までの秒数。デフォルトは600秒（10分）。",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ダウンロードURLを含む成功したレスポンス。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ファイルID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "オブジェクトの種類。このエンドポイントでは \"file\"。"
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "作成されたエポックタイムスタンプ"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "アップロードされたファイルのファイル名"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "ファイルサイズ（バイト単位）"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "ファイルをダウンロードするための事前署名付きURL。指定された`expires_in`時間後に期限切れになります。"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "ダウンロードURLの有効期限までの秒数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "不正なリクエスト。ファイルが完了していません。"
+          },
+          "401": {
+            "description": "無効なAPIキー"
+          },
+          "404": {
+            "description": "ファイルが見つからない"
+          },
+          "500": {
+            "description": "内部サーバーエラー"
+          }
+        }
+      }
+    }
+  }
+}

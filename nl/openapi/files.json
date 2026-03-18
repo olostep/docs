@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Bestanden API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer authenticatie header in de vorm Bearer <token>, waarbij <token> jouw auth token is."
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "Bestand Uploaden Aanmaken",
+        "description": "Genereer een vooraf ondertekende URL voor het uploaden van een JSON-bestand. Na het uploaden moet je de complete endpoint aanroepen om de upload te voltooien. De upload-URL verloopt na 10 minuten.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "De bestandsnaam voor het bestand. Moet eindigen met de .json-extensie.",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Het doel van het bestand. Ondersteunde waarden: 'context' of 'batch'. Standaard is 'context'.",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succesvolle reactie met upload-URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Bestand ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"file.upload\" voor deze endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Aangemaakte epoch-tijdstempel"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Vooraf ondertekende URL voor het uploaden van het bestand. Verloopt na 10 minuten."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Aantal seconden totdat de upload-URL verloopt (600 seconden = 10 minuten)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag. Ontbrekende bestandsnaam of ongeldig bestandstype (alleen .json-bestanden worden ondersteund)."
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel"
+          },
+          "500": {
+            "description": "Interne serverfout"
+          }
+        }
+      },
+      "get": {
+        "summary": "Bestanden Lijst",
+        "description": "Lijst van alle voltooide bestanden voor jouw team. Optioneel filteren op doel. Geeft alleen bestanden terug met status 'completed'.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "Filter bestanden op doel. Ondersteunde waarden: 'context' of 'batch'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle reactie met lijst van bestanden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"list\" voor deze endpoint."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Bestand ID"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "Het soort object. \"file\" voor deze endpoint."
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Aangemaakte epoch-tijdstempel"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "De bestandsnaam van het geüploade bestand"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "Bestandsgrootte in bytes"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "Het doel van het bestand"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Bestandsstatus. Altijd 'completed' voor vermelde bestanden."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel"
+          },
+          "500": {
+            "description": "Interne serverfout"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "Voltooi Bestandsupload",
+        "description": "Voltooi het uploadproces van het bestand en valideer het geüploade JSON-bestand. Deze endpoint controleert of het bestand bestaat, valideert het JSON-formaat, controleert de bestandsgrootte (max 200MB), en werkt de bestandsstatus bij naar completed.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het bestand om te voltooien.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bestandsupload succesvol voltooid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Bestand ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"file\" voor deze endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Aangemaakte epoch-tijdstempel"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "De bestandsnaam van het geüploade bestand"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Bestandsgrootte in bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Het doel van het bestand"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Bestandsstatus. Zal 'completed' zijn na succesvolle voltooiing."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag. Bestand al voltooid, ongeldige status, bestand te groot (max 200MB), of ongeldig JSON-formaat."
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel"
+          },
+          "404": {
+            "description": "Bestand niet gevonden of bestand niet geüpload naar S3"
+          },
+          "500": {
+            "description": "Interne serverfout"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "Verkrijg Bestandsmetadata op ID",
+        "description": "Haal metadata op voor een bestand via zijn ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het bestand om op te halen.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle reactie met bestandsmetadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Bestand ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"file\" voor deze endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Aangemaakte epoch-tijdstempel"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "De bestandsnaam van het geüploade bestand"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Bestandsgrootte in bytes"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Het doel van het bestand"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Bestandsstatus (bijv. 'pending', 'completed')"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel"
+          },
+          "404": {
+            "description": "Bestand niet gevonden"
+          },
+          "500": {
+            "description": "Interne serverfout"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Verwijder Bestand",
+        "description": "Verwijder een bestand en de bijbehorende gegevens uit de opslag.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het bestand om te verwijderen.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bestand succesvol verwijderd.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Bestand ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"file\" voor deze endpoint."
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "Geeft aan dat het bestand succesvol is verwijderd."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel"
+          },
+          "404": {
+            "description": "Bestand niet gevonden"
+          },
+          "500": {
+            "description": "Interne serverfout"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "Haal Bestandsobject op via ID",
+        "description": "Verkrijg een vooraf ondertekende URL om de inhoud van een \"completed\" bestand te downloaden. Optioneel kun je de vervaltijd voor de download-URL specificeren met de expires_in queryparameter (standaard is 600 seconden / 10 minuten).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Unieke identificatie voor het bestand om te downloaden.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Aantal seconden totdat de download-URL verloopt. Standaard is 600 seconden (10 minuten).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesvolle reactie met download-URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Bestand ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Het soort object. \"file\" voor deze endpoint."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Aangemaakte epoch-tijdstempel"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "De bestandsnaam van het geüploade bestand"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Bestandsgrootte in bytes"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Vooraf ondertekende URL voor het downloaden van het bestand. Verloopt na de gespecificeerde expires_in tijd."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Aantal seconden totdat de download-URL verloopt."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Foute aanvraag. Bestand niet \"completed\"."
+          },
+          "401": {
+            "description": "Ongeldige API-sleutel"
+          },
+          "404": {
+            "description": "Bestand niet gevonden"
+          },
+          "500": {
+            "description": "Interne serverfout"
+          }
+        }
+      }
+    }
+  }
+}

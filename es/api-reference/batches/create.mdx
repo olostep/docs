@@ -1,0 +1,17 @@
+---
+title: "Crear Lote"
+description: "Inicia un nuevo lote. Recibes un `id` que puedes usar para rastrear el progreso del lote como se muestra [aquí](/api-reference/batches/info). Nota: El tiempo de procesamiento es constante independientemente del tamaño del lote"
+openapi: "es/openapi/batches.json POST /v1/batches"
+---
+
+<Tip>
+**Recibe notificaciones al completar:** Pasa el parámetro `webhook` con la URL de tu endpoint para recibir un HTTP POST cuando el lote se complete. Consulta [Webhooks](/api-reference/common/webhooks) para más detalles.
+</Tip>
+
+<Tip>
+**Adjunta datos personalizados:** Usa el parámetro `metadata` para almacenar pares clave-valor. Se admite en dos niveles:
+- **Nivel de lote** — en el cuerpo de la solicitud
+- **Nivel de ítem** — en cada ítem en el array `items`
+
+Consulta [Metadata](/api-reference/common/metadata) para más detalles.
+</Tip>

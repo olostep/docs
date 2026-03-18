@@ -1,0 +1,59 @@
+---
+title: "Authentification"
+icon: "key"
+---
+
+Les points de terminaison de l'API nécessitent que tu t'authentifies en utilisant un jeton API.
+
+## Générer un jeton
+
+Le jeton peut être généré depuis le tableau de bord Olostep. Merci de créer un compte [ici](https://www.olostep.com/auth/).
+
+## Utiliser ton jeton
+
+Tu peux t'authentifier en ajoutant un en-tête `Authorization` à tous tes appels HTTP. L'en-tête Authorization est formaté comme suit : `Authorization: Bearer <API-TOKEN>` (remplace `<API-TOKEN>` par ton jeton. Si tu n'as pas de jeton, tu peux en générer un gratuitement depuis le [tableau de bord](https://www.olostep.com/dashboard/) Olostep).
+
+Exemples :
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+
+endpoint = 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>'
+headers = {
+    'Authorization': 'Bearer <API-TOKEN>',
+    'Accept': 'application/json'
+}
+
+response = requests.get(endpoint, headers=headers)
+print(response.status_code)
+print(response.json())
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+const endpoint = 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>'
+const res = await fetch(endpoint, {
+  headers: {
+    'Authorization': 'Bearer <API-TOKEN>',
+    'Accept': 'application/json'
+  }
+})
+console.log(res.status)
+console.log(await res.json())
+```
+
+```bash cURL
+curl -L -X GET 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>' \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer <API-TOKEN>'
+```
+
+</CodeGroup>

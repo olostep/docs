@@ -1,0 +1,88 @@
+---
+title: "Maak AirOps Batch"
+description: "Start een batch met geautomatiseerde paginametadata-extractie en merkindicatie"
+openapi: "POST /v1/batches-airops"
+---
+
+## Overzicht
+
+Creëert een nieuwe AirOps batch die:
+1. Alle opgegeven URL's scrapt
+2. Gestructureerde metadata automatisch extraheert
+3. Items met ontbrekende velden identificeert
+4. Onvolledige items verrijkt via LLM
+5. Geünificeerde resultaten voor alle URL's retourneert
+
+## Verzoekparameters
+
+<ParamField body="items" type="array" required>
+  Array van URL's om te verwerken. Elk item vereist:
+  - `url` - Geldige URL om te scrapen
+  - `custom_id` - Jouw unieke identificatie (1-255 tekens)
+</ParamField>
+
+<ParamField body="brands" type="array" default="[]">
+  Merknamen om naar te zoeken in de pagina-inhoud. De LLM zal vermeldingen van deze specifieke merken detecteren en overeenkomsten retourneren in het `brand_mentions` veld.
+  
+  ```json
+  {
+    "brands": ["Acme Corp", "TechBrand", "SaaS Pro"]
+  }
+  ```
+</ParamField>
+
+<ParamField body="country" type="string" default="RANDOM">
+  Land voor geo-gerichte scraping. Gebruik ISO 3166-1 alpha-2 codes (`US`, `GB`, `DE`) of `RANDOM`.
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  URL om webhookmeldingen te ontvangen. Alle levenscyclusgebeurtenissen voor deze batch worden hierheen gestuurd.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Aangepaste sleutel-waarde paren gekoppeld aan de batch. Stripe-stijl: max 50 sleutels, sleutel ≤40 tekens, waarde ≤500 tekens.
+</ParamField>
+
+## Antwoord
+
+Het antwoord bevat de batch-ID en de initiële workflowstatus:
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch_airops",
+  "created": 1705315200000,
+  "total_urls": 100,
+  "status": {
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```

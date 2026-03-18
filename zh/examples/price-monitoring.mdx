@@ -1,0 +1,226 @@
+---
+icon: "bell"
+sidebarTitle: "价格监控"
+title: "使用 Olostep 进行价格追踪"
+description: "学习如何使用 Olostep 在电商平台上大规模追踪产品价格。"
+---
+
+## 概述
+
+Olostep 提供了一个网页抓取 API，可以在电商平台上实时追踪数百万产品的价格，定期（例如每隔几个小时）进行更新，具有可扩展性且成本效益高。
+
+这对于希望监控价格波动、比较多个网站价格或追踪竞争对手定价策略的企业非常有用。
+
+在本指南中，我们将看到一个客户如何使用 Olostep 每天为数百万亚马逊产品设置自动价格追踪。
+
+## 为什么使用 Olostep 进行价格追踪？
+
+- **可扩展性：** 每隔几个小时追踪数百万产品的价格。
+- **自动化：** 设置定时抓取任务，在预定义时间/定期运行。
+- **多种格式：** 以 JSON、html 或 markdown 格式检索数据。
+- **自定义解析器：** 使用我们的解析器提取相关的 JSON 信息，或将您自己的解析器传递给 API。
+
+## 如何使用 Olostep 追踪价格
+
+### 过程设置概述
+
+在大规模追踪产品时，我们建议使用 Olostep 的 [Batches 端点](https://docs.olostep.com/api-reference/batches/create)。
+
+这个端点允许你发送多个 URL 批次（每批最多 10k 个）进行并行处理，然后在 5-8 分钟后检索结果。你可以同时发送多个批次，监控它们的进度，并在完成后检索结果。这样你可以在 15-20 分钟内处理数百万个 URL。
+
+使用 Olostep 进行价格追踪的整体流程如下：
+
+1. **从数据库读取产品并将要追踪的 URL 保存到 CSV 文件中。**
+2. **从 CSV 文件中读取数据并使用 Olostep 的批次端点启动一个批次。** 通过将数据分块发送到端点，每次最多 10,000 个 URL。
+3. **每 60 秒检查批次状态**以监控进度。
+4. **批次完成后，读取内容并在你的工作流程中使用。**
+
+你可以启动一个批次并返回页面的 html/markdown 内容，然后自行解析以提取所需数据。但我们建议使用解析器启动批次，以便返回仅包含所需解析数据的 JSON 对象。
+你可以将自己的解析器传递给 API，或使用我们为一些常见网站（例如亚马逊产品页面、谷歌搜索结果、LinkedIn 个人资料等）预构建的解析器之一。
+
+我们会将每个批次的数据存储 7 天，因此如果需要可以多次检索。
+
+### 第一步：从数据库导出产品数据
+
+第一步是从你的数据库中检索产品信息并以 CSV 格式保存。该文件应包含产品标识符、URL 以及任何用于追踪的附加元数据。
+
+### 第二步：使用 Olostep 启动批次
+
+要启动一个批次，从 CSV 中读取产品数据并将其发送到 Olostep 批次端点。这是通过带有 JSON 负载的 HTTP POST 请求完成的。
+
+每个批次最多可包含 10k 个 URL。对于大型数据集（>10,000 个 URL），拆分为多个批次并并行发送。
+
+一个批次由一组项目组成，每个项目代表一个要处理的产品 URL。以下是批次请求的结构
+
+```python
+import requests
+
+def start_batch(batch_array):
+    payload = {
+        "batch_array": batch_array,                 # 要处理的项目数组
+        "batch_country": "IT",                      # 批次的国家代码
+        "parser": "@olostep/amazon-it-product"      # 可选：指定自定义解析器以便仅获取所需的 JSON 数据
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()["id"]
+```
+
+#### 批次数组结构
+批次数组中的每个项目应遵循以下结构：
+<CodeGroup>
+    ```json filename="batch_item.json"
+    {
+        "custom_id": "unique_identifier",    // 必需：项目的唯一标识符
+        "url": "product_url",               // 必需：要处理的 URL
+        "wait_before_scraping": 0,         // 可选：在抓取批次中的每个 URL 之前的等待时间（以毫秒为单位）
+    }
+    ```
+</CodeGroup>
+参数
+<ResponseField name="batch_array" type="array" required>
+    要处理的项目数组。每批最多 10,000 个 URL。每个项目必须有一个唯一的 `custom_id`。
+</ResponseField>
+<ResponseField name="batch_country" type="string" required>
+    两字母国家代码（例如，意大利为 "IT"）。
+</ResponseField>
+<ResponseField name="parser" type="string">
+    要使用的自定义解析器名称（例如，"@olostep/amazon-it-product"）。请通过 info@olostep.com 联系我们以获取预构建解析器的访问权限或创建自己的解析器。
+</ResponseField>
+响应
+<CodeGroup>
+    ```json filename="response.json"
+    {
+        "id": "batch_54ikwskmt8"
+    }
+    ```
+</CodeGroup>
+端点返回一个包含 batch_id 的 JSON 对象，可用于监控状态然后检索结果。
+
+使用示例
+<CodeGroup>
+    ```python
+    # 准备批次数组
+    batch_array = [
+    {
+        "custom_id": "product_123",
+        "url": "https://www.amazon.it/dp/B0CHF6Z393/?coliid=INQXTGFQF4FM4&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    },
+    {
+        "custom_id": "product_124",
+        "url": "https://www.amazon.it/dp/B0CHMJL774/?coliid=I6CFYA5EHVHE2&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    }
+    ]
+
+    # 启动批次处理
+    batch_id = start_batch(batch_array)
+    print(f"Started batch: {batch_id}")
+    ```
+</CodeGroup>
+
+### 第三步：监控批次状态
+一旦批次启动，你需要监控其状态以确定何时处理完成。API 提供了一个状态端点，可以定期（例如每 60 秒）使用 batch_id 进行轮询
+
+<CodeGroup>
+    ```python filename="check_status.py"
+    import requests
+
+    def check_batch_status(batch_id):
+    headers = {"Authorization": "Bearer " + API_KEY}
+    response = requests.request(
+    "GET",
+    f"https://api.olostep.com/v1/batches/{batch_id}",
+    headers=headers
+    )
+    return response.json()["status"]
+    ```
+</CodeGroup>
+
+对于生产使用，建议实现异步监控以高效处理多个批次：
+<CodeGroup>
+    ```python
+    import asyncio
+
+    async def monitor_batch(batch_id: str) -> None:
+    """监控单个批次直到完成"""
+    while True:
+        status = check_batch_status(batch_id)
+        if status == "completed":
+            print(f"Batch {batch_id} completed!")
+            return
+        print(f"Batch {batch_id} still processing... Checking again in 60 seconds")
+        await asyncio.sleep(60)
+    ```
+</CodeGroup>
+
+### 第四步：检索已完成项目的 ID
+
+批次标记为完成后，你可以获取已完成项目的列表。每个项目都会有一个 retrieve_id。如果你想要实际内容，请通过传递 `retrieve_id` 使用 retrieve 端点
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    response = requests.get(f"https://api.olostep.com/v1/batches/{batch_id}/items", headers=headers)
+    return response.json()["items"]
+```
+这将返回每个发送的 URL 都有一个 `retrieve_id` 的已完成项目。然后你可以使用 retrieve 端点检索并存储每个 URL 的提取数据（html、markdown 或 JSON）。
+
+你可以使用以下代码获取批次中每个项目的 `retrieve_id`：
+
+```python
+items = get_completed_items("your_batch_id")
+for item in items:
+    print(f"""
+    URL: {item['url']}
+    Custom ID: {item['custom_id']}
+    Retrieve ID: {item['retrieve_id']}
+    ---
+    """)
+```
+
+### 第五步：检索每个项目的内容
+
+一旦你有了每个项目的 `retrieve_id`，你可以使用 retrieve 端点获取其内容（HTML、Markdown 或 JSON）：
+
+<CodeGroup>
+    ```python filename="retrieve_content.py"
+    def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(
+    url,
+    headers=headers,
+    params=params
+    )
+    return response.json()
+
+    # 示例用法
+    retrieve_id = "product_123"
+    content = retrieve_content(retrieve_id)
+
+    # 如果你想处理多个项目
+    def process_batch_content(batch_id):
+    items = get_completed_items(batch_id)
+    for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    # 根据需要处理或存储内容
+    ```
+</CodeGroup>
+
+## 结论
+
+通过遵循这些步骤，你可以使用 Olostep 设置一个自动化的价格追踪系统。不久我们将在 GitHub 上发布一个开源仓库，包含此示例的完整代码。

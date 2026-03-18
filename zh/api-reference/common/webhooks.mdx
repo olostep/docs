@@ -1,0 +1,387 @@
+---
+title: "Webhooks"
+description: "接收异步操作完成时的实时通知"
+icon: "webhook"
+---
+
+<Check>
+**我们正在积极扩展 webhook 支持。**
+
+刚刚推出：具有指数退避的自动重试——失败的传递现在将在 30 分钟内重试最多 5 次。
+
+**即将推出：**
+- 团队范围的默认 webhook URL
+- 用于有效载荷验证的加密签名
+
+想要提前访问？请通过 [info@olostep.com](mailto:info@olostep.com) 联系我们或加入我们的 [Slack 社区](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg)。
+</Check>
+
+## 概述
+
+Webhooks 在长时间运行的操作完成时向您的服务器发送实时 HTTP POST 通知。您的应用程序无需轮询状态，而是立即收到更新。
+
+### 使用场景
+
+<CardGroup cols={2}>
+  <Card title="异步处理" icon="clock">
+    在批处理或抓取完成时收到通知，而不是轮询
+  </Card>
+  <Card title="管道触发器" icon="diagram-project">
+    当数据准备好时自动触发下游处理
+  </Card>
+  <Card title="警报" icon="bell">
+    在完成时向 Slack、电子邮件或其他系统发送警报
+  </Card>
+  <Card title="数据同步" icon="arrows-rotate">
+    使您的数据库与 Olostep 结果保持同步
+  </Card>
+</CardGroup>
+
+## 支持的事件
+
+<AccordionGroup>
+  <Accordion title="batch.completed" icon="layer-group">
+    当批处理完成处理（所有项目完成或失败）时触发。
+    
+    ```json
+    {
+      "id": "event_a1b2c3d4e5f6g7h8",
+      "object": "event.batch.completed",
+      "timestamp": 1737570000000,
+      "delivery_attempt": "1/5",
+      "data": {
+        "id": "batch_xyz123",
+        "object": "batch",
+        "status": "completed",
+        "items_total": 100,
+        "items_completed": 98,
+        "items_failed": 2,
+        "created_at": "2024-01-15T10:00:00Z",
+        "completed_at": "2024-01-15T10:05:32Z"
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="crawl.completed" icon="spider-web">
+    当抓取完成且所有发现的页面都已处理时触发。
+    
+    ```json
+    {
+      "id": "event_x9y8z7w6v5u4t3s2",
+      "object": "event.crawl.completed",
+      "timestamp": 1737570000000,
+      "delivery_attempt": "1/5",
+      "data": {
+        "id": "crawl_abc789",
+        "object": "crawl",
+        "status": "completed",
+        "start_url": "https://example.com",
+        "urls_count": 87,
+        "max_pages": 100,
+        "max_depth": 3,
+        "actual_max_depth": 3,
+        "start_epoch": 1737569500000,
+        "start_date": "2024-01-15"
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 设置 Webhooks
+
+在创建资源时传递 `webhook`。此 URL 将接收完成通知。
+
+<Note>
+**参数名称：** 规范参数是 `webhook`。为了向后兼容，`webhook_url` 也被接受作为别名。
+</Note>
+
+<CodeGroup>
+
+```python Python
+import requests
+
+# 批处理示例
+response = requests.post(
+    "https://api.olostep.com/v1/batches",
+    headers={"Authorization": "Bearer <YOUR_API_KEY>"},
+    json={
+        "items": [
+            {"url": "https://example.com/page1", "custom_id": "1"},
+            {"url": "https://example.com/page2", "custom_id": "2"}
+        ],
+        "webhook": "https://your-server.com/webhooks/olostep"
+    }
+)
+
+# 抓取示例
+response = requests.post(
+    "https://api.olostep.com/v1/crawls",
+    headers={"Authorization": "Bearer <YOUR_API_KEY>"},
+    json={
+        "start_url": "https://example.com",
+        "max_pages": 50,
+        "webhook": "https://your-server.com/webhooks/olostep"
+    }
+)
+```
+
+```js Node
+// 批处理示例
+const batchResponse = await fetch('https://api.olostep.com/v1/batches', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    items: [
+      { url: 'https://example.com/page1', custom_id: "1" },
+      { url: 'https://example.com/page2', custom_id: "2" }
+    ],
+    webhook: 'https://your-server.com/webhooks/olostep'
+  })
+});
+
+// 抓取示例
+const crawlResponse = await fetch('https://api.olostep.com/v1/crawls', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    start_url: 'https://example.com',
+    max_pages: 50,
+    webhook: 'https://your-server.com/webhooks/olostep'
+  })
+});
+```
+
+```bash cURL
+# 批处理示例
+curl -X POST "https://api.olostep.com/v1/batches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      {"url": "https://example.com/page1", "custom_id": "1"},
+      {"url": "https://example.com/page2", "custom_id": "2"}
+    ],
+    "webhook": "https://your-server.com/webhooks/olostep"
+  }'
+
+# 抓取示例
+curl -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://example.com",
+    "max_pages": 50,
+    "webhook": "https://your-server.com/webhooks/olostep"
+  }'
+```
+
+</CodeGroup>
+
+---
+
+## Webhook 有效载荷
+
+所有 webhook 有效载荷遵循统一的信封结构：
+
+```json
+{
+  "id": "event_a1b2c3d4e5f6g7h8",
+  "object": "event.batch.completed",
+  "timestamp": 1737570000000,
+  "delivery_attempt": "1/5",
+  "data": {
+    "id": "batch_xyz123",
+    "object": "batch",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 98,
+    "items_failed": 2
+  }
+}
+```
+
+### 信封字段
+
+| 字段 | 描述 |
+|-------|-------------|
+| `id` | 事件 ID — **在所有重试尝试中相同** |
+| `object` | 事件类型（例如，`event.batch.completed`） |
+| `timestamp` | 此传递尝试发送的时间（epoch 毫秒） |
+| `delivery_attempt` | 当前尝试 / 最大尝试次数（例如，`1/5`，`3/5`） |
+| `data` | 实际资源数据（与 API 响应格式相同） |
+
+<Tip>
+使用 `id` 字段在接收器中去重 webhook 传递。相同的事件 ID 出现在所有重试尝试中。
+</Tip>
+
+---
+
+## 重试行为
+
+失败的 webhook 传递会在 30 分钟的窗口内自动重试，采用指数退避：
+
+| 尝试 | 尝试前的延迟 | 累计时间 |
+|---------|---------------------|-----------------|
+| 1 | 立即 | 0 分钟 |
+| 2 | ~2 分钟 | ~2 分钟 |
+| 3 | ~4 分钟 | ~6 分钟 |
+| 4 | ~7 分钟 | ~13 分钟 |
+| 5 | ~15 分钟 | ~28 分钟 |
+
+**总重试窗口：** 30 分钟  
+**每次请求超时：** 30 秒
+
+### 什么算作成功
+
+您的端点必须在 30 秒内返回 `2xx` 状态码。任何其他响应都会触发重试。
+
+| 响应 | 结果 |
+|----------|--------|
+| `200 OK` | ✅ 已传递 |
+| `201 Created` | ✅ 已传递 |
+| `301 Redirect` | ❌ 重试（我们不跟随重定向） |
+| `400 Bad Request` | ❌ 重试 |
+| `500 Server Error` | ❌ 重试 |
+| 超时（>30s） | ❌ 重试 |
+| 连接被拒绝 | ❌ 重试 |
+
+---
+
+## 最佳实践
+
+<AccordionGroup>
+  <Accordion title="快速响应，异步处理">
+    立即返回 `200 OK` 并异步处理 webhook。如果您的处理时间超过 30 秒，我们将重试——导致重复传递。
+    
+    ```python
+    from queue import Queue
+    import threading
+    
+    webhook_queue = Queue()
+    
+    @app.route('/webhooks/olostep', methods=['POST'])
+    def handle_webhook():
+        # 队列用于异步处理
+        webhook_queue.put(request.json)
+        
+        # 立即返回
+        return 'OK', 200
+    
+    def process_webhooks():
+        while True:
+            event = webhook_queue.get()
+            # 慢速处理在这里进行
+            process_event(event)
+    
+    threading.Thread(target=process_webhooks, daemon=True).start()
+    ```
+  </Accordion>
+  
+  <Accordion title="实现幂等处理程序">
+    使用 `id` 字段去重。存储已处理的事件 ID 并跳过重复项。
+    
+    ```python
+    processed_events = set()  # 在生产中使用 Redis/DB
+    
+    def handle_event(event):
+        if event['id'] in processed_events:
+            return  # 已处理
+        
+        # 处理事件
+        process_batch_completed(event['data'])
+        
+        # 标记为已处理
+        processed_events.add(event['id'])
+    ```
+  </Accordion>
+  
+  <Accordion title="记录 webhook 收据">
+    记录所有 webhook 收据以进行调试。包括事件 ID、时间戳和处理结果。
+    
+    ```python
+    import logging
+    
+    @app.route('/webhooks/olostep', methods=['POST'])
+    def handle_webhook():
+        event = request.json
+        logging.info(f"Webhook received: id={event['id']} type={event['object']} attempt={event['delivery_attempt']}")
+        
+        try:
+            process_event(event)
+            logging.info(f"Webhook processed: id={event['id']}")
+        except Exception as e:
+            logging.error(f"Webhook failed: id={event['id']} error={e}")
+            raise
+        
+        return 'OK', 200
+    ```
+  </Accordion>
+  
+  <Accordion title="使用 HTTPS 端点">
+    始终为 webhook 端点使用 HTTPS。HTTP 端点容易受到窃听和中间人攻击。
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 故障排除
+
+<AccordionGroup>
+  <Accordion title="未收到 webhooks">
+    1. 验证您的请求中是否包含 `webhook` 参数
+    2. 验证您的端点是否可公开访问（不是 localhost）
+    3. 检查您的服务器日志以查看传入请求
+    4. 确保您返回的是 `2xx` 状态码
+  </Accordion>
+  
+  <Accordion title="收到重复的 webhooks">
+    这是重试期间的预期行为。使用 `id` 字段实现幂等处理：
+    
+    ```python
+    def handle_event(event):
+        if already_processed(event['id']):
+            return  # 跳过重复项
+        
+        process_event(event)
+        mark_processed(event['id'])
+    ```
+  </Accordion>
+  
+  <Accordion title="webhooks 超时">
+    您的端点必须在 30 秒内响应。异步处理 webhooks：
+    
+    ```python
+    @app.route('/webhooks', methods=['POST'])
+    def webhook():
+        queue.enqueue(process_webhook, request.json)
+        return 'OK', 200  # 立即响应
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 即将推出
+
+<CardGroup cols={2}>
+  <Card title="团队默认 URL" icon="gear">
+    在您的账户设置中配置默认 webhook URL。所有请求将使用此 URL，除非被覆盖。
+  </Card>
+  <Card title="签名验证" icon="shield-check">
+    使用加密签名（HMAC-SHA256）验证 webhook 有效载荷来自 Olostep。
+  </Card>
+</CardGroup>
+
+<Note>
+想要提前访问这些功能？请通过 [info@olostep.com](mailto:info@olostep.com) 联系我们或加入我们的 [Slack 社区](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg)。
+</Note>

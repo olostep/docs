@@ -1,0 +1,17 @@
+---
+title: "Batch Aanmaken"
+description: "Start een nieuwe batch. Je ontvangt een `id` die je kunt gebruiken om de voortgang van de batch te volgen zoals getoond [hier](/api-reference/batches/info). Let op: De verwerkingstijd is constant, ongeacht de batchgrootte."
+openapi: "nl/openapi/batches.json POST /v1/batches"
+---
+
+<Tip>
+**Word op de hoogte gebracht bij voltooiing:** Geef de `webhook` parameter door met de URL van je eindpunt om een HTTP POST te ontvangen wanneer de batch voltooid is. Zie [Webhooks](/api-reference/common/webhooks) voor details.
+</Tip>
+
+<Tip>
+**Voeg aangepaste data toe:** Gebruik de `metadata` parameter om sleutel-waarde paren op te slaan. Ondersteund op twee niveaus:
+- **Batch-niveau** — in de request body
+- **Item-niveau** — op elk item in de `items` array
+
+Zie [Metadata](/api-reference/common/metadata) voor details.
+</Tip>

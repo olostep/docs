@@ -1,0 +1,116 @@
+---
+sidebarTitle: "Agentes"
+title: "API de Agentes"
+icon: "robot"
+---
+
+A través de la API de Agentes de Olostep puedes crear agentes de investigación autónomos que pueden automatizar flujos de datos y tareas de búsqueda en un horario y entregar resultados estructurados.
+
+- Investigación web en sitios con extracción automatizada
+- Flujos de trabajo de varios pasos con ejecución programada y notificaciones
+- Salida a JSON/CSV/Sheets/DB
+
+Para disponibilidad y detalles, contáctanos en [info@olostep.com](mailto:info@olostep.com) o [Contactar Ventas](https://www.olostep.com/contact-sales).
+
+## Instalación
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: el curl incorporado está bien
+```
+
+</CodeGroup>
+
+## Crear un agente
+
+Crea un agente con un prompt en lenguaje natural y un modelo objetivo.
+
+<CodeGroup>
+
+```python Python
+API_URL = 'https://api.olostep.com/v1/agents' # endpoint disponible para clientes seleccionados
+API_KEY = '<YOUR_API_KEY>'
+
+headers = {
+  'Authorization': f'Bearer {API_KEY}', 
+  'Content-Type': 'application/json'
+}
+
+data = {
+  "prompt": """
+    Encuentra compañías de portafolio desde https://www.vcsheet.com/funds y 
+    escribe en una Hoja de Google con columnas (Nombre del Fondo, URL del Sitio Web del Fondo, 
+    URL de LinkedIn del Fondo, Nombre de la Compañía del Portafolio, URL de la Compañía del Portafolio, 
+    URL de LinkedIn de la Compañía del Portafolio). Ejecutar semanalmente los lunes a las 9:00 AM 
+    y enviar un correo a steve@example.com cuando se agreguen nuevas compañías.
+  """,
+  "model": "gpt-4.1"
+}
+
+response = requests.post(API_URL, headers=headers, json=data)
+result = response.json()
+print(result)
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/agents', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    prompt: 'Encuentra compañías de portafolio desde https://www.vcsheet.com/funds y escribe en una Hoja de Google...',
+    model: 'gpt-4.1'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/agents" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Encuentra compañías de portafolio desde https://www.vcsheet.com/funds y escribe en una Hoja de Google...",
+    "model": "gpt-4.1"
+  }'
+```
+
+</CodeGroup>
+
+## Capacidades
+
+El agente de Olostep puede:
+
+- **Investigación Web**: Buscar y extraer datos automáticamente de sitios web
+- **Organización de Datos**: Estructurar información en hojas de cálculo, bases de datos u otros formatos
+- **Ejecución Programada**: Ejecutar tareas en un horario recurrente (diario, semanal, a una hora predefinida)
+- **Flujos de Trabajo de Varios Pasos**: Realizar tareas de investigación complejas y multipartes de manera autónoma
+- **Notificaciones**: Enviar alertas por correo electrónico cuando se encuentren nuevos datos o se completen tareas
+- **Salida Personalizada**: Devolver datos como CSV, JSON, Hoja de Google o directamente en tu base de datos
+
+## Acceso
+
+La API de Agentes está actualmente disponible para clientes seleccionados. Para obtener acceso:
+
+- Envíanos un correo a [info@olostep.com](mailto:info@olostep.com)
+- O [contacta a nuestro equipo de ventas](https://www.olostep.com/contact-sales)
+
+## Precios
+
+El precio de los agentes es variable. Se factura por resultado. El precio se negocia entre el cliente y el agente. Ponte en contacto con info@olostep.com para más detalles.

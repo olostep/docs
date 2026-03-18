@@ -1,0 +1,144 @@
+---
+title: "面向对象的 API"
+sidebarTitle: "面向对象的 API"
+description: "了解 Olostep API 对象如何协同工作"
+icon: "cube"
+---
+
+Olostep 的 API 是围绕对象设计的。理解这种设计有助于你构建更有效的集成。这个设计灵感来源于 [Stripe 的 API 哲学](https://docs.stripe.com/payments-api/tour#everything-is-an-object)。
+
+---
+
+## 一切皆对象
+
+在 Olostep 中，每个资源都是一个具有唯一标识符的对象。无论你是通过 API、SDK 还是仪表板创建它，你都会得到一个可以引用、更新和查询的对象。
+
+| 资源 | 对象 ID 格式 | 示例 |
+|------|--------------|------|
+| Scrape | `scrape_*` | `scrape_abc123` |
+| Batch | `batch_*` | `batch_xyz789` |
+| Crawl | `crawl_*` | `crawl_def456` |
+| Map | `map_*` | `map_ghi012` |
+| Answer | `answer_*` | `answer_jkl345` |
+| File | `file_*` | `file_mno678` |
+| Schedule | `schedule_*` | `schedule_pqr901` |
+
+---
+
+## 对象可以有生命周期
+
+一些 Olostep 对象通过 `status` 字段跟踪状态。这种状态机模式让你确切知道每个资源在其生命周期中的位置。
+
+### 批次
+
+批次有两个级别的状态：**批次**本身和单个**项目**。
+
+**批次状态：**
+
+```
+in_progress → completed
+```
+
+| 状态 | 描述 |
+|------|------|
+| `in_progress` | 正在抓取 URL |
+| `completed` | 处理完成 |
+
+<Note>
+**批次级别的失败极为罕见。** 批次几乎总是完成的——即使某些 URL 失败，批次本身也会达到 `completed` 状态。在极少数情况下，发生灾难性基础设施故障（例如，丰富期间 LLM 服务中断），批次可能会失败。这影响不到 0.01% 的批次。
+</Note>
+
+**项目状态：**
+
+批次中的每个 URL 都作为单个项目进行跟踪，并具有自己的状态：
+
+| 状态 | 描述 |
+|------|------|
+| `success` | URL 抓取成功 |
+| `failed` | URL 无法抓取 |
+
+项目可能因以下原因失败：
+- URL 被阻止或返回错误
+- 解析器输出缺失
+- 网络/获取错误
+
+失败的项目包含一个 `error` 对象，其中有解释失败的 `code` 和 `message`。批次仍然会完成——在处理结果时检查每个项目的状态。
+
+### 爬取
+
+```
+in_progress → completed
+```
+
+| 状态 | 描述 |
+|------|------|
+| `in_progress` | 正在主动发现和处理 URL |
+| `completed` | 爬取完成 |
+
+<Note>
+**爬取总是会完成。** 即使爬取发现 0 个 URL（由于 robots.txt 阻止或起始 URL 无效），爬取状态也将是 `completed`。检查 `pages_count` 字段以验证结果。
+</Note>
+
+---
+
+## 检索模式
+
+许多对象会生成可以稍后检索的内容。`retrieve_id` 模式让你可以在不重新处理的情况下获取内容。
+
+```bash
+# 使用 retrieve_id 获取内容
+curl "https://api.olostep.com/v1/retrieve?retrieve_id=6h89o8u1kt" \
+  -H "Authorization: Bearer <your_token>"
+```
+
+此模式用于：
+- **批次项目** — 每个处理的 URL 都会获得一个 `retrieve_id`
+- **爬取页面** — 每个爬取的页面都会获得一个 `retrieve_id`
+
+`/v1/retrieve` 端点接受 `formats` 参数以指定返回哪些内容类型（`html`、`markdown`、`json`、`text`）。
+
+---
+
+## Webhooks：事件驱动的更新
+
+与其轮询状态变化，不如配置 [webhooks](/api-reference/common/webhooks) 以在对象状态改变时接收事件。
+
+```json
+{
+  "event": "batch.completed",
+  "data": {
+    "id": "batch_xyz789",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 100
+  }
+}
+```
+
+---
+
+## 元数据：你的数据与我们的数据并存
+
+使用 [metadata](/api-reference/common/metadata) 将自定义键值对附加到对象。这让你可以将 Olostep 资源链接到你的内部系统。
+
+```json
+{
+  "items": [{"url": "https://example.com"}],
+  "metadata": {
+    "order_id": "12345",
+    "customer": "acme-corp"
+  }
+}
+```
+
+---
+
+## 总结
+
+| 概念 | 描述 |
+|------|------|
+| **对象** | 每个资源都有一个唯一 ID 并且可查询 |
+| **生命周期** | 通过 `status` 字段跟踪进度 |
+| **检索** | 使用 `retrieve_id` 稍后获取内容 |
+| **Webhooks** | 在状态变化时收到通知 |
+| **元数据** | 将你自己的数据附加到任何对象 |

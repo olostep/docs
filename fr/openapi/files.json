@@ -1,0 +1,482 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Fichiers",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "En-tête d'authentification Bearer sous la forme Bearer <token>, où <token> est ton jeton d'authentification."
+      }
+    }
+  },
+  "paths": {
+    "/v1/files": {
+      "post": {
+        "summary": "Créer un Téléchargement de Fichier",
+        "description": "Génère une URL pré-signée pour télécharger un fichier JSON. Après le téléchargement, tu dois appeler le point de terminaison complet pour finaliser le téléchargement. L'URL de téléchargement expire dans 10 minutes.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "Le nom du fichier. Doit se terminer par l'extension .json.",
+                    "pattern": "\\.json$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Le but du fichier. Valeurs supportées : 'context' ou 'batch'. Par défaut, 'context'.",
+                    "enum": [
+                      "context",
+                      "batch"
+                    ],
+                    "default": "context"
+                  }
+                },
+                "required": [
+                  "filename"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec URL de téléchargement.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du Fichier"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"file.upload\" pour ce point de terminaison."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Horodatage epoch créé"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL pré-signée pour télécharger le fichier. Expire dans 10 minutes."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Nombre de secondes avant l'expiration de l'URL de téléchargement (600 secondes = 10 minutes)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête. Nom de fichier manquant ou type de fichier invalide (seuls les fichiers .json sont supportés)."
+          },
+          "401": {
+            "description": "Clé API invalide"
+          },
+          "500": {
+            "description": "Erreur interne du serveur"
+          }
+        }
+      },
+      "get": {
+        "summary": "Lister les Fichiers",
+        "description": "Liste tous les fichiers complétés pour ton équipe. Filtre optionnellement par but. Retourne uniquement les fichiers avec le statut 'completed'.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context",
+                "batch"
+              ]
+            },
+            "description": "Filtrer les fichiers par but. Valeurs supportées : 'context' ou 'batch'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec liste de fichiers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"list\" pour ce point de terminaison."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "ID du Fichier"
+                          },
+                          "object": {
+                            "type": "string",
+                            "description": "Le type d'objet. \"file\" pour ce point de terminaison."
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Horodatage epoch créé"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "Le nom du fichier téléchargé"
+                          },
+                          "bytes": {
+                            "type": "integer",
+                            "description": "Taille du fichier en octets"
+                          },
+                          "purpose": {
+                            "type": "string",
+                            "description": "L'objectif du fichier"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Statut du fichier. Toujours 'completed' pour les fichiers listés."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clé API invalide"
+          },
+          "500": {
+            "description": "Erreur interne du serveur"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/complete": {
+      "post": {
+        "summary": "Terminer le téléchargement du fichier",
+        "description": "Termine le processus de téléchargement du fichier et valide le fichier JSON téléchargé. Ce point de terminaison vérifie que le fichier existe, valide son format JSON, vérifie la taille du fichier (max 200MB), et met à jour le statut du fichier à completed.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour le fichier à terminer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Téléchargement du fichier terminé avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du Fichier"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"file\" pour ce point de terminaison."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Horodatage epoch créé"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Le nom du fichier téléchargé"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Taille du fichier en octets"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "L'objectif du fichier"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Statut du fichier. Sera 'completed' après une complétion réussie."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête. Fichier déjà terminé, statut invalide, fichier trop grand (max 200MB), ou format JSON invalide."
+          },
+          "401": {
+            "description": "Clé API invalide"
+          },
+          "404": {
+            "description": "Fichier introuvable ou fichier non téléchargé sur S3"
+          },
+          "500": {
+            "description": "Erreur interne du serveur"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "summary": "Obtenir les métadonnées du fichier par ID",
+        "description": "Récupérer les métadonnées d'un fichier par son ID.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour le fichier à récupérer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec les métadonnées du fichier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du Fichier"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"file\" pour ce point de terminaison."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Horodatage epoch créé"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Le nom du fichier téléchargé"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Taille du fichier en octets"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "L'objectif du fichier"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Statut du fichier (par exemple, 'pending', 'completed')"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clé API invalide"
+          },
+          "404": {
+            "description": "Fichier introuvable"
+          },
+          "500": {
+            "description": "Erreur interne du serveur"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer le fichier",
+        "description": "Supprimer un fichier et ses données associées du stockage.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour le fichier à supprimer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fichier supprimé avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du Fichier"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"file\" pour ce point de terminaison."
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "description": "Indique que le fichier a été supprimé avec succès."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Clé API invalide"
+          },
+          "404": {
+            "description": "Fichier introuvable"
+          },
+          "500": {
+            "description": "Erreur interne du serveur"
+          }
+        }
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "Obtenir l'objet fichier par ID",
+        "description": "Obtiens une URL pré-signée pour télécharger le contenu d'un fichier \"completed\". Tu peux éventuellement spécifier le temps d'expiration pour l'URL de téléchargement en utilisant le paramètre de requête expires_in (par défaut à 600 secondes / 10 minutes).",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant unique pour le fichier à télécharger.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires_in",
+            "in": "query",
+            "required": false,
+            "description": "Nombre de secondes avant l'expiration de l'URL de téléchargement. Par défaut à 600 secondes (10 minutes).",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse réussie avec l'URL de téléchargement.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID du Fichier"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "Le type d'objet. \"file\" pour ce point de terminaison."
+                    },
+                    "created": {
+                      "type": "integer",
+                      "description": "Horodatage epoch créé"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Le nom du fichier téléchargé"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "description": "Taille du fichier en octets"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL pré-signée pour télécharger le fichier. Expire après le temps expires_in spécifié."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "Nombre de secondes avant l'expiration de l'URL de téléchargement."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mauvaise requête. Fichier non \"completed\"."
+          },
+          "401": {
+            "description": "Clé API invalide"
+          },
+          "404": {
+            "description": "Fichier introuvable"
+          },
+          "500": {
+            "description": "Erreur interne du serveur"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,144 @@
+---
+title: "Objectgeoriënteerde API"
+sidebarTitle: "Objectgeoriënteerde API"
+description: "Begrijpen hoe Olostep API-objecten samenwerken"
+icon: "cube"
+---
+
+De API van Olostep is ontworpen rond objecten. Dit ontwerp begrijpen helpt je om effectievere integraties te bouwen. Dit ontwerp is geïnspireerd door [Stripe's API-filosofie](https://docs.stripe.com/payments-api/tour#everything-is-an-object).
+
+---
+
+## Alles is een Object
+
+Elke bron in Olostep is een object met een unieke identificatie. Of je het nu creëert via de API, SDK of dashboard — je krijgt een object terug dat je kunt refereren, bijwerken en opvragen.
+
+| Bron | Object ID Formaat | Voorbeeld |
+|------|-------------------|-----------|
+| Scrape | `scrape_*` | `scrape_abc123` |
+| Batch | `batch_*` | `batch_xyz789` |
+| Crawl | `crawl_*` | `crawl_def456` |
+| Map | `map_*` | `map_ghi012` |
+| Answer | `answer_*` | `answer_jkl345` |
+| File | `file_*` | `file_mno678` |
+| Schedule | `schedule_*` | `schedule_pqr901` |
+
+---
+
+## Objecten Kunnen Levenscycli Hebben
+
+Sommige Olostep-objecten volgen de status via een `status` veld. Dit toestandsmachinepatroon laat je precies weten waar elke bron zich in zijn levenscyclus bevindt.
+
+### Batches
+
+Batches hebben twee niveaus van status: de **batch** zelf en individuele **items**.
+
+**Batch Status:**
+
+```
+in_progress → completed
+```
+
+| Status | Beschrijving |
+|--------|--------------|
+| `in_progress` | URL's worden gescraped |
+| `completed` | Verwerking voltooid |
+
+<Note>
+**Batch-niveau fouten zijn uiterst zeldzaam.** Batches worden bijna altijd voltooid — zelfs als sommige URL's falen, bereikt de batch zelf de `completed` status. In het zeldzame geval van een catastrofale infrastructuurfout (bijv. een LLM-service uitval tijdens verrijking), kan de batch falen. Dit treft minder dan 0,01% van de batches.
+</Note>
+
+**Item Status:**
+
+Elke URL in een batch wordt gevolgd als een individueel item met zijn eigen status:
+
+| Status | Beschrijving |
+|--------|--------------|
+| `success` | URL succesvol gescraped |
+| `failed` | URL kon niet worden gescraped |
+
+Items kunnen falen door:
+- URL is geblokkeerd of geeft een foutmelding
+- Parser output ontbreekt
+- Netwerk/fetch fouten
+
+Mislukte items bevatten een `error` object met `code` en `message` die de fout uitleggen. De batch wordt nog steeds voltooid — controleer de status van elk item bij het verwerken van resultaten.
+
+### Crawls
+
+```
+in_progress → completed
+```
+
+| Status | Beschrijving |
+|--------|--------------|
+| `in_progress` | Actief URL's ontdekken en verwerken |
+| `completed` | Crawlen voltooid |
+
+<Note>
+**Crawls worden altijd voltooid.** Zelfs als een crawl 0 URL's vindt (door robots.txt blokkering of een ongeldige start-URL), zal de crawl status `completed` zijn. Controleer het `pages_count` veld om resultaten te verifiëren.
+</Note>
+
+---
+
+## Ophalen Patroon
+
+Veel objecten produceren inhoud die later kan worden opgehaald. Het `retrieve_id` patroon laat je inhoud ophalen zonder opnieuw te verwerken.
+
+```bash
+# Haal inhoud op met retrieve_id
+curl "https://api.olostep.com/v1/retrieve?retrieve_id=6h89o8u1kt" \
+  -H "Authorization: Bearer <your_token>"
+```
+
+Dit patroon wordt gebruikt door:
+- **Batch items** — Elke verwerkte URL krijgt een `retrieve_id`
+- **Crawl pagina's** — Elke gecrawlde pagina krijgt een `retrieve_id`
+
+De `/v1/retrieve` endpoint accepteert de `formats` parameter om te specificeren welke inhoudstypen terug te geven (`html`, `markdown`, `json`, `text`).
+
+---
+
+## Webhooks: Event-Driven Updates
+
+In plaats van te polleren voor statuswijzigingen, configureer je [webhooks](/api-reference/common/webhooks) om evenementen te ontvangen wanneer objecten van status veranderen.
+
+```json
+{
+  "event": "batch.completed",
+  "data": {
+    "id": "batch_xyz789",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 100
+  }
+}
+```
+
+---
+
+## Metadata: Jouw Data Naast de Onze
+
+Voeg aangepaste sleutel-waarde paren toe aan objecten met behulp van [metadata](/api-reference/common/metadata). Dit stelt je in staat om Olostep bronnen te koppelen aan je interne systemen.
+
+```json
+{
+  "items": [{"url": "https://example.com"}],
+  "metadata": {
+    "order_id": "12345",
+    "customer": "acme-corp"
+  }
+}
+```
+
+---
+
+## Samenvatting
+
+| Concept | Beschrijving |
+|---------|--------------|
+| **Objecten** | Elke bron heeft een unieke ID en is opvraagbaar |
+| **Levenscycli** | Volg de voortgang via het `status` veld |
+| **Ophalen** | Haal later inhoud op met `retrieve_id` |
+| **Webhooks** | Ontvang meldingen bij statuswijzigingen |
+| **Metadata** | Voeg je eigen data toe aan elk object |

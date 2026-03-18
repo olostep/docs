@@ -1,0 +1,1178 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "批处理 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "paths": {
+    "/v1/test-batch": {
+      "post": {
+        "summary": "测试批处理",
+        "description": "测试批处理",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "custom_id": {
+                          "type": "string",
+                          "description": "URL 的内部唯一标识符。"
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "项目的 URL。"
+                        }
+                      },
+                      "required": [
+                        "custom_id",
+                        "url"
+                      ]
+                    },
+                    "description": "要在批处理中处理的项目数组。"
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "批处理启动成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "批处理 ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/recent": {
+      "get": {
+        "summary": "列出最近的批处理",
+        "description": "获取经过身份验证用户的最近批处理列表。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 100
+            },
+            "description": "返回的最大批处理数量（默认 50，最大 100）。"
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "按来源过滤（可选）。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应，包含最近批处理的列表。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "list"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "object": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created": {
+                            "type": "number"
+                          },
+                          "total_urls": {
+                            "type": "number"
+                          },
+                          "completed_urls": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "身份验证凭据缺失或无效。详情请参见 [Unauthorized](/api-reference/errors/unauthorized)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "未授权",
+                  "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "内部服务器错误。详情请参见 [Internal Error](/api-reference/errors/internal_error)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "内部服务器错误",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches": {
+      "post": {
+        "summary": "启动新批处理",
+        "description": "使用指定的参数启动新的批处理过程。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "custom_id": {
+                          "type": "string",
+                          "description": "URL 的内部唯一标识符。"
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "项目的 URL。"
+                        },
+                        "metadata": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/Metadata"
+                            }
+                          ],
+                          "description": "项目级元数据。为单个项目附加键值对，以便跟踪、过滤或与内部系统关联。"
+                        }
+                      },
+                      "required": [
+                        "custom_id",
+                        "url"
+                      ]
+                    },
+                    "description": "要在批处理中处理的项目数组。"
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "批处理执行的国家。请使用 ISO 3166-1 alpha-2 代码，如 US（美国）、IN（印度）等。"
+                  },
+                  "parser": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "用于批处理的解析器。"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "description": "你可以使用这个参数来指定要使用的解析器。解析器对于从网页中提取结构化内容非常有用。Olostep 内置了一些常见网页的解析器，你也可以创建自己的解析器。"
+                  },
+                  "links_on_page": {
+                    "type": "object",
+                    "properties": {
+                      "absolute_links": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "当为 true 时，它返回完整的 URL（例如，'https://example.com/page'），而不是相对路径（例如，'/page'）。"
+                      },
+                      "include_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "使用 glob 模式过滤提取的链接。"
+                      },
+                      "exclude_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "使用 glob 模式过滤提取的链接。"
+                      }
+                    },
+                    "description": "获取批处理中每个页面上存在的所有链接。"
+                  },
+                  "metadata": {
+                    "$ref": "#/components/schemas/Metadata"
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "当批处理完成时接收 POST 请求的 HTTPS URL。必须是使用 `http://` 或 `https://` 协议的公开可访问的 URL。不能指向 localhost 或私有 IP 地址。有关负载格式和重试行为，请参阅 [Webhooks](/api-reference/common/webhooks)。"
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              },
+              "example": {
+                "items": [
+                  {
+                    "custom_id": "product-123",
+                    "url": "https://example.com/product/123",
+                    "metadata": {
+                      "source": "catalog_sync",
+                      "priority": "high"
+                    }
+                  },
+                  {
+                    "custom_id": "product-456",
+                    "url": "https://example.com/product/456"
+                  }
+                ],
+                "country": "US",
+                "metadata": {
+                  "batch_name": "Q1 Product Sync",
+                  "initiated_by": "automation"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "批处理启动成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "批处理 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象的类型。此端点为 \"batch\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` 或 `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "创建的纪元时间"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "批处理中 URL 的数量"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "已完成的 URL 数量"
+                    },
+                    "parser": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    },
+                    "webhook": {
+                      "type": "string",
+                      "description": "用于接收完成通知的 Webhook URL"
+                    }
+                  }
+                },
+                "example": {
+                  "id": "batch_abc123def456",
+                  "object": "batch",
+                  "status": "in_progress",
+                  "created": 1704067200,
+                  "total_urls": 2,
+                  "completed_urls": 0,
+                  "country": "US",
+                  "metadata": {
+                    "batch_name": "Q1 Product Sync",
+                    "initiated_by": "automation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数不正确或缺失导致的错误请求。详情请参阅 [Bad Request](/api-reference/errors/bad_request)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "错误请求",
+                  "detail": "The 'items' array is required and must contain at least one item.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "身份验证凭据缺失或无效。详情请参见 [Unauthorized](/api-reference/errors/unauthorized)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "未授权",
+                  "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "需要付款 - 额度已用完。详情请参阅 [Payment Required](/api-reference/errors/payment_required)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "credits_exhausted",
+                  "type": "https://docs.olostep.com/api-reference/errors/payment_required",
+                  "status": 402,
+                  "title": "需要付款",
+                  "detail": "You have consumed all available credits. Please upgrade your plan from the dashboard: https://www.olostep.com/auth/",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "禁止 - 拒绝访问此功能。详情请参阅 [Forbidden](/api-reference/errors/forbidden)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "access_denied",
+                  "type": "https://docs.olostep.com/api-reference/errors/forbidden",
+                  "status": 403,
+                  "title": "禁止",
+                  "detail": "You don't have access to this feature. Please reach out to info@olostep.com to get approved",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "幂等性冲突 - 带有此键的请求正在进行中。详情请参阅 [Idempotency Error](/api-reference/errors/idempotency_error)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "idempotency_key_in_progress",
+                  "type": "https://docs.olostep.com/api-reference/errors/idempotency_error",
+                  "status": 409,
+                  "title": "幂等性错误",
+                  "detail": "A request with this idempotency key is currently being processed. Please wait and retry.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "无法处理的实体 - 违反业务规则。详情请参见 [Unprocessable Entity](/api-reference/errors/unprocessable_entity)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "idempotency_key_reuse",
+                  "type": "https://docs.olostep.com/api-reference/errors/unprocessable_entity",
+                  "status": 422,
+                  "title": "无法处理的实体",
+                  "detail": "A request with this idempotency key was already made with different parameters. Idempotency keys must be unique per request.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "内部服务器错误。详情请参见 [Internal Error](/api-reference/errors/internal_error)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "内部服务器错误",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}": {
+      "get": {
+        "summary": "获取批次信息",
+        "description": "使用 `batch_id` 获取特定批次的信息。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "要获取信息的批次ID。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应批次信息。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "批处理 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象的类型。此端点为 \"batch\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` 或 `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "创建的纪元时间"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "批处理中 URL 的数量"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "已完成的 URL 数量"
+                    },
+                    "parser": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    },
+                    "webhook": {
+                      "type": "string",
+                      "description": "用于接收完成通知的 Webhook URL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "身份验证凭据缺失或无效。详情请参见 [Unauthorized](/api-reference/errors/unauthorized)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "未授权",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "提供的ID未找到批次。详情请参见 [Not Found](/api-reference/errors/not_found)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "未找到",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "内部服务器错误。详情请参见 [Internal Error](/api-reference/errors/internal_error)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "内部服务器错误",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "更新批次元数据",
+        "description": "更新特定批次的元数据。只有 `metadata` 字段可以更新。遵循Stripe的合并语义：新键被添加，现有键被更新，设置为空字符串的键被删除。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "要更新的批次ID。"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "$ref": "#/components/schemas/Metadata"
+                  }
+                },
+                "required": [
+                  "metadata"
+                ]
+              },
+              "example": {
+                "metadata": {
+                  "status": "reviewed",
+                  "reviewer": "jane@example.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "批次元数据更新成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "批处理 ID"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "对象的类型。此端点为 \"batch\"。"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` 或 `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "创建的纪元时间"
+                    },
+                    "total_urls": {
+                      "type": "number",
+                      "description": "批处理中 URL 的数量"
+                    },
+                    "completed_urls": {
+                      "type": "number",
+                      "description": "已完成的 URL 数量"
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/Metadata"
+                    }
+                  }
+                },
+                "example": {
+                  "id": "batch_abc123def456",
+                  "object": "batch",
+                  "status": "completed",
+                  "created": 1704067200,
+                  "total_urls": 10,
+                  "completed_urls": 10,
+                  "metadata": {
+                    "batch_name": "Q1 Product Sync",
+                    "status": "reviewed",
+                    "reviewer": "jane@example.com"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求 - 缺少或无效的元数据。详情请参见 [Bad Request](/api-reference/errors/bad_request)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_metadata",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "错误请求",
+                  "detail": "No metadata field provided. Only metadata can be updated.",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "身份验证凭据缺失或无效。详情请参见 [Unauthorized](/api-reference/errors/unauthorized)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "未授权",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "提供的ID未找到批次。详情请参见 [Not Found](/api-reference/errors/not_found)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "未找到",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "内部服务器错误。详情请参见 [Internal Error](/api-reference/errors/internal_error)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "内部服务器错误",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}/items": {
+      "get": {
+        "summary": "获取特定批次的已完成或失败项目列表，可选择包含内容",
+        "description": "根据请求的状态获取特定批次ID的项目和内容列表。",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "要获取项目的批次ID。"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            },
+            "description": "要检索的URL状态（已完成或失败）。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "分页游标。第一次请求时省略此参数。对于后续请求，使用上一个响应中的 `cursor` 值。详情请参见 [Pagination](/api-reference/common/pagination)。"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "要返回的结果数量（推荐10-50）。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应批次项目。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "batch_id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "custom_id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "metadata": {
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/Metadata"
+                              }
+                            ],
+                            "description": "如果在批量创建时提供了项目级元数据。"
+                          },
+                          "links_on_page": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "items_count": {
+                      "type": "integer"
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "分页游标。当有更多结果可用时出现。在下一个请求的 `cursor` 参数中使用此值。详情请参见 [分页](/api-reference/common/pagination)。"
+                    }
+                  }
+                },
+                "example": {
+                  "batch_id": "batch_abc123def456",
+                  "object": "list",
+                  "status": "completed",
+                  "items": [
+                    {
+                      "custom_id": "product-123",
+                      "retrieve_id": "ret_xyz789",
+                      "url": "https://example.com/product/123",
+                      "metadata": {
+                        "source": "catalog_sync",
+                        "priority": "high"
+                      }
+                    },
+                    {
+                      "custom_id": "product-456",
+                      "retrieve_id": "ret_abc456",
+                      "url": "https://example.com/product/456"
+                    }
+                  ],
+                  "items_count": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "由于参数错误导致的错误请求。详情请参见 [错误请求](/api-reference/errors/bad_request)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "错误请求",
+                  "detail": "Status must be either 'completed' or 'failed'",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "身份验证凭据缺失或无效。详情请参见 [Unauthorized](/api-reference/errors/unauthorized)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "invalid_api_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "未授权",
+                  "detail": "Your API key is invalid",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "提供的ID未找到批次。详情请参见 [Not Found](/api-reference/errors/not_found)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "batch_not_found",
+                  "type": "https://docs.olostep.com/api-reference/errors/not_found",
+                  "status": 404,
+                  "title": "未找到",
+                  "detail": "Batch not found",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "内部服务器错误。详情请参见 [Internal Error](/api-reference/errors/internal_error)。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "id": "error_abc123",
+                  "object": "error",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/internal_error",
+                  "status": 500,
+                  "title": "内部服务器错误",
+                  "detail": "An unexpected error occurred",
+                  "created": 1704067200,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer 认证头的格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "RFC 7807 问题详情错误响应",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "唯一错误标识符"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "error"
+            ],
+            "description": "始终为 'error'"
+          },
+          "code": {
+            "type": "string",
+            "description": "机器可读的错误代码"
+          },
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "标识问题类型的 URI 引用"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP 状态码"
+          },
+          "title": {
+            "type": "string",
+            "description": "简短的、可读的摘要"
+          },
+          "detail": {
+            "type": "string",
+            "description": "可读的解释"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix 时间戳"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "errors": {
+            "type": "array",
+            "description": "可选的附加错误详情数组",
+            "items": {}
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "code",
+          "type",
+          "status",
+          "title",
+          "detail",
+          "created"
+        ]
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "用于存储对象附加信息的键值对集合。遵循 Stripe 的验证规则：最多 50 个键，键最多 40 个字符（不含方括号），值最多 500 个字符，所有值以字符串形式存储。",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "元数据值（最多 500 个字符）。数字和布尔值会自动转换为字符串。"
+        },
+        "maxProperties": 50,
+        "example": {
+          "order_id": "12345",
+          "customer_name": "John Doe",
+          "priority": "high",
+          "processed": "true"
+        },
+        "x-validation-rules": {
+          "max_keys": 50,
+          "key_max_length": 40,
+          "key_forbidden_chars": [
+            "[",
+            "]"
+          ],
+          "value_max_length": 500,
+          "value_types": [
+            "string",
+            "number (coerced)",
+            "boolean (coerced)"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+---
+title: "Autenticazione"
+icon: "key"
+---
+
+Gli endpoint API richiedono che tu ti autentichi utilizzando un token API.
+
+## Genera un token
+
+Il token può essere generato dalla dashboard di Olostep. Per favore crea un account [qui](https://www.olostep.com/auth/).
+
+## Usa il tuo token
+
+Puoi autenticarti aggiungendo un'intestazione `Authorization` a tutte le tue chiamate HTTP. L'intestazione Authorization è formattata come segue: `Authorization: Bearer <API-TOKEN>` (sostituisci `<API-TOKEN>` con il tuo token. Se non hai un token, puoi generarne uno gratuitamente dalla [dashboard](https://www.olostep.com/dashboard/) di Olostep).
+
+Esempi:
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+
+endpoint = 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>'
+headers = {
+    'Authorization': 'Bearer <API-TOKEN>',
+    'Accept': 'application/json'
+}
+
+response = requests.get(endpoint, headers=headers)
+print(response.status_code)
+print(response.json())
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+const endpoint = 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>'
+const res = await fetch(endpoint, {
+  headers: {
+    'Authorization': 'Bearer <API-TOKEN>',
+    'Accept': 'application/json'
+  }
+})
+console.log(res.status)
+console.log(await res.json())
+```
+
+```bash cURL
+curl -L -X GET 'https://api.olostep.com/v1/scrapes/<SCRAPE_ID>' \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer <API-TOKEN>'
+```
+
+</CodeGroup>

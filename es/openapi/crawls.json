@@ -1,0 +1,486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Rastreo",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Encabezado de autenticación Bearer del formato Bearer <token>, donde <token> es tu token de autenticación."
+      }
+    }
+  },
+  "paths": {
+    "/v1/crawls": {
+      "post": {
+        "summary": "Iniciar un nuevo rastreo",
+        "description": "Inicia un nuevo proceso de rastreo con los parámetros especificados.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_url": {
+                    "type": "string",
+                    "description": "El punto de inicio del rastreo."
+                  },
+                  "include_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Patrones de ruta URL para incluir en el rastreo usando la sintaxis glob.  Por defecto es `/**` que incluye todas las URLs. Usa patrones como `/blog/**` para rastrear secciones específicas (por ejemplo, solo páginas de blog), `/products/*.html` para páginas de productos, o múltiples patrones para diferentes secciones. Soporta características estándar de glob como * (cualquier carácter) y ** (coincidencia recursiva)."
+                  },
+                  "exclude_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Nombres de ruta URL en patrón glob para excluir. Por ejemplo: `/careers/**`. Las URLs excluidas tendrán prioridad sobre las incluidas."
+                  },
+                  "max_pages": {
+                    "type": "number",
+                    "description": "Número máximo de páginas a rastrear. Recomendado para la mayoría de los casos de uso como rastrear un sitio web completo."
+                  },
+                  "max_depth": {
+                    "type": "number",
+                    "description": "Profundidad máxima del rastreo. Útil para extraer solo hasta n-grado de enlaces."
+                  },
+                  "include_external": {
+                    "type": "boolean",
+                    "description": "Rastrear enlaces externos de primer grado."
+                  },
+                  "include_subdomain": {
+                    "type": "boolean",
+                    "description": "Incluir subdominios del sitio web. `false` por defecto."
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "description": "Una consulta de búsqueda opcional para encontrar enlaces específicos y también ordenar los resultados por relevancia."
+                  },
+                  "top_n": {
+                    "type": "number",
+                    "description": "Un número opcional para rastrear solo los N enlaces más relevantes en cada página según la consulta de búsqueda."
+                  },
+                  "webhook": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL HTTPS para recibir una solicitud POST cuando el rastreo se complete. Debe ser una URL públicamente accesible usando el protocolo `http://` o `https://`. No puede apuntar a localhost o direcciones IP privadas. Ver [Webhooks](/api-reference/common/webhooks) para el formato de carga útil y comportamiento de reintento."
+                  },
+                  "timeout": {
+                    "type": "number",
+                    "description": "Terminar el rastreo después de n segundos con las páginas completadas hasta entonces. Puede tomar ~10s extra del tiempo de espera proporcionado."
+                  },
+                  "follow_robots_txt": {
+                    "type": "boolean",
+                    "description": "Si se deben respetar las reglas de robots.txt. Si se establece en `false`, el rastreador raspará el sitio web independientemente de las directivas de desautorización de robots.txt. `true` por defecto.",
+                    "default": true
+                  },
+                  "scrape_options": {
+                    "type": "object",
+                    "description": "Controla lo que cada solicitud de raspado de página individual pide al API de Olostep. Todos los campos son opcionales.",
+                    "properties": {
+                      "formats": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "html",
+                            "markdown",
+                            "text",
+                            "json",
+                            "screenshot"
+                          ]
+                        },
+                        "description": "Formatos de salida a solicitar para cada página raspada. Por defecto es `[\"html\", \"markdown\"]` cuando se omite. `html` siempre se incluye automáticamente. `json` se agrega automáticamente cuando se proporciona un `parser`. Nota: `raw_pdf` no es compatible — los PDFs no pueden ser rastreados.",
+                        "example": [
+                          "markdown",
+                          "screenshot"
+                        ]
+                      },
+                      "parser": {
+                        "type": "string",
+                        "description": "Nombre del parser para ejecutar en cada página y producir salida `json` estructurada (por ejemplo, `\"@olostep/extract-emails\"`). Agrega automáticamente `json` a `formats` cuando se establece.",
+                        "example": "@olostep/extract-emails"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "start_url",
+                  "max_pages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rastreo iniciado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Rastreo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"crawl\" para este endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` o `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Tiempo de creación en epoch"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Tiempo de creación en fecha"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "La profundidad actual del proceso de rastreo."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Conteo de páginas rastreadas"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a parámetros incorrectos o faltantes."
+          },
+          "500": {
+            "description": "Error interno del servidor."
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}": {
+      "get": {
+        "summary": "Recuperar información del rastreo",
+        "description": "Obtiene información sobre un rastreo específico usando su `crawl_id`.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "El ID del rastreo para recuperar información."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con información del rastreo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID del Rastreo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"crawl\" para este endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` o `completed`"
+                    },
+                    "created": {
+                      "type": "number",
+                      "description": "Tiempo de creación en epoch"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Tiempo de creación en fecha"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "max_pages": {
+                      "type": "number"
+                    },
+                    "max_depth": {
+                      "type": "number"
+                    },
+                    "exclude_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "include_external": {
+                      "type": "boolean"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "top_n": {
+                      "type": "number"
+                    },
+                    "current_depth": {
+                      "type": "number",
+                      "description": "La profundidad actual del proceso de rastreo."
+                    },
+                    "pages_count": {
+                      "type": "number",
+                      "description": "Conteo de páginas rastreadas"
+                    },
+                    "webhook": {
+                      "type": "string"
+                    },
+                    "follow_robots_txt": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a parámetros incorrectos o faltantes."
+          },
+          "404": {
+            "description": "Rastreo no encontrado para el ID proporcionado."
+          },
+          "500": {
+            "description": "Error interno del servidor."
+          }
+        }
+      }
+    },
+    "/v1/crawls/{crawl_id}/pages": {
+      "get": {
+        "summary": "Recuperar lista de páginas rastreadas opcionalmente con contenido",
+        "description": "Obtiene la lista de páginas rastreadas y contenido que han sido procesados para un ID de rastreo específico.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "crawl_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "El ID del rastreo para recuperar la lista de URLs."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Entero opcional que representa el índice para comenzar a obtener contenido. Útil para paginar hasta que se obtengan todas las URLs. Comienza con 0, luego proporciona el valor de `response['cursor']` de la última solicitud."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Entero opcional para limitar el número de resultados devueltos. Se recomienda de 10 a 50 resultados a la vez. Paginado usando *cursor*. Máximo 10MB de contenido puede ser obtenido en una sola solicitud."
+          },
+          {
+            "name": "search_query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Una consulta de búsqueda opcional para ordenar los resultados por relevancia. Usa la `search_query` original por defecto si se proporciona."
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "markdown"
+                ]
+              }
+            },
+            "description": "**Obsoleto:** Usa el endpoint `/retrieve` con `retrieve_id`.  Array de formatos para obtener (e.g., [\"html\", \"markdown\"])."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa con la lista de URLs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "crawl_id": {
+                      "type": "string",
+                      "description": "ID del Rastreo"
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "El tipo de objeto. \"crawl\" para este endpoint."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "`in_progress` o `completed`"
+                    },
+                    "search_query": {
+                      "type": "string"
+                    },
+                    "pages_count": {
+                      "type": "number"
+                    },
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "retrieve_id": {
+                            "type": "string",
+                            "description": "Para obtener contenido del endpoint `/retrieve`"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "is_external": {
+                            "type": "boolean"
+                          },
+                          "html_content": {
+                            "type": "string",
+                            "description": "Obsoleto: Usa el endpoint `/retrieve` con `retrieve_id`."
+                          },
+                          "markdown_content": {
+                            "type": "string",
+                            "description": "Obsoleto: Usa el endpoint `/retrieve` con `retrieve_id`."
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "external_urls": {
+                          "type": "array",
+                          "description": "URLs externas que se encontraron durante el rastreo",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "failed_urls": {
+                          "type": "array",
+                          "description": "URLs que se encontraron pero no se pudieron extraer",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": "integer",
+                      "description": "Para pasar en la consulta en la próxima solicitud para obtener los siguientes elementos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta debido a parámetros incorrectos o faltantes."
+          },
+          "404": {
+            "description": "Rastreo no encontrado para el ID proporcionado."
+          },
+          "500": {
+            "description": "Error interno del servidor."
+          }
+        }
+      }
+    }
+  }
+}

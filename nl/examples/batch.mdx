@@ -1,0 +1,167 @@
+---
+icon: "lines-leaning"
+sidebarTitle: "Batch Scraping"
+title: "Haal de inhoud van meerdere websites in één keer op"
+description: "Start een batch scrape om inhoud van maximaal 100k URL’s in 5-7 minuten te extraheren"
+---
+
+## Overzicht
+
+De [Batches](https://docs.olostep.com/api-reference/batches/create) endpoint van Olostep stelt je in staat om een batch van maximaal 10.000 URL's te starten en de inhoud binnen 5–7 minuten terug te krijgen. Je kunt tot 10 batches tegelijk starten om inhoud van 100.000 URL's in één keer te extraheren. Als je meer schaal nodig hebt, neem dan contact met ons op.
+
+Dit is handig als je al de URL's hebt die je wilt verwerken — bijvoorbeeld om data te aggregeren voor analyse, een gespecialiseerde zoektool te bouwen, of meerdere websites te monitoren op veranderingen.
+
+In deze gids laten we zien hoe je een batch start met een lijst van URL's en de inhoud in markdown-formaat ophaalt.
+
+## Gist met Volledige Code
+Hier is alle code in één gist die je kunt kopiëren en plakken om batch scraping met Olostep uit te proberen:
+https://gist.github.com/olostep/e903f2e4fc28f8093b834b4df68b8031
+
+In deze gist hebben we laten zien hoe je een batch start met 5 Google-zoekopdrachten, de status controleert, en de inhoud voor elk item ophaalt.
+
+## Vereisten
+Voordat je begint, zorg ervoor dat je het volgende hebt:
+
+- Een geldige Olostep API-sleutel. Je kunt er een krijgen door je aan te melden bij [Olostep](https://www.olostep.com/dashboard).
+- Python geïnstalleerd op je systeem.
+- De `requests` en `hashlib` bibliotheken (installeer `requests` met `pip install requests` indien nodig).
+
+## Stap 1: Maak een Batch van Lokale URL's
+
+Als je al een lijst van URL's hebt die je wilt verwerken, kun je deze direct in je script definiëren. Anders kun je ze uit een bestand of database lezen.
+
+```python filename="start_batch.py"
+import requests
+import hashlib
+
+API_KEY = "YOUR_API_KEY"
+
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=nikola+tesla&gl=us&hl=en",
+        "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+        "https://www.google.com/search?q=google+solar+eclipse&gl=us&hl=en",
+        "https://www.google.com/search?q=crispr&gl=us&hl=en",
+        "https://www.google.com/search?q=genghis%20khan&gl=us&hl=en"
+    ]
+    return [{"custom_id": create_hash_id(url), "url": url} for url in urls]
+
+def start_batch(items):
+    payload = {
+        "items": items
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+    return response.json()["id"]
+
+if __name__ == "__main__":
+    items = compose_items_array()
+    batch_id = start_batch(items)
+    print("Batch gestart. ID:", batch_id)
+```
+
+## Stap 2: Monitor Batch Status
+
+Zodra de batch is gestart, kun je de status ervan monitoren met behulp van de `batch_id` die wordt geretourneerd wanneer je de batch start.
+
+```python filename="check_status.py"
+import requests
+
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}",
+        headers=headers
+    )
+    return response.json()["status"]
+```
+
+Je kunt de status elke paar seconden (bijv. 10 seconden) controleren totdat de batch voltooid is:
+
+```python
+import time
+
+def recursive_check(batch_id):
+    status = check_batch_status(batch_id)
+    print("Status:", status)
+    if status == "completed":
+        print("Batch is voltooid!")
+    else:
+        time.sleep(60)
+        recursive_check(batch_id)
+```
+
+## Stap 3: Haal Voltooide Items op
+
+Zodra de batch als voltooid is gemarkeerd, haal je de verwerkte items op.
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}/items",
+        headers=headers
+    )
+    return response.json()["items"]
+```
+
+Elk item bevat een `retrieve_id` die je kunt gebruiken om de gescrapete inhoud op te halen.
+
+```python
+items = get_completed_items(batch_id)
+for item in items:
+    print(f"URL: {item['url']}\nCustom ID: {item['custom_id']}\nRetrieve ID: {item['retrieve_id']}\n---")
+```
+
+## Stap 4: Haal de Inhoud op
+
+Gebruik de `retrieve_id` om de geëxtraheerde inhoud in markdown, html of json op te halen. Hier is een voorbeeld om de inhoud in markdown-formaat op te halen:
+
+```python filename="retrieve_content.py"
+def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# Voorbeeld gebruik:
+items = get_completed_items(batch_id)
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content)
+```
+
+## Gehoste Inhoud
+We hosten de inhoud ook voor 7 dagen, zodat je het meerdere keren kunt ophalen zonder opnieuw te scrapen.
+Voorbeeld van een gehoste url voor [markdown inhoud](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_p64bro0q3n_924d0fa125efcc5c.txt)
+
+## Voorbeeld Gebruikscases
+
+### 1. Zoekmachines Bouwen
+Gebruik Olostep om inhoud van branchespecifieke websites (juridisch, medisch, AI) te extraheren en een doorzoekbare database te bouwen.
+
+### 2. Website Monitoring
+Monitor productbeschikbaarheid, prijswijzigingen, of nieuwsupdates op meerdere websites door dagelijkse batch scrapes te plannen.
+
+### 3. Social Media Monitoring
+Scrape vermeldingen van je merk of trefwoorden op forums of contentbronnen en extraheer gestructureerde data.
+
+### 4. Aggregators
+Bouw een vacaturebank, nieuwsaggregator, of vastgoedplatform door data van tientallen bronnen te halen.
+
+## Conclusie
+
+Met batch scraping kun je snel en efficiënt inhoud van maximaal 100k URL's extraheren. Of je nu zoektools, aggregators, of monitoringsystemen bouwt, Olostep Batches vereenvoudigt de klus.
+
+Wil je alleen gestructureerde data extraheren? Gebruik [Parsers](https://docs.olostep.com/features/structured-content/parsers) om alleen de velden te krijgen die je nodig hebt. Hulp nodig? Neem contact op met `info@olostep.com` voor ondersteuning of laat ons aangepaste scripts schrijven voor jouw gebruikssituatie.

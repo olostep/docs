@@ -1,0 +1,225 @@
+---
+icon: "bell"
+sidebarTitle: "価格モニタリング"
+title: "Olostepを使った価格追跡"
+description: "Olostepを使用して、eコマースでの製品価格を大規模に追跡する方法を学びます。"
+---
+
+## 概要
+
+Olostepは、リアルタイムで数百万の製品の価格を定期的に（例えば数時間ごとに）スケーラブルかつコスト効率の良い方法で追跡するためのウェブスクレイピングAPIを提供しています。
+
+これは、価格変動を監視したい、複数のウェブサイトで価格を比較したい、または競合他社の価格戦略を追跡したい企業にとって便利です。
+
+このガイドでは、ある顧客がOlostepを使用して、毎日数百万のAmazon製品の自動価格追跡を設定する方法を見ていきます。
+
+## なぜ価格追跡にOlostepを使用するのか？
+
+- **スケーラビリティ:** 数百万の製品の価格を数時間ごとに追跡。
+- **自動化:** 事前に定義された時間/定期的な間隔で実行されるスケジュールされたスクレイピングタスクを設定。
+- **複数のフォーマット:** JSON、html、またはmarkdown形式でデータを取得。
+- **カスタムパーサー:** パーサーを使用して関連するJSON情報のみを抽出するか、自分のパーサーをAPIに渡す。
+
+## Olostepを使用した価格追跡の方法
+
+### プロセスセットアップの概要
+
+製品を大規模に追跡する際には、Olostepの[Batchesエンドポイント](https://docs.olostep.com/api-reference/batches/create)を使用することをお勧めします。
+
+このエンドポイントを使用すると、最大10,000のURLを含む複数のバッチを並行して処理し、5〜8分後に結果を取得できます。複数のバッチを同時に送信し、進行状況を監視し、完了したら結果を取得できます。この方法で、数百万のURLを15〜20分で処理できます。
+
+Olostepを使用した価格追跡の全体的な流れは次のとおりです：
+
+1. **データベースから製品を読み取り、追跡したいURLをCSVファイルに保存します。**
+2. **CSVファイルからデータを読み取り、Olostepのバッチエンドポイントを使用してバッチを開始します。** これは、データを最大10,000のURLのチャンクでエンドポイントに投稿することで行われます。
+3. **バッチの進行状況を監視するために、60秒ごとにバッチのステータスを確認します。**
+4. **バッチが完了したら、コンテンツを読み取り、ワークフローで使用します。**
+
+バッチを開始し、ページのhtml/markdownコンテンツを返してもらい、自分でデータを解析することもできますが、パーサーを使用してバッチを開始し、必要な解析済みデータのみを含むJSONオブジェクトを返してもらうことをお勧めします。APIに自分のパーサーを渡すか、一般的なウェブサイト用に用意された事前構築のものを使用できます（例：Amazon製品ページ、Google検索結果、Linkedinプロファイルなど）。
+
+各バッチのデータは7日間保存されるため、必要に応じて複数回取得できます。
+
+### ステップ1: データベースから製品データをエクスポート
+
+最初のステップは、データベースから製品情報を取得し、CSV形式で保存することです。このファイルには、製品識別子、URL、および追跡に必要な追加のメタデータが含まれている必要があります。
+
+### ステップ2: Olostepでバッチを開始
+
+バッチを開始するには、CSVから製品データを読み取り、Olostepのバッチエンドポイントに送信します。これは、JSONペイロードを使用したHTTP POSTリクエストで行われます。
+
+各バッチには最大10,000のURLを含めることができます。大規模なデータセット（>10,000 URL）の場合、複数のバッチに分割して並行して送信します。
+
+バッチは処理される製品URLを表すアイテムの配列で構成されます。バッチリクエストの構造は次のとおりです：
+
+```python
+import requests
+
+def start_batch(batch_array):
+    payload = {
+        "batch_array": batch_array,                 # 処理するアイテムの配列
+        "batch_country": "IT",                      # バッチの国コード
+        "parser": "@olostep/amazon-it-product"      # オプション: 必要なJSONデータのみを取得するためのカスタムパーサーを指定
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()["id"]
+```
+
+#### バッチ配列の構造
+batch_arrayの各アイテムは次の構造に従う必要があります：
+<CodeGroup>
+    ```json filename="batch_item.json"
+    {
+        "custom_id": "unique_identifier",    // 必須: アイテムの一意の識別子
+        "url": "product_url",               // 必須: 処理されるURL
+        "wait_before_scraping": 0,         // オプション: バッチ内の各URLをスクレイピングする前の待機時間（ミリ秒単位）
+    }
+    ```
+</CodeGroup>
+パラメータ
+<ResponseField name="batch_array" type="array" required>
+    処理するアイテムの配列。バッチごとに最大10,000のURL。各アイテムには一意の`custom_id`が必要です。
+</ResponseField>
+<ResponseField name="batch_country" type="string" required>
+    2文字の国コード（例："IT"はイタリア）。
+</ResponseField>
+<ResponseField name="parser" type="string">
+    使用するカスタムパーサーの名前（例："@olostep/amazon-it-product"）。事前構築のパーサーへのアクセスを得るか、自分のものを作成するにはinfo@olostep.comまでご連絡ください。
+</ResponseField>
+レスポンス
+<CodeGroup>
+    ```json filename="response.json"
+    {
+        "id": "batch_54ikwskmt8"
+    }
+    ```
+</CodeGroup>
+エンドポイントは、バッチのステータスを監視し、結果を取得するために使用できるbatch_idを含むJSONオブジェクトを返します。
+
+使用例
+<CodeGroup>
+    ```python
+    # バッチ配列を準備
+    batch_array = [
+    {
+        "custom_id": "product_123",
+        "url": "https://www.amazon.it/dp/B0CHF6Z393/?coliid=INQXTGFQF4FM4&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    },
+    {
+        "custom_id": "product_124",
+        "url": "https://www.amazon.it/dp/B0CHMJL774/?coliid=I6CFYA5EHVHE2&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    }
+    ]
+
+    # バッチ処理を開始
+    batch_id = start_batch(batch_array)
+    print(f"Started batch: {batch_id}")
+    ```
+</CodeGroup>
+
+### ステップ3: バッチステータスの監視
+バッチが開始されたら、処理が完了したかどうかを判断するためにステータスを監視する必要があります。APIは、batch_idを使用して定期的にポーリングできるステータスエンドポイントを提供しています。
+
+<CodeGroup>
+    ```python filename="check_status.py"
+    import requests
+
+    def check_batch_status(batch_id):
+    headers = {"Authorization": "Bearer " + API_KEY}
+    response = requests.request(
+    "GET",
+    f"https://api.olostep.com/v1/batches/{batch_id}",
+    headers=headers
+    )
+    return response.json()["status"]
+    ```
+</CodeGroup>
+
+本番環境では、複数のバッチを効率的に処理するために非同期モニタリングを実装することをお勧めします：
+<CodeGroup>
+    ```python
+    import asyncio
+
+    async def monitor_batch(batch_id: str) -> None:
+    """バッチが完了するまで監視"""
+    while True:
+        status = check_batch_status(batch_id)
+        if status == "completed":
+            print(f"Batch {batch_id} completed!")
+            return
+        print(f"Batch {batch_id} still processing... Checking again in 60 seconds")
+        await asyncio.sleep(60)
+    ```
+</CodeGroup>
+
+### ステップ4: 完了したアイテムのIDを取得
+
+バッチが完了とマークされたら、完了したアイテムのリストを取得できます。各アイテムにはretrieve_idがあります。実際のコンテンツを取得したい場合は、`retrieve_id`を渡してretrieveエンドポイントを使用します。
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    response = requests.get(f"https://api.olostep.com/v1/batches/{batch_id}/items", headers=headers)
+    return response.json()["items"]
+```
+これにより、送信された各URLに対して`retrieve_id`を持つ完了したアイテムが返されます。その後、retrieveエンドポイントを使用して各URLの抽出データ（html、markdown、またはJSON）を取得および保存できます。
+
+バッチ内の各アイテムの`retrieve_id`を取得するには、次のコードを使用します：
+
+```python
+items = get_completed_items("your_batch_id")
+for item in items:
+    print(f"""
+    URL: {item['url']}
+    Custom ID: {item['custom_id']}
+    Retrieve ID: {item['retrieve_id']}
+    ---
+    """)
+```
+
+### ステップ5: 各アイテムのコンテンツを取得
+
+各アイテムの`retrieve_id`を取得したら、retrieveエンドポイントを使用してそのコンテンツ（HTML、Markdown、またはJSON）を取得できます：
+
+<CodeGroup>
+    ```python filename="retrieve_content.py"
+    def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(
+    url,
+    headers=headers,
+    params=params
+    )
+    return response.json()
+
+    # 使用例
+    retrieve_id = "product_123"
+    content = retrieve_content(retrieve_id)
+
+    # 複数のアイテムを処理したい場合
+    def process_batch_content(batch_id):
+    items = get_completed_items(batch_id)
+    for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    # 必要に応じてコンテンツを処理または保存
+    ```
+</CodeGroup>
+
+## 結論
+
+これらのステップに従うことで、Olostepを使用した自動価格追跡システムを設定できます。近日中に、この例の完全なコードを含むオープンソースのGitHubリポジトリを公開する予定です。

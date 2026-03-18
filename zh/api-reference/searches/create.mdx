@@ -1,0 +1,78 @@
+---
+title: "创建搜索"
+openapi: "zh/openapi/search.json POST /v1/searches"
+---
+
+## 概述
+
+使用此端点可以创建新的搜索。你需要提供搜索的详细信息，包括查询参数和其他可选设置。
+
+## 请求
+
+**方法**: `POST`  
+**URL**: `/v1/searches`
+
+### 请求头
+
+- `Content-Type`: `application/json`
+- `Authorization`: `Bearer YOUR_API_KEY`
+
+### 请求体
+
+请求体应该是一个包含以下字段的 JSON 对象：
+
+- `query`: *string* - 要搜索的查询字符串。
+- `filters`: *object* - 可选的过滤器对象。
+- `sort`: *string* - 可选的排序参数。
+
+### 示例请求
+
+```json
+{
+  "query": "example search",
+  "filters": {
+    "category": "books"
+  },
+  "sort": "relevance"
+}
+```
+
+## 响应
+
+成功的响应将返回一个包含搜索结果的 JSON 对象。
+
+### 响应体
+
+- `results`: *array* - 搜索结果的数组。
+- `total`: *number* - 搜索结果的总数。
+- `page`: *number* - 当前页码。
+- `perPage`: *number* - 每页的结果数。
+
+### 示例响应
+
+```json
+{
+  "results": [
+    {
+      "id": "1",
+      "title": "Example Book",
+      "author": "John Doe"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "perPage": 10
+}
+```
+
+## 错误
+
+如果请求无效或出现其他问题，API 将返回错误响应。
+
+### 常见错误代码
+
+- `400 Bad Request`: 请求格式不正确。
+- `401 Unauthorized`: API 密钥无效或缺失。
+- `500 Internal Server Error`: 服务器内部错误。
+
+确保你的请求格式正确，并且你有有效的 API 密钥。

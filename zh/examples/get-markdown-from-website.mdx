@@ -1,0 +1,91 @@
+---
+icon: "file-lines"
+sidebarTitle: "获取网站的Markdown"
+title: "获取网站的Markdown"
+description: "学习如何从任何网页提取内容为LLM友好的markdown格式。"
+---
+
+## 概述
+
+Olostep的[scrape](../../features/scrapes/scrapes)端点允许从任何网站提取内容。如果你想将内容传递给LLM而不需要所有的HTML，markdown格式的内容非常有用。
+
+在本指南中，我们将看到如何从像`https://www.nea.com/team`这样的网站提取markdown。
+
+## 前提条件
+
+在开始之前，请确保你具备以下条件：
+
+- 有效的Olostep API密钥。你可以通过在[Olostep](https://www.olostep.com/dashboard)注册来获取。
+- 你的系统上安装了Python
+- `requests`和`json`库（这些库随Python预装，但如果需要，可以使用`pip install requests`来安装）
+
+## 从网站提取文本
+
+以下Python脚本演示了如何使用Olostep的API从网站提取文本和markdown内容。
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.nea.com/team",
+    "country": "US",
+    "formats": ["markdown"],
+    "wait_before_scraping": 0,
+    "remove_css_selectors": "default",
+}
+
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+print(json.dumps(response.json(), indent=4))
+```
+
+## 示例响应
+
+成功的响应看起来会像这样：
+
+```json
+{
+    "id": "scrape_63x2e5sf5r",
+    "object": "scrape",
+    "created": 1740341743,
+    "metadata": {},
+    "retrieve_id": "63x2e5sf5r",
+    "url_to_scrape": "https://www.nea.com/team",
+    "result": {
+        "html_content": null,
+        "markdown_content": "NEA ….",
+        "text_content": null,
+        "json_content": null,
+        "llm_extract": null,
+        "screenshot_hosted_url": null,
+        "html_hosted_url": null,
+        "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_63x2e5sf5r.txt",
+        "json_hosted_url": null,
+        "text_hosted_url": null,
+        "links_on_page": [],
+        "page_metadata": {
+            "status_code": 200,
+            "title": ""
+        }
+    }
+}
+```
+
+## 解释
+
+- `url_to_scrape`：指定要提取内容的网站URL。
+- `formats`：定义输出格式（在此情况下为文本）。
+- `Authorization`：包含你的API密钥以验证请求。
+- 响应格式化为JSON并打印以便于阅读。
+
+## 结论
+
+使用Olostep，你可以轻松地从任何网站提取markdown内容。如果你想从网站获取内容并将其传递给LLM进行数据提取和分析，这非常有用。如果你想从同一网站反复大规模提取内容（例如监控数据、价格跟踪等），我们建议使用[自定义解析器](../../features/structured-content/parsers)以JSON格式获取内容。

@@ -1,0 +1,973 @@
+---
+sidebarTitle: "n8n"
+icon: "code"
+title: "n8n 集成"
+description: "使用 n8n 的自托管工作流自动化平台自动化网页搜索、抓取和爬取"
+---
+
+Olostep n8n 集成为 n8n 工作流带来了强大的网页搜索、抓取和爬取功能。构建自动化工作流，从任何网站搜索、提取和结构化网页数据，无需编写代码。
+
+[开始使用 Olostep 在 n8n 上 →](https://www.npmjs.com/package/n8n-nodes-olostep)
+
+## 功能
+
+该集成提供了 6 种强大的操作，用于自动化网页数据提取：
+
+<CardGroup cols={2}>
+  <Card title="抓取网站" icon="file-lines">
+    从任何单一 URL 提取内容，支持多种格式（Markdown、HTML、JSON、文本）
+  </Card>
+  
+  <Card title="搜索" icon="search">
+    搜索网络并获取结构化结果
+  </Card>
+  
+  <Card title="答案（AI）" icon="globe-pointer">
+    使用 AI 搜索网络并获取带有来源和引用的结构化答案
+  </Card>
+  
+  <Card title="批量抓取 URL" icon="layer-group">
+    同时抓取多达 10k 个 URL。非常适合大规模数据提取
+  </Card>
+  
+  <Card title="创建爬取" icon="spider-web">
+    获取 URL 的子页面内容。自主发现并抓取整个网站
+  </Card>
+  
+  <Card title="创建地图" icon="map">
+    获取网站上的所有 URL 以进行站点结构分析和内容发现
+  </Card>
+</CardGroup>
+
+## 安装
+
+### 1. 安装节点
+
+通过 npm 安装 Olostep 节点包：
+
+```bash
+npm install n8n-nodes-olostep
+```
+
+然后重启 n8n 以加载新节点。
+
+或者，按照 [n8n 社区节点安装指南](https://docs.n8n.io/integrations/community-nodes/installation/) 获取详细说明。
+
+### 2. 连接你的账户
+
+首次在工作流中使用 Olostep 节点时，你需要配置凭据：
+
+1. 将 "Olostep Scrape" 节点添加到你的工作流
+2. 点击节点以打开其设置
+3. 点击 "创建新凭据" 或选择现有凭据
+4. 输入你的 Olostep API 密钥
+5. 点击 "保存" 以存储凭据
+
+从 [Olostep 仪表板](https://olostep.com/dashboard) 获取你的 API 密钥。
+
+## 可用操作
+
+### 抓取网站
+
+从单个 URL 提取内容。支持多种格式和 JavaScript 渲染。
+
+**使用场景：**
+- 监控特定页面的变化
+- 从电商网站提取产品信息
+- 收集新闻文章或博客文章的数据
+- 为内容聚合拉取内容
+
+**配置：**
+
+<ParamField path="URL to Scrape" type="string" required>
+  要抓取的网站 URL（必须包含 http:// 或 https://）
+</ParamField>
+
+<ParamField path="Output Format" type="dropdown" default="Markdown">
+  选择格式：Markdown、HTML、JSON 或纯文本
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  用于特定位置内容的国家代码（例如 "US", "GB", "CA"）
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  JavaScript 渲染的等待时间（0-10000 毫秒）
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  用于专业提取的可选解析器 ID（例如 "@olostep/amazon-product"）
+</ParamField>
+
+**输出字段：**
+- 抓取 ID
+- 抓取的 URL
+- Markdown 内容
+- HTML 内容
+- JSON 内容
+- 文本内容
+- 状态
+- 时间戳
+- 截图 URL（如果可用）
+- 页面元数据
+
+**示例工作流：**
+
+<AccordionGroup>
+  <Accordion title="监控竞争对手定价">
+    **触发器：** 计划（每天上午 9 点）
+    
+    **操作：** Olostep - 抓取网站
+    - URL：竞争对手产品页面
+    - 格式：JSON
+    - 解析器：@olostep/amazon-product
+    
+    **操作：** Google Sheets - 添加行
+    - 将价格数据添加到跟踪电子表格
+    
+    **操作：** 邮件 - 发送邮件（如果价格下降）
+    - 向团队发出价格变动警报
+  </Accordion>
+
+  <Accordion title="提取并保存博客文章">
+    **触发器：** RSS Feed - 新项目
+    
+    **操作：** Olostep - 抓取网站
+    - URL：\{\{$json.link\}\}
+    - 格式：Markdown
+    
+    **操作：** Notion - 创建页面
+    - 将文章内容保存到 Notion 数据库
+  </Accordion>
+
+  <Accordion title="潜在客户丰富">
+    **触发器：** Google Sheets - 新行
+    
+    **操作：** Olostep - 抓取网站
+    - URL：来自表格的公司网站
+    - 格式：Markdown
+    
+    **操作：** OpenAI - 完成文本
+    - 使用 AI 提取公司信息
+    
+    **操作：** Google Sheets - 更新行
+    - 将丰富的数据添加回表格
+  </Accordion>
+</AccordionGroup>
+
+### 搜索
+
+为给定查询搜索网络并获取结构化结果（非 AI，基于解析器的搜索结果）。
+
+**使用场景：**
+- 自动化研究工作流
+- 潜在客户发现和丰富
+- 竞争分析
+- 内容研究
+
+**配置：**
+
+<ParamField path="Query" type="string" required>
+  搜索查询
+</ParamField>
+
+**输出：** 返回结构化的搜索结果，包含标题、URL、摘要和元数据的 JSON。
+
+**示例工作流：**
+
+<AccordionGroup>
+  <Accordion title="自动化研究">
+    **触发器：** 计划（每天上午 8 点）
+    
+    **操作：** Olostep - 搜索
+    - 查询："最新 AI 发展"
+    
+    **操作：** 代码 - 处理结果
+    - 提取和格式化关键信息
+    
+    **操作：** Notion - 创建页面
+    - 存储研究结果
+  </Accordion>
+
+  <Accordion title="潜在客户发现">
+    **触发器：** 手动（按钮）
+    
+    **操作：** Olostep - 搜索
+    - 查询："\{\{$json.searchTerm\}\}"
+    
+    **操作：** Airtable - 创建记录
+    - 存储包含联系信息的潜在客户
+  </Accordion>
+</AccordionGroup>
+
+### 批量抓取 URL
+
+同时抓取多达 10k 个 URL。非常适合大规模数据提取。
+
+**使用场景：**
+- 抓取整个产品目录
+- 从多个搜索结果中提取数据
+- 处理来自电子表格的 URL 列表
+- 批量内容提取
+
+**配置：**
+
+<ParamField path="URLs to Scrape" type="text" required>
+  包含 url 和 custom_id 字段的 JSON 对象数组。
+  
+  示例：`[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="Output Format" type="dropdown" default="Markdown">
+  为所有 URL 选择格式：Markdown、HTML、JSON 或纯文本
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  用于特定位置抓取的国家代码
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  JavaScript 渲染的等待时间
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  用于专业提取的可选解析器 ID
+</ParamField>
+
+**输出字段：**
+- 批次 ID（用于稍后检索结果）
+- 状态
+- 总 URL 数
+- 创建时间
+- 请求格式
+- 国家代码
+- 使用的解析器
+
+**示例工作流：**
+
+<AccordionGroup>
+  <Accordion title="抓取产品目录">
+    **触发器：** Webhook - 接收 POST 请求
+    
+    **操作：** 代码 - 格式化 URL
+    - 将 CSV/列表转换为 JSON 数组格式
+    
+    **操作：** Olostep - 批量抓取 URL
+    - URL：\{\{$json.urlArray\}\}
+    - 格式：JSON
+    - 解析器：@olostep/amazon-product
+    
+    **操作：** Webhook - POST
+    - 将批次 ID 发送到你的系统以进行检索
+  </Accordion>
+
+  <Accordion title="每日内容监控">
+    **触发器：** 计划 - 每天上午 6 点
+    
+    **操作：** Google Sheets - 读取行
+    - 获取要监控的 URL
+    
+    **操作：** 代码 - 格式化 URL
+    - 转换为批量数组格式
+    
+    **操作：** Olostep - 批量抓取 URL
+    - 一次处理所有 URL
+    
+    **操作：** Slack - 发送消息
+    - 通知团队抓取已完成
+  </Accordion>
+</AccordionGroup>
+
+### 创建爬取
+
+获取 URL 的子页面内容。通过跟随链接自主发现并抓取整个网站。非常适合文档网站、博客和内容库。
+
+**使用场景：**
+- 爬取并存档整个文档网站
+- 从网站提取所有博客文章
+- 从网页内容构建知识库
+- 监控网站结构变化
+
+**配置：**
+
+<ParamField path="Start URL" type="string" required>
+  爬取的起始 URL（必须包含 http:// 或 https://）
+</ParamField>
+
+<ParamField path="Maximum Pages" type="integer" default="10">
+  爬取的最大页面数
+</ParamField>
+
+<ParamField path="Follow Links" type="boolean" default="true">
+  是否跟随页面上的链接
+</ParamField>
+
+<ParamField path="Output Format" type="dropdown" default="Markdown">
+  抓取内容的格式
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  用于特定位置爬取的可选国家代码
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  用于专业内容提取的可选解析器 ID
+</ParamField>
+
+**输出字段：**
+- 爬取 ID（用于稍后检索结果）
+- 对象类型
+- 状态
+- 起始 URL
+- 最大页面数
+- 跟随链接
+- 创建时间戳
+- 格式
+
+**示例工作流：**
+
+<AccordionGroup>
+  <Accordion title="存档文档网站">
+    **触发器：** 计划 - 每月 1 日凌晨 12 点
+    
+    **操作：** Olostep - 创建爬取
+    - 起始 URL：https://docs.example.com
+    - 最大页面数：500
+    - 跟随链接：true
+    - 格式：Markdown
+    
+    **操作：** Webhook - POST
+    - 将爬取 ID 发送到你的存档系统
+    
+    **操作：** Slack - 发送消息
+    - 通知团队爬取正在进行中
+  </Accordion>
+
+  <Accordion title="竞争对手内容分析">
+    **触发器：** 计划 - 每周一上午 9 点
+    
+    **操作：** Olostep - 创建爬取
+    - 起始 URL：竞争对手博客 URL
+    - 最大页面数：100
+    - 格式：Markdown
+    
+    **操作：** 等待 - 10 分钟
+    - 等待爬取完成
+    
+    **操作：** Airtable - 创建记录
+    - 存储爬取数据以进行分析
+  </Accordion>
+</AccordionGroup>
+
+### 创建地图
+
+获取网站上的所有 URL。从网站提取所有 URL 以进行内容发现和站点结构分析。
+
+**使用场景：**
+- 构建站点地图和站点结构图
+- 在批量抓取前发现所有页面
+- 查找损坏或缺失的页面
+- SEO 审核和分析
+
+**配置：**
+
+<ParamField path="Website URL" type="string" required>
+  要提取链接的网站 URL（必须包含 http:// 或 https://）
+</ParamField>
+
+<ParamField path="Search Query" type="string">
+  用于过滤 URL 的可选搜索查询（例如 "blog"）
+</ParamField>
+
+<ParamField path="Top N URLs" type="integer">
+  限制返回的 URL 数量
+</ParamField>
+
+<ParamField path="Include URL Patterns" type="string">
+  包含特定路径的 Glob 模式（例如 "/blog/**"）
+</ParamField>
+
+<ParamField path="Exclude URL Patterns" type="string">
+  排除特定路径的 Glob 模式（例如 "/admin/**"）
+</ParamField>
+
+**输出字段：**
+- 地图 ID
+- 对象类型
+- 网站 URL
+- 找到的总 URL 数
+- URL（JSON 数组）
+- 搜索查询
+- Top N 限制
+
+**示例工作流：**
+
+<AccordionGroup>
+  <Accordion title="发现并抓取">
+    **触发器：** 手动（按钮）
+    
+    **操作：** Olostep - 创建地图
+    - URL：https://example.com
+    - 包含模式：/products/**
+    - Top N：500
+    
+    **操作：** 代码 - 提取 URL
+    - 从地图结果解析 URL
+    
+    **操作：** Olostep - 批量抓取 URL
+    - URL：\{\{$json.urls\}\}
+    - 格式：JSON
+    
+    **操作：** Google Sheets - 添加行
+    - 将所有产品数据添加到电子表格
+  </Accordion>
+
+  <Accordion title="SEO 站点审核">
+    **触发器：** 计划 - 每月
+    
+    **操作：** Olostep - 创建地图
+    - URL：你的网站
+    - Top N：1000
+    
+    **操作：** Airtable - 创建记录
+    - 存储所有 URL 以进行跟踪
+    
+    **操作：** Slack - 发送消息
+    - 报告找到的总页面数
+  </Accordion>
+</AccordionGroup>
+
+## 流行的工作流示例
+
+### 电商价格监控
+
+监控竞争对手价格并获得即时警报：
+
+```
+触发器：计划（每小时）
+↓
+操作：Olostep - 抓取网站
+  - URL：竞争对手产品页面
+  - 格式：JSON
+  - 解析器：@olostep/amazon-product
+↓
+操作：IF - 检查价格是否变化
+↓
+操作：Slack - 发送消息
+  - 警报："价格变为 $\{\{price\}\}"
+```
+
+### 内容聚合
+
+从多个来源聚合内容：
+
+```
+触发器：Google Sheets - 新行
+↓
+操作：Olostep - 抓取网站
+  - URL：\{\{$json.url\}\}
+  - 格式：Markdown
+↓
+操作：OpenAI - 总结
+  - 总结内容
+↓
+操作：Airtable - 创建记录
+  - 存储带有摘要的文章
+```
+
+### 潜在客户丰富管道
+
+通过网页信息丰富潜在客户数据：
+
+```
+触发器：HubSpot - 新联系人
+↓
+操作：Olostep - 抓取网站
+  - URL：\{\{$json.companyWebsite\}\}
+  - 格式：Markdown
+↓
+操作：OpenAI - 提取数据
+  - 提取：公司规模、行业、产品
+↓
+操作：HubSpot - 更新联系人
+  - 将丰富的数据添加到联系人
+```
+
+### 研究自动化
+
+从多个来源自动化研究：
+
+```
+触发器：Airtable - 新记录
+↓
+操作：Olostep - 创建地图
+  - URL：研究目标网站
+  - 包含：/research/**
+↓
+操作：代码 - 解析 URL
+↓
+操作：Olostep - 批量抓取 URL
+  - URL：\{\{$json.discoveredUrls\}\}
+  - 格式：Markdown
+↓
+操作：Notion - 创建页面
+  - 创建研究数据库
+```
+
+### 社交媒体监控
+
+跟踪提及和内容：
+
+```
+触发器：计划（每 6 小时）
+↓
+操作：Olostep - 抓取网站
+  - URL：新闻网站搜索页面
+  - 格式：HTML
+↓
+操作：代码 - 提取提及
+  - 查找品牌提及
+↓
+操作：Google Sheets - 添加行
+  - 记录带有时间戳的提及
+```
+
+## 多步骤工作流
+
+### 完整的产品抓取管道
+
+构建一个全面的产品数据管道：
+
+<Steps>
+  <Step title="发现产品 URL">
+    使用 **创建地图** 找到目标网站上的所有产品页面
+    - 包含模式：`/products/**`
+    - 排除模式：`/cart/**`, `/checkout/**`
+  </Step>
+  
+  <Step title="批量处理产品">
+    使用 **批量抓取 URL** 提取所有产品数据
+    - 格式：JSON
+    - 解析器：如果可用，使用特定产品解析器
+  </Step>
+  
+  <Step title="存储在数据库中">
+    将批次 ID 发送到你的系统或等待并检索结果
+    - 使用 Airtable、Google Sheets 或你的数据库
+  </Step>
+  
+  <Step title="监控变化">
+    安排每日抓取以跟踪价格/可用性变化
+    - 与现有数据进行比较
+    - 对重大变化发出警报
+  </Step>
+</Steps>
+
+### SEO 内容策略
+
+分析竞争对手并规划内容：
+
+<Steps>
+  <Step title="映射竞争对手网站">
+    在竞争对手网站上使用 **创建地图**
+    - 提取所有博客文章和内容页面
+  </Step>
+  
+  <Step title="抓取内容">
+    使用 **批量抓取 URL** 获取完整内容
+    - 格式：Markdown 以便于分析
+  </Step>
+  
+  <Step title="AI 分析">
+    使用 OpenAI 分析主题和关键词
+    - 识别内容差距
+    - 找到热门话题
+  </Step>
+  
+  <Step title="创建内容日历">
+    将见解添加到 Notion 或 Airtable
+    - 规划你的内容策略
+  </Step>
+</Steps>
+
+## 专用解析器
+
+Olostep 提供了针对热门网站的预构建解析器。在 `Parser` 字段中使用它们：
+
+<CardGroup cols={2}>
+  <Card title="亚马逊产品" icon="amazon">
+    `@olostep/amazon-product`
+    
+    提取：标题、价格、评分、评论、图片、变体
+  </Card>
+  
+  <Card title="谷歌搜索" icon="google">
+    `@olostep/google-search`
+    
+    提取：搜索结果、标题、摘要、URL
+  </Card>
+  
+  <Card title="谷歌地图" icon="map">
+    `@olostep/google-maps`
+    
+    提取：商业信息、评论、评分、位置
+  </Card>
+
+  <Card title="提取电子邮件" icon="envelope">
+    `@olostep/extract-emails`
+    
+    提取：页面、联系人列表和页脚中的电子邮件
+  </Card>
+
+  <Card title="提取社交" icon="users">
+    `@olostep/extract-socials`
+    
+    提取：社交资料链接（X/Twitter、GitHub 等）
+  </Card>
+
+  <Card title="提取日历" icon="calendar">
+    `@olostep/extract-calendars`
+    
+    提取：页面中的日历链接（Google Calendar、ICS）
+  </Card>
+</CardGroup>
+
+### 使用解析器
+
+只需将解析器 ID 添加到 Parser 字段。两个示例：
+
+```
+操作：Olostep - 抓取网站
+  - URL：https://www.amazon.com/dp/PRODUCT_ID
+  - 格式：JSON
+  - 解析器：@olostep/amazon-product
+```
+
+```
+操作：Olostep - 抓取网站
+  - URL：https://example.com/contact
+  - 格式：JSON
+  - 解析器：@olostep/extract-emails
+```
+
+解析器自动提取特定任务的结构化数据。
+
+## 与热门应用集成
+
+### Google Sheets
+
+非常适合数据收集和跟踪：
+
+```
+1. Olostep 抓取网站
+2. 过滤或转换数据
+3. Google Sheets - 添加行
+```
+
+**使用场景：**
+- 价格跟踪电子表格
+- 潜在客户丰富数据库
+- 内容库存
+- 竞争对手分析表
+
+### Airtable
+
+使用抓取的数据构建强大的数据库：
+
+```
+1. Olostep 抓取或爬取
+2. 代码 - 格式化数据
+3. Airtable - 创建记录
+```
+
+**使用场景：**
+- 产品目录
+- 研究数据库
+- 内容日历
+- 链接数据库
+
+### Slack
+
+获取即时通知：
+
+```
+1. Olostep 监控页面
+2. IF - 检查变化
+3. Slack - 发送消息
+```
+
+**使用场景：**
+- 价格下降警报
+- 内容更新通知
+- 错误监控
+- 每日摘要
+
+### HubSpot / Salesforce
+
+自动丰富 CRM 数据：
+
+```
+1. 添加新联系人
+2. Olostep 抓取公司网站
+3. OpenAI 提取关键信息
+4. CRM - 更新联系人
+```
+
+**使用场景：**
+- 潜在客户丰富
+- 公司研究
+- 竞争情报
+- 账户映射
+
+### Notion
+
+构建知识库：
+
+```
+1. Olostep 爬取文档
+2. 代码 - 解析内容
+3. Notion - 创建页面
+```
+
+**使用场景：**
+- 文档镜像
+- 研究存储库
+- 内容库
+- 团队维基
+
+## 最佳实践
+
+<AccordionGroup>
+  <Accordion title="使用批量处理多个 URL">
+    当抓取超过 3-5 个 URL 时，使用 **批量抓取 URL** 而不是多个 **抓取网站** 操作。批量处理是：
+    - 更快（并行处理）
+    - 更具成本效益
+    - 更易于管理
+    - 更适合速率限制
+  </Accordion>
+
+  <Accordion title="设置适当的等待时间">
+    对于 JavaScript 密集型网站，使用 "抓取前等待" 参数：
+    - 简单网站：0-1000 毫秒
+    - 动态网站：2000-3000 毫秒
+    - 重 JavaScript：5000-8000 毫秒
+    
+    使用不同的值进行测试以找到最佳等待时间。
+  </Accordion>
+
+  <Accordion title="使用专用解析器">
+    使用预构建解析器（例如，亚马逊、谷歌和来自 Olostep 商店的任务特定解析器，如电子邮件、社交、日历）：
+    - 自动获取结构化数据
+    - 提取更可靠
+    - 无需自定义解析
+    - 由 Olostep 维护
+  </Accordion>
+
+  <Accordion title="抓取前过滤">
+    使用 n8n 的 IF 节点避免不必要的抓取：
+    - 检查 URL 是否已更改
+    - 验证数据是否最近已被抓取
+    - 在抓取前应用业务逻辑
+    
+    这可以节省 API 积分和执行时间。
+  </Accordion>
+
+  <Accordion title="处理异步操作">
+    批次、爬取和地图操作是异步的：
+    - 存储返回的 ID（batch_id、crawl_id、map_id）
+    - 如果立即检索，请使用等待节点
+    - 考虑使用 Webhook 回调完成
+    - 为检索设置单独的工作流
+  </Accordion>
+
+  <Accordion title="正确存储结果">
+    根据你的需求选择合适的存储：
+    - **Google Sheets**：简单跟踪，团队协作
+    - **Airtable**：关系数据，丰富格式
+    - **数据库**：大规模，复杂查询
+    - **Notion**：知识库，文档
+  </Accordion>
+
+  <Accordion title="监控和警报">
+    为你的抓取工作流设置监控：
+    - 使用 n8n 中的错误工作流
+    - 在失败时发送警报到 Slack/电子邮件
+    - 在 Olostep 仪表板中跟踪 API 使用情况
+    - 记录重要指标
+  </Accordion>
+</AccordionGroup>
+
+## 行业常见使用场景
+
+### 电商
+- **价格监控**：实时跟踪竞争对手定价
+- **产品研究**：发现热门产品和市场空白
+- **库存跟踪**：监控库存可用性
+- **评论分析**：聚合和分析客户评论
+
+### 营销与 SEO
+- **内容发现**：寻找内容机会
+- **竞争分析**：跟踪竞争对手策略
+- **反向链接研究**：发现链接机会
+- **关键词研究**：从搜索结果中提取关键词数据
+
+### 销售与潜在客户生成
+- **潜在客户丰富**：通过网页信息增强 CRM 数据
+- **公司研究**：收集公司情报
+- **联系人发现**：寻找决策者
+- **竞争情报**：跟踪竞争对手动向
+
+### 研究与分析
+- **数据收集**：从多个来源收集数据
+- **市场研究**：跟踪行业趋势
+- **学术研究**：收集研究数据
+- **价格情报**：分析定价策略
+
+### 媒体与出版
+- **内容聚合**：从多个网站策划内容
+- **新闻监控**：跟踪新闻和提及
+- **社交媒体**：监控社交平台
+- **趋势检测**：识别热门话题
+
+## 故障排除
+
+<AccordionGroup>
+  <Accordion title="身份验证失败">
+    **错误**："无效的 API 密钥"
+    
+    **解决方案**：
+    - 从 [仪表板](https://olostep.com/dashboard) 检查 API 密钥
+    - 确保 API 密钥中没有多余的空格
+    - 在 n8n 中重新创建凭据
+    - 验证 API 密钥是否有效
+  </Accordion>
+
+  <Accordion title="抓取返回空内容">
+    **错误**：内容字段为空
+    
+    **解决方案**：
+    - 增加 "抓取前等待" 时间
+    - 检查网站是否需要登录
+    - 尝试不同的格式（HTML vs Markdown）
+    - 验证 URL 是否可访问
+    - 检查网站是否阻止自动访问
+  </Accordion>
+
+  <Accordion title="批量数组格式错误">
+    **错误**："批量数组的 JSON 格式无效"
+    
+    **解决方案**：
+    - 使用格式：`[{"url":"https://example.com","custom_id":"id1"}]`
+    - 确保正确的 JSON 语法
+    - 使用代码节点正确格式化 URL
+    - 使用在线验证器测试 JSON
+  </Accordion>
+
+  <Accordion title="超过速率限制">
+    **错误**："超过速率限制"
+    
+    **解决方案**：
+    - 使用等待节点间隔工作流执行
+    - 使用批量处理而不是单个抓取
+    - 升级你的 Olostep 计划
+    - 在仪表板中检查速率限制
+  </Accordion>
+
+  <Accordion title="URL 未抓取">
+    **错误**：特定 URL 无法抓取
+    
+    **解决方案**：
+    - 验证 URL 格式（包含 http:// 或 https://）
+    - 检查 URL 是否需要身份验证
+    - 首先在浏览器中测试 URL
+    - 尝试使用国家参数
+    - 对于被阻止的域名联系支持
+  </Accordion>
+</AccordionGroup>
+
+## n8n 优势
+
+### 自托管
+n8n 是自托管的，让你完全控制你的工作流和数据。没有供应商锁定，没有数据离开你的基础设施。
+
+### 无任务限制
+与基于云的自动化平台不同，n8n 不会施加任务限制。根据需要运行尽可能多的工作流，而无需额外费用。
+
+### 开源
+n8n 是开源的，允许你根据特定需求进行自定义和扩展。
+
+### 成本效益
+自托管 n8n 是免费的，提供可选的云托管。只需支付 Olostep API 使用费用。
+
+## 价格
+
+Olostep 根据 API 使用收费，与 n8n 独立：
+
+- **抓取**：按抓取收费
+- **批次**：按批次中的 URL 收费
+- **爬取**：按爬取的页面收费
+- **地图**：按地图操作收费
+
+查看当前定价请访问 [olostep.com/pricing](https://olostep.com/pricing)。
+
+**n8n**：自托管 n8n 是免费的。云托管提供可选付费计划。
+
+## 支持
+
+需要 n8n 集成的帮助？
+
+<CardGroup cols={2}>
+  <Card title="文档" icon="book" href="https://docs.olostep.com">
+    浏览完整的 API 文档
+  </Card>
+  
+  <Card title="支持邮箱" icon="envelope" href="mailto:info@olostep.com">
+    邮箱：info@olostep.com
+  </Card>
+  
+  <Card title="n8n 社区" icon="users" href="https://community.n8n.io">
+    在 n8n 社区提问
+  </Card>
+  
+  <Card title="状态页面" icon="signal" href="https://status.olostep.com">
+    检查 API 状态
+  </Card>
+</CardGroup>
+
+## 相关资源
+
+<CardGroup cols={2}>
+  <Card title="抓取 API" icon="file-lines" href="/features/scrapes/scrapes">
+    了解抓取端点
+  </Card>
+  
+  <Card title="批次 API" icon="layer-group" href="/features/batches/batches">
+    了解批次端点
+  </Card>
+  
+  <Card title="爬取 API" icon="spider-web" href="/features/crawls/crawls">
+    了解爬取端点
+  </Card>
+  
+  <Card title="地图 API" icon="map" href="/features/maps/maps">
+    了解地图端点
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    使用 Python 与 Olostep
+  </Card>
+  
+  <Card title="LangChain 集成" icon="link" href="/integrations/langchain">
+    使用 LangChain 构建 AI 代理
+  </Card>
+</CardGroup>
+
+## 开始使用
+
+准备好自动化你的网页搜索、抓取和爬取工作流了吗？
+
+<Card title="安装节点" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
+  安装 n8n-nodes-olostep 并开始构建自动化工作流
+</Card>
+
+立即将 Olostep 与 n8n 连接，自动化你的网页数据提取！

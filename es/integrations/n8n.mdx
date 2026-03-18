@@ -1,0 +1,973 @@
+---
+sidebarTitle: "n8n"
+icon: "code"
+title: "Integración de n8n"
+description: "Automatiza la búsqueda web, scraping y crawling con la plataforma de automatización de flujos de trabajo autoalojada de n8n"
+---
+
+La integración de Olostep con n8n lleva potentes capacidades de búsqueda web, scraping y crawling a los flujos de trabajo de n8n. Construye flujos de trabajo automatizados que buscan, extraen y estructuran datos web de cualquier sitio sin escribir código.
+
+[Comienza con Olostep en n8n →](https://www.npmjs.com/package/n8n-nodes-olostep)
+
+## Características
+
+La integración proporciona 6 operaciones potentes para la extracción automatizada de datos web:
+
+<CardGroup cols={2}>
+  <Card title="Extraer Sitio Web" icon="file-lines">
+    Extrae contenido de cualquier URL única en múltiples formatos (Markdown, HTML, JSON, texto)
+  </Card>
+  
+  <Card title="Buscar" icon="search">
+    Busca en la Web y obtén resultados estructurados
+  </Card>
+  
+  <Card title="Respuestas (IA)" icon="globe-pointer">
+    Busca en la Web con IA y obtén respuestas estructuradas con fuentes y citas
+  </Card>
+  
+  <Card title="Extraer Lotes de URLs" icon="layer-group">
+    Extrae hasta 10k URLs al mismo tiempo. Perfecto para la extracción de datos a gran escala
+  </Card>
+  
+  <Card title="Crear Rastreo" icon="spider-web">
+    Obtén el contenido de subpáginas de una URL. Descubre y extrae sitios web completos de manera autónoma
+  </Card>
+  
+  <Card title="Crear Mapa" icon="map">
+    Obtén todas las URLs de un sitio web para el análisis de la estructura del sitio y descubrimiento de contenido
+  </Card>
+</CardGroup>
+
+## Instalación
+
+### 1. Instala el Nodo
+
+Instala el paquete de nodos de Olostep a través de npm:
+
+```bash
+npm install n8n-nodes-olostep
+```
+
+Luego reinicia n8n para cargar el nuevo nodo.
+
+Alternativamente, sigue la [guía de instalación de nodos comunitarios de n8n](https://docs.n8n.io/integrations/community-nodes/installation/) para instrucciones detalladas.
+
+### 2. Conecta Tu Cuenta
+
+Cuando uses por primera vez el nodo de Olostep en un flujo de trabajo, necesitarás configurar credenciales:
+
+1. Añade el nodo "Olostep Scrape" a tu flujo de trabajo
+2. Haz clic en el nodo para abrir sus configuraciones
+3. Haz clic en "Crear Nueva Credencial" o selecciona credenciales existentes
+4. Ingresa tu clave API de Olostep
+5. Haz clic en "Guardar" para almacenar la credencial
+
+Obtén tu clave API desde el [Dashboard de Olostep](https://olostep.com/dashboard).
+
+## Acciones Disponibles
+
+### Extraer Sitio Web
+
+Extrae contenido de una URL única. Soporta múltiples formatos y renderizado de JavaScript.
+
+**Casos de Uso:**
+- Monitorear cambios en páginas específicas
+- Extraer información de productos de sitios de comercio electrónico
+- Recopilar datos de artículos de noticias o blogs
+- Obtener contenido para agregación de contenido
+
+**Configuración:**
+
+<ParamField path="URL para Extraer" type="string" required>
+  URL del sitio web para extraer (debe incluir http:// o https://)
+</ParamField>
+
+<ParamField path="Formato de Salida" type="dropdown" default="Markdown">
+  Elige formato: Markdown, HTML, JSON, o Texto Plano
+</ParamField>
+
+<ParamField path="Código de País" type="string">
+  Código de país para contenido específico de la ubicación (por ejemplo, "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="Esperar Antes de Extraer" type="integer">
+  Tiempo de espera en milisegundos para renderizado de JavaScript (0-10000)
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  ID de parser opcional para extracción especializada (por ejemplo, "@olostep/amazon-product")
+</ParamField>
+
+**Campos de Salida:**
+- ID de Extracción
+- URL Extraída
+- Contenido Markdown
+- Contenido HTML
+- Contenido JSON
+- Contenido de Texto
+- Estado
+- Marca de Tiempo
+- URL de Captura de Pantalla (si está disponible)
+- Metadatos de la Página
+
+**Ejemplos de Flujos de Trabajo:**
+
+<AccordionGroup>
+  <Accordion title="Monitorear Precios de Competencia">
+    **Disparador:** Programar (Todos los días a las 9 AM)
+    
+    **Acción:** Olostep - Extraer Sitio Web
+    - URL: Página de producto del competidor
+    - Formato: JSON
+    - Parser: @olostep/amazon-product
+    
+    **Acción:** Google Sheets - Añadir Fila
+    - Añadir datos de precios a la hoja de seguimiento
+    
+    **Acción:** Email - Enviar Email (Si el precio baja)
+    - Alertar al equipo sobre cambios de precio
+  </Accordion>
+
+  <Accordion title="Extraer y Guardar Entradas de Blog">
+    **Disparador:** RSS Feed - Nuevo Elemento
+    
+    **Acción:** Olostep - Extraer Sitio Web
+    - URL: \{\{$json.link\}\}
+    - Formato: Markdown
+    
+    **Acción:** Notion - Crear Página
+    - Guardar contenido del artículo en la base de datos de Notion
+  </Accordion>
+
+  <Accordion title="Enriquecimiento de Leads">
+    **Disparador:** Google Sheets - Nueva Fila
+    
+    **Acción:** Olostep - Extraer Sitio Web
+    - URL: Sitio web de la empresa desde la hoja
+    - Formato: Markdown
+    
+    **Acción:** OpenAI - Completar Texto
+    - Extraer información de la empresa usando IA
+    
+    **Acción:** Google Sheets - Actualizar Fila
+    - Añadir datos enriquecidos de nuevo a la hoja
+  </Accordion>
+</AccordionGroup>
+
+### Buscar
+
+Busca en la Web una consulta dada y obtén resultados estructurados (resultados de búsqueda basados en parser, no IA).
+
+**Casos de Uso:**
+- Flujos de trabajo de investigación automatizados
+- Descubrimiento y enriquecimiento de leads
+- Análisis competitivo
+- Investigación de contenido
+
+**Configuración:**
+
+<ParamField path="Consulta" type="string" required>
+  Consulta de búsqueda
+</ParamField>
+
+**Salida:** Devuelve resultados de búsqueda estructurados como JSON con títulos, URLs, fragmentos y metadatos.
+
+**Ejemplos de Flujos de Trabajo:**
+
+<AccordionGroup>
+  <Accordion title="Investigación Automatizada">
+    **Disparador:** Programar (Diario a las 8 AM)
+    
+    **Acción:** Olostep - Buscar
+    - Consulta: "últimos desarrollos en IA"
+    
+    **Acción:** Código - Procesar Resultados
+    - Extraer y dar formato a la información clave
+    
+    **Acción:** Notion - Crear Páginas
+    - Almacenar hallazgos de investigación
+  </Accordion>
+
+  <Accordion title="Descubrimiento de Leads">
+    **Disparador:** Manual (Botón)
+    
+    **Acción:** Olostep - Buscar
+    - Consulta: "\{\{$json.searchTerm\}\}"
+    
+    **Acción:** Airtable - Crear Registros
+    - Almacenar leads con información de contacto
+  </Accordion>
+</AccordionGroup>
+
+### Extraer Lotes de URLs
+
+Extrae hasta 10k URLs al mismo tiempo. Perfecto para la extracción de datos a gran escala.
+
+**Casos de Uso:**
+- Extraer catálogos de productos completos
+- Extraer datos de múltiples resultados de búsqueda
+- Procesar listas de URLs desde hojas de cálculo
+- Extracción masiva de contenido
+
+**Configuración:**
+
+<ParamField path="URLs para Extraer" type="text" required>
+  Array JSON de objetos con campos url y custom_id. 
+  
+  Ejemplo: `[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="Formato de Salida" type="dropdown" default="Markdown">
+  Elige formato para todas las URLs: Markdown, HTML, JSON, o Texto Plano
+</ParamField>
+
+<ParamField path="Código de País" type="string">
+  Código de país para extracción específica de la ubicación
+</ParamField>
+
+<ParamField path="Esperar Antes de Extraer" type="integer">
+  Tiempo de espera en milisegundos para renderizado de JavaScript
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  ID de parser opcional para extracción especializada
+</ParamField>
+
+**Campos de Salida:**
+- ID de Lote (usa esto para recuperar resultados más tarde)
+- Estado
+- Total de URLs
+- Creado En
+- Formato Solicitado
+- Código de País
+- Parser Usado
+
+**Ejemplos de Flujos de Trabajo:**
+
+<AccordionGroup>
+  <Accordion title="Extraer Catálogo de Productos">
+    **Disparador:** Webhook - Recibir Solicitud POST
+    
+    **Acción:** Código - Formatear URLs
+    - Convertir CSV/lista a formato de array JSON
+    
+    **Acción:** Olostep - Extraer Lotes de URLs
+    - URLs: \{\{$json.urlArray\}\}
+    - Formato: JSON
+    - Parser: @olostep/amazon-product
+    
+    **Acción:** Webhook - POST
+    - Enviar ID de lote a tu sistema para recuperación
+  </Accordion>
+
+  <Accordion title="Monitoreo Diario de Contenido">
+    **Disparador:** Programar - Todos los días a las 6 AM
+    
+    **Acción:** Google Sheets - Leer Filas
+    - Obtener URLs para monitorear
+    
+    **Acción:** Código - Formatear URLs
+    - Convertir a formato de array de lote
+    
+    **Acción:** Olostep - Extraer Lotes de URLs
+    - Procesar todas las URLs a la vez
+    
+    **Acción:** Slack - Enviar Mensaje
+    - Notificar al equipo que la extracción está completa
+  </Accordion>
+</AccordionGroup>
+
+### Crear Rastreo
+
+Obtén el contenido de subpáginas de una URL. Descubre y extrae sitios web completos de manera autónoma siguiendo enlaces. Perfecto para sitios de documentación, blogs y repositorios de contenido.
+
+**Casos de Uso:**
+- Rastrear y archivar sitios de documentación completos
+- Extraer todos los artículos de blog de un sitio web
+- Construir bases de conocimiento a partir de contenido web
+- Monitorear cambios en la estructura del sitio web
+
+**Configuración:**
+
+<ParamField path="URL de Inicio" type="string" required>
+  URL de inicio para el rastreo (debe incluir http:// o https://)
+</ParamField>
+
+<ParamField path="Máximo de Páginas" type="integer" default="10">
+  Número máximo de páginas a rastrear
+</ParamField>
+
+<ParamField path="Seguir Enlaces" type="boolean" default="true">
+  Si se deben seguir los enlaces encontrados en las páginas
+</ParamField>
+
+<ParamField path="Formato de Salida" type="dropdown" default="Markdown">
+  Formato para el contenido extraído
+</ParamField>
+
+<ParamField path="Código de País" type="string">
+  Código de país opcional para rastreo específico de la ubicación
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  ID de parser opcional para extracción de contenido especializada
+</ParamField>
+
+**Campos de Salida:**
+- ID de Rastreo (usa esto para recuperar resultados más tarde)
+- Tipo de Objeto
+- Estado
+- URL de Inicio
+- Máximo de Páginas
+- Seguir Enlaces
+- Marca de Tiempo de Creación
+- Formatos
+
+**Ejemplos de Flujos de Trabajo:**
+
+<AccordionGroup>
+  <Accordion title="Archivar Sitio de Documentación">
+    **Disparador:** Programar - Mensualmente el 1º a las 12 AM
+    
+    **Acción:** Olostep - Crear Rastreo
+    - URL de Inicio: https://docs.example.com
+    - Máximo de Páginas: 500
+    - Seguir Enlaces: true
+    - Formato: Markdown
+    
+    **Acción:** Webhook - POST
+    - Enviar ID de rastreo a tu sistema de archivo
+    
+    **Acción:** Slack - Enviar Mensaje
+    - Notificar al equipo que el rastreo está en progreso
+  </Accordion>
+
+  <Accordion title="Análisis de Contenido de Competencia">
+    **Disparador:** Programar - Semanalmente los lunes a las 9 AM
+    
+    **Acción:** Olostep - Crear Rastreo
+    - URL de Inicio: URL del blog del competidor
+    - Máximo de Páginas: 100
+    - Formato: Markdown
+    
+    **Acción:** Esperar - Por 10 minutos
+    - Esperar a que el rastreo se complete
+    
+    **Acción:** Airtable - Crear Registros
+    - Almacenar datos de rastreo para análisis
+  </Accordion>
+</AccordionGroup>
+
+### Crear Mapa
+
+Obtén todas las URLs en un sitio web. Extrae todas las URLs de un sitio web para el descubrimiento de contenido y análisis de la estructura del sitio.
+
+**Casos de Uso:**
+- Construir mapas de sitio y diagramas de estructura del sitio
+- Descubrir todas las páginas antes de extraer en lote
+- Encontrar páginas rotas o faltantes
+- Auditorías y análisis de SEO
+
+**Configuración:**
+
+<ParamField path="URL del Sitio Web" type="string" required>
+  URL del sitio web para extraer enlaces (debe incluir http:// o https://)
+</ParamField>
+
+<ParamField path="Consulta de Búsqueda" type="string">
+  Consulta de búsqueda opcional para filtrar URLs (por ejemplo, "blog")
+</ParamField>
+
+<ParamField path="Top N URLs" type="integer">
+  Limitar el número de URLs devueltas
+</ParamField>
+
+<ParamField path="Incluir Patrones de URL" type="string">
+  Patrones glob para incluir rutas específicas (por ejemplo, "/blog/**")
+</ParamField>
+
+<ParamField path="Excluir Patrones de URL" type="string">
+  Patrones glob para excluir rutas específicas (por ejemplo, "/admin/**")
+</ParamField>
+
+**Campos de Salida:**
+- ID de Mapa
+- Tipo de Objeto
+- URL del Sitio Web
+- Total de URLs Encontradas
+- URLs (array JSON)
+- Consulta de Búsqueda
+- Límite de Top N
+
+**Ejemplos de Flujos de Trabajo:**
+
+<AccordionGroup>
+  <Accordion title="Descubrir y Extraer">
+    **Disparador:** Manual (Botón)
+    
+    **Acción:** Olostep - Crear Mapa
+    - URL: https://example.com
+    - Incluir Patrones: /products/**
+    - Top N: 500
+    
+    **Acción:** Código - Extraer URLs
+    - Analizar URLs del resultado del mapa
+    
+    **Acción:** Olostep - Extraer Lotes de URLs
+    - URLs: \{\{$json.urls\}\}
+    - Formato: JSON
+    
+    **Acción:** Google Sheets - Añadir Filas
+    - Añadir todos los datos de productos a la hoja de cálculo
+  </Accordion>
+
+  <Accordion title="Auditoría de Sitio SEO">
+    **Disparador:** Programar - Mensualmente
+    
+    **Acción:** Olostep - Crear Mapa
+    - URL: Tu sitio web
+    - Top N: 1000
+    
+    **Acción:** Airtable - Crear Registros
+    - Almacenar todas las URLs para seguimiento
+    
+    **Acción:** Slack - Enviar Mensaje
+    - Informar el total de páginas encontradas
+  </Accordion>
+</AccordionGroup>
+
+## Ejemplos Populares de Flujos de Trabajo
+
+### Monitoreo de Precios en E-commerce
+
+Monitorea precios de competidores y recibe alertas instantáneas:
+
+```
+Disparador: Programar (Cada hora)
+↓
+Acción: Olostep - Extraer Sitio Web
+  - URL: Página de producto del competidor
+  - Formato: JSON
+  - Parser: @olostep/amazon-product
+↓
+Acción: IF - Verificar si el precio cambió
+↓
+Acción: Slack - Enviar Mensaje
+  - Alerta: "El precio cambió a $\{\{price\}\}"
+```
+
+### Agregación de Contenido
+
+Agrega contenido de múltiples fuentes:
+
+```
+Disparador: Google Sheets - Nueva Fila
+↓
+Acción: Olostep - Extraer Sitio Web
+  - URL: \{\{$json.url\}\}
+  - Formato: Markdown
+↓
+Acción: OpenAI - Resumir
+  - Resumir el contenido
+↓
+Acción: Airtable - Crear Registro
+  - Almacenar artículo con resumen
+```
+
+### Pipeline de Enriquecimiento de Leads
+
+Enriquece datos de leads con información web:
+
+```
+Disparador: HubSpot - Nuevo Contacto
+↓
+Acción: Olostep - Extraer Sitio Web
+  - URL: \{\{$json.companyWebsite\}\}
+  - Formato: Markdown
+↓
+Acción: OpenAI - Extraer Datos
+  - Extraer: tamaño de la empresa, industria, productos
+↓
+Acción: HubSpot - Actualizar Contacto
+  - Añadir datos enriquecidos al contacto
+```
+
+### Automatización de Investigación
+
+Automatiza la investigación desde múltiples fuentes:
+
+```
+Disparador: Airtable - Nuevo Registro
+↓
+Acción: Olostep - Crear Mapa
+  - URL: Sitio web objetivo de investigación
+  - Incluir: /research/**
+↓
+Acción: Código - Analizar URLs
+↓
+Acción: Olostep - Extraer Lotes de URLs
+  - URLs: \{\{$json.discoveredUrls\}\}
+  - Formato: Markdown
+↓
+Acción: Notion - Crear Páginas
+  - Crear base de datos de investigación
+```
+
+### Monitoreo de Redes Sociales
+
+Rastrea menciones y contenido:
+
+```
+Disparador: Programar (Cada 6 horas)
+↓
+Acción: Olostep - Extraer Sitio Web
+  - URL: Página de búsqueda de sitio de noticias
+  - Formato: HTML
+↓
+Acción: Código - Extraer Menciones
+  - Encontrar menciones de la marca
+↓
+Acción: Google Sheets - Añadir Fila
+  - Registrar menciones con marca de tiempo
+```
+
+## Flujos de Trabajo de Múltiples Pasos
+
+### Pipeline Completo de Extracción de Productos
+
+Construye un pipeline de datos de productos completo:
+
+<Steps>
+  <Step title="Descubrir URLs de Productos">
+    Usa **Crear Mapa** para encontrar todas las páginas de productos en el sitio objetivo
+    - Incluir patrones: `/products/**`
+    - Excluir patrones: `/cart/**`, `/checkout/**`
+  </Step>
+  
+  <Step title="Procesar Lotes de Productos">
+    Usa **Extraer Lotes de URLs** para extraer todos los datos de productos
+    - Formato: JSON
+    - Parser: Parser específico de producto si está disponible
+  </Step>
+  
+  <Step title="Almacenar en Base de Datos">
+    Envía el ID de lote a tu sistema o espera y recupera resultados
+    - Usa Airtable, Google Sheets, o tu base de datos
+  </Step>
+  
+  <Step title="Monitorear Cambios">
+    Programa extracciones diarias para rastrear cambios de precio/disponibilidad
+    - Compara con datos existentes
+    - Alerta sobre cambios significativos
+  </Step>
+</Steps>
+
+### Estrategia de Contenido SEO
+
+Analiza competidores y planifica contenido:
+
+<Steps>
+  <Step title="Mapear Sitios de Competencia">
+    Usa **Crear Mapa** en sitios web de competidores
+    - Extrae todas las entradas de blog y páginas de contenido
+  </Step>
+  
+  <Step title="Extraer Contenido">
+    Usa **Extraer Lotes de URLs** para obtener contenido completo
+    - Formato: Markdown para análisis fácil
+  </Step>
+  
+  <Step title="Análisis con IA">
+    Usa OpenAI para analizar temas y palabras clave
+    - Identifica brechas de contenido
+    - Encuentra temas de tendencia
+  </Step>
+  
+  <Step title="Crear Calendario de Contenidos">
+    Añade ideas a Notion o Airtable
+    - Planifica tu estrategia de contenido
+  </Step>
+</Steps>
+
+## Parsers Especializados
+
+Olostep proporciona parsers preconstruidos para sitios web populares. Úsalos con el campo `Parser`:
+
+<CardGroup cols={2}>
+  <Card title="Producto de Amazon" icon="amazon">
+    `@olostep/amazon-product`
+    
+    Extrae: título, precio, calificación, reseñas, imágenes, variantes
+  </Card>
+  
+  <Card title="Búsqueda de Google" icon="google">
+    `@olostep/google-search`
+    
+    Extrae: resultados de búsqueda, títulos, fragmentos, URLs
+  </Card>
+  
+  <Card title="Google Maps" icon="map">
+    `@olostep/google-maps`
+    
+    Extrae: información de negocios, reseñas, calificaciones, ubicación
+  </Card>
+
+  <Card title="Extraer Emails" icon="envelope">
+    `@olostep/extract-emails`
+    
+    Extrae: emails de páginas, listas de contacto y pies de página
+  </Card>
+
+  <Card title="Extraer Redes Sociales" icon="users">
+    `@olostep/extract-socials`
+    
+    Extrae: enlaces de perfiles sociales (X/Twitter, GitHub, etc.)
+  </Card>
+
+  <Card title="Extraer Calendarios" icon="calendar">
+    `@olostep/extract-calendars`
+    
+    Extrae: enlaces de calendarios (Google Calendar, ICS) de páginas
+  </Card>
+</CardGroup>
+
+### Usando Parsers
+
+Simplemente añade el ID del parser al campo Parser. Dos ejemplos:
+
+```
+Acción: Olostep - Extraer Sitio Web
+  - URL: https://www.amazon.com/dp/PRODUCT_ID
+  - Formato: JSON
+  - Parser: @olostep/amazon-product
+```
+
+```
+Acción: Olostep - Extraer Sitio Web
+  - URL: https://example.com/contact
+  - Formato: JSON
+  - Parser: @olostep/extract-emails
+```
+
+El parser extrae automáticamente datos estructurados específicos para la tarea.
+
+## Integración con Aplicaciones Populares
+
+### Google Sheets
+
+Perfecto para la recopilación y seguimiento de datos:
+
+```
+1. Olostep extrae sitio web
+2. Filtrar o transformar datos
+3. Google Sheets - Añadir Fila
+```
+
+**Casos de Uso:**
+- Hojas de seguimiento de precios
+- Bases de datos de enriquecimiento de leads
+- Inventario de contenido
+- Hojas de análisis de competidores
+
+### Airtable
+
+Construye potentes bases de datos con datos extraídos:
+
+```
+1. Olostep extrae o rastrea
+2. Código - Formatear datos
+3. Airtable - Crear Registros
+```
+
+**Casos de Uso:**
+- Catálogos de productos
+- Bases de datos de investigación
+- Calendarios de contenido
+- Bases de datos de enlaces
+
+### Slack
+
+Recibe notificaciones instantáneas:
+
+```
+1. Olostep monitorea página
+2. IF - Verificar cambios
+3. Slack - Enviar Mensaje
+```
+
+**Casos de Uso:**
+- Alertas de caída de precios
+- Notificaciones de actualización de contenido
+- Monitoreo de errores
+- Resúmenes diarios
+
+### HubSpot / Salesforce
+
+Enriquece datos de CRM automáticamente:
+
+```
+1. Nuevo contacto añadido
+2. Olostep extrae sitio web de la empresa
+3. OpenAI extrae información clave
+4. CRM - Actualizar contacto
+```
+
+**Casos de Uso:**
+- Enriquecimiento de leads
+- Investigación de empresas
+- Inteligencia competitiva
+- Mapeo de cuentas
+
+### Notion
+
+Construye bases de conocimiento:
+
+```
+1. Olostep rastrea documentación
+2. Código - Analizar contenido
+3. Notion - Crear Páginas
+```
+
+**Casos de Uso:**
+- Espejos de documentación
+- Repositorios de investigación
+- Bibliotecas de contenido
+- Wikis de equipo
+
+## Mejores Prácticas
+
+<AccordionGroup>
+  <Accordion title="Usa Procesamiento por Lotes para Múltiples URLs">
+    Cuando extraigas más de 3-5 URLs, usa **Extraer Lotes de URLs** en lugar de múltiples acciones de **Extraer Sitio Web**. El procesamiento por lotes es:
+    - Mucho más rápido (procesamiento en paralelo)
+    - Más rentable
+    - Más fácil de gestionar
+    - Mejor para límites de tasa
+  </Accordion>
+
+  <Accordion title="Configura Tiempos de Espera Apropiados">
+    Para sitios pesados en JavaScript, usa el parámetro "Esperar Antes de Extraer":
+    - Sitios simples: 0-1000ms
+    - Sitios dinámicos: 2000-3000ms
+    - JavaScript pesado: 5000-8000ms
+    
+    Prueba con diferentes valores para encontrar el tiempo de espera óptimo.
+  </Accordion>
+
+  <Accordion title="Usa Parsers Especializados">
+    Usa parsers preconstruidos (por ejemplo, Amazon, Google, y parsers específicos de tareas de la Tienda Olostep como emails, redes sociales, calendarios):
+    - Obtén datos estructurados automáticamente
+    - Extracción más confiable
+    - No necesitas parsing personalizado
+    - Mantenidos por Olostep
+  </Accordion>
+
+  <Accordion title="Filtra Antes de Extraer">
+    Usa el nodo IF de n8n para evitar extracciones innecesarias:
+    - Verifica si la URL ha cambiado
+    - Verifica que los datos no se hayan extraído recientemente
+    - Aplica lógica de negocio antes de extraer
+    
+    Esto ahorra créditos de API y tiempo de ejecución.
+  </Accordion>
+
+  <Accordion title="Maneja Operaciones Asíncronas">
+    Las operaciones de Lote, Rastreo y Mapa son asíncronas:
+    - Almacena el ID devuelto (batch_id, crawl_id, map_id)
+    - Usa un nodo de Espera si recuperas inmediatamente
+    - Considera callbacks de webhook para finalización
+    - Configura flujos de trabajo separados para recuperación
+  </Accordion>
+
+  <Accordion title="Almacena Resultados Adecuadamente">
+    Elige el almacenamiento adecuado según tus necesidades:
+    - **Google Sheets**: Seguimiento simple, colaboración en equipo
+    - **Airtable**: Datos relacionales, formato enriquecido
+    - **Base de Datos**: A gran escala, consultas complejas
+    - **Notion**: Base de conocimiento, documentación
+  </Accordion>
+
+  <Accordion title="Monitorea y Alerta">
+    Configura monitoreo para tus flujos de trabajo de extracción:
+    - Usa flujos de trabajo de Error en n8n
+    - Envía alertas a Slack/Email en caso de fallos
+    - Rastrea el uso de API en el dashboard de Olostep
+    - Registra métricas importantes
+  </Accordion>
+</AccordionGroup>
+
+## Casos de Uso Comunes por Industria
+
+### E-commerce
+- **Monitoreo de Precios**: Rastrear precios de competidores en tiempo real
+- **Investigación de Productos**: Descubrir productos de tendencia y brechas de mercado
+- **Seguimiento de Inventario**: Monitorear disponibilidad de stock
+- **Análisis de Reseñas**: Agregar y analizar reseñas de clientes
+
+### Marketing & SEO
+- **Descubrimiento de Contenido**: Encontrar oportunidades de contenido
+- **Análisis de Competencia**: Rastrear estrategias de competidores
+- **Investigación de Backlinks**: Descubrir oportunidades de enlaces
+- **Investigación de Palabras Clave**: Extraer datos de palabras clave de resultados de búsqueda
+
+### Ventas & Generación de Leads
+- **Enriquecimiento de Leads**: Mejorar datos de CRM con información web
+- **Investigación de Empresas**: Recopilar inteligencia de empresas
+- **Descubrimiento de Contactos**: Encontrar tomadores de decisiones
+- **Inteligencia Competitiva**: Rastrear movimientos de competidores
+
+### Investigación & Análisis
+- **Recopilación de Datos**: Recopilar datos de múltiples fuentes
+- **Investigación de Mercado**: Rastrear tendencias de la industria
+- **Investigación Académica**: Recopilar datos de investigación
+- **Inteligencia de Precios**: Analizar estrategias de precios
+
+### Medios & Publicación
+- **Agregación de Contenido**: Curar contenido de múltiples sitios
+- **Monitoreo de Noticias**: Rastrear noticias y menciones
+- **Redes Sociales**: Monitorear plataformas sociales
+- **Detección de Tendencias**: Identificar temas de tendencia
+
+## Solución de Problemas
+
+<AccordionGroup>
+  <Accordion title="Autenticación Fallida">
+    **Error**: "Clave API inválida"
+    
+    **Soluciones**:
+    - Verifica la clave API desde el [dashboard](https://olostep.com/dashboard)
+    - Asegúrate de que no haya espacios extra en la clave API
+    - Recrea la credencial en n8n
+    - Verifica que la clave API esté activa
+  </Accordion>
+
+  <Accordion title="Extracción Devuelve Contenido Vacío">
+    **Error**: Los campos de contenido están vacíos
+    
+    **Soluciones**:
+    - Aumenta el tiempo de "Esperar Antes de Extraer"
+    - Verifica si el sitio web requiere inicio de sesión
+    - Prueba con un formato diferente (HTML vs Markdown)
+    - Verifica que la URL sea accesible
+    - Verifica si el sitio bloquea el acceso automatizado
+  </Accordion>
+
+  <Accordion title="Error de Formato de Array de Lote">
+    **Error**: "Formato JSON inválido para array de lote"
+    
+    **Soluciones**:
+    - Usa el formato: `[{"url":"https://example.com","custom_id":"id1"}]`
+    - Asegúrate de la sintaxis JSON adecuada
+    - Usa el nodo de Código para formatear URLs correctamente
+    - Prueba el JSON con un validador en línea
+  </Accordion>
+
+  <Accordion title="Límite de Tasa Excedido">
+    **Error**: "Límite de tasa excedido"
+    
+    **Soluciones**:
+    - Espacia las ejecuciones de flujo de trabajo con nodos de Espera
+    - Usa procesamiento por lotes en lugar de extracciones individuales
+    - Actualiza tu plan de Olostep
+    - Verifica el límite de tasa en el dashboard
+  </Accordion>
+
+  <Accordion title="URL No Extraída">
+    **Error**: URLs específicas fallan al extraer
+    
+    **Soluciones**:
+    - Verifica el formato de la URL (incluye http:// o https://)
+    - Verifica si la URL requiere autenticación
+    - Prueba la URL en el navegador primero
+    - Prueba con el parámetro de país
+    - Contacta al soporte para dominios bloqueados
+  </Accordion>
+</AccordionGroup>
+
+## Ventajas de n8n
+
+### Autoalojado
+n8n es autoalojado, lo que te da control total sobre tus flujos de trabajo y datos. Sin bloqueo de proveedor, sin datos saliendo de tu infraestructura.
+
+### Sin Límites de Tareas
+A diferencia de las plataformas de automatización basadas en la nube, n8n no impone límites de tareas. Ejecuta tantos flujos de trabajo como necesites sin costos adicionales.
+
+### Código Abierto
+n8n es de código abierto, lo que te permite personalizarlo y extenderlo para adaptarlo a tus necesidades específicas.
+
+### Rentable
+n8n autoalojado es gratuito, con alojamiento en la nube opcional disponible. Solo paga por el uso de la API de Olostep.
+
+## Precios
+
+Olostep cobra basado en el uso de la API, independiente de n8n:
+
+- **Extracciones**: Pago por extracción
+- **Lotes**: Pago por URL en lote
+- **Rastreos**: Pago por página rastreada
+- **Mapas**: Pago por operación de mapa
+
+Consulta los precios actuales en [olostep.com/pricing](https://olostep.com/pricing).
+
+**n8n**: n8n autoalojado es gratuito. Alojamiento en la nube disponible con planes pagos opcionales.
+
+## Soporte
+
+¿Necesitas ayuda con la integración de n8n?
+
+<CardGroup cols={2}>
+  <Card title="Documentación" icon="book" href="https://docs.olostep.com">
+    Explora la documentación completa de la API
+  </Card>
+  
+  <Card title="Correo de Soporte" icon="envelope" href="mailto:info@olostep.com">
+    Email: info@olostep.com
+  </Card>
+  
+  <Card title="Comunidad de n8n" icon="users" href="https://community.n8n.io">
+    Pregunta en la Comunidad de n8n
+  </Card>
+  
+  <Card title="Página de Estado" icon="signal" href="https://status.olostep.com">
+    Verifica el estado de la API
+  </Card>
+</CardGroup>
+
+## Recursos Relacionados
+
+<CardGroup cols={2}>
+  <Card title="API de Extracciones" icon="file-lines" href="/features/scrapes/scrapes">
+    Aprende sobre el endpoint de Extracciones
+  </Card>
+  
+  <Card title="API de Lotes" icon="layer-group" href="/features/batches/batches">
+    Aprende sobre el endpoint de Lotes
+  </Card>
+  
+  <Card title="API de Rastreos" icon="spider-web" href="/features/crawls/crawls">
+    Aprende sobre el endpoint de Rastreos
+  </Card>
+  
+  <Card title="API de Mapas" icon="map" href="/features/maps/maps">
+    Aprende sobre el endpoint de Mapas
+  </Card>
+  
+  <Card title="SDK de Python" icon="python" href="/sdks/python">
+    Usa Olostep con Python
+  </Card>
+  
+  <Card title="Integración con LangChain" icon="link" href="/integrations/langchain">
+    Construye agentes de IA con LangChain
+  </Card>
+</CardGroup>
+
+## Comienza
+
+¿Listo para automatizar tus flujos de trabajo de búsqueda web, scraping y crawling?
+
+<Card title="Instala el Nodo" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
+  Instala n8n-nodes-olostep y comienza a construir flujos de trabajo automatizados
+</Card>
+
+¡Conecta Olostep con n8n y automatiza hoy mismo tu extracción de datos web!

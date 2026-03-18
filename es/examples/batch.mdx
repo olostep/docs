@@ -1,0 +1,167 @@
+---
+icon: "lines-leaning"
+sidebarTitle: "Raspado por Lotes"
+title: "Obtén el contenido de múltiples sitios web de una sola vez"
+description: "Inicia un raspado por lotes para extraer contenido de hasta 100k URLs en 5-7 minutos"
+---
+
+## Descripción General
+
+El endpoint [Batches](https://docs.olostep.com/api-reference/batches/create) de Olostep te permite iniciar un lote de hasta 10,000 URLs y obtener el contenido en 5-7 minutos. Puedes iniciar hasta 10 lotes a la vez para extraer contenido de 100,000 URLs de una sola vez. Si necesitas más escala, por favor contáctanos.
+
+Esto es útil si ya tienes las URLs que deseas procesar, por ejemplo, para agregar datos para análisis, construir una herramienta de búsqueda especializada o monitorear múltiples sitios web para detectar cambios.
+
+En esta guía, te mostraremos cómo iniciar un lote con una lista de URLs y recuperar el contenido en formato markdown.
+
+## Resumen con Código Completo
+Aquí tienes todo el código en un resumen que puedes copiar y pegar para probar el raspado por lotes con Olostep:
+https://gist.github.com/olostep/e903f2e4fc28f8093b834b4df68b8031
+
+En este resumen hemos mostrado cómo iniciar un lote con 5 consultas de búsqueda de Google, verificar el estado y recuperar el contenido de cada elemento.
+
+## Prerrequisitos
+Antes de comenzar, asegúrate de tener lo siguiente:
+
+- Una clave API válida de Olostep. Puedes obtener una registrándote en [Olostep](https://www.olostep.com/dashboard).
+- Python instalado en tu sistema.
+- Las bibliotecas `requests` y `hashlib` (instala `requests` con `pip install requests` si es necesario).
+
+## Paso 1: Crear un Lote desde URLs Locales
+
+Si ya tienes una lista de URLs que deseas procesar, puedes definirlas directamente en tu script. De lo contrario, puedes leerlas desde un archivo o base de datos.
+
+```python filename="start_batch.py"
+import requests
+import hashlib
+
+API_KEY = "YOUR_API_KEY"
+
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=nikola+tesla&gl=us&hl=en",
+        "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+        "https://www.google.com/search?q=google+solar+eclipse&gl=us&hl=en",
+        "https://www.google.com/search?q=crispr&gl=us&hl=en",
+        "https://www.google.com/search?q=genghis%20khan&gl=us&hl=en"
+    ]
+    return [{"custom_id": create_hash_id(url), "url": url} for url in urls]
+
+def start_batch(items):
+    payload = {
+        "items": items
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+    return response.json()["id"]
+
+if __name__ == "__main__":
+    items = compose_items_array()
+    batch_id = start_batch(items)
+    print("Lote iniciado. ID:", batch_id)
+```
+
+## Paso 2: Monitorear el Estado del Lote
+
+Una vez que el lote está iniciado, puedes monitorear su estado usando el `batch_id` que se devuelve cuando inicias el lote.
+
+```python filename="check_status.py"
+import requests
+
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}",
+        headers=headers
+    )
+    return response.json()["status"]
+```
+
+Puedes sondear el estado cada pocos segundos (por ejemplo, 10 segundos) hasta que el lote esté completo:
+
+```python
+import time
+
+def recursive_check(batch_id):
+    status = check_batch_status(batch_id)
+    print("Estado:", status)
+    if status == "completed":
+        print("¡Lote completo!")
+    else:
+        time.sleep(60)
+        recursive_check(batch_id)
+```
+
+## Paso 3: Recuperar Elementos Completados
+
+Una vez que el lote está marcado como completo, recupera los elementos procesados.
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}/items",
+        headers=headers
+    )
+    return response.json()["items"]
+```
+
+Cada elemento incluirá un `retrieve_id` que puedes usar para obtener el contenido raspado.
+
+```python
+items = get_completed_items(batch_id)
+for item in items:
+    print(f"URL: {item['url']}\nCustom ID: {item['custom_id']}\nRetrieve ID: {item['retrieve_id']}\n---")
+```
+
+## Paso 4: Recuperar el Contenido
+
+Usa el `retrieve_id` para obtener el contenido extraído en markdown, html o json. Aquí tienes un ejemplo para recuperar el contenido en formato markdown:
+
+```python filename="retrieve_content.py"
+def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# Ejemplo de uso:
+items = get_completed_items(batch_id)
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content)
+```
+
+## Contenido Hospedado
+También alojamos el contenido durante 7 días, por lo que puedes recuperarlo varias veces sin volver a raspar.
+Ejemplo de una URL alojada para [contenido markdown](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_p64bro0q3n_924d0fa125efcc5c.txt)
+
+## Casos de Uso de Ejemplo
+
+### 1. Construir Motores de Búsqueda
+Usa Olostep para extraer contenido de sitios web específicos de la industria (legal, médico, IA) y construir una base de datos buscable.
+
+### 2. Monitoreo de Sitios Web
+Monitorea la disponibilidad de productos, cambios de precios o actualizaciones de noticias en múltiples sitios web programando raspados por lotes diarios.
+
+### 3. Monitoreo de Redes Sociales
+Raspa menciones de tu marca o palabras clave en foros o fuentes de contenido y extrae datos estructurados.
+
+### 4. Agregadores
+Construye un tablero de empleos, un agregador de noticias o una plataforma de listados inmobiliarios extrayendo datos de docenas de fuentes.
+
+## Conclusión
+
+Con el raspado por lotes, puedes extraer contenido de hasta 100k URLs de manera rápida y eficiente. Ya sea que estés construyendo herramientas de búsqueda, agregadores o sistemas de monitoreo, Olostep Batches simplifica el trabajo.
+
+¿Quieres extraer solo datos estructurados? Usa [Parsers](https://docs.olostep.com/features/structured-content/parsers) para obtener solo los campos que necesitas. ¿Necesitas ayuda? Comunícate con `info@olostep.com` para soporte o para que escribamos scripts personalizados para tu caso de uso.

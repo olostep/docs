@@ -1,0 +1,144 @@
+---
+title: "API Orientada a Objetos"
+sidebarTitle: "API Orientada a Objetos"
+description: "Entendiendo cómo los objetos de la API de Olostep trabajan juntos"
+icon: "cube"
+---
+
+La API de Olostep está diseñada alrededor de objetos. Entender este diseño te ayuda a construir integraciones más efectivas. Este diseño está inspirado por la [filosofía de la API de Stripe](https://docs.stripe.com/payments-api/tour#everything-is-an-object).
+
+---
+
+## Todo es un Objeto
+
+Cada recurso en Olostep es un objeto con un identificador único. Ya sea que lo crees a través de la API, SDK o el panel de control, obtienes un objeto que puedes referenciar, actualizar y consultar.
+
+| Recurso | Formato de ID de Objeto | Ejemplo |
+|---------|-------------------------|---------|
+| Scrape | `scrape_*` | `scrape_abc123` |
+| Batch | `batch_*` | `batch_xyz789` |
+| Crawl | `crawl_*` | `crawl_def456` |
+| Map | `map_*` | `map_ghi012` |
+| Answer | `answer_*` | `answer_jkl345` |
+| File | `file_*` | `file_mno678` |
+| Schedule | `schedule_*` | `schedule_pqr901` |
+
+---
+
+## Los Objetos Pueden Tener Ciclos de Vida
+
+Algunos objetos de Olostep rastrean el estado a través de un campo `status`. Este patrón de máquina de estados te permite saber exactamente en qué parte del ciclo de vida se encuentra cada recurso.
+
+### Batches
+
+Los batches tienen dos niveles de estado: el **batch** en sí y los **elementos** individuales.
+
+**Estado del Batch:**
+
+```
+in_progress → completed
+```
+
+| Estado | Descripción |
+|--------|-------------|
+| `in_progress` | Se están scrapeando URLs |
+| `completed` | Procesamiento finalizado |
+
+<Note>
+**Las fallas a nivel de batch son extremadamente raras.** Los batches casi siempre se completan, incluso si algunas URLs fallan, el batch en sí alcanza el estado `completed`. En el raro caso de una falla catastrófica de infraestructura (por ejemplo, una interrupción del servicio LLM durante el enriquecimiento), el batch puede fallar. Esto afecta a menos del 0.01% de los batches.
+</Note>
+
+**Estado del Elemento:**
+
+Cada URL en un batch se rastrea como un elemento individual con su propio estado:
+
+| Estado | Descripción |
+|--------|-------------|
+| `success` | URL scrapeada exitosamente |
+| `failed` | No se pudo scrapear la URL |
+
+Los elementos pueden fallar debido a:
+- La URL está bloqueada o devuelve un error
+- Falta la salida del analizador
+- Errores de red/obtención
+
+Los elementos fallidos incluyen un objeto `error` con `code` y `message` que explican la falla. El batch aún se completa: verifica el estado de cada elemento al procesar los resultados.
+
+### Crawls
+
+```
+in_progress → completed
+```
+
+| Estado | Descripción |
+|--------|-------------|
+| `in_progress` | Descubriendo y procesando URLs activamente |
+| `completed` | Crawling finalizado |
+
+<Note>
+**Los crawls siempre se completan.** Incluso si un crawl encuentra 0 URLs (debido a bloqueo de robots.txt o URL de inicio inválida), el estado del crawl será `completed`. Verifica el campo `pages_count` para confirmar los resultados.
+</Note>
+
+---
+
+## Patrón de Recuperación
+
+Muchos objetos producen contenido que puede ser recuperado más tarde. El patrón `retrieve_id` te permite obtener contenido sin volver a procesarlo.
+
+```bash
+# Obtener contenido usando retrieve_id
+curl "https://api.olostep.com/v1/retrieve?retrieve_id=6h89o8u1kt" \
+  -H "Authorization: Bearer <your_token>"
+```
+
+Este patrón es utilizado por:
+- **Elementos de batch** — Cada URL procesada obtiene un `retrieve_id`
+- **Páginas de crawl** — Cada página rastreada obtiene un `retrieve_id`
+
+El endpoint `/v1/retrieve` acepta el parámetro `formats` para especificar qué tipos de contenido devolver (`html`, `markdown`, `json`, `text`).
+
+---
+
+## Webhooks: Actualizaciones Basadas en Eventos
+
+En lugar de sondear para cambios de estado, configura [webhooks](/api-reference/common/webhooks) para recibir eventos cuando los objetos cambian de estado.
+
+```json
+{
+  "event": "batch.completed",
+  "data": {
+    "id": "batch_xyz789",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 100
+  }
+}
+```
+
+---
+
+## Metadata: Tus Datos Junto a los Nuestros
+
+Adjunta pares clave-valor personalizados a los objetos usando [metadata](/api-reference/common/metadata). Esto te permite vincular los recursos de Olostep a tus sistemas internos.
+
+```json
+{
+  "items": [{"url": "https://example.com"}],
+  "metadata": {
+    "order_id": "12345",
+    "customer": "acme-corp"
+  }
+}
+```
+
+---
+
+## Resumen
+
+| Concepto | Descripción |
+|----------|-------------|
+| **Objetos** | Cada recurso tiene un ID único y es consultable |
+| **Ciclos de Vida** | Rastrear el progreso a través del campo `status` |
+| **Recuperar** | Obtener contenido más tarde con `retrieve_id` |
+| **Webhooks** | Recibe notificaciones cuando el estado cambia |
+| **Metadata** | Adjunta tus propios datos a cualquier objeto |

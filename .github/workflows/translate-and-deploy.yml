@@ -233,6 +233,9 @@ jobs:
             fi
           done
 
+      - name: Sanitize MDX frontmatter (YAML-safe quoting, all locales)
+        run: npx ts-node scripts/sanitize-locale-frontmatter.ts
+
       - name: Translate OpenAPI specs (all locales)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

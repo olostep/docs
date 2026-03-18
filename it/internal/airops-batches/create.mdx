@@ -1,0 +1,88 @@
+---
+title: "Crea Batch AirOps"
+description: "Avvia un batch con estrazione automatica dei metadati delle pagine e rilevamento del marchio"
+openapi: "POST /v1/batches-airops"
+---
+
+## Panoramica
+
+Crea un nuovo batch AirOps che:
+1. Esegue il scraping di tutti gli URL forniti
+2. Estrae automaticamente i metadati strutturati
+3. Identifica gli elementi con campi mancanti
+4. Arricchisce gli elementi incompleti tramite LLM
+5. Restituisce risultati unificati per tutti gli URL
+
+## Parametri della Richiesta
+
+<ParamField body="items" type="array" required>
+  Array di URL da elaborare. Ogni elemento richiede:
+  - `url` - URL valido per il scraping
+  - `custom_id` - Il tuo identificatore univoco (1-255 caratteri)
+</ParamField>
+
+<ParamField body="brands" type="array" default="[]">
+  Nomi dei marchi da cercare nel contenuto della pagina. L'LLM rileverà le menzioni di questi marchi specifici e restituirà le corrispondenze nel campo `brand_mentions`.
+  
+  ```json
+  {
+    "brands": ["Acme Corp", "TechBrand", "SaaS Pro"]
+  }
+  ```
+</ParamField>
+
+<ParamField body="country" type="string" default="RANDOM">
+  Paese per il scraping geo-mirato. Usa i codici ISO 3166-1 alpha-2 (`US`, `GB`, `DE`) o `RANDOM`.
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  URL per ricevere notifiche webhook. Tutti gli eventi del ciclo di vita per questo batch saranno inviati qui.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Coppie chiave-valore personalizzate associate al batch. Stile Stripe: massimo 50 chiavi, chiave ≤40 caratteri, valore ≤500 caratteri.
+</ParamField>
+
+## Risposta
+
+La risposta include l'ID del batch e lo stato iniziale del workflow:
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch_airops",
+  "created": 1705315200000,
+  "total_urls": 100,
+  "status": {
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```

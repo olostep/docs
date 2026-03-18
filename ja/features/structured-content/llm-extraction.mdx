@@ -1,0 +1,118 @@
+---
+sidebarTitle: "LLM抽出の使用"
+title: "LLM抽出の使用"
+---
+
+構造が変化するウェブサイトや一度限りの抽出ニーズに対して、OlostepはLLMを活用した抽出を提供しています。このアプローチは以下の通りです：
+
+- コンテンツを大規模言語モデルに入力する
+- モデルに特定のデータのみを解析して返すよう指示する
+- 必要なデータを正確に含むクリーンなJSON構造を返す
+
+```python
+import requests
+import json
+
+def extract_with_llm():
+    url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": [
+            "markdown", 
+            "json"
+        ],
+        "llm_extract": {
+            "schema": {
+                "event": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "date": {"type": "string"},
+                        "description": {"type": "string"},
+                        "venue": {"type": "string"},
+                        "address": {"type": "string"},
+                        "start_time": {"type": "string"}
+                    }
+                }
+            }
+        },
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # LLM抽出結果はresultに含まれます
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+    extract_with_llm()
+```
+
+`schema`または`prompt`をLLMに渡すことができます。
+
+```python
+
+import requests
+import json
+
+def extract_with_llm():
+    url = "https://api.olostep.com/v1/scrapes"
+
+    headers = {
+        "Authorization": "Bearer <API_KEY>",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+        "formats": [
+            "markdown", 
+            "json"
+        ],
+        "llm_extract": {
+            "prompt": "イベントページからイベントのタイトル、日付、説明、会場、住所、開始時間を抽出してください。"
+        },
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # LLM抽出結果はresultに含まれます
+    print(json.dumps(result, indent=2))
+
+    return result
+
+if __name__ == "__main__":
+    extract_with_llm()
+```
+
+`prompt`はデータを抽出するためにLLMに渡される自然言語の文字列です。LLMはプロンプトに基づいてデータをどのように抽出するかを決定します。`schema`を使用したくない場合にこれを使用できます。
+
+サンプルレスポンス：
+
+```json
+{
+    "id": "scrape_94iqy385ty",
+    ...
+    "result": {
+        "json_content":  "{\"event\":{\"title\":\"Stefano Marchese and Friends\",\"date\":\"Wednesday / January 22, 2025\",\"description\":\"Join acclaimed Italian singer-songwriter and educator Stefano Marchese for an unforgettable evening of musical magic as he takes the stage alongside a constellation of extraordinary talent in a concert titled Concerto di Duetti.\",\"venue\":\"David Friend Recital Hall (DFRH)\",\"address\":\"921 Boylston Street Boston MA 02115 United States\",\"start_time\":\"7:30 p.m. (EST)\"}}"
+    }
+}
+```
+
+json_contentはイベントの文字列化されたJSONコンテンツです。文字列を解析してJSONオブジェクトとしてアクセスできます。
+
+```python
+import json
+
+event = json.loads(result["json_content"])
+print(event["event"]["title"])
+```

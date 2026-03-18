@@ -1,0 +1,96 @@
+---
+title: "Obtener el Estado del Lote"
+description: "Recupera el estado actual y el progreso de un lote de AirOps"
+openapi: "GET /v1/batches-airops/{batch_id}"
+---
+
+## Descripción General
+
+Devuelve la fase actual y las métricas de progreso para un lote de AirOps. Usa esto para hacer polling si no estás utilizando webhooks.
+
+## Campos de Respuesta
+
+<ResponseField name="id" type="string">
+  El identificador del lote.
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  Siempre `"batch"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+  Marca de tiempo Unix (milisegundos) cuando el lote fue creado.
+</ResponseField>
+
+<ResponseField name="total_urls" type="integer">
+  Número total de URLs enviadas.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Estado general del flujo de trabajo: `pending`, `in_progress`, `completed`, o `failed`.
+</ResponseField>
+
+<ResponseField name="batch_mode" type="boolean">
+  Si el modo de lote asincrónico LLM está habilitado (`true`) o el modo sincrónico (`false`).
+</ResponseField>
+
+<ResponseField name="scraping" type="object">
+  Objeto de estado completo de la fase de scraping (ver [Webhooks](/internal/airops-batches/webhooks#scraping-status)).
+</ResponseField>
+
+<ResponseField name="analyzing" type="object">
+  Objeto de estado completo de la fase de análisis (ver [Webhooks](/internal/airops-batches/webhooks#analyzing-status)).
+</ResponseField>
+
+<ResponseField name="enriching" type="object">
+  Objeto de estado completo de la fase de enriquecimiento (ver [Webhooks](/internal/airops-batches/webhooks#enriching-status)).
+</ResponseField>
+
+## Ejemplo de Respuesta
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch",
+  "created_at": 1705315200000,
+  "total_urls": 100,
+  "status": "completed",
+  "batch_mode": true,
+  "scraping": {
+    "state": "completed",
+    "submitted": 100,
+    "valid": 100,
+    "succeeded": 98,
+    "failed": 2,
+    "started_at": 1705315200000,
+    "completed_at": 1705315500000,
+    "error": null
+  },
+  "analyzing": {
+    "state": "completed",
+    "items_analyzed": 98,
+    "items_needing_enrichment": 45,
+    "items_complete": 53,
+    "fields_to_enrich": {
+      "page_type": 98,
+      "author": 12,
+      "date_published": 8,
+      "date_modified": 25,
+      "brand_mentions": 98
+    },
+    "started_at": 1705315500000,
+    "completed_at": 1705315502000
+  },
+  "enriching": {
+    "state": "completed",
+    "items_to_enrich": 45,
+    "items_enriched": 44,
+    "items_failed": 1,
+    "llm_batch_id": "batch_xyz789def",
+    "batch_mode": true,
+    "started_at": 1705315505000,
+    "completed_at": 1705316800000,
+    "error": null
+  }
+}
+```

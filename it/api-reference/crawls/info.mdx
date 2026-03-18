@@ -1,0 +1,54 @@
+---
+title: "Informazioni sul Crawl"
+description: "Recupera informazioni su un crawl specifico."
+openapi: "it/openapi/crawls.json GET /v1/crawls/{crawl_id}"
+---
+
+# Informazioni sul Crawl
+
+Questo endpoint ti permette di ottenere informazioni dettagliate su un crawl specifico utilizzando il suo `crawl_id`.
+
+## Richiesta HTTP
+
+```http
+GET /v1/crawls/{crawl_id}
+```
+
+### Parametri
+
+- `crawl_id` (stringa, obbligatorio): L'identificatore unico del crawl di cui vuoi ottenere informazioni.
+
+## Risposta
+
+Una risposta di successo restituirà un oggetto JSON contenente i dettagli del crawl.
+
+### Esempio di Risposta
+
+```json
+{
+  "id": "12345",
+  "status": "completato",
+  "created_at": "2023-10-01T12:00:00Z",
+  "completed_at": "2023-10-01T12:30:00Z",
+  "results": {
+    "pages_crawled": 100,
+    "errors": 5
+  }
+}
+```
+
+## Codici di Stato
+
+- `200 OK`: La richiesta è stata completata con successo.
+- `404 Not Found`: Il `crawl_id` specificato non esiste.
+- `500 Internal Server Error`: Si è verificato un errore sul server.
+
+## Esempio di Utilizzo
+
+Ecco un esempio di come puoi utilizzare questo endpoint con `curl`:
+
+```bash
+curl -X GET "https://api.olostep.com/v1/crawls/12345" -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Assicurati di sostituire `YOUR_ACCESS_TOKEN` con il tuo token di accesso valido.

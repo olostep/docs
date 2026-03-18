@@ -1,0 +1,544 @@
+---
+icon: "globe"
+sidebarTitle: "GEO - AI Zoekhulpmiddelen"
+title: "Haal gegevens op van populaire AI-zoekhulpmiddelen"
+description: "Haal gestructureerde gegevens uit AI-aangedreven zoekmachines met batchverzoeken"
+---
+
+## Overzicht
+
+Deze gids laat zien hoe je de Batches-eindpunt van Olostep kunt gebruiken om gegevens op te halen van populaire AI-zoekhulpmiddelen, waaronder Google AI Mode, Gemini, Microsoft Copilot, ChatGPT, Perplexity en Google AI Overzicht.
+
+Door gebruik te maken van gespecialiseerde parsers voor elk platform, kun je gestructureerde zoekresultaten op grote schaal extraheren, wat ideaal is voor:
+- Het verzamelen van concurrentie-informatie
+- Vergelijking van zoekresultaten op meerdere platforms
+- Monitoring van AI-zoekmachines
+
+## Verzoek Formuleren
+
+### Stap 1: Bereid je zoekopdrachten voor
+
+Maak een array van zoekopdrachten die je wilt uitvoeren. Voor deze demo gaan we nieuws opvragen in verschillende steden:
+
+```javascript
+const axios = require('axios');
+
+// Configuratie
+const CONFIG = {
+  url: 'https://api.olostep.com/v1/batches',
+  token: 'YOUR_API_KEY_HERE'
+};
+
+// Demo: Genereer zoekopdrachten voor verschillende steden
+const BASE_QUERY = 'wat is het nieuws vandaag in';
+const CITIES = [
+  'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix',
+  'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose'
+];
+```
+
+### Stap 2: Genereer Items voor Elk AI Hulpmiddel
+
+Elk AI-zoekhulpmiddel vereist een specifieke parser-ID en URL-structuur. Hieronder staan de functies voor het genereren van items voor elk platform:
+
+<Tabs>
+  <Tab title="Google AI Mode">
+    **Parser ID:** `@olostep/google-aimode-results`
+    
+    ```javascript
+    const generateAIModeItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://google.com/aimode?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+ </Tab>
+  
+  <Tab title="ChatGPT">
+    **Parser ID:** `@olostep/chatgpt-results`
+    
+    ```javascript
+    const generateChatGPTItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://chatgpt.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+  
+  <Tab title="Perplexity">
+    **Parser ID:** `@olostep/perplexity-results`
+    
+    ```javascript
+    const generatePerplexityItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://www.perplexity.ai/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+  
+  <Tab title="Google AI Overzicht">
+    **Parser ID:** `@olostep/google-ai-overview-results`
+    
+    ```javascript
+    const generateGoogleAIOverviewItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://www.google.com/search?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+
+  </Tab>
+
+  <Tab title="Gemini">
+    **Parser ID:** `@olostep/gemini-results`
+    
+    ```javascript
+    const generateGeminiItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://gemini.google.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+  
+  <Tab title="Microsoft Copilot">
+    **Parser ID:** `@olostep/microsoft-copilot-results`
+    
+    ```javascript
+    const generateCopilotItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://copilot.microsoft.com/chats?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+   <Tab title="Grok">
+    **Parser ID:** `@olostep/grok-results`
+    
+    ```javascript
+    const generateGrokItems = () => {
+      return CITIES.map((city, index) => {
+        const query = `${BASE_QUERY} ${city}`;
+        const encodedQuery = encodeURIComponent(query);
+        return {
+          url: `https://grok.com/?q=${encodedQuery}`,
+          custom_id: (index + 1).toString()
+        };
+      });
+    };
+    ```
+    
+  </Tab>
+</Tabs>
+
+### Stap 3: Dien het Batchverzoek in
+
+Dien je batchverzoek in met de gegenereerde items:
+
+```javascript
+const response = await axios.post(CONFIG.url, {
+  parser: { id: '@olostep/gemini-results' },
+  items: generateGeminiItems()
+}, {
+  headers: {
+    'Authorization': `Bearer ${CONFIG.token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const batchId = response.data.id;
+```
+
+**Opmerking:** Na het indienen, [poll voor voltooiing](/use-cases/batch#step-2-monitor-batch-status) om resultaten op te halen.
+
+## Responsformaat
+
+Na het indienen van een batchverzoek en het poll voor voltooiing, ontvang je reacties in het volgende formaat:
+
+<Tabs>
+  <Tab title="Google AI Mode">
+    ```json
+    {
+      "url": "https://www.google.com//search?q=what+is+the+news+today+in+Austin&hl=en&udm=50&aep=11&newwindow=1&sei=mt_oaPvDBrKh5NoPy9W1sQE&mstk=AUtExfANCngr4KIDEH7t1EJsJ3xHfdsjka647_hz7r0UJWh1VM4FhWV9j1f2QOy0ylJU2l9-zWCxfORo5WzWeAN52_oVMM7nGAgEIRdyzsjtT7h1qhBn8Qj2RiN8HFQke6uYjmqnTeR4O1opgHbiLdAe5ZNfkzDyE_9O2zE&csuir=1",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "In Austin nieuws, ambtenaren kondigden aan dat er vooruitgang is geboekt in de reactie van de stad op dakloosheid \n\n.  \n\n**Topverhaal: Dakloosheid**  \n\n* Austin-functionarissen en lokale voorstanders meldden \"echte, meetbare vooruitgang\" bij het aanpakken van de behoeften van de dakloze bevolking van de stad.\n* De aankondiging kwam voorafgaand aan een rapport van de Ending Community Homelessness Coalition (ECHO)... ",
+      "sources": [
+        {
+          "url": "https://www.kxan.com/video/austin-mayor-citys-decreased-homelessness-is-a-big-deal/11151402/#:~:text=Elected%20city%20and%20county%20officials%2C%20along%20with,experiencing%20homelessness%20in%20Austin.%20Read%20More:%20https://www.kxan.com/news/local/austin/echo%2Dto%2Dpresent%2Dreport%2Don%2Dstate%2Dof%2Daustins%2Dhomelessness%2Dresponse%2Dsystem/",
+          "title": "KXAN\n·",
+          "description": "Burgemeester van Austin: Verminderde dakloosheid in de stad is 'een grote zaak'",
+          "icon": null,
+          "domain": "https://www.kxan.com",
+          "cited": true
+        },
+        {
+          "url": "https://www.fox7austin.com/tag/us/tx/travis-county/austin/east-austin#:~:text=Austin%20pd%20arrests%20man%20in%20deadly%20east%20austin%20double%20shooting",
+          "title": "FOX 7 Austin",
+          "description": "Oost-Austin",
+          "icon": null,
+          "domain": "https://www.fox7austin.com",
+          "cited": true
+        },
+        ...
+      ],
+      "country": null
+    }
+    ```
+  </Tab>
+
+  <Tab title="ChatGPT">
+    ```json
+    {
+      "url": "https://chatgpt.com/?model=auto&q=what%20is%20the%20news%20today%20in%20Austin",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Hier is een overzicht van **het belangrijkste nieuws van vandaag in Austin, Texas**:\n\n---\n\n## 🏛️ Lokale Overheid\n\n* **Nieuw Dakloos Navigatiecentrum Goedgekeurd:** De gemeenteraad van Austin heeft de aankoop van een commercieel pand aan South Interstate 35 goedgekeurd...\n\n[Raad keurt aankoop van locatie goed - Austin Monitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n\n## 📚 Onderwijs\n\n* **Austin ISD Consolidatie:** Gezinnen verzamelen zich bij het hoofdkantoor van Austin ISD om zich te verzetten tegen het consolidatieplan...\n\n[Austin's Leading Local News - KVUE](https://www.kvue.com/)",
+      "inline_references": [
+        {
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "text": "Raad keurt aankoop van locatie goed - Austin Monitor",
+          "position": 1
+        },
+        {
+          "url": "https://www.kvue.com/",
+          "text": "Austin's Leading Local News - KVUE",
+          "position": 2
+        },
+        ...
+      ],
+      "sources": [
+        {
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "title": "Raad keurt aankoop van locatie voor nieuw dakloos navigatiecentrum goed - Austin Monitor",
+          "snippet": "De gemeenteraad stemde donderdag met 8–3 voor de aankoop van een commercieel pand aan South Interstate 35...",
+          "cited": true,
+          "date_published": "2025-10-10T12:00:00.000Z",
+          "attribution": "austinmonitor.com"
+        },
+        {
+          "url": "https://www.kvue.com/",
+          "title": "Austin's Leading Local News - KVUE",
+          "snippet": "Gezinnen verzamelen zich bij het hoofdkantoor van Austin ISD om zich te verzetten tegen het consolidatieplan...",
+          "cited": true,
+          "date_published": null,
+          "attribution": "www.kvue.com"
+        },
+        ...
+      ],
+      "products": [],
+      "network_search_calls": {
+        "user_query": "what is the news today in Austin",
+        "default_model_slug": "auto",
+        "model_slug": "gpt-5-2",
+        "search_triggered": true,
+        "search_queries": [
+          {
+            "query": "Austin Texas nieuws vandaag oktober 2025",
+            "type": "model_query"
+          },
+          ...
+        ],
+        "search_result_groups": [
+          {
+            "domain": "austinmonitor.com",
+            "entries": [
+              {
+                "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+                "title": "Raad keurt aankoop van locatie voor nieuw dakloos navigatiecentrum goed",
+                "snippet": "De gemeenteraad stemde donderdag met 8–3 voor de aankoop van een commercieel pand...",
+                "pub_date": "2025-10-10T12:00:00.000Z",
+                "attribution": "austinmonitor.com",
+                "ref_type": "news",
+                "ref_index": 1
+              }
+            ]
+          },
+          ...
+        ]
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Perplexity">
+    ```json
+    {
+      "url": "https://www.perplexity.ai/search/what-is-the-news-today-in-aust-_3zTmnq8QGiB7f2f.ESHgw",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "\nHet nieuws van vandaag in Austin omvat zowel lokale als staatsontwikkelingen. Hier is een samenvatting van de belangrijkste koppen:\n\n- Lokale Overheid\n  - Nieuw Dakloos Navigatiecentrum: De gemeenteraad van Austin heeft de aankoop van een commercieel pand aan South Interstate 35 goedgekeurd als het eerste huisvestingsnavigatiecentrum van de stad. [austinmonitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n  - Koffiehuis Zoning: De gemeenteraad van Austin werkt eraan om het gemakkelijker te maken om wandelbare buurtkoffiehuizen te openen.\n- Onderwijs\n  - Austin ISD Consolidatie: Gemeenschapsleden protesteren tegen het plan van het Austin Independent School District om 13 scholen te sluiten, met een mogelijke TEA-overname in het verschiet. Gezinnen verzamelen zich bij het hoofdkantoor van Austin ISD om zich te verzetten tegen het consolidatieplan. [kvue](https://www.kvue.com/)\n- Misdaad & Veiligheid\n  - Moord in Noord-Austin: De politie heeft een vrouw geïdentificeerd die dood werd gevonden achter een bedrijf aan Research Boulevard. Een verdachte is gearresteerd.\n  - Luchthavenbeveiliging: Een verdacht pakket gevonden op de luchthaven van Austin is inmiddels vrijgegeven.\n\nVoor de laatste updates, bekijk lokale nieuwsbronnen zoals KUT, KVUE en de Austin Monitor.\n",
+      "sources": [
+        {
+          "position": 1,
+          "label": "KUT Homepage | KUT Radio, Austin's NPR Station",
+          "url": "https://www.kut.org/",
+          "description": ""
+        },
+        {
+          "position": 2,
+          "label": "Austin News, Weather, Sports, Breaking News - CBS Austin",
+          "url": "https://cbsaustin.com/",
+          "description": ""
+        },
+        {
+          "position": 3,
+          "label": "Raad keurt aankoop van locatie voor nieuw dakloos navigatiecentrum goed",
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "description": ""
+        },
+        {
+          "position": 4,
+          "label": "Austin's Leading Local News - KVUE",
+          "url": "https://www.kvue.com/",
+          "description": ""
+        },
+        ...
+      ],
+      "related_queries": [
+        "Toon de belangrijkste lokale koppen in Austin op dit moment",
+        "Wat zijn de laatste updates over de sluiting van Austin ISD-scholen",
+        "Hoogtepunten van de gemeenteraadsvergadering van Austin vandaag"
+      ],
+      "shopping_cards": [],
+      "videos": [],
+      "images": [],
+      "hotels": [],
+      "places": [],
+      "search_model_queries": [
+        {
+          "query": "what is the news today in Austin",
+          "engine": "web",
+          "limit": 8
+        }
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Google AI Overzicht">
+    ```json
+    {
+      "url": "https://www.google.com/search?q=what%20is%20the%20news%20today%20in%20Austin&gl=IN&hl=en",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Het belangrijkste nieuws van vandaag in Austin omvat het falen van het Texas House om een quorum te bereiken vanwege een Democratische impasse, een verdachte die is gearresteerd voor een moord in Noord-Austin, en een verdacht pakket dat is gevonden op de luchthaven van Austin dat inmiddels is vrijgegeven. Andere lokale koppen omvatten gemeenschapsprotesten tegen voorgestelde sluitingen van Austin ISD-scholen, de inspanning van de gemeenteraad om het openen van buurtkoffiehuizen te vereenvoudigen, en een man die een gevangenisstraf van 80 jaar heeft gekregen voor zijn vijfde DWI...",
+      "sources": [
+        {
+          "title": "Austin News, Weather, Sports, Breaking News",
+          "url": "https://cbsaustin.com/#:~:text=%22I%20feel%20sad%2C%22%20Austin,Roberson%20in%20shaken%20baby%20case",
+          "index": 0
+        },
+        {
+          "title": "Nieuws - FOX 7 Austin",
+          "url": "https://www.fox7austin.com/news#:~:text=Concerned%20community%20members%20protest%20proposed,multiple%20break%2Dins%20in%20custody",
+          "index": 1
+        },
+        ...
+      ],
+      "text_blocks": [
+        {
+          "type": "paragraph",
+          "snippet": "Het belangrijkste nieuws van vandaag in Austin omvat het falen van het Texas House om een quorum te bereiken vanwege een Democratische impasse, een verdachte die is gearresteerd voor een moord in Noord-Austin, en een verdacht pakket dat is gevonden op de luchthaven van Austin dat inmiddels is vrijgegeven. Andere lokale koppen omvatten gemeenschapsprotesten tegen voorgestelde sluitingen van Austin ISD-scholen, de inspanning van de gemeenteraad om het openen van buurtkoffiehuizen te vereenvoudigen, en een man die een gevangenisstraf van 80 jaar heeft gekregen voor zijn vijfde DWI-veroordeling.",
+          "snippet_highlighted_words": "het falen van het Texas House om een quorum te bereiken vanwege een Democratische impasse, een verdachte die is gearresteerd voor een moord in Noord-Austin, en een verdacht pakket dat is gevonden op de luchthaven van Austin dat inmiddels is vrijgegeven"
+        },
+        {
+          "type": "list",
+          "list": [
+            {
+              "type": "paragraph",
+              "snippet": "Democratische Impasse: Het Texas House is niet in staat om een quorum te bereiken omdat Texas Democraten hun boycot van de wetgevende zitting voortzetten."
+            },
+            {
+              "type": "paragraph",
+              "snippet": "Voorgestelde ISD-sluitingen: Gemeenschapsleden protesteren tegen het plan van het Austin Independent School District om 13 scholen te sluiten, met een mogelijke TEA-overname in het verschiet."
+            },
+            {
+              "type": "paragraph",
+              "snippet": "Koffiehuizen: De gemeenteraad van Austin werkt eraan om het gemakkelijker te maken om wandelbare buurtkoffiehuizen te openen."
+            },
+            {
+              "type": "paragraph",
+              "snippet": "Dakloos Navigatiecentrum: De gemeenteraad heeft de aankoop van een nieuw pand voor een dakloos navigatiecentrum goedgekeurd."
+            }
+          ],
+          "title": "Austin Politiek & Bestuur"
+        },
+        ...
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Gemini">
+    ```json
+    {
+      "url": "https://gemini.google.com/",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Hier zijn enkele van de belangrijkste lokale nieuws koppen in Austin, Texas:\n\n### Lokale Overheid en Gemeenschap\n\n* **Nieuw Dakloos Navigatiecentrum Goedgekeurd:** De gemeenteraad van Austin heeft de aankoop van een commercieel pand aan South Interstate 35 goedgekeurd...\n\n[Raad keurt aankoop van locatie voor nieuw dakloos navigatiecentrum goed - Austin Monitor](https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/)\n\n* **Austin ISD Consolidatie:** Gezinnen verzamelen zich bij het hoofdkantoor van Austin ISD om zich te verzetten tegen het consolidatieplan...\n\n[Austin's Leading Local News - KVUE](https://www.kvue.com/)",
+      "sources": [
+        {
+          "position": 1,
+          "label": "Raad keurt aankoop van locatie voor nieuw dakloos navigatiecentrum goed - Austin Monitor",
+          "url": "https://austinmonitor.com/stories/2025/10/council-oks-purchase-of-site-for-new-homeless-navigation-center/",
+          "description": "De gemeenteraad stemde donderdag met 8–3 voor de aankoop van een commercieel pand aan South Interstate 35 om te dienen als het eerste huisvestingsnavigatiecentrum van de stad...",
+          "confidence_level": 0.9781935
+        },
+        {
+          "position": 2,
+          "label": "Austin's Leading Local News - KVUE",
+          "url": "https://www.kvue.com/",
+          "description": "Gezinnen verzamelen zich bij het hoofdkantoor van Austin ISD om zich te verzetten tegen het consolidatieplan. Ouders dringen er bij de leiders van Austin ISD op aan om...",
+          "confidence_level": 0.9623676
+        },
+        ...
+      ],
+      "links_attached": true,
+      "model": "gemini"
+    }
+    ```
+  </Tab>
+
+  <Tab title="Microsoft Copilot">
+    ```json
+    {
+      "url": "https://copilot.microsoft.com/chats/G7TZeFAA3dMces2Cb5J3N",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "Hier is een overzicht van de belangrijkste verhalen van vandaag uit Austin:\n\n## 🕵️ Misdaad & Veiligheid\n\n**Moordonderzoek in Noord-Austin** De politie heeft de 43-jarige Mary Gonzales geïdentificeerd als de vrouw die dood werd gevonden achter een bedrijf aan Research Boulevard. Een verdachte, 21 jaar oud, is gearresteerdMSN News.\n\n**Verdacht Pakket op Luchthaven** De politie onderzocht nadat een verdacht pakket was gevonden op de luchthaven van Austin, dat inmiddels is vrijgegevenMSN News.\n\n## 🏛️ Lokale Overheid\n\n**Dakloos Navigatiecentrum** De gemeenteraad heeft de aankoop van een nieuw pand voor een dakloos navigatiecentrum goedgekeurdAustin Monitor.\n\n[MSN NewsVrouw gevonden dood achter Noord-Austin bedrijf geïdentificeerd; verdachte gearresteerd](https://www.msn.com/en-us/news/crime/woman-found-dead-behind-north-austin-business-identified-suspect-arrested/ar-AA1ObaMU)\n[MSN NewsPolitie onderzoekt nadat verdacht pakket is gevonden op de luchthaven van Austin](https://www.msn.com/en-us/news/crime/police-investigating-after-suspicious-package-found-at-austins-airport/ar-AA1Ob39x)",
+      "sources": [
+        {
+          "url": "https://www.msn.com/en-us/news/crime/woman-found-dead-behind-north-austin-business-identified-suspect-arrested/ar-AA1ObaMU",
+          "title": "Vrouw gevonden dood achter Noord-Austin bedrijf geïdentificeerd; verdachte gearresteerd",
+          "position": 319,
+          "icon_url": "https://services.bingapis.com/favicon?url=www.msn.com"
+        },
+        {
+          "url": "https://www.msn.com/en-us/news/crime/police-investigating-after-suspicious-package-found-at-austins-airport/ar-AA1Ob39x",
+          "title": "Politie onderzoekt nadat verdacht pakket is gevonden op de luchthaven van Austin",
+          "position": 555,
+          "icon_url": "https://services.bingapis.com/favicon?url=www.msn.com"
+        },
+        ...
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab title="Grok">
+    ```json
+    {
+      "url": "https://grok.com/",
+      "prompt": "what is the news today in Austin",
+      "answer_markdown": "### \n\nlaatste nieuws in Austin TX vandaag Gezocht naar \"laatste nieuws in Austin TX vandaag\" \n\n10 berichten \n\n### \n\nAustin sinds:2025-10-10 tot:2025-10-11 filter:nieuws Gezocht naar \"Austin sinds:2025-10-10 tot:2025-10-11 filter:nieuws\" \n\n10 berichten \n\n### \n\nAustin Texas nieuws 10 oktober 2025 Gezocht naar \"Austin Texas nieuws 10 oktober 2025\" \n\n15 resultaten \n\n### Belangrijkste Nieuwsverhalen in Austin, TX – 10 oktober 2025\n\nHier is een overzicht van de laatste ontwikkelingen van lokale bronnen, met de nadruk op belangrijke gebeurtenissen, weer...",
+      "sources": [
+        {
+          "url": "https://www.austinchronicle.com/issues/october-10-2025/",
+          "title": "10 oktober • 2025 - The Austin Chronicle",
+          "description": "Om duidelijk te zijn, met \"een goede deal\" bedoel ik niet \"rock-bottom prijzen.\" Ik heb het over een maaltijd die volledig de moeite waard is qua kwaliteit en kwantiteit. En bij Le Calamar, een nieuwe South First plek die gespecialiseerd is in Texan… ... Voorstel Stop Beste Redacteur, Met betrekking tot het recente artikel in The Austin Chronicle [\"Hogere Belastingen Staan op de Stembiljetten. Stadsleiders Leggen Uit Wat Ze Ons Zullen Brengen,\" Nieuws, sept.",
+          "icon": "https://imgs.search.brave.com/IIGvOiGOT-2BIUALAC8jt1l2gfEyH5C1RNDmZTaKBM8/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDQ5NWE3OTli/MzYxZmI5MTBmMTA4/MzNlOTI1NTY3M2Nm/ZTYyMWYyYWI5OTEz/MTJlYzAwNWJjNjg3/ZTZhOWQ4OC93d3cu/YXVzdGluY2hyb25p/Y2xlLmNvbS8",
+          "domain": "https://www.austinchronicle.com/",
+          "cited": true
+        },
+        {
+          "url": "https://www.austinchronicle.com/",
+          "title": "Home - The Austin Chronicle",
+          "description": "Huidige Uitgave 10 oktober • 2025 Vol. 45 • Nr. 6 Speciale Uitgaven Best of Austin Austin Music Awards SXSW The 420 Issue The Burger Issue The Drinks Issue Nieuwsbrieven Fotogalerijen ONDERSTEUN GRATIS PERS.ONDERSTEUN THE AUSTIN CHRONICLE. Al meer dan 40 jaar is The Austin Chronicle de progressieve stem van Austin.",
+          "icon": "https://imgs.search.brave.com/IIGvOiGOT-2BIUALAC8jt1l2gfEyH5C1RNDmZTaKBM8/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDQ5NWE3OTli/MzYxZmI5MTBmMTA4/MzNlOTI1NTY3M2Nm/ZTYyMWYyYWI5OTEz/MTJlYzAwNWJjNjg3/ZTZhOWQ4OC93d3cu/YXVzdGluY2hyb25p/Y2xlLmNvbS8",
+          "domain": "https://www.austinchronicle.com/",
+          "cited": true
+        },
+      ],
+      "xposts": [
+        {
+          "post_url": "https://x.com/EugeneAustin/status/1976621075090878962",
+          "username": "EugeneAustin",
+          "name": "Eugene Sepulveda",
+          "text": "👏🏽👏🏽👏🏽 Nobelprijs voor de Vrede 2025 live updates: Venezolaanse oppositieleider María Corina Machado wint  [Ze staat op voor de mensen van haar land in tegenstelling tot Donald Trump die troepen inzet tegen zijn eigen volk] https://t.co/tVQ2jxH41J",
+          "create_time": "2025-10-10T12:09:22Z",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/1908632830118068224/xO8hj6PK_normal.jpg",
+          "post_id": "1976621075090878962",
+          "view_count": 25
+        },
+        {
+          "post_url": "https://x.com/TheSteelersWire/status/1976608836657029234",
+          "username": "TheSteelersWire",
+          "name": "Steelers Wire",
+          "text": "Steelers blessure-update: Zal Calvin Austin III spelen tegen de Browns? https://t.co/1eGS7g2xYz https://t.co/17krn8un1N",
+          "create_time": "2025-10-10T11:20:44Z",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/1607062294046941191/UBv9QEQW_normal.jpg",
+          "post_id": "1976608836657029234",
+          "view_count": 462
+        },
+      ],
+      "model": "grok-4-auto"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Volledige responsvoorbeelden:**
+- [Google AI Mode](https://olostep-storage.s3.us-east-1.amazonaws.com/json_wcez50jwt6_2.json)
+- [ChatGPT](https://olostep-storage.s3.us-east-1.amazonaws.com/json_9q5mzct5fe_2.json)
+- [Perplexity](https://olostep-storage.s3.us-east-1.amazonaws.com/json_4930ezsqmw_2.json)
+- [Google AI Overzicht](https://olostep-storage.s3.us-east-1.amazonaws.com/json_tshp1kuuyn_2.json)
+- [Gemini](https://olostep-storage.s3.us-east-1.amazonaws.com/json_y2tqdrfaro_2.json)
+- [Microsoft Copilot](https://olostep-storage.s3.us-east-1.amazonaws.com/json_hyjx3dykha_1.json)
+- [Grok](https://olostep-storage.s3.us-east-1.amazonaws.com/json_qh73hpdhyv_1.json)
+
+## Prijzen en Geolocatie Matrix
+
+De volgende tabel geeft een overzicht van de ondersteuning voor land-specifieke zoekopdrachten en de credits die door elke parser worden verbruikt.
+
+| Functie             | Google AI Mode | ChatGPT | Perplexity | Google AI Overzicht | Gemini | Microsoft Copilot | Grok |
+| ------------------- | :------------: | :-----: | :--------: | :----------------: | :----: | :---------------: | :--: |
+| **Land Ondersteund** |       ✅       |    ✅     |     ✅     |         ✅         |   ✅   |        ✅         |  ✅  |
+| **Batchgrootte Limiet** |       2500      |    2500     |     2500     |         2500         |   2500   |        1000         |  1000  
+| **Credits**         |       3        |    5    |     3      |         3          |   3    |         3         |  3   |
+
+### Controleren van Ondersteunde Landen
+
+Gebruik het volgende eindpunt om de lijst van ondersteunde landen voor elke parser op te halen:
+
+```
+GET https://api.olostep.com/v1/countries?service=batches&parser={parser_id}
+```
+
+**Voorbeeldverzoek:**
+
+```bash
+curl "https://api.olostep.com/v1/countries?service=batches&parser=@olostep/perplexity-results"
+```
+
+Mis je iets? Neem contact op met `info@olostep.com` voor ondersteuning of aangepaste implementatie-assistentie.

@@ -1,0 +1,96 @@
+---
+title: "获取批处理状态"
+description: "检索 AirOps 批处理的当前状态和进度"
+openapi: "GET /v1/batches-airops/{batch_id}"
+---
+
+## 概述
+
+返回 AirOps 批处理的当前阶段和进度指标。如果你没有使用 webhooks，可以使用此方法进行轮询。
+
+## 响应字段
+
+<ResponseField name="id" type="string">
+  批处理标识符。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  始终为 `"batch"`。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+  批处理创建时的 Unix 时间戳（毫秒）。
+</ResponseField>
+
+<ResponseField name="total_urls" type="integer">
+  提交的 URL 总数。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  整体工作流状态：`pending`、`in_progress`、`completed` 或 `failed`。
+</ResponseField>
+
+<ResponseField name="batch_mode" type="boolean">
+  是否启用了异步 LLM 批处理模式（`true`）或同步模式（`false`）。
+</ResponseField>
+
+<ResponseField name="scraping" type="object">
+  完整的抓取阶段状态对象（参见 [Webhooks](/internal/airops-batches/webhooks#scraping-status)）。
+</ResponseField>
+
+<ResponseField name="analyzing" type="object">
+  完整的分析阶段状态对象（参见 [Webhooks](/internal/airops-batches/webhooks#analyzing-status)）。
+</ResponseField>
+
+<ResponseField name="enriching" type="object">
+  完整的丰富阶段状态对象（参见 [Webhooks](/internal/airops-batches/webhooks#enriching-status)）。
+</ResponseField>
+
+## 示例响应
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch",
+  "created_at": 1705315200000,
+  "total_urls": 100,
+  "status": "completed",
+  "batch_mode": true,
+  "scraping": {
+    "state": "completed",
+    "submitted": 100,
+    "valid": 100,
+    "succeeded": 98,
+    "failed": 2,
+    "started_at": 1705315200000,
+    "completed_at": 1705315500000,
+    "error": null
+  },
+  "analyzing": {
+    "state": "completed",
+    "items_analyzed": 98,
+    "items_needing_enrichment": 45,
+    "items_complete": 53,
+    "fields_to_enrich": {
+      "page_type": 98,
+      "author": 12,
+      "date_published": 8,
+      "date_modified": 25,
+      "brand_mentions": 98
+    },
+    "started_at": 1705315500000,
+    "completed_at": 1705315502000
+  },
+  "enriching": {
+    "state": "completed",
+    "items_to_enrich": 45,
+    "items_enriched": 44,
+    "items_failed": 1,
+    "llm_batch_id": "batch_xyz789def",
+    "batch_mode": true,
+    "started_at": 1705315505000,
+    "completed_at": 1705316800000,
+    "error": null
+  }
+}
+```

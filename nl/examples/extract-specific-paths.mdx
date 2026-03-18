@@ -1,0 +1,112 @@
+---
+icon: "list-ol"
+sidebarTitle: "Specifieke URLs verkrijgen op website"
+title: "Blog-URLs extraheren van Stripe’s website"
+description: "Filter en extraheer alleen de blog-URLs van Stripe’s website voor gerichte contentanalyse."
+---
+
+## Overzicht
+
+In plaats van [de hele website in kaart te brengen](/use-cases/get-website-structure), wil je je misschien richten op specifieke secties. In deze gids laten we je zien hoe je alleen de blog-URLs van Stripe's website kunt extraheren.
+
+## Alleen Blog-URLs Extraheren
+
+Om alleen blog-URLs van Stripe's website te extraheren, gebruik je de maps endpoint met padpatroonfilters. De `include_urls` parameter stelt je in staat om precies te specificeren welke URL-patronen je in de resultaten wilt opnemen.
+
+<CodeGroup>
+    ```python extract_stripe_blog_urls.py
+    import requests
+    import time
+    import json
+
+    # Configuratie
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Starttijd voor latentie-tracking
+    start_time = time.time()
+    
+    # Definieer de payload met URL-patronen om op te nemen
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog", "/blog/**"]  # Komt overeen met /blog en alle paden onder /blog
+    }
+    
+    # Voer het verzoek uit
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Bereken latentie
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"Verzoek voltooid in {latency}ms")
+    
+    # Verwerk de resultaten
+    data = response.json()
+    print(f"Gevonden {data['urls_count']} blog-URLs op Stripe's website")
+    
+    # Print de eerste 10 URLs als voorbeeld
+    print("\nVoorbeeld blog-URLs:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Sla blog-URLs op in een bestand voor verdere verwerking
+    with open('stripe_blog_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nAlle blog-URLs opgeslagen in stripe_blog_urls.json")
+    ```
+</CodeGroup>
+
+### Begrijpen van de URL-patronen
+
+In het bovenstaande voorbeeld gebruiken we twee patroon specificaties:
+
+- `/blog` - Komt precies overeen met de hoofdpagina van de blog (https://stripe.com/blog)
+- `/blog/**` - Komt overeen met alle subpaden onder /blog, inclusief individuele blogposts, categoriepagina's, etc.
+
+Deze combinatie zorgt ervoor dat we alle blog-gerelateerde content vastleggen terwijl we andere secties van de website uitsluiten.
+
+### Voorbeeldreactie
+
+```json
+{
+  "id": "map_xyz789abc",
+  "urls_count": 278,
+  "urls": [
+    "https://stripe.com/blog",
+    "https://stripe.com/blog/page/1",
+    "https://stripe.com/blog/page/2",
+    "https://stripe.com/blog/engineering",
+    "https://stripe.com/blog/product",
+    "https://stripe.com/blog/how-we-built-it-usage-based-billing",
+    "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+    "https://stripe.com/blog/stripe-radar-responded-to-card-testing",
+    "https://stripe.com/blog/future-of-real-time-payments",
+    "https://stripe.com/blog/ml-flywheel-improve-models"
+    // ... extra URLs weggelaten voor beknoptheid
+  ]
+}
+```
+
+## Blog-URLs filteren op categorie
+
+Je kunt je extractie verder verfijnen om je te richten op specifieke blogcategorieën. Bijvoorbeeld, als je alleen geïnteresseerd bent in de engineering blogposts van Stripe:
+
+<CodeGroup>
+    ```python extract_engineering_blog_urls.py
+    # Definieer de payload met specifiekere URL-patronen
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog/engineering", "/blog/engineering/**"]
+    }
+    ```
+</CodeGroup>
+
+## Volgende Stappen
+
+Nu je alle blog-URLs van Stripe hebt geëxtraheerd,
+
+1. Kun je hun inhoud individueel ophalen met behulp van de [scrape API](../../api-reference/scrapes/create).
+2. Of, gebruik de [volgende gids](/use-cases/crawl-matching-pages) om de daadwerkelijke inhoud van deze blogpagina's direct te crawlen en extraheren met ingebouwde filters.

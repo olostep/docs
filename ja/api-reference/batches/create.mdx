@@ -1,0 +1,17 @@
+---
+title: "バッチの作成"
+description: "新しいバッチを開始します。バッチの進行状況を追跡するために使用できる `id` を受け取ります。詳細は[こちら](/api-reference/batches/info)を参照してください。注意: 処理時間はバッチサイズに関係なく一定です"
+openapi: "ja/openapi/batches.json POST /v1/batches"
+---
+
+<Tip>
+**完了時に通知を受け取る:** `webhook` パラメータにエンドポイントURLを渡すことで、バッチが完了した際にHTTP POSTを受け取ることができます。詳細は[Webhooks](/api-reference/common/webhooks)を参照してください。
+</Tip>
+
+<Tip>
+**カスタムデータを添付する:** `metadata` パラメータを使用してキーと値のペアを保存します。2つのレベルでサポートされています:
+- **バッチレベル** — リクエストボディに
+- **アイテムレベル** — `items` 配列内の各アイテムに
+
+詳細は[Metadata](/api-reference/common/metadata)を参照してください。
+</Tip>

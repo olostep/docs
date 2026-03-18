@@ -1,0 +1,856 @@
+---
+sidebarTitle: "Python"
+title: "Olostep Python SDK"
+icon: "python"
+description: "SDK ufficiale Python per cercare, estrarre e strutturare dati dal Web"
+---
+
+<Note>
+  **Pacchetto PyPI**: [olostep](https://pypi.org/project/olostep/) | **Requisiti**: Python 3.11+
+</Note>
+
+## Installazione
+
+<CodeGroup>
+
+```bash pip
+pip install olostep
+```
+
+```bash pip3
+pip3 install olostep
+```
+
+```bash poetry
+poetry add olostep
+```
+
+```bash uv
+uv pip install olostep
+```
+
+</CodeGroup>
+
+## Autenticazione
+
+Ottieni la tua chiave API dal [Dashboard di Olostep](https://www.olostep.com/dashboard/).
+
+## Inizio Rapido
+
+L'SDK fornisce due opzioni di client a seconda del tuo caso d'uso:
+
+<CardGroup cols={2}>
+  <Card
+    title="Client Sincrono (`Olostep`)"
+    href="/sdks/python#sync-client-olostep"
+    icon="sync"
+  >
+    Ideale per: Script e casi d'uso semplici dove preferisci operazioni bloccanti.<br /><br />
+    Il client sincrono offre un'interfaccia più semplice e bloccante, più facile da iniziare se sei nuovo a async/await.
+  </Card>
+  <Card
+    title="Client Asincrono (`AsyncOlostep`)"
+    href="/sdks/python#async-client-asyncolostep"
+    icon="zap"
+  >
+    Ideale per: Applicazioni in produzione e gestione di molte richieste concorrenti.<br /><br />
+    Il client asincrono offre operazioni non bloccanti ed è la scelta consigliata per applicazioni in produzione che necessitano di un alto throughput.
+  </Card>
+</CardGroup>
+
+# Client Sincrono (Olostep)
+
+Il client sincrono (`Olostep`) fornisce un'interfaccia bloccante perfetta per script e casi d'uso semplici.
+
+```python
+from olostep import Olostep
+
+# Fornisci la chiave API passando il parametro 'api_key' o
+# impostando la variabile d'ambiente OLOSTEP_API_KEY
+
+# Il client sincrono gestisce automaticamente la gestione delle risorse
+# Non è necessario chiudere esplicitamente - le risorse vengono pulite dopo ogni operazione
+client = Olostep(api_key="YOUR_REAL_KEY")
+scrape_result = client.scrapes.create(url_to_scrape="https://example.com")
+```
+
+### Web Scraping di Base
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Scraping semplice
+result = client.scrapes.create(url_to_scrape="https://example.com")
+print(f"Scraped {len(result.html_content)} characters")
+
+# Formati multipli
+result = client.scrapes.create(
+    url_to_scrape="https://example.com",
+    formats=["html", "markdown"]
+)
+print(f"HTML: {len(result.html_content)} chars")
+print(f"Markdown: {len(result.markdown_content)} chars")
+```
+
+### Elaborazione in Batch
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Elabora più URL in modo efficiente
+batch = client.batches.create(
+    urls=[
+        "https://www.google.com/search?q=python",
+        "https://www.google.com/search?q=javascript",
+        "https://www.google.com/search?q=typescript"
+    ]
+)
+
+# Attendi il completamento ed elabora i risultati
+for item in batch.items():
+    content = item.retrieve(["html"])
+    print(f"Processed {item.url}: {len(content.html_content)} bytes")
+```
+
+### Web Crawling Intelligente
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Crawl con filtraggio intelligente
+crawl = client.crawls.create(
+    start_url="https://www.bbc.com",
+    max_pages=100,
+    include_urls=["/articles/**", "/blog/**"],
+    exclude_urls=["/admin/**"]
+)
+
+for page in crawl.pages():
+    content = page.retrieve(["html"])
+    print(f"Crawled: {page.url}")
+```
+
+### Mappatura del Sito
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Estrai tutti i link da un sito web
+maps = client.maps.create(url="https://example.com")
+
+# Ottieni tutti gli URL scoperti
+urls = []
+for url in maps.urls():
+    urls.append(url)
+    if len(urls) >= 10:  # Limite per demo
+        break
+
+print(f"Found {len(urls)} URLs")
+```
+
+### Risposte Potenziate dall'AI
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Ottieni risposte dalle pagine web usando l'AI
+answer = client.answers.create(
+    task="What is the main topic of https://example.com?"
+)
+print(f"Answer: {answer.answer}")
+```
+
+# Client Asincrono (AsyncOlostep)
+
+Il client asincrono (`AsyncOlostep`) è il client consigliato per applicazioni ad alte prestazioni, servizi backend e quando hai bisogno di gestire molte richieste concorrenti.
+
+```python
+from olostep import AsyncOlostep
+
+# Fornisci la chiave API passando il parametro 'api_key' o
+# impostando la variabile d'ambiente OLOSTEP_API_KEY
+
+# GESTIONE DELLE RISORSE
+# ======================
+# L'SDK supporta due modelli di utilizzo per la gestione delle risorse:
+
+# 1. Gestore di Contesto (Consigliato per uso una tantum):
+#    Gestisce automaticamente la pulizia delle risorse
+async with AsyncOlostep(api_key="YOUR_REAL_KEY") as client:
+    scrape_result = await client.scrapes.create(url_to_scrape="https://example.com")
+# Il trasporto viene chiuso automaticamente qui
+
+# 2. Chiusura Esplicita (Per servizi di lunga durata):
+#    Richiede la pulizia manuale delle risorse
+client = AsyncOlostep(api_key="YOUR_REAL_KEY")
+try:
+    scrape_result = await client.scrapes.create(url_to_scrape="https://example.com")
+finally:
+    await client.close()  # Chiudi manualmente il trasporto
+```
+
+### Web Scraping di Base
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Scraping semplice
+        result = await client.scrapes.create(url_to_scrape="https://example.com")
+        print(f"Scraped {len(result.html_content)} characters")
+
+        # Formati multipli
+        result = await client.scrapes.create(
+            url_to_scrape="https://example.com",
+            formats=["html", "markdown"]
+        )
+        print(f"HTML: {len(result.html_content)} chars")
+        print(f"Markdown: {len(result.markdown_content)} chars")
+
+asyncio.run(main())
+```
+
+### Elaborazione in Batch
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Elabora più URL in modo efficiente
+        batch = await client.batches.create(
+            urls=[
+                "https://www.google.com/search?q=python",
+                "https://www.google.com/search?q=javascript",
+                "https://www.google.com/search?q=typescript"
+            ]
+        )
+
+        # Attendi il completamento ed elabora i risultati
+        async for item in batch.items():
+            content = await item.retrieve(["html"])
+            print(f"Processed {item.url}: {len(content.html_content)} bytes")
+
+asyncio.run(main())
+```
+
+### Web Crawling Intelligente
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Crawl con filtraggio intelligente
+        crawl = await client.crawls.create(
+            start_url="https://www.bbc.com",
+            max_pages=100,
+            include_urls=["/articles/**", "/blog/**"],
+            exclude_urls=["/admin/**"]
+        )
+
+        async for page in crawl.pages():
+            content = await page.retrieve(["html"])
+            print(f"Crawled: {page.url}")
+
+asyncio.run(main())
+```
+
+### Mappatura del Sito
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Estrai tutti i link da un sito web
+        maps = await client.maps.create(url="https://example.com")
+
+        # Ottieni tutti gli URL scoperti
+        urls = []
+        async for url in maps.urls():
+            urls.append(url)
+            if len(urls) >= 10:  # Limite per demo
+                break
+
+        print(f"Found {len(urls)} URLs")
+
+asyncio.run(main())
+```
+
+### Risposte Potenziate dall'AI
+
+```python
+import asyncio
+from olostep import AsyncOlostep
+
+async def main():
+    async with AsyncOlostep(api_key="your-api-key") as client:
+        # Ottieni risposte dalle pagine web usando l'AI
+        answer = await client.answers.create(
+            task="What is the main topic of https://example.com?"
+        )
+        print(f"Answer: {answer.answer}")
+
+asyncio.run(main())
+```
+
+## Riferimento SDK
+
+### Struttura dei Metodi
+
+Entrambi i client SDK forniscono la stessa interfaccia pulita e pythonica organizzata in spazi dei nomi logici:
+
+| Namespace  | Scopo                 | Metodi Chiave                  |
+| ---------- | --------------------- | ------------------------------ |
+| `scrapes`  | Estrazione singolo URL| `create()`, `get()`            |
+| `batches`  | Elaborazione multi-URL| `create()`, `info()`, `items()`|
+| `crawls`   | Traversata del sito   | `create()`, `info()`, `pages()`|
+| `maps`     | Estrazione link       | `create()`, `urls()`           |
+| `answers`  | Estrazione potenziata dall'AI | `create()`, `get()`   |
+| `retrieve` | Recupero contenuti    | `get()`                        |
+
+Ogni operazione restituisce oggetti con stato con metodi ergonomici per operazioni successive.
+
+## Gestione degli Errori
+
+Cattura tutti gli errori SDK utilizzando la classe di eccezione base:
+
+```python
+from olostep import Olostep, Olostep_BaseError
+
+client = Olostep(api_key="your-api-key")
+
+try:
+    result = client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Error has occurred: {type(e).__name__}")
+    print(f"Error message: {e}")
+```
+
+Per informazioni dettagliate sulla gestione degli errori, inclusa la gerarchia completa delle eccezioni e le opzioni di gestione degli errori granulari, vedi [Gestione Dettagliata degli Errori](/sdks/python#detailed-error-handling).
+
+## Riprovi Automatici
+
+L'SDK riprova automaticamente in caso di errori transitori (problemi di rete, problemi temporanei del server) basati sulla configurazione di `RetryStrategy`. Puoi personalizzare il comportamento di riprova passando un'istanza di `RetryStrategy` quando crei il client:
+
+```python
+from olostep import Olostep, RetryStrategy
+
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+
+client = Olostep(api_key="your-api-key", retry_strategy=retry_strategy)
+result = client.scrapes.create("https://example.com")
+```
+
+Per opzioni di configurazione dettagliate sui riprovi e migliori pratiche, vedi [Strategia di Riprova](/sdks/python#retry-strategy-configuration).
+
+## Funzionalità Avanzate
+
+### Coercizione Intelligente degli Input
+
+L'SDK gestisce in modo intelligente vari formati di input per la massima comodità:
+
+```python
+from olostep import Olostep, Country
+
+client = Olostep(api_key="your-api-key")
+
+# Formati: stringa, lista o enum
+client.scrapes.create(url_to_scrape="https://example.com", formats="html")
+client.scrapes.create(url_to_scrape="https://example.com", formats=["html", "markdown"])
+
+# Paesi: stringhe case-insensitive o enum
+client.scrapes.create(url_to_scrape="https://example.com", country="us")
+client.scrapes.create(url_to_scrape="https://example.com", country=Country.US)
+
+# Liste: valori singoli o liste
+client.batches.create(urls="https://example.com")    # URL singolo
+client.batches.create(urls=["https://a.com", "https://b.com"])  # URL multipli
+```
+
+### Opzioni Avanzate di Scraping
+
+```python
+from olostep import Olostep, Format, Country, WaitAction, FillInputAction
+
+client = Olostep(api_key="your-api-key")
+
+# Controllo completo sul comportamento di scraping
+result = client.scrapes.create(
+    url_to_scrape="https://news.google.com/",
+    wait_before_scraping=3000,
+    formats=[Format.HTML, Format.MARKDOWN],
+    remove_css_selectors=["script", ".popup"],
+    actions=[
+        WaitAction(milliseconds=1500),
+        FillInputAction(selector="searchbox", value="olostep")
+    ],
+    parser="@olostep/google-news",
+    country=Country.US,
+    remove_images=True
+)
+```
+
+### Elaborazione in Batch con ID Personalizzati
+
+```python
+from olostep import Olostep, Country
+
+client = Olostep(api_key="your-api-key")
+
+batch = client.batches.create([
+    {"url": "https://www.google.com/search?q=python", "custom_id": "search_1"},
+    {"url": "https://www.google.com/search?q=javascript", "custom_id": "search_2"},
+    {"url": "https://www.google.com/search?q=typescript", "custom_id": "search_3"}
+],
+country=Country.US,
+parser="@olostep/google-search"
+)
+
+# Elabora i risultati per ID personalizzato
+# Quando si utilizza un parser, recupera il contenuto JSON invece di HTML
+for item in batch.items():
+    if item.custom_id == "search_2":
+        content = item.retrieve(["json"])
+        print(f"Search result: {content.json_content}")
+```
+
+### Crawling Intelligente
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Crawl con filtraggio intelligente
+crawl = client.crawls.create(
+    start_url="https://www.bbc.com",
+    max_pages=1000,
+    max_depth=3,
+    include_urls=["/articles/**", "/news/**"],
+    exclude_urls=["/ads/**", "/tracking/**"],
+    include_external=False,
+    include_subdomain=True,
+)
+
+for page in crawl.pages():
+    content = page.retrieve(["html"])
+    print(f"Crawled: {page.url}")
+```
+
+### Mappatura del Sito con Filtri
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Estrai tutti i link con filtraggio avanzato
+maps = client.maps.create(
+    url="https://www.bbc.com",
+    include_subdomain=True,
+    include_urls=["/articles/**", "/news/**"],
+    exclude_urls=["/ads/**", "/tracking/**"]
+)
+
+# Ottieni URL filtrati
+urls = []
+for url in maps.urls():
+    urls.append(url)
+
+print(f"Found {len(urls)} relevant URLs")
+```
+
+### Recupero delle Risposte
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Prima crea una risposta
+created_answer = client.answers.create(
+    task="What is the main topic of https://example.com?"
+)
+
+# Poi recuperala usando l'ID
+answer = client.answers.get(answer_id=created_answer.id)
+print(f"Answer: {answer.answer}")
+```
+
+### Recupero dei Contenuti
+
+```python
+from olostep import Olostep
+
+client = Olostep(api_key="your-api-key")
+
+# Ottieni contenuto tramite ID di recupero
+result = client.retrieve.get(retrieve_id="ret_123")
+
+# Ottieni formati multipli
+result = client.retrieve.get(retrieve_id="ret_123", formats=["html", "markdown", "text", "json"])
+```
+
+## Logging
+
+Abilita il logging per eseguire il debug dei problemi:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("olostep")
+logger.setLevel(logging.INFO)  # Usa DEBUG per output verboso
+```
+
+**Livelli di Log**: `INFO` (consigliato), `DEBUG` (verboso), `WARNING`, `ERROR`
+
+## Configurazione della Strategia di Riprova
+
+La classe `RetryStrategy` controlla come l'SDK Olostep gestisce gli errori API transitori tramite riprove automatiche con backoff esponenziale e jitter. Questo aiuta a garantire un funzionamento affidabile in ambienti di produzione dove problemi di rete temporanei, limiti di velocità e sovraccarico del server possono causare fallimenti intermittenti.
+
+### Comportamento Predefinito
+
+Per impostazione predefinita, l'SDK utilizza la seguente configurazione di riprova:
+
+- **Max riprove**: 5 tentativi
+- **Ritardo iniziale**: 2 secondi
+- **Backoff**: Esponenziale (2^tentativo)
+- **Jitter**: 10-90% del ritardo (randomizzato)
+
+Questo significa:
+
+- Tentativo 1: Immediato
+- Tentativo 2: ~2-3.6s di ritardo
+- Tentativo 3: ~4-7.2s di ritardo
+- Tentativo 4: ~8-14.4s di ritardo
+- Tentativo 5: ~16-28.8s di ritardo
+
+Durata massima: ~57 secondi per tutte le riprove (peggiore dei casi)
+
+### Configurazione Personalizzata
+
+```python
+from olostep import AsyncOlostep, RetryStrategy
+
+# Crea strategia di riprova personalizzata
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,  # 20% di jitter minimo
+    jitter_max=0.8,  # 80% di jitter massimo
+)
+
+# Usa con il client
+async with AsyncOlostep(
+    api_key="your-api-key",
+    retry_strategy=retry_strategy
+) as client:
+    result = await client.scrapes.create("https://example.com")
+```
+
+### Quando Avvengono le Riprova
+
+L'SDK riprova automaticamente su:
+
+- **Problemi temporanei del server** (`OlostepServerError_TemporaryIssue`)
+- **Risposte di timeout** (`OlostepServerError_NoResultInResponse`)
+
+Altri errori (autenticazione, validazione, risorsa non trovata, ecc.) falliscono immediatamente senza riprova.
+
+### Riprova di Trasporto vs Chiamante
+
+L'SDK ha due livelli di riprova:
+
+1. **Livello di trasporto**: Gestisce i fallimenti di connessione a livello di rete (DNS, timeout, ecc.)
+2. **Livello di chiamante**: Gestisce gli errori transitori a livello di API (controllato da `RetryStrategy`)
+
+Entrambi i livelli sono indipendenti e hanno configurazioni separate. La durata massima totale è la somma di entrambi i livelli.
+
+### Calcolare la Durata Massima
+
+```python
+retry_strategy = RetryStrategy(max_retries=5, initial_delay=2.0)
+max_duration = retry_strategy.max_duration()
+print(f"Max call duration: {max_duration:.2f}s")
+```
+
+### Esempi di Configurazione
+
+Ecco alcuni esempi di come configurare la strategia di riprova per diversi casi d'uso.
+
+#### Strategia Conservativa
+
+```python
+# Meno riprove, ritardi più brevi
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+# Durata massima: ~12.6s
+```
+
+#### Strategia Aggressiva
+
+```python
+# Più riprove per operazioni critiche
+retry_strategy = RetryStrategy(
+    max_retries=10,
+    initial_delay=0.5
+)
+# Durata massima: ~969.75s
+```
+
+#### Nessuna Riprova (Fallimento Immediato)
+
+```python
+# Disabilita le riprove per feedback immediato di fallimento
+retry_strategy = RetryStrategy(max_retries=0)
+
+client = AsyncOlostep(api_key="your-api-key", retry_strategy=retry_strategy)
+```
+
+#### Strategia ad Alto Throughput
+
+```python
+# Ottimizzato per operazioni ad alto volume
+retry_strategy = RetryStrategy(
+    max_retries=2,
+    initial_delay=0.5,
+    jitter_min=0.1,
+    jitter_max=0.3  # Jitter più basso per tempistiche più prevedibili
+)
+# Durata massima: ~1.95s
+```
+
+### Comprendere il Jitter
+
+Il jitter aggiunge randomizzazione per prevenire problemi di "thundering herd" quando molti client riprovano contemporaneamente. Il jitter è calcolato come:
+
+```python
+base_delay = initial_delay * (2 ** attempt)
+jitter_range = base_delay * (jitter_max - jitter_min)
+jitter = random.uniform(base_delay * jitter_min, base_delay * jitter_min + jitter_range)
+final_delay = base_delay + jitter
+```
+
+Ad esempio, con `initial_delay=2.0`, `jitter_min=0.1`, `jitter_max=0.9`:
+
+- Tentativo 0: base=2.0s, jitter=0.2-1.8s, finale=2.2-3.8s
+- Tentativo 1: base=4.0s, jitter=0.4-3.6s, finale=4.4-7.6s
+- Tentativo 2: base=8.0s, jitter=0.8-7.2s, finale=8.8-15.2s
+
+### Migliori Pratiche
+
+#### Per Applicazioni in Produzione
+
+```python
+# Approccio bilanciato per la produzione
+retry_strategy = RetryStrategy(
+    max_retries=5,
+    initial_delay=2.0,
+    jitter_min=0.1,
+    jitter_max=0.9
+)
+```
+
+#### Per Sviluppo/Test
+
+```python
+# Feedback rapido per lo sviluppo
+retry_strategy = RetryStrategy(
+    max_retries=2,
+    initial_delay=0.5,
+    jitter_min=0.1,
+    jitter_max=0.3
+)
+```
+
+#### Per Operazioni in Batch
+
+```python
+# Conservativo per lavori batch di grandi dimensioni
+retry_strategy = RetryStrategy(
+    max_retries=3,
+    initial_delay=1.0,
+    jitter_min=0.2,
+    jitter_max=0.8
+)
+```
+
+### Monitoraggio e Debug
+
+L'SDK registra le informazioni di riprova al livello DEBUG:
+
+```
+DEBUG: Temporary issue, retrying in 2.34s
+DEBUG: No result in response, retrying in 4.67s
+```
+
+Abilita il logging di debug per monitorare il comportamento di riprova:
+
+```python
+import logging
+logging.getLogger("olostep").setLevel(logging.DEBUG)
+```
+
+### Gestione degli Errori
+
+Quando tutte le riprove sono esaurite, viene sollevato l'errore originale:
+
+```python
+try:
+    result = await client.scrapes.create("https://example.com")
+except OlostepServerError_TemporaryIssue as e:
+    print(f"Failed after all retries: {e}")
+    # Gestisci il fallimento permanente
+```
+
+### Considerazioni sulle Prestazioni
+
+- **Memoria**: Ogni tentativo di riprova utilizza memoria aggiuntiva per oggetti di richiesta/risposta
+- **Tempo**: Il tempo totale dell'operazione può essere significativamente più lungo con le riprove abilitate
+- **Limiti API**: Le riprove contano contro i tuoi limiti di utilizzo dell'API
+- **Rete**: Più traffico di rete a causa dei tentativi di riprova
+
+Scegli la tua strategia di riprova in base ai requisiti della tua applicazione per affidabilità vs. prestazioni.
+
+## Gestione Dettagliata degli Errori
+
+### Gerarchia delle Eccezioni
+
+L'SDK Olostep fornisce una gerarchia completa di eccezioni per diversi scenari di fallimento. Tutte le eccezioni ereditano da `Olostep_BaseError`.
+
+Ci sono tre tipi principali di errori che ereditano direttamente da `Olostep_BaseError`:
+
+1. **`Olostep_APIConnectionError`** - Fallimenti di connessione a livello di rete
+2. **`OlostepServerError_BaseError`** - Errori sollevati (in qualche modo) dal server API
+3. **`OlostepClientError_BaseError`** - Errori sollevati dal client SDK
+
+### Perché gli Errori di Connessione Sono Separati
+
+`Olostep_APIConnectionError` è separato dagli errori del server perché rappresenta fallimenti a livello di rete che si verificano prima che l'API possa elaborare la richiesta. Questi sono problemi a livello di trasporto (fallimenti DNS o HTTP, timeout, connessione rifiutata, ecc.) piuttosto che errori a livello di API. I codici di stato HTTP (4xx, 5xx) sono considerati risposte API e sono categorizzati come errori del server, anche se indicano problemi.
+
+```
+Olostep_BaseError
+├── Olostep_APIConnectionError
+├── OlostepServerError_BaseError
+│   ├── OlostepServerError_TemporaryIssue
+│   │   ├── OlostepServerError_NetworkBusy
+│   │   └── OlostepServerError_InternalNetworkIssue
+│   ├── OlostepServerError_RequestUnprocessable
+│   │   ├── OlostepServerError_ParserNotFound
+│   │   └── OlostepServerError_OutOfResources
+│   ├── OlostepServerError_BlacklistedDomain
+│   ├── OlostepServerError_FeatureApprovalRequired
+│   ├── OlostepServerError_AuthFailed
+│   ├── OlostepServerError_CreditsExhausted
+│   ├── OlostepServerError_InvalidEndpointCalled
+│   ├── OlostepServerError_ResourceNotFound
+│   ├── OlostepServerError_NoResultInResponse
+│   └── OlostepServerError_UnknownIssue
+└── OlostepClientError_BaseError
+    ├── OlostepClientError_RequestValidationFailed
+    ├── OlostepClientError_ResponseValidationFailed
+    ├── OlostepClientError_NoAPIKey
+    ├── OlostepClientError_AsyncContext
+    ├── OlostepClientError_BetaFeatureAccessRequired
+    └── OlostepClientError_Timeout
+```
+
+### Gestione degli Errori Consigliata
+
+Per la maggior parte dei casi d'uso, cattura l'errore base e stampa il nome dell'errore:
+
+```python
+from olostep import AsyncOlostep, Olostep_BaseError
+
+try:
+    result = await client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_BaseError as e:
+    print(f"Error has occurred: {type(e).__name__}")
+    print(f"Error message: {e}")
+```
+
+Questo approccio cattura tutti gli errori SDK e fornisce informazioni chiare su cosa è andato storto. Il nome dell'errore (es. `OlostepServerError_AuthFailed`) è abbastanza descrittivo per comprendere il problema.
+
+### Gestione degli Errori Granulare
+
+Se hai bisogno di una gestione degli errori più specifica, cattura direttamente i tipi di errore specifici. **Evita di usare `OlostepServerError_BaseError` o `OlostepClientError_BaseError`** - queste classi base indicano solo chi ha sollevato l'errore (server vs client), non chi è responsabile di risolverlo. Questo è un dettaglio di implementazione che non aiuta con la logica di gestione degli errori.
+
+Invece, cattura i tipi di errore specifici che indicano il problema reale:
+
+```python
+from olostep import (
+    AsyncOlostep,
+    Olostep_BaseError,
+    Olostep_APIConnectionError,
+    OlostepServerError_AuthFailed,
+    OlostepServerError_CreditsExhausted,
+    OlostepClientError_NoAPIKey,
+)
+
+try:
+    result = await client.scrapes.create(url_to_scrape="https://example.com")
+except Olostep_APIConnectionError as e:
+    print(f"Network error: {type(e).__name__}")
+except OlostepServerError_AuthFailed:
+    print("Invalid API key")
+except OlostepServerError_CreditsExhausted:
+    print("Credits exhausted")
+except OlostepClientError_NoAPIKey:
+    print("API key not provided")
+except Olostep_BaseError as e:
+    print(f"Error has occurred: {type(e).__name__}")
+```
+
+## Configurazione
+
+### Variabili d'Ambiente
+
+| Variabile               | Descrizione               | Predefinito                   |
+| ---------------------- | ------------------------- | ----------------------------- |
+| `OLOSTEP_API_KEY`      | La tua chiave API         | Richiesto                     |
+| `OLOSTEP_BASE_API_URL` | URL base dell'API         | `https://api.olostep.com/v1`  |
+| `OLOSTEP_API_TIMEOUT`  | Timeout della richiesta (secondi) | `150`                  |
+
+## Ottenere Aiuto
+
+- [Documentazione Completa](https://docs.olostep.com)
+- [Community Slack](https://join.slack.com/t/olostep-users/shared_invite/zt-2pn2ce0uu-~591qIdhAfJy~LXCWQS5UQ)
+- [Email di Supporto](mailto:info@olostep.com)
+
+## Risorse
+
+<CardGroup cols={2}>
+  <Card title="Pacchetto PyPI" icon="python" href="https://pypi.org/project/olostep/">
+    Visualizza su PyPI
+  </Card>
+  <Card title="Ottieni Chiave API" icon="key" href="https://www.olostep.com/auth">
+    Iscriviti gratuitamente
+  </Card>
+</CardGroup>

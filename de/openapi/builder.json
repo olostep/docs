@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Builder-API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://agent.olostep.com"
+    },
+    {
+      "url": "https://dataset.olostep.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer-Authentifizierungsheader in der Form Bearer <token>, wobei <token> dein Authentifizierungstoken ist."
+      }
+    }
+  },
+  "paths": {
+    "/olostep-p2p-incomingAPI": {
+      "get": {
+        "summary": "Starte das Scraping von Webseiten mit verschiedenen Konfigurationen",
+        "description": "Dieser Endpunkt ermöglicht es dir, Webseiten mit verschiedenen Optionen zu scrapen, wie z.B. das Setzen von Timeouts, Wartezeit vor dem Scraping, Datenformatpräferenzen und mehr.",
+        "servers": [
+          {
+            "url": "https://agent.olostep.com"
+          }
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "Die URL, von der aus das Scraping gestartet werden soll.",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "description": "Timeout in Sekunden für den Scraping-Prozess, mit einem Maximum von 620 Sekunden.",
+            "schema": {
+              "type": "integer",
+              "default": 40
+            }
+          },
+          {
+            "name": "waitBeforeScraping",
+            "in": "query",
+            "required": false,
+            "description": "Zeit in Sekunden, die vor dem Start des Scrapings gewartet werden soll, bis zu 500 Sekunden.",
+            "schema": {
+              "type": "integer",
+              "default": 3
+            }
+          },
+          {
+            "name": "saveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Option, den gescrapten Inhalt als HTML zu speichern.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "saveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Option, den gescrapten Inhalt als Markdown zu speichern.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "removeCSSselectors",
+            "in": "query",
+            "required": false,
+            "description": "Option, bestimmte CSS-Selektoren aus dem Inhalt zu entfernen. Optional kannst du auch ein JSON-stringifiziertes Array von spezifischen Selektoren übergeben, die du entfernen möchtest. Die CSS-Selektoren, die entfernt werden, wenn diese Option auf `default` gesetzt ist, sind `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "schema": {
+              "type": "string",
+              "default": "default",
+              "enum": [
+                "default",
+                "none",
+                "JSON stringified array of CSS selectors"
+              ]
+            }
+          },
+          {
+            "name": "htmlTransformer",
+            "in": "query",
+            "required": false,
+            "description": "Gib den HTML-Transformer an, der verwendet werden soll, falls vorhanden. Die Mercury Parser-Bibliothek von Postlight wird verwendet, um Anzeigen und andere unerwünschte Inhalte aus dem gescrapten Inhalt zu entfernen.",
+            "schema": {
+              "type": "string",
+              "default": "none",
+              "enum": [
+                "none",
+                "postlightParser"
+              ]
+            }
+          },
+          {
+            "name": "removeImages",
+            "in": "query",
+            "required": false,
+            "description": "Option, Bilder aus dem gescrapten Inhalt zu entfernen.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "expandMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Wenn true, wird der Markdown-Inhalt im markdown_content-Feld zurückgegeben.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "expandHtml",
+            "in": "query",
+            "required": false,
+            "description": "Wenn true, wird der HTML-Inhalt im html_content-Feld zurückgegeben.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "description": "Aktionen, die auf der Seite ausgeführt werden sollen, bevor der Inhalt abgerufen wird",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "discriminator": {
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "Warten",
+                    "required": [
+                      "type",
+                      "milliseconds"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "wait"
+                        ],
+                        "description": "Warte eine bestimmte Anzahl von Millisekunden"
+                      },
+                      "milliseconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Zeit in Millisekunden, die gewartet werden soll"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Klicken",
+                    "required": [
+                      "type",
+                      "selector"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "click"
+                        ],
+                        "description": "Auf ein Element klicken"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "CSS-Selektor für das Element, auf das geklickt werden soll"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Eingabe ausfüllen",
+                    "required": [
+                      "type",
+                      "selector",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fill_input"
+                        ],
+                        "description": "Ein Eingabeelement mit einem Wert füllen"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "description": "CSS-Selektor für das Eingabeelement"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Text, der in die Eingabe eingegeben werden soll"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "title": "Scrollen",
+                    "required": [
+                      "type",
+                      "direction",
+                      "amount"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scroll"
+                        ],
+                        "description": "Die Seite scrollen"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "up",
+                          "down",
+                          "left",
+                          "right"
+                        ],
+                        "description": "Richtung zum Scrollen"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "Menge zum Scrollen in Pixeln"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit den angeforderten Daten."
+          },
+          "400": {
+            "description": "Schlechte Anfrage aufgrund falscher oder fehlender Parameter."
+          },
+          "401": {
+            "description": "Unbefugter Zugriff aufgrund eines fehlenden oder ungültigen API-Tokens."
+          },
+          "500": {
+            "description": "Interner Serverfehler."
+          }
+        }
+      }
+    },
+    "/olostep-p2p-dataset-API": {
+      "get": {
+        "servers": [
+          {
+            "url": "https://dataset.olostep.com"
+          }
+        ],
+        "summary": "Datensatzinformationen abrufen",
+        "description": "Ermöglicht es Benutzern, Datensatzinformationen im Markdown- und/oder HTML-Format basierend auf der bereitgestellten Datensatz-ID abzurufen.",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasetId",
+            "in": "query",
+            "required": true,
+            "description": "Eindeutiger Bezeichner für den abzurufenden Datensatz.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "retrieveMarkdown",
+            "in": "query",
+            "required": false,
+            "description": "Option, den Datensatz im Markdown-Format abzurufen.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "retrieveHtml",
+            "in": "query",
+            "required": false,
+            "description": "Option, den Datensatz im HTML-Format abzurufen.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "fastLane",
+            "in": "query",
+            "required": false,
+            "description": "Experimentelle Option, um den Scraping-Prozess zu beschleunigen",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Antwort mit den Datensatzinformationen."
+          },
+          "400": {
+            "description": "Schlechte Anfrage aufgrund falscher oder fehlender Parameter."
+          },
+          "404": {
+            "description": "Datensatz für die bereitgestellte ID nicht gefunden."
+          },
+          "500": {
+            "description": "Interner Serverfehler."
+          }
+        }
+      }
+    }
+  }
+}

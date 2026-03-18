@@ -12,6 +12,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import OpenAI from "openai";
+import { sanitizeMdxFrontmatter } from "./mdx-frontmatter-sanitize";
 
 interface LanguageInfo {
   name: string;
@@ -261,7 +262,7 @@ WHAT TO PRESERVE EXACTLY (do not translate):
 - All inline code (content in backticks)
 - All URLs, links, file paths
 - All variable names, function names, identifiers
-- Frontmatter keys (only translate 'title' and 'description' values)
+- Frontmatter keys (only translate 'title', 'description', and 'sidebarTitle' values). Use typographic apostrophe ’ (U+2019) inside those strings instead of ASCII ' so YAML stays valid (e.g. l'API → l' + U+2019 + API).
 - Brand names (Olostep, etc.)
 - Standard technical acronyms that are universally used in English (API, SDK, JSON, HTTP, etc.)
 
@@ -376,10 +377,12 @@ async function translateFileToLang(
   content: string
 ): Promise<{ success: boolean; lang: string; translated?: string; error?: string }> {
   try {
-    const translated = rewriteOpenapiPathForLanguage(
-      await translateContent(content, lang, file),
-      lang
-    );
+    const raw = await translateContent(content, lang, file);
+    const sanitized = sanitizeMdxFrontmatter(raw);
+    if (!sanitized.ok) {
+      throw new Error(`Invalid frontmatter after repair: ${sanitized.error}`);
+    }
+    const translated = rewriteOpenapiPathForLanguage(sanitized.content, lang);
     return { success: true, lang, translated };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -1,0 +1,203 @@
+---
+icon: "spider"
+sidebarTitle: "Explorer des pages spécifiques d’un site web"
+title: "Explorer et extraire le contenu des pages de blog de Stripe"
+description: "Apprenez à explorer et extraire le contenu des articles de blog de Stripe."
+---
+
+## Aperçu
+
+Ce guide vous montrera comment :
+
+- Démarrer une exploration ciblant spécifiquement les articles de blog de Stripe
+- Surveiller la progression de l'exploration
+- Récupérer et traiter le contenu exploré
+
+## Explorer les pages de blog de Stripe
+
+Pour explorer les pages de blog de Stripe, utilisez le point de terminaison des explorations avec la correspondance de motifs pour cibler des URL de blog spécifiques. Cela récupérera le contenu HTML complet de chaque page, que vous pourrez ensuite traiter pour extraire les informations dont vous avez besoin.
+
+<CodeGroup>
+    ```python crawl_stripe_blog.py
+    import requests
+    import time
+    import json
+    from datetime import datetime
+
+    # Configuration
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Enregistrer l'heure de début pour suivre la durée de l'exploration
+    crawl_start_time = time.time()
+    
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Démarrage de l'exploration du blog de Stripe...")
+    
+    # Démarrer une exploration centrée sur les articles de blog d'ingénierie de Stripe
+    # Vous pouvez ajuster les motifs en fonction de vos intérêts spécifiques
+    payload = {
+        "start_url": "https://stripe.com/blog",
+        "include_urls": ["/blog/engineering/**"],  # Se concentrer sur les articles d'ingénierie
+        "max_pages": 25  # Limiter à 25 pages pour cet exemple
+    }
+
+    # Démarrer l'exploration
+    print("Démarrage de l'exploration des articles de blog d'ingénierie de Stripe...")
+    response = requests.post(f'{API_URL}/crawls', headers=HEADERS, json=payload)
+    data = response.json()
+    crawl_id = data['id']
+    print(f"Exploration démarrée avec l'ID : {crawl_id}")
+
+    # Surveiller la progression de l'exploration
+    while True:
+        status_response = requests.get(f'{API_URL}/crawls/{crawl_id}', headers=HEADERS)
+        status_data = status_response.json()
+        print(f"Statut de l'exploration : {status_data['status']} - Pages explorées : {status_data.get('pages_count', 0)}")
+        
+        if status_data['status'] == 'completed' or status_data['status'] == 'failed':
+            break
+            
+        # Attendre 5 secondes avant de vérifier à nouveau
+        time.sleep(5)
+
+    # Calculer et afficher la durée de l'exploration
+    crawl_duration = time.time() - crawl_start_time
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Exploration terminée en {crawl_duration:.2f} secondes")
+    ```
+</CodeGroup>
+
+## Convertir le contenu du blog en Markdown
+
+Une façon puissante d'utiliser le contenu exploré est de le convertir en format markdown, ce qui est idéal pour l'intégrer dans des LLMs ou créer une base de connaissances. Voici comment récupérer et convertir le contenu du blog en markdown :
+
+<CodeGroup>
+    ```python blog_to_markdown.py
+    import requests
+    import time
+    import json
+    from datetime import datetime
+    import os
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Configuration
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Fonction pour récupérer le contenu au format markdown
+    def retrieve_content(retrieve_id, formats):
+        params = {
+            "retrieve_id": retrieve_id,
+            "formats": json.dumps(formats)
+        }
+        response = requests.get(f"{API_URL}/retrieve", headers=HEADERS, params=params)
+        return response.json()
+
+    # Suite de l'exemple d'exploration précédent
+    if status_data['status'] == 'completed':
+        print(f"\nExploration terminée ! {status_data['pages_count']} pages récupérées.")
+        pages_response = requests.get(f'{API_URL}/crawls/{crawl_id}/pages', headers=HEADERS)
+        pages_data = pages_response.json()
+        
+        # Créer le répertoire de sortie s'il n'existe pas
+        os.makedirs("output", exist_ok=True)
+        
+        # Préparer la collecte du contenu markdown
+        markdown_pages = []
+        total_pages = len(pages_data['pages'])
+        
+        # Traiter les pages en parallèle pour obtenir le contenu markdown
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            # Créer des futurs pour la récupération de contenu
+            future_to_page = {
+                executor.submit(retrieve_content, page['retrieve_id'], ["markdown"]): page
+                for page in pages_data['pages']
+            }
+            
+            # Traiter les résultats au fur et à mesure qu'ils se terminent
+            for i, future in enumerate(as_completed(future_to_page), 1):
+                page = future_to_page[future]
+                url = page['url']
+                print(f"Traitement {i}/{total_pages} : {url}")
+                
+                try:
+                    content_data = future.result()
+                    if content_data and "markdown_content" in content_data:
+                        markdown_pages.append({
+                            'url': url,
+                            'title': page['title'],
+                            'markdown_content': content_data['markdown_content']
+                        })
+                        print(f"✓ Contenu markdown récupéré pour {url}")
+                    else:
+                        print(f"⚠ Aucun contenu markdown pour {url}")
+                except Exception as e:
+                    print(f"❌ Erreur lors de la récupération du contenu pour {url} : {str(e)}")
+        
+        # Enregistrer tout le contenu markdown dans un seul fichier
+        output_file = "output/stripe_blog_markdown.md"
+        
+        with open(output_file, "w", encoding="utf-8") as f:
+            for page in markdown_pages:
+                # Écrire l'en-tête de la page avec le titre et l'URL
+                f.write(f"URL : {page['url']}\n\n")
+                
+                # Écrire le contenu markdown
+                f.write(f"{page['markdown_content']}\n\n")
+                
+                # Ajouter un séparateur entre les pages
+                f.write("---\n\n")
+                
+                print(f"✓ Contenu markdown ajouté depuis {page['url']}")
+
+        print(f"\n✅ Processus terminé ! Tout le contenu markdown a été enregistré dans '{output_file}'")
+        print(f"Nombre total de pages traitées : {len(markdown_pages)}")
+    else:
+        print(f"Exploration échouée avec le statut : {status_data['status']}")
+    ```
+</CodeGroup>
+
+### Exemple de sortie Markdown
+
+Le fichier markdown résultant contiendra tout le contenu de blog exploré dans un format propre et structuré :
+
+```markdown
+URL: https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations
+
+## Utiliser le ML pour détecter et répondre aux dégradations de performance
+
+Par Jane Smith, Ingénieure Senior chez Stripe
+
+Chez Stripe, nous traitons des millions de requêtes API chaque jour...
+
+---
+
+URL: https://stripe.com/blog/building-robust-payment-systems
+
+## Construire un système de paiement robuste
+
+Par John Doe, Responsable Ingénierie
+
+La fiabilité est au cœur de l'infrastructure de Stripe...
+
+---
+```
+
+## Prochaines étapes
+
+Maintenant que tu as réussi à explorer et extraire le contenu du blog de Stripe, tu peux :
+
+1. **Étendre ton exploration** : Modifie le paramètre `include_urls` pour explorer d'autres sections du blog de Stripe
+2. **Mettre en place des mises à jour régulières** : Configure un travail planifié pour explorer périodiquement de nouveaux contenus
+3. **Effectuer une analyse plus approfondie** : Utilise des outils NLP pour extraire des insights du contenu du blog
+4. **Construire un moteur de recherche** : Crée une base de données consultable du contenu du blog de Stripe
+5. **Alimenter des LLMs** : Utilise le contenu markdown comme contexte pour que les LLMs répondent à des questions sur les pratiques d'ingénierie de Stripe
+
+En utilisant les capacités d'exploration de contenu d'Olostep, tu peux construire des outils puissants pour surveiller et analyser la stratégie de contenu de n'importe quel site web.

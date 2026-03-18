@@ -1,0 +1,434 @@
+---
+sidebarTitle: "Scrape"
+title: "Scrape"
+description: "Zet elke URL om in schone data"
+icon: "file-lines"
+---
+
+Via de Olostep `/v1/scrapes` endpoint kun je LLM-vriendelijke Markdown, HTML, tekst, screenshots of gestructureerde JSON in real-time uit elke URL extraheren.
+
+- Levert schone markdown, gestructureerde data, screenshots of html
+- Extraheer JSON via [Parsers](/features/structured-content/parsers) of [LLM extractie](/features/structured-content/llm-extraction)
+- Behandelt dynamische inhoud: door js-gerenderde sites, login flows via acties, PDF's
+
+Voor API-details zie de [Scrape Endpoint API Referentie](/api-reference/scrapes/create).
+
+## Een URL scrapen
+
+Gebruik de `/v1/scrapes` endpoint om een enkele URL te scrapen en kies uitvoerformaten.
+
+### Installatie
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: ingebouwde curl is prima
+```
+
+</CodeGroup>
+
+### Gebruik
+
+Je kunt de endpoint gebruiken om een enkele URL te scrapen en uitvoerformaten te kiezen. De verplichte parameters zijn `url_to_scrape` en `formats`.
+
+Andere veelvoorkomende parameters zijn `wait_before_scraping` (in milliseconden), `remove_css_selectors` (standaard, geen, of een array van selectors), en `country`.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+    "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+    "formats": ["markdown", "html"]
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const endpoint = 'https://api.olostep.com/v1/scrapes'
+const payload = {
+  url_to_scrape: 'https://en.wikipedia.org/wiki/Alexander_the_Great',
+  formats: ['markdown', 'html']
+}
+const res = await fetch(endpoint, {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+})
+const data = await res.json()
+console.log(data)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+    "formats": ["markdown", "html"]
+  }'
+```
+
+</CodeGroup>
+
+### Antwoord
+
+De API retourneert een `scrape` object als antwoord.
+
+De `scrape` heeft enkele eigenschappen zoals `id` en `result`.
+
+Het `result` object heeft de volgende velden (afhankelijk van de `formats` parameter kunnen sommige null zijn):
+- `html_content`: de HTML-inhoud van de pagina. Gebruik `formats: ["html"]` om dit te krijgen.
+- `markdown_content`: de MD-inhoud van de pagina. Gebruik `formats: ["markdown"]` om dit te krijgen.
+- `text_content`: de tekstinhoud van de pagina. Gebruik `formats: ["text"]` om dit te krijgen.
+- `json_content`: de JSON-inhoud van de pagina. Gebruik `formats: ["json"]` om dit te krijgen en geef ook een `parser` of `llm_extract` parameter op.
+- `screenshot_hosted_url`: de gehoste URL van de screenshot.
+- `html_hosted_url`: de gehoste URL van de HTML-inhoud
+- `markdown_hosted_url`: de gehoste URL van de Markdown-inhoud
+- `json_hosted_url`: de gehoste URL van de JSON-inhoud
+- `text_hosted_url`: de gehoste URL van de tekstinhoud
+- `links_on_page`: de links op de pagina
+- `page_metadata`: de metadata van de pagina
+
+```json
+{
+  "id": "scrape_6h89o8u1kt",
+  "object": "scrape",
+  "created": 1745673871,
+  "metadata": {},
+  "retrieve_id": "6h89o8u1kt",
+  "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+  "result": {
+    "html_content": "<html...",
+    "markdown_content": "## Alexander the Great...",
+    "text_content": null,
+    "json_content": null,
+    "screenshot_hosted_url": null,
+    "html_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/text_6h89o8u1kt.txt",
+    "markdown_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_6h89o8u1kt.txt",
+    "json_hosted_url": null,
+    "text_hosted_url": null,
+    "links_on_page": [],
+    "page_metadata": { "status_code": 200, "title": "" }
+  }
+}
+```
+
+## Scrape Format
+
+Kies een of meer uitvoerformaten via `formats`:
+
+- `markdown`: LLM-vriendelijke markdown
+- `html`: schoongemaakte HTML
+- `text`: platte tekst
+- `json`: gestructureerde uitvoer (via parser of llm_extract)
+- `raw_pdf`: ruwe PDF-bytes geëxtraheerd naar gehoste URL
+- `screenshot`: ingesteld via acties om een screenshot te maken en een gehoste URL te retourneren
+
+Uitvoer sleutels worden binnen `result` geretourneerd als `*_content` velden en een `*_hosted_url` ook.
+
+## Gestructureerde data extraheren
+
+Je kunt gestructureerde JSON op twee manieren extraheren: met behulp van Parsers of LLM extractie.
+
+### Een Parser gebruiken (aanbevolen voor schaal)
+
+Definieer `formats: ["json"]` en geef een parser `id`.
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+  "formats": ["json"],
+  "parser": { 
+    "id": "@olostep/google-search" 
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>", 
+    "Content-Type": "application/json"
+}
+
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://www.google.com/search?q=alexander+the+great&gl=us&hl=en',
+    formats: ['json'],
+    parser: { id: '@olostep/google-search' }
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "formats": ["json"],
+    "parser": {"id": "@olostep/google-search"}
+  }'
+```
+
+</CodeGroup>
+
+Olostep heeft een paar vooraf gebouwde parsers voor [populaire websites](https://www.olostep.com/store) maar je kunt ook je eigen parsers maken via het dashboard of ons team vragen om het voor je te doen.
+
+Parsers zijn zelfherstellend en zullen zichzelf bijwerken naar de nieuwste versie van de website.
+
+### LLM extractie gebruiken (schema en/of prompt)
+
+Geef `llm_extract` met een JSON Schema (`schema`) en/of een natuurlijke taal instructie (`prompt`). Je kunt beide parameters doorgeven, maar als beide worden gegeven, heeft `schema` voorrang.
+
+Als je in plaats daarvan alleen een `prompt` doorgeeft, zal de LLM de data extraheren op basis van de prompt en zelf de datastructuur bepalen.
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+  "formats": ["markdown", "json"],
+  "llm_extract": {
+    "schema": {
+      "event": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "date": {"type": "string"},
+          "description": {"type": "string"},
+          "venue": {"type": "string"},
+          "address": {"type": "string"},
+          "start_time": {"type": "string"}
+        }
+      }
+    }
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```python Python (prompt only)
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+  "formats": ["json"],
+  "llm_extract": {
+    "prompt": "Haal de titel van het evenement, datum, beschrijving, locatie, adres en starttijd van de pagina."
+  }
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://www.berklee.edu/events/stefano-marchese-friends',
+    formats: ['json'],
+    llm_extract: {
+      prompt: 'Haal de titel van het evenement, datum, beschrijving, locatie, adres en starttijd van de pagina.'
+    }
+  })
+})
+console.log(await res.json())
+```
+
+</CodeGroup>
+
+Opmerking: `result.json_content` retourneert een ge-stringifieerde JSON. Parse het in je code als je een object nodig hebt.
+
+## Interactie met de pagina met Acties
+
+Voer acties uit voordat je gaat scrapen om te communiceren met dynamische sites. Ondersteunde acties:
+
+- `wait` met `milliseconds`
+- `click` met `selector`
+- `fill_input` met `selector` en `value`
+- `scroll` met `direction` en `amount`
+
+Het is vaak nuttig om `wait` te gebruiken voor/na andere acties om de pagina te laten laden.
+
+### Voorbeeld
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
+  "url_to_scrape": "https://example.com/login",
+  "formats": ["markdown"],
+  "actions": [
+    {"type": "fill_input", "selector": "input[type=email]", "value": "john@example.com"},
+    {"type": "wait", "milliseconds": 500},
+    {"type": "fill_input", "selector": "input[type=password]", "value": "secret"},
+    {"type": "click", "selector": "button[type=\"submit\"]"},
+    {"type": "wait", "milliseconds": 1500}
+  ]
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>", 
+    "Content-Type": "application/json"
+}
+res = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(res.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://example.com/login',
+    formats: ['markdown'],
+    actions: [
+      { type: 'fill_input', selector: 'input[type=email]', value: 'john@example.com' },
+      { type: 'wait', milliseconds: 500 },
+      { type: 'fill_input', selector: 'input[type=password]', value: 'secret' },
+      { type: 'click', selector: 'button[type="submit"]' },
+      { type: 'wait', milliseconds: 1500 }
+    ]
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://example.com/login",
+    "formats": ["markdown"],
+    "actions": [
+      { "type": "fill_input", "selector": "input[type=email]", "value": "john@example.com" },
+      { "type": "wait", "milliseconds": 500 },
+      { "type": "fill_input", "selector": "input[type=password]", "value": "secret" },
+      { "type": "click", "selector": "button[type=\"submit\"]" },
+      { "type": "wait", "milliseconds": 1500 }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+Het antwoord zal alle gevraagde formaten bevatten (bijv. `markdown_content`).
+
+## Gebruiksscenario's
+
+Hieronder staan enkele praktische toepassingen van klanten die de `/scrapes` endpoint gebruiken.
+### Inhoudsanalyse & Onderzoek
+- **Concurrentieanalyse**: Productdetails, prijzen en functies van concurrentenwebsites extraheren
+- **Marktonderzoek**: Analyseer landingspagina's, productbeschrijvingen en klantgetuigenissen
+- **Academisch Onderzoek**: Specifieke gegevens verzamelen uit wetenschappelijke publicaties of onderzoeksportalen
+- **Juridische Documentatie**: Case studies, regelgeving of juridische precedenten van officiële websites extraheren
+
+### E-commerce & Retail
+- **Dynamische Prijsstrategieën**: Realtime productprijzen van concurrerende winkels verkrijgen
+- **Productinformatiebeheer**: Gedetailleerde specificaties en beschrijvingen extraheren
+- **Voorraad/Inventaris Monitoring**: Productbeschikbaarheid bij andere retailers controleren
+- **Review Analyse**: Consumentenfeedback en sentiment voor specifieke producten verzamelen
+
+### Marketing & Contentcreatie
+- **Content Curation**: Relevante artikelen en blogposts voor nieuwsbrieven extraheren
+- **SEO Analyse**: Onderzoek naar het gebruik van zoekwoorden, metabeschrijvingen en paginstructuur van concurrenten
+- **Leadgeneratie**: Contactinformatie van bedrijvengidsen of bedrijfspagina's extraheren
+- **Influencer Onderzoek**: Engagement metrics en contentstijlen van influencerprofielen verzamelen
+- **Gepersonaliseerde Social Media generatie**: AI-gestuurde social media marketing creëren door klantwebsites te analyseren
+
+### Data Toepassingen
+- **AI Trainingsdata Verzameling**: Specifieke voorbeelden voor machine learning modellen verzamelen
+- **Aangepaste Kennisbank Bouwen**: Documentatie of instructies van softwarewebsites extraheren
+- **Historische Data Archieven**: Website-inhoud op specifieke momenten in de tijd bewaren
+- **Gestructureerde Data Extractie**: Webinhoud transformeren naar geformatteerde datasets voor analyse
+
+### Monitoring & Alerts
+- **Regelgevingsmonitoring**: Wijzigingen op juridische of regelgevende websites volgen
+- **Crisisbeheer**: Nieuwswebsites monitoren voor vermeldingen van specifieke gebeurtenissen of organisaties
+- **Evenemententracking**: Details over aankomende evenementen van locatie- of organisatorenwebsites extraheren
+- **Servicestatusmonitoring**: Servicestatuspagina's controleren voor specifieke platforms of tools
+
+### Publicatie & Media
+- **Nieuwsaggregatie**: Brekend nieuws van officiële bronnen extraheren
+- **Mediamonitoring**: Specifieke onderwerpen op nieuwswebsites volgen
+- **Inhoudsverificatie**: Informatie extraheren om claims of uitspraken te verifiëren
+- **Multimedia Extractie**: Ingebedde video's, afbeeldingen of audio verzamelen voor mediatheken
+
+### Financiële Toepassingen
+- **Investeringsonderzoek**: Financiële overzichten of jaarverslagen van bedrijfswebsites extraheren
+- **Economische Indicatoren**: Economische gegevens van overheids- of financiële instellingenwebsites verzamelen
+- **Cryptocurrency Data**: Realtime prijs- en marktkapitalisatie-informatie extraheren
+- **Financiële Nieuws Analyse**: Financiële nieuwssites monitoren voor specifieke marktsignalen
+
+### Technische Toepassingen
+- **API Documentatie Extractie**: Technische documentatie verzamelen voor referentie
+- **Integratietesten**: Website-elementen extraheren om derde partij integraties te verifiëren
+- **Toegankelijkheidstesten**: Website-structuur analyseren voor naleving van toegankelijkheidsnormen
+- **Webarchiefcreatie**: Volledige website-inhoud vastleggen voor historische bewaring
+
+### Integratiescenario's
+- **CRM Systemen**: Klantprofielen verbeteren met gegevens van bedrijfswebsites of Linkedin
+- **Content Management Systemen**: Relevante externe inhoud importeren
+- **Business Intelligence Tools**: Interne gegevens aanvullen met externe marktinformatie
+- **Project Management Software**: Specificaties of vereisten van klantwebsites extraheren
+- **Aangepaste Dashboards**: Geëxtraheerde gegevens naast interne statistieken weergeven
+
+## Prijzen
+
+Scrape kost standaard 1 credit. Als je ook [parsers](/features/structured-content/parsers) gebruikt, variëren de kosten per parser (1-5 credits). Als je [LLM extract](/features/structured-content/llm-extraction) gebruikt, kost het 20 credits.
