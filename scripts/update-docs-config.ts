@@ -1,9 +1,11 @@
 #!/usr/bin/env npx ts-node
 /**
  * Updates docs.json to include language configurations for i18n.
- * Preserves the exact navigation structure (tabs) for each language.
- * Translates navigation labels (tab names, group names) using OpenAI.
  *
+ * CRITICAL: This generates `navigation.languages[].tabs` (NOT `groups`).
+ * This preserves the exact tab structure for each language.
+ *
+ * @see engineering-docs/architecture/MINTLIFY-I18N-TABS-WORKING.md
  * @module update-docs-config
  */
 
@@ -29,79 +31,74 @@ interface NavTab {
   openapi?: string | string[];
 }
 
+interface LanguageNavConfig {
+  language: string;
+  default?: boolean;
+  tabs: NavTab[];
+}
+
 interface DocsConfig {
   navigation: {
     tabs?: NavTab[];
-    languages?: LanguageConfig[];
+    languages?: LanguageNavConfig[];
     global?: Record<string, unknown>;
   };
   openapi?: string[];
   [key: string]: unknown;
 }
 
-interface LanguageConfig {
-  language: string;
-  default?: boolean;
-  groups: NavGroup[];
-  openapi?: string[];
-}
-
-// Only French enabled for initial test - uncomment others after validation
 const LANGUAGES: Record<string, LanguageInfo> = {
+  de: { name: "German", nativeName: "Deutsch" },
   fr: { name: "French", nativeName: "Français" },
-  // es: { name: "Spanish", nativeName: "Español" },
-  // nl: { name: "Dutch", nativeName: "Nederlands" },
-  // de: { name: "German", nativeName: "Deutsch" },
-  // zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
-  // it: { name: "Italian", nativeName: "Italiano" },
-  // ja: { name: "Japanese", nativeName: "日本語" },
+  es: { name: "Spanish", nativeName: "Español" },
+  nl: { name: "Dutch", nativeName: "Nederlands" },
+  zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
+  it: { name: "Italian", nativeName: "Italiano" },
+  ja: { name: "Japanese", nativeName: "日本語" },
 };
 
 const DOCS_ROOT = path.resolve(__dirname, "..");
 const DOCS_CONFIG_PATH = path.join(DOCS_ROOT, "docs.json");
-const OPENAPI_DIR = path.join(DOCS_ROOT, "openapi");
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-/**
- * Gets the list of OpenAPI spec files from the openapi directory
- */
-function getOpenApiFiles(): string[] {
-  if (!fs.existsSync(OPENAPI_DIR)) {
-    return [];
+// Defer OpenAI client creation - only initialize if API key is present
+let openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!openai && process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
-  return fs
-    .readdirSync(OPENAPI_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => `openapi/${f}`);
-}
-
-/**
- * Gets language-specific OpenAPI paths.
- */
-function getLangOpenApiFiles(lang: string): string[] {
-  const langOpenApiDir = path.join(DOCS_ROOT, lang, "openapi");
-
-  if (!fs.existsSync(langOpenApiDir)) {
-    return [];
-  }
-
-  return fs
-    .readdirSync(langOpenApiDir)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => `${lang}/openapi/${f}`);
+  return openai!;
 }
 
 const translationCache: Map<string, Map<string, string>> = new Map();
 
 /**
+ * Checks if a language has any translated files
+ */
+function hasTranslations(lang: string): boolean {
+  const langDir = path.join(DOCS_ROOT, lang);
+  if (!fs.existsSync(langDir)) {
+    return false;
+  }
+
+  const files = fs.readdirSync(langDir, { recursive: true });
+  return files.some((f) => f.toString().endsWith(".mdx"));
+}
+
+/**
  * Translates a navigation label to the target language.
+ * If OPENAI_API_KEY is not set, returns the original label (for testing).
  */
 async function translateLabel(label: string, lang: string): Promise<string> {
+  // Skip translation if no API key (for local testing)
+  if (!process.env.OPENAI_API_KEY) {
+    return label;
+  }
+
   if (!translationCache.has(lang)) {
     translationCache.set(lang, new Map());
   }
   const langCache = translationCache.get(lang)!;
+
   if (langCache.has(label)) {
     return langCache.get(label)!;
   }
@@ -112,17 +109,14 @@ async function translateLabel(label: string, lang: string): Promise<string> {
   }
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       temperature: 0.1,
-      max_tokens: 100,
+      max_tokens: 50,
       messages: [
         {
           role: "system",
-          content: `You are a translator. Translate the following navigation label to ${langInfo.name} (${langInfo.nativeName}). 
-Keep it concise and natural for UI navigation. 
-Do NOT translate brand names like "Olostep", "SDK", "API".
-Output ONLY the translated text, nothing else.`,
+          content: `Translate this UI navigation label to ${langInfo.name} (${langInfo.nativeName}). Output ONLY the translated text, no quotes or explanation.`,
         },
         {
           role: "user",
@@ -135,99 +129,72 @@ Output ONLY the translated text, nothing else.`,
     langCache.set(label, translated);
     return translated;
   } catch (error) {
-    console.warn(`Warning: Failed to translate "${label}" to ${lang}, using original`);
+    console.warn(`  Warning: Failed to translate label "${label}" to ${lang}`);
     return label;
   }
 }
 
 /**
- * Translates a navigation group and its nested groups, with optional page path prefix
+ * Recursively prefixes page paths with language code and translates group names.
  */
-async function translateGroupWithPrefix(
-  group: NavGroup,
-  lang: string,
-  addLangPrefix: boolean
-): Promise<NavGroup> {
-  const translatedGroupName = await translateLabel(group.group, lang);
-  const translatedPages = await translatePages(group.pages, lang, addLangPrefix);
+async function translateGroup(group: NavGroup, lang: string): Promise<NavGroup> {
+  const translatedGroup = await translateLabel(group.group, lang);
+
+  const translatedPages: (string | NavGroup)[] = [];
+  for (const page of group.pages) {
+    if (typeof page === "string") {
+      translatedPages.push(`${lang}/${page}`);
+    } else {
+      translatedPages.push(await translateGroup(page, lang));
+    }
+  }
 
   return {
     ...group,
-    group: translatedGroupName,
+    group: translatedGroup,
     pages: translatedPages,
   };
 }
 
 /**
- * Translates page references (handles nested groups).
- * 
- * # Note: For non-English languages, page paths MUST be prefixed with lang code.
- * Per Mintlify docs: `"pages": ["es/index", "es/quickstart"]`
+ * Translates a full tab (tab name + all groups inside)
  */
-async function translatePages(
-  pages: (string | NavGroup)[],
-  lang: string,
-  addLangPrefix: boolean
-): Promise<(string | NavGroup)[]> {
-  const results: (string | NavGroup)[] = [];
-  for (const page of pages) {
-    if (typeof page === "string") {
-      results.push(addLangPrefix ? `${lang}/${page}` : page);
-    } else {
-      results.push(await translateGroupWithPrefix(page, lang, addLangPrefix));
-    }
+async function translateTab(tab: NavTab, lang: string): Promise<NavTab> {
+  const translatedTabName = await translateLabel(tab.tab, lang);
+
+  const translatedGroups: NavGroup[] = [];
+  for (const group of tab.groups) {
+    translatedGroups.push(await translateGroup(group, lang));
   }
-  return results;
+
+  return {
+    ...tab,
+    tab: translatedTabName,
+    groups: translatedGroups,
+  };
 }
 
 /**
- * Checks if translations exist for a language
+ * Creates language config entry with full tabs array (NOT groups)
  */
-function hasTranslations(lang: string): boolean {
-  const langDir = path.join(DOCS_ROOT, lang);
-  if (!fs.existsSync(langDir)) {
-    return false;
-  }
-
-  const files = fs.readdirSync(langDir, { recursive: true }) as string[];
-  return files.some((f) => f.endsWith(".mdx"));
-}
-
-/**
- * Flattens tabs into a single groups array.
- * Mintlify i18n requires groups at the language level, not tabs.
- * We preserve all groups from non-hidden tabs.
- */
-function flattenTabsToGroups(tabs: NavTab[]): NavGroup[] {
-  const groups: NavGroup[] = [];
-  for (const tab of tabs) {
-    if (tab.hidden) continue;
-    groups.push(...tab.groups);
-  }
-  return groups;
-}
-
-/**
- * Flattens and translates tabs into groups for a language.
- * Non-English languages get page paths prefixed with lang code.
- */
-async function flattenAndTranslateTabsToGroups(
-  tabs: NavTab[],
+async function createLanguageConfig(
+  englishTabs: NavTab[],
   lang: string
-): Promise<NavGroup[]> {
-  const groups: NavGroup[] = [];
-  const addLangPrefix = lang !== "en";
-  for (const tab of tabs) {
-    if (tab.hidden) continue;
-    for (const group of tab.groups) {
-      groups.push(await translateGroupWithPrefix(group, lang, addLangPrefix));
-    }
+): Promise<LanguageNavConfig> {
+  const translatedTabs: NavTab[] = [];
+
+  for (const tab of englishTabs) {
+    translatedTabs.push(await translateTab(tab, lang));
   }
-  return groups;
+
+  return {
+    language: lang,
+    tabs: translatedTabs,
+  };
 }
 
 async function main(): Promise<void> {
-  console.log("Updating docs.json with language configurations...\n");
+  console.log("Updating docs.json with i18n language configurations...\n");
 
   const configContent = fs.readFileSync(DOCS_CONFIG_PATH, "utf8");
   const config: DocsConfig = JSON.parse(configContent);
@@ -240,66 +207,57 @@ async function main(): Promise<void> {
     return;
   }
 
-  const englishTabs = config.navigation.tabs;
-  if (!englishTabs) {
-    console.error("No tabs found in navigation");
+  // # Note: After a deploy, docs.json only has languages[]; re-runs need en tabs from there.
+  let englishTabs = config.navigation.tabs;
+  if (!englishTabs?.length && Array.isArray(config.navigation.languages)) {
+    const en = config.navigation.languages.find((l) => (l as LanguageNavConfig).language === "en");
+    if (en && (en as LanguageNavConfig).tabs?.length) {
+      englishTabs = (en as LanguageNavConfig).tabs;
+    }
+  }
+  if (!englishTabs?.length) {
+    console.error("No English tabs found in navigation (tabs or languages[en])");
     process.exit(1);
   }
 
   console.log(`English tabs: ${englishTabs.map((t) => t.tab).join(", ")}`);
 
-  // Flatten English tabs to groups for i18n (Mintlify requires groups at language level)
-  const englishGroups = flattenTabsToGroups(englishTabs);
-  console.log(`Flattened to ${englishGroups.length} groups for i18n`);
-
-  // Build languages array with groups (not tabs)
-  const languages: LanguageConfig[] = [
+  // Build languages array with TABS (not groups!)
+  const languages: LanguageNavConfig[] = [
     {
       language: "en",
       default: true,
-      groups: englishGroups,
+      tabs: englishTabs,
     },
   ];
 
-  console.log("\nTranslating navigation for each language...");
+  console.log("\nTranslating navigation labels for each language...");
   for (const lang of availableLangs) {
-    console.log(`  ${lang}: translating groups...`);
-
-    const translatedGroups = await flattenAndTranslateTabsToGroups(englishTabs, lang);
-
-    const langConfig: LanguageConfig = {
-      language: lang,
-      groups: translatedGroups,
-    };
-
-    const langOpenApi = getLangOpenApiFiles(lang);
-    if (langOpenApi.length > 0) {
-      langConfig.openapi = langOpenApi;
-    }
-
+    console.log(`  ${lang}: translating tabs and groups...`);
+    const langConfig = await createLanguageConfig(englishTabs, lang);
     languages.push(langConfig);
   }
 
-  // Build new config preserving all other settings
+  // Preserve global config (anchors, etc.)
+  const global = config.navigation.global;
+
+  // Build new config - remove tabs at top level, add languages
   const newConfig: DocsConfig = {
     ...config,
     navigation: {
       languages,
-      global: config.navigation.global,
+      ...(global ? { global } : {}),
     },
   };
 
+  // Remove the top-level tabs since they're now inside languages
+  delete (newConfig.navigation as { tabs?: NavTab[] }).tabs;
+
   fs.writeFileSync(DOCS_CONFIG_PATH, JSON.stringify(newConfig, null, 2), "utf8");
 
-  console.log(`\n✓ Updated docs.json with ${languages.length} languages:`);
-  languages.forEach((l) => {
-    const info = l.language === "en" ? "English" : LANGUAGES[l.language]?.name;
-    console.log(`  - ${l.language}: ${info}${l.default ? " (default)" : ""}`);
-  });
-
-  // Output preview of structure for validation
-  console.log("\n=== Structure Preview ===");
-  console.log(JSON.stringify(newConfig.navigation, null, 2).slice(0, 1500) + "...");
+  console.log("\n✓ docs.json updated with i18n configuration");
+  console.log(`  Languages: ${languages.map((l) => l.language).join(", ")}`);
+  console.log(`  Structure: navigation.languages[].tabs (preserves tab structure)`);
 }
 
 main().catch((err) => {

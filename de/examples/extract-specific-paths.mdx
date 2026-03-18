@@ -1,0 +1,112 @@
+---
+icon: list-ol
+sidebarTitle: Bestimmte URLs auf Website erhalten
+title: Blog-URLs von Stripes Website extrahieren
+description: Filtern und extrahieren Sie nur die Blog-URLs von Stripes Website für eine gezielte Inhaltsanalyse.
+---
+
+## Übersicht
+
+Anstatt die [gesamte Website zu kartieren](/use-cases/get-website-structure), möchten Sie sich möglicherweise auf bestimmte Abschnitte konzentrieren. In diesem Leitfaden zeigen wir Ihnen, wie Sie nur die Blog-URLs von Stripes Website extrahieren können.
+
+## Nur Blog-URLs extrahieren
+
+Um nur Blog-URLs von Stripes Website zu extrahieren, verwenden Sie den Maps-Endpunkt mit Pfadmusterfiltern. Der Parameter `include_urls` ermöglicht es Ihnen, genau anzugeben, welche URL-Muster Sie in die Ergebnisse einbeziehen möchten.
+
+<CodeGroup>
+    ```python extract_stripe_blog_urls.py
+    import requests
+    import time
+    import json
+
+    # Konfiguration
+    API_URL = 'https://api.olostep.com/v1'
+    API_KEY = '<your_olostep_api_key>'
+    HEADERS = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    # Startzeit für Latenzverfolgung
+    start_time = time.time()
+    
+    # Definieren Sie die Nutzlast mit einzuschließenden URL-Mustern
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog", "/blog/**"]  # Übereinstimmung mit /blog und allen Pfaden unter /blog
+    }
+    
+    # Anfrage stellen
+    response = requests.post(f'{API_URL}/maps', headers=HEADERS, json=payload)
+    
+    # Latenz berechnen
+    latency = round((time.time() - start_time) * 1000, 2)
+    print(f"Anfrage abgeschlossen in {latency}ms")
+    
+    # Ergebnisse verarbeiten
+    data = response.json()
+    print(f"{data['urls_count']} Blog-URLs auf Stripes Website gefunden")
+    
+    # Die ersten 10 URLs als Beispiel ausgeben
+    print("\nBeispiel-Blog-URLs:")
+    for url in data['urls'][:10]:
+        print(f"- {url}")
+        
+    # Blog-URLs zur weiteren Verarbeitung in eine Datei speichern
+    with open('stripe_blog_urls.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"\nAlle Blog-URLs in stripe_blog_urls.json gespeichert")
+    ```
+</CodeGroup>
+
+### Die URL-Muster verstehen
+
+Im obigen Beispiel verwenden wir zwei Musterspezifikationen:
+
+- `/blog` - Passt genau zur Hauptblogseite (https://stripe.com/blog)
+- `/blog/**` - Passt zu allen Unterpfaden unter /blog, einschließlich einzelner Blogbeiträge, Kategorieseiten usw.
+
+Diese Kombination stellt sicher, dass wir alle blogbezogenen Inhalte erfassen, während andere Abschnitte der Website ausgeschlossen werden.
+
+### Beispielantwort
+
+```json
+{
+  "id": "map_xyz789abc",
+  "urls_count": 278,
+  "urls": [
+    "https://stripe.com/blog",
+    "https://stripe.com/blog/page/1",
+    "https://stripe.com/blog/page/2",
+    "https://stripe.com/blog/engineering",
+    "https://stripe.com/blog/product",
+    "https://stripe.com/blog/how-we-built-it-usage-based-billing",
+    "https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations",
+    "https://stripe.com/blog/stripe-radar-responded-to-card-testing",
+    "https://stripe.com/blog/future-of-real-time-payments",
+    "https://stripe.com/blog/ml-flywheel-improve-models"
+    // ... zusätzliche URLs aus Platzgründen weggelassen
+  ]
+}
+```
+
+## Blog-URLs nach Kategorie filtern
+
+Sie können Ihre Extraktion weiter verfeinern, um sich auf bestimmte Blog-Kategorien zu konzentrieren. Wenn Sie beispielsweise nur an Stripes Engineering-Blogbeiträgen interessiert sind:
+
+<CodeGroup>
+    ```python extract_engineering_blog_urls.py
+    # Definieren Sie die Nutzlast mit spezifischeren URL-Mustern
+    payload = {
+        "url": "https://stripe.com",
+        "include_urls": ["/blog/engineering", "/blog/engineering/**"]
+    }
+    ```
+</CodeGroup>
+
+## Nächste Schritte
+
+Nachdem Sie nun alle Blog-URLs von Stripe extrahiert haben,
+
+1. können Sie deren Inhalte einzeln mit der [scrape API](../../api-reference/scrapes/create) abrufen.
+2. Oder, verwenden Sie den [nächsten Leitfaden](/use-cases/crawl-matching-pages), um die tatsächlichen Inhalte von diesen Blogseiten direkt mit integrierten Filtern zu crawlen und zu extrahieren.

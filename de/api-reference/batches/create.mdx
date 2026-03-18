@@ -1,0 +1,17 @@
+---
+title: 'Batch erstellen'
+description: 'Startet einen neuen Batch. Sie erhalten eine `id`, mit der Sie den Fortschritt des Batches verfolgen können, wie [hier](/api-reference/batches/info) gezeigt. Hinweis: Die Verarbeitungszeit ist unabhängig von der Batchgröße konstant.'
+openapi: 'de/openapi/batches.json POST /v1/batches'
+---
+
+<Tip>
+**Benachrichtigung bei Abschluss:** Übergeben Sie den `webhook`-Parameter mit der URL Ihres Endpunkts, um eine HTTP POST-Benachrichtigung zu erhalten, wenn der Batch abgeschlossen ist. Details finden Sie unter [Webhooks](/api-reference/common/webhooks).
+</Tip>
+
+<Tip>
+**Benutzerdefinierte Daten anhängen:** Verwenden Sie den `metadata`-Parameter, um Schlüssel-Wert-Paare zu speichern. Unterstützt auf zwei Ebenen:
+- **Batch-Ebene** — im Anforderungskörper
+- **Element-Ebene** — bei jedem Element im `items`-Array
+
+Details finden Sie unter [Metadaten](/api-reference/common/metadata).
+</Tip>

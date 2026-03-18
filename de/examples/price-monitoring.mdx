@@ -1,0 +1,228 @@
+---
+icon: bell
+sidebarTitle: Preisüberwachung
+title: Preisverfolgung mit Olostep
+description: Erfahren Sie, wie Sie Olostep verwenden, um Produktpreise in großem Maßstab auf einer E-Commerce-Plattform zu verfolgen.
+---
+
+## Überblick
+
+Olostep bietet eine Web-Scraping-API, die eine Echtzeit-Preisverfolgung von Millionen von Produkten auf einer E-Commerce-Plattform in regelmäßigen Abständen (z. B. alle paar Stunden) auf skalierbare und kosteneffiziente Weise ermöglicht.
+
+Dies ist nützlich für Unternehmen, die Preisänderungen überwachen, Preise auf mehreren Websites vergleichen oder die Preisstrategien von Wettbewerbern verfolgen möchten.
+
+In diesem Leitfaden werden wir sehen, wie ein Kunde Olostep verwendet, um eine automatisierte Preisverfolgung für Millionen von Amazon-Produkten täglich einzurichten.
+
+## Warum Olostep für die Preisverfolgung verwenden?
+
+- **Skalierbarkeit:** Verfolgen Sie Preise für Millionen von Produkten alle paar Stunden.
+- **Automatisierung:** Richten Sie geplante Scraping-Aufgaben ein, die zu vordefinierten Zeiten/regelmäßigen Intervallen ausgeführt werden.
+- **Mehrere Formate:** Abrufen von Daten im JSON-, HTML- oder Markdown-Format.
+- **Benutzerdefinierte Parser:** Extrahieren Sie nur die relevanten JSON-Informationen mit unseren Parsern oder übergeben Sie Ihre eigenen an die API.
+
+## Wie man Preise mit Olostep verfolgt
+
+### Überblick über die Prozess-Einrichtung
+
+Beim Verfolgen von Produkten in großem Maßstab empfehlen wir die Verwendung des [Batches-Endpunkts](https://docs.olostep.com/api-reference/batches/create) von Olostep.
+
+Dieser Endpunkt ermöglicht es Ihnen, mehrere Batches von URLs (jeweils bis zu 10.000) parallel zu verarbeiten und die Ergebnisse nach 5-8 Minuten abzurufen. Sie können mehrere Batches gleichzeitig senden, ihren Fortschritt überwachen und die Ergebnisse abrufen, sobald sie abgeschlossen sind. Auf diese Weise können Sie Millionen von URLs in 15-20 Minuten verarbeiten.
+
+Der allgemeine Ablauf für die Preisverfolgung mit Olostep ist wie folgt:
+
+1. **Lesen Sie die Produkte aus der Datenbank und speichern Sie die URLs, die Sie verfolgen möchten, in einer CSV-Datei.**
+2. **Lesen Sie die Daten aus der CSV-Datei und starten Sie einen Batch mit dem Batch-Endpunkt von Olostep.** Dies erfolgt durch das Posten der Daten an den Endpunkt in Blöcken von jeweils bis zu 10.000 URLs.
+3. **Überprüfen Sie alle 60 Sekunden den Batch-Status**, um den Fortschritt zu überwachen.
+4. **Sobald der Batch abgeschlossen ist, lesen Sie den Inhalt und verwenden Sie ihn in Ihrem Workflow.**
+
+Sie können einen Batch starten und den HTML/Markdown-Inhalt der Seite zurückerhalten und ihn dann selbst parsen, um die gewünschten Daten zu extrahieren. Wir empfehlen jedoch, den Batch mit einem Parser zu starten, damit Sie ein JSON-Objekt mit nur den benötigten geparsten Daten erhalten.
+Sie können Ihren eigenen Parser an die API übergeben oder einen der vorgefertigten für einige gängige Websites (z. B. Amazon-Produktseiten, Google-Suchergebnisse, LinkedIn-Profile usw.) verwenden.
+
+Wir speichern die Daten für jeden Batch 7 Tage lang, sodass Sie sie bei Bedarf mehrfach abrufen können.
+
+### Schritt 1: Exportieren der Produktdaten aus Ihrer Datenbank
+
+Der erste Schritt besteht darin, Produktinformationen aus Ihrer Datenbank abzurufen und im CSV-Format zu speichern. Diese Datei sollte Produktkennungen, URLs und alle zusätzlichen Metadaten enthalten, die für die Verfolgung erforderlich sind.
+
+### Schritt 2: Starten eines Batches mit Olostep
+
+Um einen Batch zu starten, lesen Sie die Produktdaten aus der CSV und senden Sie sie an den Batch-Endpunkt von Olostep. Dies erfolgt mittels einer HTTP-POST-Anfrage mit einer JSON-Nutzlast.
+
+Jeder Batch kann bis zu 10.000 URLs enthalten. Für große Datensätze (>10.000 URLs) teilen Sie diese in mehrere Batches auf und senden Sie sie parallel.
+
+Ein Batch besteht aus einem Array von Elementen, wobei jedes Element eine zu verarbeitende Produkt-URL darstellt. Hier ist die Struktur einer Batch-Anfrage:
+
+```python
+import requests
+
+def start_batch(batch_array):
+    payload = {
+        "batch_array": batch_array,                 # Array von zu verarbeitenden Elementen
+        "batch_country": "IT",                      # Ländercode für den Batch
+        "parser": "@olostep/amazon-it-product"      # Optional: Geben Sie einen benutzerdefinierten Parser an, damit Sie nur die benötigten JSON-Daten erhalten
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()["id"]
+```
+
+#### Struktur des Batch-Arrays
+Jedes Element im batch_array sollte dieser Struktur folgen:
+<CodeGroup>
+    ```json filename="batch_item.json"
+    {
+        "custom_id": "unique_identifier",    // Erforderlich: Ihre eindeutige Kennung für das Element
+        "url": "product_url",               // Erforderlich: Zu verarbeitende URL
+        "wait_before_scraping": 0,         // Optional: Wartezeit vor dem Scraping jeder URL im Batch (in Millisekunden)
+    }
+    ```
+</CodeGroup>
+Parameter
+<ResponseField name="batch_array" type="array" required>
+    Array von zu verarbeitenden Elementen. Maximal 10.000 URLs pro Batch. Jedes Element muss eine eindeutige `custom_id` haben.
+</ResponseField>
+<ResponseField name="batch_country" type="string" required>
+    Zweibuchstabiger Ländercode (z.B. "IT" für Italien).
+</ResponseField>
+<ResponseField name="parser" type="string">
+    Name des zu verwendenden benutzerdefinierten Parsers (z.B. "@olostep/amazon-it-product"). Kontaktieren Sie uns unter info@olostep.com, um Zugriff auf die vorgefertigten Parser zu erhalten oder um Ihren eigenen zu erstellen.
+</ResponseField>
+Antwort
+<CodeGroup>
+    ```json filename="response.json"
+    {
+        "id": "batch_54ikwskmt8"
+    }
+    ```
+</CodeGroup>
+Der Endpunkt gibt ein JSON-Objekt mit der batch_id zurück, die verwendet werden kann, um den Status zu überwachen und dann die Ergebnisse abzurufen.
+
+Beispielverwendung
+<CodeGroup>
+    ```python
+    # Batch-Array vorbereiten
+    batch_array = [
+    {
+        "custom_id": "product_123",
+        "url": "https://www.amazon.it/dp/B0CHF6Z393/?coliid=INQXTGFQF4FM4&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    },
+    {
+        "custom_id": "product_124",
+        "url": "https://www.amazon.it/dp/B0CHMJL774/?coliid=I6CFYA5EHVHE2&colid=1R0NGA5NR5LSZ&psc=1&ref_=list_c_wl_lv_vv_lig_dp_it"
+    }
+    ]
+
+    # Batch-Verarbeitung starten
+    batch_id = start_batch(batch_array)
+    print(f"Batch gestartet: {batch_id}")
+    ```
+</CodeGroup>
+
+### Schritt 3: Überwachen des Batch-Status
+Sobald ein Batch gestartet ist, müssen Sie seinen Status überwachen, um festzustellen, wann die Verarbeitung abgeschlossen ist. Die API bietet einen Status-Endpunkt, der periodisch (z.B. alle 60 Sekunden) mit der batch_id abgefragt werden kann.
+
+<CodeGroup>
+    ```python filename="check_status.py"
+    import requests
+
+    def check_batch_status(batch_id):
+    headers = {"Authorization": "Bearer " + API_KEY}
+    response = requests.request(
+    "GET",
+    f"https://api.olostep.com/v1/batches/{batch_id}",
+    headers=headers
+    )
+    return response.json()["status"]
+    ```
+</CodeGroup>
+
+Für den Produktionseinsatz wird empfohlen, eine asynchrone Überwachung zu implementieren, um mehrere Batches effizient zu handhaben:
+<CodeGroup>
+    ```python
+    import asyncio
+
+    async def monitor_batch(batch_id: str) -> None:
+    """Überwachen eines einzelnen Batches, bis er abgeschlossen ist"""
+    while True:
+        status = check_batch_status(batch_id)
+        if status == "completed":
+            print(f"Batch {batch_id} abgeschlossen!")
+            return
+        print(f"Batch {batch_id} wird noch verarbeitet... Erneute Überprüfung in 60 Sekunden")
+        await asyncio.sleep(60)
+    ```
+</CodeGroup>
+
+
+### Schritt 4: Abrufen der IDs für abgeschlossene Elemente
+
+Sobald der Batch als abgeschlossen markiert ist, können Sie die Liste der abgeschlossenen Elemente abrufen. Jedes Element wird eine retrieve_id haben. Wenn Sie den tatsächlichen Inhalt möchten, verwenden Sie den retrieve-Endpunkt, indem Sie die `retrieve_id` übergeben.
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    response = requests.get(f"https://api.olostep.com/v1/batches/{batch_id}/items", headers=headers)
+    return response.json()["items"]
+```
+Dies wird die abgeschlossenen Elemente zurückgeben, die jeweils eine `retrieve_id` für jede gesendete URL haben. Sie können dann den retrieve-Endpunkt verwenden, um die extrahierten Daten (HTML, Markdown oder JSON) für jede URL abzurufen und zu speichern.
+
+Sie können die `retrieve_id` für jedes Element im Batch mit folgendem Code abrufen:
+
+```python
+items = get_completed_items("your_batch_id")
+for item in items:
+    print(f"""
+    URL: {item['url']}
+    Custom ID: {item['custom_id']}
+    Retrieve ID: {item['retrieve_id']}
+    ---
+    """)
+```
+
+### Schritt 5: Abrufen des Inhalts für jedes Element
+
+Sobald Sie die `retrieve_id` für jedes Element haben, können Sie dessen Inhalt (HTML, Markdown oder JSON) mit dem retrieve-Endpunkt abrufen:
+
+<CodeGroup>
+    ```python filename="retrieve_content.py"
+    def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(
+    url,
+    headers=headers,
+    params=params
+    )
+    return response.json()
+
+    # Beispielverwendung
+    retrieve_id = "product_123"
+    content = retrieve_content(retrieve_id)
+
+    # Wenn Sie mehrere Elemente verarbeiten möchten
+    def process_batch_content(batch_id):
+    items = get_completed_items(batch_id)
+    for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    # Verarbeiten oder Speichern des Inhalts nach Bedarf
+    ```
+</CodeGroup>
+
+
+## Fazit
+
+Indem Sie diesen Schritten folgen, können Sie ein automatisiertes Preisverfolgungssystem mit Olostep einrichten. In Kürze werden wir ein Open-Source-GitHub-Repo mit dem vollständigen Code für dieses Beispiel veröffentlichen.

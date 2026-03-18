@@ -1,0 +1,556 @@
+---
+sidebarTitle: 'Relay'
+icon: bolt
+title: Relay-Integration
+description: Automatisieren Sie Websuche, Scraping und Crawling mit dem modernen Workflow-Builder von Relay.app, der eingebettete KI- und Human-in-the-Loop-Funktionalität bietet
+---
+
+Die Olostep Relay.app-Integration bringt leistungsstarke Web-Scraping-Fähigkeiten auf die moderne Automatisierungsplattform von Relay. Erstellen Sie automatisierte Workflows, die Webdaten mit der benutzerfreundlichen Oberfläche von Relay und fortschrittlichen Funktionen wie eingebetteter KI und Human-in-the-Loop-Funktionalität extrahieren, überwachen und verarbeiten.
+
+[Erste Schritte mit Olostep auf Relay.app →](https://www.relay.app/apps/olostep/integrations)
+
+## Funktionen
+
+Relay.app bietet ein modernes Automatisierungserlebnis mit tiefen Integrationen und leistungsstarken Workflow-Funktionen:
+
+<CardGroup cols={2}>
+  <Card title="Tiefe Integrationen" icon="link">
+    Umfassende und benutzerfreundliche Integrationen mit zahlreichen Anwendungen für nahtlose Workflow-Automatisierung
+  </Card>
+  
+  <Card title="Eingebettete KI" icon="brain">
+    Eingebaute KI-Funktionen zur Verbesserung der Entscheidungsfindung und Automatisierung von Aufgaben, die menschliches Verständnis erfordern
+  </Card>
+  
+  <Card title="Human-in-the-Loop" icon="users">
+    Fügen Sie manuelle Schritte für Aufgaben hinzu, die menschliches Urteilsvermögen erfordern, um Flexibilität und Qualitätskontrolle zu gewährleisten
+  </Card>
+  
+  <Card title="Leistungsstarke Workflows" icon="workflow">
+    Umfassende Workflow-Grundlagen einschließlich bedingter Logik, Fehlerbehandlung und paralleler Verarbeitung
+  </Card>
+</CardGroup>
+
+## Installation
+
+### 1. Finden Sie Olostep in Relay.app
+
+Suchen Sie nach "Olostep" in Relay.app, wenn Sie einen neuen Workflow erstellen:
+
+1. Gehen Sie zu [Olostep auf Relay.app](https://www.relay.app/apps/olostep/integrations)
+2. Klicken Sie auf "Kostenlos starten" oder "Workflow erstellen"
+3. Suchen Sie im App-Selektor nach "Olostep"
+4. Wählen Sie die Olostep-App
+
+Alternativ besuchen Sie direkt die [Olostep-Integrationsseite](https://www.relay.app/apps/olostep/integrations), um verfügbare Aktionen zu durchsuchen und Ihren ersten Workflow zu erstellen.
+
+### 2. Verbinden Sie Ihr Konto
+
+Wenn Sie Olostep zum ersten Mal in einem Workflow verwenden, werden Sie aufgefordert, Ihr Konto zu verbinden:
+
+1. Klicken Sie auf "Olostep verbinden"
+2. Geben Sie Ihren Olostep-API-Schlüssel ein
+3. Autorisieren Sie die Verbindung
+
+Holen Sie sich Ihren API-Schlüssel vom [Olostep-Dashboard](https://olostep.com/dashboard).
+
+## Verfügbare Aktionen
+
+### URL scrapen
+
+Extrahieren Sie Inhalte von einer einzelnen URL. Unterstützt mehrere Formate und JavaScript-Rendering.
+
+**Anwendungsfälle:**
+- Überwachen Sie bestimmte Seiten auf Änderungen
+- Extrahieren Sie Produktinformationen von E-Commerce-Seiten
+- Sammeln Sie Daten aus Nachrichtenartikeln oder Blogbeiträgen
+- Ziehen Sie Inhalte für Content-Aggregation
+
+**Konfiguration:**
+
+<ParamField path="URL" type="string" required>
+  Website-URL zum Scrapen (muss http:// oder https:// enthalten)
+</ParamField>
+
+<ParamField path="Format" type="dropdown" default="Markdown">
+  Wählen Sie das Format: Markdown, HTML, JSON oder Klartext
+</ParamField>
+
+<ParamField path="Country Code" type="string">
+  Ländercode für ortsspezifische Inhalte (z.B. "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="Wait Before Scraping" type="integer">
+  Wartezeit in Millisekunden für JavaScript-Rendering (0-10000)
+</ParamField>
+
+<ParamField path="Parser" type="string">
+  Optionaler Parser-ID für spezialisierte Extraktion (z.B. "@olostep/amazon-product")
+</ParamField>
+
+**Ausgabefelder:**
+- Scrape-ID
+- Gescrapte URL
+- Markdown-Inhalt
+- HTML-Inhalt
+- JSON-Inhalt
+- Textinhalt
+- Status
+- Zeitstempel
+- Screenshot-URL (falls verfügbar)
+- Seiten-Metadaten
+
+**Beispiel-Workflows:**
+
+<AccordionGroup>
+  <Accordion title="Wettbewerberpreise überwachen">
+    **Auslöser:** Zeitplan (Jeden Tag um 9 Uhr)
+    
+    **Aktion:** Olostep - URL scrapen
+    - URL: Wettbewerber-Produktseite
+    - Format: JSON
+    - Parser: @olostep/amazon-product
+    
+    **Aktion:** Google Sheets - Zeile erstellen
+    - Preisdaten zum Tracking-Spreadsheet hinzufügen
+    
+    **Human-in-the-Loop:** Preisänderungen überprüfen
+    - Genehmigen Sie signifikante Preisnachlässe
+    
+    **Aktion:** Slack - Nachricht senden
+    - Team über genehmigte Preisänderungen informieren
+  </Accordion>
+
+  <Accordion title="Blogbeiträge extrahieren und speichern">
+    **Auslöser:** RSS-Feed - Neuer Eintrag
+    
+    **Aktion:** Olostep - URL scrapen
+    - URL: \{\{Post-URL\}\}
+    - Format: Markdown
+    
+    **Aktion:** Notion - Seite erstellen
+    - Artikelinhalt in Notion-Datenbank speichern
+  </Accordion>
+
+  <Accordion title="Lead-Anreicherung mit KI">
+    **Auslöser:** Google Sheets - Neue Zeile
+    
+    **Aktion:** Olostep - URL scrapen
+    - URL: Unternehmenswebsite aus Tabelle
+    - Format: Markdown
+    
+    **KI-Aktion:** OpenAI - Daten extrahieren
+    - Extrahieren: Unternehmensgröße, Branche, Produkte
+    
+    **Aktion:** Google Sheets - Zeile aktualisieren
+    - Angereicherte Daten zurück in Tabelle hinzufügen
+  </Accordion>
+</AccordionGroup>
+
+## Vorteile von Relay.app
+
+Relay.app bietet mehrere Vorteile gegenüber traditionellen Automatisierungsplattformen:
+
+### Human-in-the-Loop-Workflows
+
+Fügen Sie manuelle Überprüfungsschritte direkt in Ihre Workflows ein:
+
+```
+1. Olostep scrapt Website
+2. Menschlicher Überprüfungsschritt ← Daten überprüfen und genehmigen
+3. Nur bei Genehmigung in Datenbank speichern
+```
+
+Perfekt für:
+- Qualitätskontrolle vor der Datenverarbeitung
+- Menschliches Urteil über extrahierte Inhalte
+- Genehmigungsworkflows für sensible Daten
+- Überprüfung von KI-generierten Zusammenfassungen
+
+### Eingebettete KI-Funktionen
+
+Verwenden Sie KI direkt in Ihren Workflows ohne externe Integrationen:
+
+- **KI-Entscheidungsfindung**: Lassen Sie KI Workflow-Pfade basierend auf gescrapten Inhalten entscheiden
+- **Intelligente Filterung**: Automatische Filterung und Kategorisierung gescrapter Daten
+- **Inhaltszusammenfassung**: Lange Artikel vor der Speicherung zusammenfassen
+- **Datenextraktion**: Verwenden Sie KI, um strukturierte Daten aus unstrukturierten Inhalten zu extrahieren
+
+### Bessere UX und Tests
+
+Die benutzerfreundliche Oberfläche von Relay.app erleichtert den Workflow-Aufbau:
+
+- Klare Testinformationen
+- Hilfreiche Fehlermeldungen
+- Visueller Workflow-Builder
+- Einfaches Debuggen und Fehlerbehebung
+
+## Beliebte Workflow-Beispiele
+
+### E-Commerce-Preisüberwachung mit Überprüfung
+
+Überwachen Sie Wettbewerberpreise mit menschlicher Genehmigung:
+
+```
+Auslöser: Zeitplan (Stündlich)
+↓
+Aktion: Olostep - URL scrapen
+  - URL: Wettbewerber-Produktseite
+  - Format: JSON
+  - Parser: @olostep/amazon-product
+↓
+Menschlicher Überprüfungsschritt
+  - Preisänderung überprüfen
+  - Genehmigen oder ablehnen
+↓
+Aktion: Slack - Nachricht senden (bei Genehmigung)
+  - Benachrichtigung: "Preis geändert auf $\{\{price\}\}"
+```
+
+### Content-Aggregation mit KI
+
+Aggregieren und verbessern Sie Inhalte aus mehreren Quellen:
+
+```
+Auslöser: Google Sheets - Neue Zeile
+↓
+Aktion: Olostep - URL scrapen
+  - URL: \{\{URL aus Tabelle\}\}
+  - Format: Markdown
+↓
+KI-Aktion: Inhalt zusammenfassen
+  - Zusammenfassung erstellen
+↓
+Aktion: Airtable - Datensatz erstellen
+  - Artikel mit KI-Zusammenfassung speichern
+```
+
+### Lead-Anreicherungs-Pipeline
+
+Bereichern Sie Lead-Daten mit Webinformationen und KI:
+
+```
+Auslöser: HubSpot - Neuer Kontakt
+↓
+Aktion: Olostep - URL scrapen
+  - URL: \{\{Unternehmenswebsite\}\}
+  - Format: Markdown
+↓
+KI-Aktion: Unternehmensinformationen extrahieren
+  - Extrahieren: Unternehmensgröße, Branche, Produkte
+↓
+Menschlicher Überprüfungsschritt
+  - Genauigkeit der KI-Extraktion überprüfen
+↓
+Aktion: HubSpot - Kontakt aktualisieren
+  - Verifizierte angereicherte Daten hinzufügen
+```
+
+## Integration mit beliebten Apps
+
+### Google Sheets
+
+Perfekt für Datensammlung und Tracking:
+
+```
+1. Olostep scrapt Website
+2. KI - Daten verarbeiten und formatieren
+3. Menschliche Überprüfung (optional)
+4. Google Sheets - Zeile erstellen/aktualisieren
+```
+
+**Anwendungsfälle:**
+- Preisüberwachungstabellen
+- Lead-Anreicherungsdatenbanken
+- Inhaltsinventar
+- Wettbewerbsanalysen
+
+### Airtable
+
+Erstellen Sie leistungsstarke Datenbanken mit gescrapten Daten:
+
+```
+1. Olostep scrapt oder crawlt
+2. KI - Strukturierte Daten extrahieren
+3. Airtable - Datensätze erstellen
+```
+
+**Anwendungsfälle:**
+- Produktkataloge
+- Forschungsdatenbanken
+- Inhaltskalender
+- Link-Datenbanken
+
+### Slack
+
+Erhalten Sie sofortige Benachrichtigungen mit Genehmigungsworkflows:
+
+```
+1. Olostep überwacht Seite
+2. Filter - Änderungen überprüfen
+3. Menschlicher Genehmigungsschritt
+4. Slack - Nachricht senden (bei Genehmigung)
+```
+
+**Anwendungsfälle:**
+- Preisnachlassalarme (mit Genehmigung)
+- Inhaltsaktualisierungsbenachrichtigungen
+- Fehlerüberwachung
+- Tägliche Zusammenfassungen
+
+### HubSpot / Salesforce
+
+Bereichern Sie CRM-Daten automatisch:
+
+```
+1. Neuer Kontakt hinzugefügt
+2. Olostep scrapt Unternehmenswebsite
+3. KI extrahiert wichtige Informationen
+4. Menschlicher Überprüfungsschritt
+5. CRM - Kontakt aktualisieren (bei Genehmigung)
+```
+
+**Anwendungsfälle:**
+- Lead-Anreicherung mit Qualitätskontrolle
+- Unternehmensrecherche
+- Wettbewerbsintelligenz
+- Kontozuordnung
+
+### Notion
+
+Erstellen Sie Wissensdatenbanken mit überprüften Inhalten:
+
+```
+1. Olostep crawlt Dokumentation
+2. KI - Inhalt parsen und strukturieren
+3. Menschlicher Überprüfungsschritt
+4. Notion - Seiten erstellen (genehmigter Inhalt)
+```
+
+**Anwendungsfälle:**
+- Dokumentationsspiegel
+- Forschungsrepositorien
+- Inhaltsbibliotheken
+- Team-Wikis
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Nutzen Sie Human-in-the-Loop für Qualitätskontrolle">
+    Nutzen Sie die Human-in-the-Loop-Funktion von Relay.app für:
+    - Überprüfung von KI-generierten Zusammenfassungen
+    - Genehmigung sensibler Daten vor der Speicherung
+    - Validierung der Genauigkeit gescrapter Inhalte
+    - Urteilsentscheidungen über Workflow-Pfade
+  </Accordion>
+
+  <Accordion title="Kombinieren Sie mit eingebetteter KI">
+    Verwenden Sie die eingebauten KI-Funktionen von Relay.app:
+    - Automatische Kategorisierung gescrapter Inhalte
+    - Generieren von Zusammenfassungen vor der Speicherung
+    - Extraktion strukturierter Daten aus unstrukturierten Inhalten
+    - Intelligente Entscheidungen in Workflows treffen
+  </Accordion>
+
+  <Accordion title="Setzen Sie angemessene Wartezeiten">
+    Für JavaScript-lastige Seiten verwenden Sie den Parameter "Warten vor dem Scrapen":
+    - Einfache Seiten: 0-1000ms
+    - Dynamische Seiten: 2000-3000ms
+    - Schweres JavaScript: 5000-8000ms
+    
+    Testen Sie mit verschiedenen Werten, um die optimale Wartezeit zu finden.
+  </Accordion>
+
+  <Accordion title="Verwenden Sie spezialisierte Parser">
+    Für beliebte Websites (Amazon, LinkedIn, Google) verwenden Sie vorgefertigte Parser:
+    - Automatisch strukturierte Daten erhalten
+    - Zuverlässigere Extraktion
+    - Keine Notwendigkeit für benutzerdefiniertes Parsing
+    - Von Olostep gewartet
+  </Accordion>
+
+  <Accordion title="Nutzen Sie die Testfunktionen von Relay.app">
+    Nutzen Sie die hervorragenden Testmöglichkeiten von Relay.app:
+    - Klare Testinformationen für jeden Schritt
+    - Hilfreiche Fehlermeldungen
+    - Einfaches Debuggen
+    - Workflows vor der Aktivierung testen
+  </Accordion>
+
+  <Accordion title="Speichern Sie Ergebnisse richtig">
+    Wählen Sie den richtigen Speicher basierend auf Ihren Bedürfnissen:
+    - **Google Sheets**: Einfaches Tracking, Teamzusammenarbeit
+    - **Airtable**: Relationale Daten, reichhaltige Formatierung
+    - **Datenbank**: Großangelegt, komplexe Abfragen
+    - **Notion**: Wissensdatenbank, Dokumentation
+  </Accordion>
+</AccordionGroup>
+
+## Häufige Anwendungsfälle nach Branche
+
+### E-Commerce
+- **Preisüberwachung**: Verfolgen Sie Wettbewerberpreise mit menschlichen Genehmigungsworkflows
+- **Produktforschung**: Entdecken Sie Trendprodukte und Marktlücken
+- **Bestandsverfolgung**: Überwachen Sie die Lagerverfügbarkeit
+- **Bewertungsanalyse**: Sammeln und analysieren Sie Kundenbewertungen mit KI
+
+### Marketing & SEO
+- **Content Discovery**: Finden Sie Content-Möglichkeiten mit KI-Unterstützung
+- **Wettbewerbsanalyse**: Verfolgen Sie Wettbewerbsstrategien
+- **Backlink-Recherche**: Entdecken Sie Link-Möglichkeiten
+- **Keyword-Recherche**: Extrahieren Sie Keyword-Daten aus Suchergebnissen
+
+### Vertrieb & Lead-Generierung
+- **Lead-Anreicherung**: Verbessern Sie CRM-Daten mit Webinformationen und menschlicher Überprüfung
+- **Unternehmensrecherche**: Sammeln Sie Unternehmensinformationen
+- **Kontaktentdeckung**: Finden Sie Entscheidungsträger
+- **Wettbewerbsintelligenz**: Verfolgen Sie Wettbewerberbewegungen
+
+### Forschung & Analyse
+- **Datensammlung**: Sammeln Sie Daten aus mehreren Quellen
+- **Marktforschung**: Verfolgen Sie Branchentrends
+- **Akademische Forschung**: Sammeln Sie Forschungsdaten
+- **Preisintelligenz**: Analysieren Sie Preisstrategien
+
+### Medien & Verlagswesen
+- **Content-Aggregation**: Kuratieren Sie Inhalte von mehreren Seiten mit KI-Zusammenfassungen
+- **Nachrichtenüberwachung**: Verfolgen Sie Nachrichten und Erwähnungen
+- **Soziale Medien**: Überwachen Sie soziale Plattformen
+- **Trend-Erkennung**: Identifizieren Sie Trendthemen
+
+## Fehlerbehebung
+
+<AccordionGroup>
+  <Accordion title="Authentifizierung fehlgeschlagen">
+    **Fehler**: "Ungültiger API-Schlüssel"
+    
+    **Lösungen**:
+    - Überprüfen Sie den API-Schlüssel vom [Dashboard](https://olostep.com/dashboard)
+    - Stellen Sie sicher, dass keine zusätzlichen Leerzeichen im API-Schlüssel sind
+    - Verbinden Sie Ihr Olostep-Konto in Relay.app erneut
+    - Überprüfen Sie, ob der API-Schlüssel aktiv ist
+  </Accordion>
+
+  <Accordion title="Scrape liefert leere Inhalte">
+    **Fehler**: Inhaltsfelder sind leer
+    
+    **Lösungen**:
+    - Erhöhen Sie die "Warten vor dem Scrapen"-Zeit
+    - Überprüfen Sie, ob die Website eine Anmeldung erfordert
+    - Versuchen Sie ein anderes Format (HTML vs Markdown)
+    - Überprüfen Sie, ob die URL zugänglich ist
+    - Überprüfen Sie, ob die Seite automatisierten Zugriff blockiert
+  </Accordion>
+
+  <Accordion title="Ratenlimit überschritten">
+    **Fehler**: "Ratenlimit überschritten"
+    
+    **Lösungen**:
+    - Verteilen Sie Workflow-Ausführungen mit Verzögerungen
+    - Verwenden Sie Batch-Verarbeitung anstelle von Einzel-Scrapes
+    - Aktualisieren Sie Ihren Olostep-Plan
+    - Überprüfen Sie das Ratenlimit im Dashboard
+  </Accordion>
+
+  <Accordion title="URL nicht gescrapt">
+    **Fehler**: Bestimmte URLs können nicht gescrapt werden
+    
+    **Lösungen**:
+    - Überprüfen Sie das URL-Format (einschließlich http:// oder https://)
+    - Überprüfen Sie, ob die URL eine Authentifizierung erfordert
+    - Testen Sie die URL zuerst im Browser
+    - Versuchen Sie es mit dem Länderparameter
+    - Kontaktieren Sie den Support für blockierte Domains
+  </Accordion>
+</AccordionGroup>
+
+## Relay.app vs Zapier
+
+Relay.app ist eine moderne Alternative zu Zapier mit mehreren Vorteilen:
+
+**Vorteile von Relay.app:**
+- **Human-in-the-Loop**: Eingebaute manuelle Überprüfungsschritte
+- **Eingebettete KI**: KI-Funktionen in Workflows integriert
+- **Bessere UX**: Intuitivere Benutzeroberfläche und klarere Fehlermeldungen
+- **Bessere Preisgestaltung**: Kosteneffizienter für viele Anwendungsfälle
+- **Tiefere Integrationen**: Umfassendere Integrationen mit beliebten Apps
+
+**Wann Sie Zapier wählen sollten:**
+- Benötigen Sie Integration mit weniger häufig verwendeten Apps
+- Bevorzugen Sie eine etabliertere Plattform
+- Erfordern spezifische Zapier-exklusive Funktionen
+
+Für detaillierte Vergleiche siehe [Relay.app's Zapier-Vergleich](https://www.relay.app/blog/zapier-alternatives).
+
+## Preisgestaltung
+
+Olostep berechnet basierend auf der API-Nutzung, unabhängig von Relay.app:
+
+- **Scrapes**: Bezahlung pro Scrape
+- **Batches**: Bezahlung pro URL im Batch
+- **Crawls**: Bezahlung pro gecrawlter Seite
+- **Maps**: Bezahlung pro Kartenoperation
+
+Überprüfen Sie die aktuellen Preise auf [olostep.com/pricing](https://olostep.com/pricing).
+
+**Relay.app-Plan**: Sie benötigen auch einen aktiven Relay.app-Plan, um Workflows auszuführen.
+
+## Support
+
+Benötigen Sie Hilfe bei der Relay.app-Integration?
+
+<CardGroup cols={2}>
+  <Card title="Dokumentation" icon="book" href="https://docs.olostep.com">
+    Durchsuchen Sie die vollständigen API-Dokumentationen
+  </Card>
+  
+  <Card title="Support-E-Mail" icon="envelope" href="mailto:info@olostep.com">
+    E-Mail: info@olostep.com
+  </Card>
+  
+  <Card title="Relay.app Hilfezentrum" icon="help-circle" href="https://help.relay.app">
+    Besuchen Sie das Hilfezentrum von Relay.app
+  </Card>
+  
+  <Card title="Statusseite" icon="signal" href="https://status.olostep.com">
+    Überprüfen Sie den API-Status
+  </Card>
+</CardGroup>
+
+## Verwandte Ressourcen
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Erfahren Sie mehr über den Scrapes-Endpunkt
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Erfahren Sie mehr über den Batches-Endpunkt
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Erfahren Sie mehr über den Crawls-Endpunkt
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Erfahren Sie mehr über den Maps-Endpunkt
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    Verwenden Sie Olostep mit Python
+  </Card>
+  
+  <Card title="Zapier-Integration" icon="bolt" href="/integrations/zapier">
+    Vergleichen Sie mit der Zapier-Integration
+  </Card>
+</CardGroup>
+
+## Erste Schritte
+
+Bereit, Ihre Web-Scraping-Workflows mit Relay.app zu automatisieren?
+
+<Card title="Erstellen Sie Ihren ersten Workflow" icon="bolt" href="https://www.relay.app/apps/olostep/integrations">
+  Beginnen Sie mit dem Aufbau automatisierter Workflows mit Olostep und Relay.app
+</Card>
+
+Verbinden Sie Olostep mit der modernen Automatisierungsplattform von Relay.app und automatisieren Sie noch heute Ihre Web-Datenextraktion!

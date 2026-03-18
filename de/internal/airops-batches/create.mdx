@@ -1,0 +1,88 @@
+---
+title: 'AirOps Batch erstellen'
+description: 'Starten Sie einen Batch mit automatischer Extraktion von Seitenmetadaten und Markenerkennung'
+openapi: POST /v1/batches-airops
+---
+
+## Übersicht
+
+Erstellt einen neuen AirOps Batch, der:
+1. Alle angegebenen URLs abruft
+2. Strukturierte Metadaten automatisch extrahiert
+3. Elemente mit fehlenden Feldern identifiziert
+4. Unvollständige Elemente über LLM anreichert
+5. Vereinheitlichte Ergebnisse für alle URLs zurückgibt
+
+## Anforderungsparameter
+
+<ParamField body="items" type="array" required>
+  Array von zu verarbeitenden URLs. Jedes Element erfordert:
+  - `url` - Gültige URL zum Abrufen
+  - `custom_id` - Ihre eindeutige Kennung (1-255 Zeichen)
+</ParamField>
+
+<ParamField body="brands" type="array" default="[]">
+  Markennamen, nach denen im Seiteninhalt gesucht werden soll. Das LLM erkennt Erwähnungen dieser spezifischen Marken und gibt Übereinstimmungen im Feld `brand_mentions` zurück.
+  
+  ```json
+  {
+    "brands": ["Acme Corp", "TechBrand", "SaaS Pro"]
+  }
+  ```
+</ParamField>
+
+<ParamField body="country" type="string" default="RANDOM">
+  Land für geo-targeted Scraping. Verwenden Sie ISO 3166-1 Alpha-2-Codes (`US`, `GB`, `DE`) oder `RANDOM`.
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  URL zum Empfangen von Webhook-Benachrichtigungen. Alle Lebenszyklusereignisse für diesen Batch werden hierhin gesendet.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Benutzerdefinierte Schlüssel-Wert-Paare, die dem Batch zugeordnet sind. Stripe-Stil: max. 50 Schlüssel, Schlüssel ≤40 Zeichen, Wert ≤500 Zeichen.
+</ParamField>
+
+## Antwort
+
+Die Antwort enthält die Batch-ID und den anfänglichen Workflow-Status:
+
+```json
+{
+  "id": "batch_abc123xyz",
+  "object": "batch_airops",
+  "created": 1705315200000,
+  "total_urls": 100,
+  "status": {
+    "scraping": {
+      "state": "started",
+      "submitted": 100,
+      "valid": 100,
+      "succeeded": 0,
+      "failed": 0,
+      "started_at": 1705315200000,
+      "completed_at": null,
+      "error": null
+    },
+    "analyzing": {
+      "state": "pending",
+      "items_analyzed": 0,
+      "items_needing_enrichment": 0,
+      "items_complete": 0,
+      "fields_to_enrich": null,
+      "started_at": null,
+      "completed_at": null
+    },
+    "enriching": {
+      "state": "pending",
+      "items_to_enrich": 0,
+      "items_enriched": 0,
+      "items_failed": 0,
+      "llm_batch_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  }
+}
+```

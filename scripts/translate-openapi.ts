@@ -16,21 +16,20 @@ interface LanguageInfo {
   nativeName: string;
 }
 
-// Only French enabled for initial test - uncomment others after validation
 const LANGUAGES: Record<string, LanguageInfo> = {
+  de: { name: "German", nativeName: "Deutsch" },
   fr: { name: "French", nativeName: "Français" },
-  // es: { name: "Spanish", nativeName: "Español" },
-  // nl: { name: "Dutch", nativeName: "Nederlands" },
-  // de: { name: "German", nativeName: "Deutsch" },
-  // zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
-  // it: { name: "Italian", nativeName: "Italiano" },
-  // ja: { name: "Japanese", nativeName: "日本語" },
+  es: { name: "Spanish", nativeName: "Español" },
+  nl: { name: "Dutch", nativeName: "Nederlands" },
+  zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
+  it: { name: "Italian", nativeName: "Italiano" },
+  ja: { name: "Japanese", nativeName: "日本語" },
 };
 
 const DOCS_ROOT = path.resolve(__dirname, "..");
 const OPENAPI_DIR = path.join(DOCS_ROOT, "openapi");
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let openai: OpenAI;
 
 // Fields that contain human-readable text and should be translated
 const TRANSLATABLE_FIELDS = new Set(["description", "summary", "title"]);
@@ -39,105 +38,7 @@ const TRANSLATABLE_FIELDS = new Set(["description", "summary", "title"]);
 const translationCache: Map<string, Map<string, string>> = new Map();
 
 /**
- * Translates a single string to the target language.
- * Uses caching to avoid redundant API calls.
- *
- * @param text - The English text to translate
- * @param lang - Target language code
- * @returns Translated text
- */
-async function translateString(text: string, lang: string): Promise<string> {
-  if (!text || text.trim().length === 0) {
-    return text;
-  }
-
-  // Check cache
-  if (!translationCache.has(lang)) {
-    translationCache.set(lang, new Map());
-  }
-  const langCache = translationCache.get(lang)!;
-  if (langCache.has(text)) {
-    return langCache.get(text)!;
-  }
-
-  const langInfo = LANGUAGES[lang];
-  if (!langInfo) {
-    return text;
-  }
-
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      temperature: 0.1,
-      max_tokens: 500,
-      messages: [
-        {
-          role: "system",
-          content: `Translate this API documentation text to ${langInfo.name} (${langInfo.nativeName}).
-
-PRESERVE (do not translate):
-- Standard technical acronyms universally used in English
-- Brand names
-- Code references in backticks
-- Quoted values (e.g., "file", "completed")
-
-Output ONLY the translated text.`,
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
-    });
-
-    const translated = response.choices[0]?.message?.content?.trim() || text;
-    langCache.set(text, translated);
-    return translated;
-  } catch (error) {
-    console.warn(`  Warning: Failed to translate "${text.substring(0, 50)}..." to ${lang}`);
-    return text;
-  }
-}
-
-/**
- * Recursively walks through an object and translates only the specified fields.
- * All other fields are preserved exactly.
- *
- * @param obj - The object to process
- * @param lang - Target language code
- * @returns New object with translated fields
- */
-async function translateObject(obj: unknown, lang: string): Promise<unknown> {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    const results: unknown[] = [];
-    for (const item of obj) {
-      results.push(await translateObject(item, lang));
-    }
-    return results;
-  }
-
-  if (typeof obj === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-      if (TRANSLATABLE_FIELDS.has(key) && typeof value === "string") {
-        result[key] = await translateString(value, lang);
-      } else {
-        result[key] = await translateObject(value, lang);
-      }
-    }
-    return result;
-  }
-
-  return obj;
-}
-
-/**
  * Extracts all translatable strings from an OpenAPI spec for batch translation.
- * This allows us to translate all strings at once, reducing API calls.
  */
 function extractTranslatableStrings(obj: unknown, strings: Set<string> = new Set()): Set<string> {
   if (obj === null || obj === undefined) {
@@ -166,7 +67,6 @@ function extractTranslatableStrings(obj: unknown, strings: Set<string> = new Set
 
 /**
  * Batch translates an array of strings to a target language.
- * Groups strings to minimize API calls.
  */
 async function batchTranslateStrings(
   strings: string[],
@@ -177,7 +77,6 @@ async function batchTranslateStrings(
     return new Map(strings.map((s) => [s, s]));
   }
 
-  // Filter out already cached strings
   if (!translationCache.has(lang)) {
     translationCache.set(lang, new Map());
   }
@@ -208,10 +107,15 @@ async function batchTranslateStrings(
 FORMAT: Each text is numbered [1], [2], etc. Output translations in the same format.
 
 PRESERVE (do not translate):
-- Standard technical acronyms universally used in English
-- Brand names
+- Standard technical acronyms universally used in English (API, URL, JSON, HTTP, etc.)
+- Brand names (Olostep)
 - Quoted values (e.g., "file", "completed")
 - Technical identifiers (e.g., file_id, expires_in)
+- Code references in backticks
+
+STYLE:
+- Use informal "you" (e.g., "du" in German, "tu" in French) - this is developer documentation
+- Keep it casual and direct
 
 Output ONLY the numbered translations.`,
           },
@@ -223,7 +127,7 @@ Output ONLY the numbered translations.`,
       });
 
       const output = response.choices[0]?.message?.content || "";
-      
+
       // Parse the numbered output
       const lines = output.split("\n");
       let currentNum = 0;
@@ -232,7 +136,6 @@ Output ONLY the numbered translations.`,
       for (const line of lines) {
         const match = line.match(/^\[(\d+)\]\s*(.*)/);
         if (match) {
-          // Save previous if exists
           if (currentNum > 0 && currentNum <= batch.length) {
             langCache.set(batch[currentNum - 1], currentText.trim());
           }
@@ -242,7 +145,6 @@ Output ONLY the numbered translations.`,
           currentText += " " + line;
         }
       }
-      // Save last one
       if (currentNum > 0 && currentNum <= batch.length) {
         langCache.set(batch[currentNum - 1], currentText.trim());
       }
@@ -295,31 +197,24 @@ function applyTranslations(
 }
 
 /**
- * Translates a single OpenAPI spec file to all languages (all languages in parallel).
- * Logs a single line per file with results for all languages.
+ * Translates a single OpenAPI spec file to all languages.
  */
 async function translateOpenApiFile(filename: string): Promise<void> {
   const filepath = path.join(OPENAPI_DIR, filename);
   const content = fs.readFileSync(filepath, "utf8");
   const spec = JSON.parse(content);
 
-  // Extract all translatable strings
   const strings = extractTranslatableStrings(spec);
   const stringArray = Array.from(strings);
 
   const langs = Object.keys(LANGUAGES);
-  
-  // Translate all languages in parallel
+
   const results = await Promise.all(
     langs.map(async (lang) => {
       try {
-        // Batch translate all strings
         const translations = await batchTranslateStrings(stringArray, lang);
-
-        // Apply translations to create new spec
         const translatedSpec = applyTranslations(spec, translations);
 
-        // Write to language-specific directory (async)
         const langDir = path.join(DOCS_ROOT, lang, "openapi");
         fs.mkdirSync(langDir, { recursive: true });
         await fs.promises.writeFile(
@@ -334,15 +229,13 @@ async function translateOpenApiFile(filename: string): Promise<void> {
     })
   );
 
-  // Log single line: [file.json] (N strings) es✓ nl✓ fr✓ de✓ zh✓ it✓ ja✓
   const langStatus = results
     .map((r) => (r.success ? `${r.lang}✓` : `${r.lang}✗`))
     .join(" ");
   console.log(`[${filename}] (${strings.size} strings) ${langStatus}`);
 }
 
-// Process multiple files in parallel
-const PARALLEL_FILES = 5;
+const PARALLEL_FILES = 3;
 
 async function main(): Promise<void> {
   console.log("OpenAPI Translation");
@@ -353,12 +246,13 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Get all OpenAPI spec files
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
   const files = fs.readdirSync(OPENAPI_DIR).filter((f) => f.endsWith(".json"));
   console.log(`Found ${files.length} OpenAPI spec files`);
-  console.log(`Parallelism: ${PARALLEL_FILES} files × ${Object.keys(LANGUAGES).length} languages\n`);
+  console.log(`Languages: ${Object.keys(LANGUAGES).join(", ")}`);
+  console.log(`Parallelism: ${PARALLEL_FILES} files\n`);
 
-  // Process files in batches
   for (let i = 0; i < files.length; i += PARALLEL_FILES) {
     const batch = files.slice(i, i + PARALLEL_FILES);
     await Promise.all(batch.map((file) => translateOpenApiFile(file)));

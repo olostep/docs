@@ -1,0 +1,167 @@
+---
+icon: lines-leaning
+sidebarTitle: Batch-Scraping
+title: Den Inhalt mehrerer Websites auf einmal abrufen
+description: Starten Sie ein Batch-Scraping, um Inhalte von bis zu 100.000 URLs in 5-7 Minuten zu extrahieren
+---
+
+## Übersicht
+
+Der [Batches](https://docs.olostep.com/api-reference/batches/create)-Endpunkt von Olostep ermöglicht es Ihnen, ein Batch von bis zu 10.000 URLs zu starten und den Inhalt in 5–7 Minuten zurückzubekommen. Sie können bis zu 10 Batches gleichzeitig starten, um Inhalte von 100.000 URLs auf einmal zu extrahieren. Wenn Sie mehr Skalierung benötigen, kontaktieren Sie uns bitte.
+
+Dies ist nützlich, wenn Sie bereits die URLs haben, die Sie verarbeiten möchten — zum Beispiel, um Daten für Analysen zu aggregieren, ein spezialisiertes Suchwerkzeug zu erstellen oder mehrere Websites auf Änderungen zu überwachen.
+
+In diesem Leitfaden zeigen wir Ihnen, wie Sie ein Batch mit einer Liste von URLs starten und den Inhalt im Markdown-Format abrufen.
+
+## Gist mit vollständigem Code
+Hier ist der gesamte Code in einem Gist, den Sie kopieren und einfügen können, um das Batch-Scraping mit Olostep auszuprobieren:
+https://gist.github.com/olostep/e903f2e4fc28f8093b834b4df68b8031
+
+In diesem Gist haben wir gezeigt, wie man ein Batch mit 5 Google-Suchanfragen startet, den Status überprüft und den Inhalt für jedes Element abruft.
+
+## Voraussetzungen
+Bevor Sie beginnen, stellen Sie sicher, dass Sie Folgendes haben:
+
+- Einen gültigen Olostep-API-Schlüssel. Sie können einen erhalten, indem Sie sich bei [Olostep](https://www.olostep.com/dashboard) anmelden.
+- Python auf Ihrem System installiert.
+- Die Bibliotheken `requests` und `hashlib` (installieren Sie `requests` mit `pip install requests`, falls erforderlich).
+
+## Schritt 1: Ein Batch aus lokalen URLs erstellen
+
+Wenn Sie bereits eine Liste von URLs haben, die Sie verarbeiten möchten, können Sie diese direkt in Ihrem Skript definieren. Andernfalls können Sie sie aus einer Datei oder Datenbank lesen.
+
+```python filename="start_batch.py"
+import requests
+import hashlib
+
+API_KEY = "YOUR_API_KEY"
+
+def create_hash_id(url):
+    return hashlib.sha256(url.encode()).hexdigest()[:16]
+
+def compose_items_array():
+    urls = [
+        "https://www.google.com/search?q=nikola+tesla&gl=us&hl=en",
+        "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+        "https://www.google.com/search?q=google+solar+eclipse&gl=us&hl=en",
+        "https://www.google.com/search?q=crispr&gl=us&hl=en",
+        "https://www.google.com/search?q=genghis%20khan&gl=us&hl=en"
+    ]
+    return [{"custom_id": create_hash_id(url), "url": url} for url in urls]
+
+def start_batch(items):
+    payload = {
+        "items": items
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.post(
+        "https://api.olostep.com/v1/batches",
+        headers=headers,
+        json=payload
+    )
+    return response.json()["id"]
+
+if __name__ == "__main__":
+    items = compose_items_array()
+    batch_id = start_batch(items)
+    print("Batch gestartet. ID:", batch_id)
+```
+
+## Schritt 2: Batch-Status überwachen
+
+Sobald das Batch gestartet ist, können Sie seinen Status mit der `batch_id` überwachen, die zurückgegeben wird, wenn Sie das Batch starten.
+
+```python filename="check_status.py"
+import requests
+
+def check_batch_status(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}",
+        headers=headers
+    )
+    return response.json()["status"]
+```
+
+Sie können den Status alle paar Sekunden (z.B. alle 10 Sekunden) abfragen, bis das Batch abgeschlossen ist:
+
+```python
+import time
+
+def recursive_check(batch_id):
+    status = check_batch_status(batch_id)
+    print("Status:", status)
+    if status == "completed":
+        print("Batch ist abgeschlossen!")
+    else:
+        time.sleep(60)
+        recursive_check(batch_id)
+```
+
+## Schritt 3: Abgeschlossene Elemente abrufen
+
+Sobald das Batch als abgeschlossen markiert ist, holen Sie die verarbeiteten Elemente ab.
+
+```python
+import requests
+
+def get_completed_items(batch_id):
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    response = requests.get(
+        f"https://api.olostep.com/v1/batches/{batch_id}/items",
+        headers=headers
+    )
+    return response.json()["items"]
+```
+
+Jedes Element enthält eine `retrieve_id`, die Sie verwenden können, um den gescrapten Inhalt abzurufen.
+
+```python
+items = get_completed_items(batch_id)
+for item in items:
+    print(f"URL: {item['url']}\nCustom ID: {item['custom_id']}\nRetrieve ID: {item['retrieve_id']}\n---")
+```
+
+## Schritt 4: Den Inhalt abrufen
+
+Verwenden Sie die `retrieve_id`, um den extrahierten Inhalt in Markdown, HTML oder JSON zu erhalten. Hier ist ein Beispiel, um den Inhalt im Markdown-Format abzurufen:
+
+```python filename="retrieve_content.py"
+def retrieve_content(retrieve_id):
+    url = "https://api.olostep.com/v1/retrieve"
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    params = {"retrieve_id": retrieve_id}
+
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# Beispielverwendung:
+items = get_completed_items(batch_id)
+for item in items:
+    content = retrieve_content(item['retrieve_id'])
+    print(content)
+```
+
+## Gehosteter Inhalt
+Wir hosten den Inhalt auch für 7 Tage, sodass Sie ihn mehrfach abrufen können, ohne erneut zu scrapen.
+Beispiel einer gehosteten URL für [Markdown-Inhalt](https://olostep-storage.s3.us-east-1.amazonaws.com/markDown_p64bro0q3n_924d0fa125efcc5c.txt)
+
+## Beispielanwendungen
+
+### 1. Suchmaschinen bauen
+Verwenden Sie Olostep, um Inhalte von branchenspezifischen Websites (rechtlich, medizinisch, KI) zu extrahieren und eine durchsuchbare Datenbank zu erstellen.
+
+### 2. Website-Überwachung
+Überwachen Sie die Produktverfügbarkeit, Preisänderungen oder Nachrichtenaktualisierungen auf mehreren Websites, indem Sie tägliche Batch-Scrapes planen.
+
+### 3. Social Media Monitoring
+Scrapen Sie Erwähnungen Ihrer Marke oder Schlüsselwörter in Foren oder Inhaltsquellen und extrahieren Sie strukturierte Daten.
+
+### 4. Aggregatoren
+Erstellen Sie ein Job-Board, einen Nachrichtenaggregator oder eine Immobilienplattform, indem Sie Daten aus Dutzenden von Quellen abrufen.
+
+## Fazit
+
+Mit Batch-Scraping können Sie Inhalte von bis zu 100.000 URLs schnell und effizient extrahieren. Egal, ob Sie Suchwerkzeuge, Aggregatoren oder Überwachungssysteme erstellen, Olostep Batches vereinfachen die Aufgabe.
+
+Möchten Sie nur strukturierte Daten extrahieren? Verwenden Sie [Parsers](https://docs.olostep.com/features/structured-content/parsers), um nur die Felder zu erhalten, die Sie benötigen. Brauchen Sie Hilfe? Kontaktieren Sie `info@olostep.com` für Unterstützung oder lassen Sie uns maßgeschneiderte Skripte für Ihren Anwendungsfall schreiben.

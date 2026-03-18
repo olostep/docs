@@ -1,0 +1,144 @@
+---
+title: 'Objektorientierte API'
+sidebarTitle: 'Objektorientierte API'
+description: 'Verstehen, wie Olostep API-Objekte zusammenarbeiten'
+icon: 'cube'
+---
+
+Die API von Olostep ist objektorientiert gestaltet. Dieses Design zu verstehen, hilft Ihnen, effektivere Integrationen zu erstellen. Dieses Design ist inspiriert von [Stripes API-Philosophie](https://docs.stripe.com/payments-api/tour#everything-is-an-object).
+
+---
+
+## Alles ist ein Objekt
+
+Jede Ressource in Olostep ist ein Objekt mit einer eindeutigen Kennung. Egal, ob Sie es über die API, das SDK oder das Dashboard erstellen — Sie erhalten ein Objekt zurück, auf das Sie verweisen, das Sie aktualisieren und abfragen können.
+
+| Ressource | Objekt-ID-Format | Beispiel |
+|-----------|------------------|----------|
+| Scrape | `scrape_*` | `scrape_abc123` |
+| Batch | `batch_*` | `batch_xyz789` |
+| Crawl | `crawl_*` | `crawl_def456` |
+| Map | `map_*` | `map_ghi012` |
+| Answer | `answer_*` | `answer_jkl345` |
+| File | `file_*` | `file_mno678` |
+| Schedule | `schedule_*` | `schedule_pqr901` |
+
+---
+
+## Objekte können Lebenszyklen haben
+
+Einige Olostep-Objekte verfolgen den Status über ein `status`-Feld. Dieses Zustandsmaschinenmuster lässt Sie genau wissen, wo sich jede Ressource in ihrem Lebenszyklus befindet.
+
+### Batches
+
+Batches haben zwei Status-Ebenen: den **Batch** selbst und die einzelnen **Items**.
+
+**Batch-Status:**
+
+```
+in_progress → completed
+```
+
+| Status | Beschreibung |
+|--------|--------------|
+| `in_progress` | URLs werden gescraped |
+| `completed` | Verarbeitung abgeschlossen |
+
+<Note>
+**Batch-Fehler sind extrem selten.** Batches werden fast immer abgeschlossen — selbst wenn einige URLs fehlschlagen, erreicht der Batch selbst den Status `completed`. Im seltenen Fall eines katastrophalen Infrastrukturfehlers (z. B. LLM-Dienstunterbrechung während der Anreicherung) kann der Batch fehlschlagen. Dies betrifft weniger als 0,01 % der Batches.
+</Note>
+
+**Item-Status:**
+
+Jede URL in einem Batch wird als einzelnes Item mit eigenem Status verfolgt:
+
+| Status | Beschreibung |
+|--------|--------------|
+| `success` | URL erfolgreich gescraped |
+| `failed` | URL konnte nicht gescraped werden |
+
+Items können fehlschlagen aufgrund von:
+- URL ist blockiert oder gibt einen Fehler zurück
+- Parser-Ausgabe fehlt
+- Netzwerk-/Abruffehler
+
+Fehlgeschlagene Items enthalten ein `error`-Objekt mit `code` und `message`, die den Fehler erklären. Der Batch wird trotzdem abgeschlossen — überprüfen Sie den Status jedes Items bei der Verarbeitung der Ergebnisse.
+
+### Crawls
+
+```
+in_progress → completed
+```
+
+| Status | Beschreibung |
+|--------|--------------|
+| `in_progress` | URLs werden aktiv entdeckt und verarbeitet |
+| `completed` | Crawling abgeschlossen |
+
+<Note>
+**Crawls werden immer abgeschlossen.** Selbst wenn ein Crawl 0 URLs findet (aufgrund von robots.txt-Blockierung oder ungültiger Start-URL), wird der Crawl-Status `completed` sein. Überprüfen Sie das `pages_count`-Feld, um die Ergebnisse zu verifizieren.
+</Note>
+
+---
+
+## Abrufmuster
+
+Viele Objekte erzeugen Inhalte, die später abgerufen werden können. Das `retrieve_id`-Muster ermöglicht es Ihnen, Inhalte abzurufen, ohne sie erneut zu verarbeiten.
+
+```bash
+# Inhalte mit retrieve_id abrufen
+curl "https://api.olostep.com/v1/retrieve?retrieve_id=6h89o8u1kt" \
+  -H "Authorization: Bearer <your_token>"
+```
+
+Dieses Muster wird verwendet von:
+- **Batch-Items** — Jede verarbeitete URL erhält eine `retrieve_id`
+- **Crawl-Seiten** — Jede gecrawlte Seite erhält eine `retrieve_id`
+
+Der `/v1/retrieve`-Endpunkt akzeptiert den `formats`-Parameter, um anzugeben, welche Inhaltstypen zurückgegeben werden sollen (`html`, `markdown`, `json`, `text`).
+
+---
+
+## Webhooks: Ereignisgesteuerte Aktualisierungen
+
+Anstatt auf Statusänderungen zu warten, konfigurieren Sie [Webhooks](/api-reference/common/webhooks), um Ereignisse zu erhalten, wenn sich der Status von Objekten ändert.
+
+```json
+{
+  "event": "batch.completed",
+  "data": {
+    "id": "batch_xyz789",
+    "status": "completed",
+    "items_total": 100,
+    "items_completed": 100
+  }
+}
+```
+
+---
+
+## Metadaten: Ihre Daten neben unseren
+
+Fügen Sie Objekten benutzerdefinierte Schlüssel-Wert-Paare mit [Metadaten](/api-reference/common/metadata) hinzu. Dies ermöglicht es Ihnen, Olostep-Ressourcen mit Ihren internen Systemen zu verknüpfen.
+
+```json
+{
+  "items": [{"url": "https://example.com"}],
+  "metadata": {
+    "order_id": "12345",
+    "customer": "acme-corp"
+  }
+}
+```
+
+---
+
+## Zusammenfassung
+
+| Konzept | Beschreibung |
+|---------|--------------|
+| **Objekte** | Jede Ressource hat eine eindeutige ID und ist abfragbar |
+| **Lebenszyklen** | Fortschritt über das `status`-Feld verfolgen |
+| **Abrufen** | Inhalte später mit `retrieve_id` abrufen |
+| **Webhooks** | Benachrichtigungen bei Statusänderungen erhalten |
+| **Metadaten** | Eigene Daten an jedes Objekt anhängen |

@@ -1,0 +1,165 @@
+---
+title: 'Batch-Elemente abrufen'
+description: 'Rufen Sie alle Elemente mit ihren extrahierten Metadaten ab'
+openapi: GET /v1/batches-airops/{batch_id}/items
+---
+
+## Übersicht
+
+Gibt alle Elemente im Batch mit ihren extrahierten Metadaten zurück. Elemente umfassen sowohl erfolgreiche Extraktionen als auch Fehler in jeder Phase.
+
+<Note>
+  Dieser Endpunkt gibt nur vollständige Ergebnisse zurück, wenn der Batch-`status` `"completed"` ist. Wenn der Batch noch verarbeitet wird, erhalten Sie ein leeres `items`-Array mit einer Nachricht.
+</Note>
+
+## Antwortstruktur
+
+<ResponseField name="batch_id" type="string">
+  Der Batch-Identifikator.
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  ISO 8601-Zeitstempel, wann der Batch abgeschlossen wurde.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Batch-Status: `"completed"` oder `"in_progress"`.
+</ResponseField>
+
+<ResponseField name="counts" type="object">
+  Zusammenfassende Zählungen:
+  - `total` - Gesamtanzahl der Elemente im Batch
+  - `succeeded` - Erfolgreich verarbeitet
+  - `failed` - In irgendeiner Phase fehlgeschlagen
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array aller Elemente mit ihren Ergebnissen.
+</ResponseField>
+
+---
+
+## Element-Schema
+
+### Erfolgreiche Elemente
+
+Abgeschlossene Elemente haben extrahierte Felder auf der Root-Ebene:
+
+```json
+{
+  "custom_id": "post-1",
+  "url": "https://example.com/blog/post-1",
+  "status": "completed",
+  "page_type": "informational_article",
+  "author": "John Doe",
+  "date_published": "2024-01-15",
+  "date_modified": null,
+  "brand_mentions": ["Acme Corp", "TechBrand"]
+}
+```
+
+| Feld | Typ | Beschreibung |
+|------|-----|--------------|
+| `custom_id` | string | Ihr Identifikator aus der Anfrage |
+| `url` | string | Die gescrapte URL |
+| `status` | string | `"completed"` für erfolgreiche Elemente |
+| `page_type` | string | Klassifizierter Seitentyp (siehe [Übersicht](/internal/airops-batches/overview#page-types)) |
+| `author` | string \| null | Autor des Inhalts |
+| `date_published` | string \| null | Veröffentlichungsdatum (ISO 8601, wenn verfügbar) |
+| `date_modified` | string \| null | Letztes Änderungsdatum |
+| `brand_mentions` | array | Marken aus Ihrer Eingabeliste, die auf der Seite gefunden wurden |
+
+### Fehlgeschlagene Elemente
+
+Elemente, die in irgendeiner Phase fehlgeschlagen sind, haben eine Fehlerstruktur:
+
+```json
+{
+  "custom_id": "post-failed",
+  "url": "https://example.com/broken-page",
+  "status": "failed",
+  "failed_stage": "scraping",
+  "error": {
+    "code": "SCRAPE_FAILED",
+    "message": "Verbindungstimeout nach 30s"
+  }
+}
+```
+
+| Feld | Typ | Beschreibung |
+|------|-----|--------------|
+| `status` | string | `"failed"` für fehlgeschlagene Elemente |
+| `failed_stage` | string | Phase, in der der Fehler auftrat: `scraping`, `analyzing` oder `enriching` |
+| `error` | object | Fehlerdetails mit `code` und `message` |
+
+---
+
+## Extraktionsquellen
+
+Felder werden mit mehreren Methoden in Prioritätsreihenfolge extrahiert:
+
+1. **Classifier** - URL-Musteranalyse (sofort)
+2. **Parser** - Strukturierte Metadatenextraktion
+3. **LLM** - KI-gestützte Extraktion für fehlende Felder
+
+---
+
+## Beispielantwort
+
+### Abgeschlossener Batch
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "completed_at": "2024-01-15T12:30:00.000Z",
+  "status": "completed",
+  "counts": {
+    "total": 100,
+    "succeeded": 98,
+    "failed": 2
+  },
+  "items": [
+    {
+      "custom_id": "post-1",
+      "url": "https://example.com/blog/post-1",
+      "status": "completed",
+      "page_type": "informational_article",
+      "author": "John Doe",
+      "date_published": "2024-01-15",
+      "date_modified": null,
+      "brand_mentions": ["OpenAI", "Google"]
+    },
+    {
+      "custom_id": "post-2",
+      "url": "https://example.com/pricing",
+      "status": "completed",
+      "page_type": "pricing_page",
+      "author": null,
+      "date_published": null,
+      "date_modified": null,
+      "brand_mentions": []
+    },
+    {
+      "custom_id": "post-3",
+      "url": "https://example.com/broken",
+      "status": "failed",
+      "failed_stage": "scraping",
+      "error": {
+        "code": "SCRAPE_FAILED",
+        "message": "URL konnte nicht gescrapt werden"
+      }
+    }
+  ]
+}
+```
+
+### In Bearbeitung befindlicher Batch
+
+```json
+{
+  "batch_id": "batch_abc123xyz",
+  "status": "in_progress",
+  "items": [],
+  "message": "Batch wird noch verarbeitet. Elemente werden verfügbar sein, wenn der Status \"completed\" ist."
+}
+```

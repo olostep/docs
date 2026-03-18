@@ -29,15 +29,14 @@ interface TranslationResult {
   errors: TranslationError[];
 }
 
-// Only French enabled for initial test - uncomment others after validation
 const LANGUAGES: Record<string, LanguageInfo> = {
+  de: { name: "German", nativeName: "Deutsch" },
   fr: { name: "French", nativeName: "Français" },
-  // es: { name: "Spanish", nativeName: "Español" },
-  // nl: { name: "Dutch", nativeName: "Nederlands" },
-  // de: { name: "German", nativeName: "Deutsch" },
-  // zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
-  // it: { name: "Italian", nativeName: "Italiano" },
-  // ja: { name: "Japanese", nativeName: "日本語" },
+  es: { name: "Spanish", nativeName: "Español" },
+  nl: { name: "Dutch", nativeName: "Nederlands" },
+  zh: { name: "Chinese (Simplified)", nativeName: "简体中文" },
+  it: { name: "Italian", nativeName: "Italiano" },
+  ja: { name: "Japanese", nativeName: "日本語" },
 };
 
 const DOCS_ROOT = path.resolve(__dirname, "..");
@@ -71,14 +70,13 @@ interface DocsConfig {
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
-// Parallel processing - number of files to translate simultaneously
+// Parallel processing - aggressive parallelism
 const PARALLEL_FILES = 50;
 
 let openai: OpenAI;
 
 /**
  * Extracts all page paths from a navigation group (recursively).
- * Only returns string pages (file paths), not nested group objects.
  */
 function extractPagesFromGroup(group: NavGroup): string[] {
   const pages: string[] = [];
@@ -86,7 +84,6 @@ function extractPagesFromGroup(group: NavGroup): string[] {
     if (typeof page === "string") {
       pages.push(page);
     } else {
-      // Nested group
       pages.push(...extractPagesFromGroup(page));
     }
   }
@@ -95,10 +92,6 @@ function extractPagesFromGroup(group: NavGroup): string[] {
 
 /**
  * Gets all page paths referenced in docs.json navigation.
- * This ensures we only translate files that are actually in the nav.
- *
- * # Note: This prevents translating orphan files like concepts/, orbit/, parsers/
- * that exist but are not in the navigation.
  */
 function getNavReferencedPages(): Set<string> {
   const configContent = fs.readFileSync(DOCS_CONFIG_PATH, "utf8");
@@ -106,7 +99,6 @@ function getNavReferencedPages(): Set<string> {
 
   const pages = new Set<string>();
 
-  // Extract from tabs (English source config)
   if (config.navigation.tabs) {
     for (const tab of config.navigation.tabs) {
       for (const group of tab.groups) {
@@ -122,13 +114,11 @@ function getNavReferencedPages(): Set<string> {
 
 /**
  * Validates the OpenAI API key by making a test request
- * @throws Error if the API key is invalid or the API is unreachable
  */
 async function validateApiKey(): Promise<void> {
   console.log("Validating OpenAI API key...");
 
   try {
-    // Make a minimal API call to verify the key works
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: "Reply with OK" }],
@@ -145,26 +135,16 @@ async function validateApiKey(): Promise<void> {
 
     if (error.status === 401) {
       console.error("::error::OpenAI API key is invalid or expired");
-      console.error("");
-      console.error("The API key was rejected by OpenAI. Please:");
-      console.error("1. Verify your API key at https://platform.openai.com/api-keys");
-      console.error("2. Update the OPENAI_API_KEY secret in GitHub");
       process.exit(1);
     }
 
     if (error.status === 429) {
       console.error("::error::OpenAI API rate limit exceeded or quota exhausted");
-      console.error("");
-      console.error("Please check your OpenAI account:");
-      console.error("- Verify you have available credits");
-      console.error("- Check rate limits at https://platform.openai.com/usage");
       process.exit(1);
     }
 
     if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
       console.error("::error::Cannot connect to OpenAI API");
-      console.error("");
-      console.error("Network error - unable to reach api.openai.com");
       process.exit(1);
     }
 
@@ -175,16 +155,12 @@ async function validateApiKey(): Promise<void> {
 
 /**
  * Finds English MDX files that are referenced in the navigation.
- *
- * # Note: Only returns files actually in docs.json navigation to prevent
- * translating orphan files (e.g. deprecated concepts/, orbit/, parsers/).
  */
 function findEnglishMdxFiles(): string[] {
   const navPages = getNavReferencedPages();
   const files: string[] = [];
 
   for (const page of navPages) {
-    // Pages in docs.json don't have .mdx extension
     const filePath = `${page}.mdx`;
     const fullPath = path.join(DOCS_ROOT, filePath);
 
@@ -215,37 +191,55 @@ function getMissingTranslations(englishFile: string): string[] {
 }
 
 /**
- * Checks if an error is retryable (transient network/rate issues)
+ * Checks if an error is retryable
  */
 function isRetryableError(err: unknown): boolean {
   const error = err as Error & { status?: number; code?: string };
-  
-  // Network errors
+
   if (error.code === "ECONNRESET" || error.code === "ETIMEDOUT" || error.code === "ENOTFOUND") {
     return true;
   }
-  
-  // Server errors (5xx)
+
   if (error.status && error.status >= 500) {
     return true;
   }
-  
-  // Rate limit (429) - can retry after delay
+
   if (error.status === 429) {
     return true;
   }
-  
-  // Bad request (400) - sometimes OpenAI has transient JSON parsing issues
+
   if (error.status === 400) {
     return true;
   }
-  
+
   return false;
 }
 
 /**
+ * Mintlify resolves OpenAPI per MDX file; translated pages must reference `{lang}/openapi/*.json`.
+ * Rewrites the openapi frontmatter line regardless of what the model returned.
+ *
+ * @param content - MDX after translation
+ * @param lang - Target locale (e.g. `fr`)
+ * @returns MDX with corrected openapi path when present
+ */
+function rewriteOpenapiPathForLanguage(content: string, lang: string): string {
+  return content.replace(
+    /^openapi:\s*(['"])([\s\S]*?)\1/m,
+    (_full, quote: string, value: string) => {
+      const trimmed = value.trim();
+      const m = trimmed.match(/^(?:[a-z]{2}\/)?openapi\/(\S+\.json)(\s+[\s\S]*)?$/);
+      if (!m) {
+        return `openapi: ${quote}${value}${quote}`;
+      }
+      const rest = m[2] ?? "";
+      return `openapi: ${quote}${lang}/openapi/${m[1]}${rest}${quote}`;
+    }
+  );
+}
+
+/**
  * Translates MDX content to a target language with retry logic
- * @throws Error if translation fails after all retries
  */
 async function translateContent(
   content: string,
@@ -274,6 +268,7 @@ WHAT TO PRESERVE EXACTLY (do not translate):
 STYLE:
 - Translate naturally for native speakers - don't be overly literal
 - Maintain the same markdown formatting (headers, lists, bold, italic)
+- Use informal "you" (e.g., "du" in German, "tu" in French/Spanish/Italian, etc.) - this is developer documentation, keep it casual and direct
 
 OUTPUT FORMAT:
 - Output ONLY the raw translated MDX content
@@ -281,7 +276,7 @@ OUTPUT FORMAT:
 - Start directly with --- for the frontmatter`;
 
   let lastError: Error | undefined;
-  
+
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await openai.chat.completions.create({
@@ -303,21 +298,17 @@ OUTPUT FORMAT:
         throw new Error("LLM returned empty translation");
       }
 
-      // Strip code fences if LLM wrapped the output (common issue)
+      // Strip code fences if LLM wrapped the output
       if (translated.startsWith("```")) {
-        // Remove opening fence (```mdx, ```markdown, or just ```)
         translated = translated.replace(/^```(?:mdx|markdown)?\n?/, "");
-        // Remove closing fence
         translated = translated.replace(/\n?```\s*$/, "");
         translated = translated.trim();
       }
 
-      // Ensure file starts with frontmatter
       if (!translated.startsWith("---")) {
         throw new Error("Translation missing frontmatter (must start with ---)");
       }
 
-      // Basic sanity check: translated content should have reasonable length
       if (translated.length < content.length * 0.3) {
         throw new Error(
           `Translation suspiciously short (${translated.length} chars vs ${content.length} original)`
@@ -327,31 +318,25 @@ OUTPUT FORMAT:
       return translated;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      
-      // Don't retry auth errors - they won't succeed
+
       const error = err as Error & { status?: number };
       if (error.status === 401 || error.status === 403) {
         throw err;
       }
-      
+
       if (attempt < MAX_RETRIES && isRetryableError(err)) {
-        const delay = RETRY_DELAY_MS * attempt; // Exponential backoff
-        console.log(`    ⚠ Attempt ${attempt} failed, retrying in ${delay}ms...`);
-        await new Promise((r) => setTimeout(r, delay));
-      } else if (attempt === MAX_RETRIES) {
-        throw lastError;
-      } else {
-        // Non-retryable error
-        throw err;
+        const delay = RETRY_DELAY_MS * attempt;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
       }
     }
   }
-  
-  throw lastError ?? new Error("Translation failed after all retries");
+
+  throw lastError || new Error("Translation failed after all retries");
 }
 
 /**
- * Writes translated content to the appropriate language directory (async)
+ * Writes translated content to language directory
  */
 async function writeTranslation(
   englishFile: string,
@@ -383,7 +368,7 @@ async function processInBatches<T, R>(
 }
 
 /**
- * Translates a file to a specific language, returning result with translated content
+ * Translates a file to a specific language
  */
 async function translateFileToLang(
   file: string,
@@ -391,12 +376,14 @@ async function translateFileToLang(
   content: string
 ): Promise<{ success: boolean; lang: string; translated?: string; error?: string }> {
   try {
-    const translated = await translateContent(content, lang, file);
+    const translated = rewriteOpenapiPathForLanguage(
+      await translateContent(content, lang, file),
+      lang
+    );
     return { success: true, lang, translated };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    
-    // Check for fatal API errors
+
     const error = err as Error & { status?: number };
     if (error.status === 401 || error.status === 403) {
       console.error("\n::error::API authentication failed - stopping");
@@ -406,42 +393,39 @@ async function translateFileToLang(
       console.error("\n::error::Rate limit exceeded - stopping");
       process.exit(1);
     }
-    
+
     return { success: false, lang, error: message };
   }
 }
 
 /**
- * Translates a single file to all specified languages (all languages in parallel)
+ * Translates a single file to all specified languages (parallel)
  */
 async function translateFileToAllLangs(
   file: string,
   langs: string[]
 ): Promise<{ file: string; results: { success: boolean; lang: string; error?: string }[] }> {
   const content = fs.readFileSync(path.join(DOCS_ROOT, file), "utf8");
-  
-  // Translate to all languages in parallel (no logging during translation)
+
   const results = await Promise.all(
     langs.map((lang) => translateFileToLang(file, lang, content))
   );
-  
-  // Write all successful translations in parallel (async)
+
   await Promise.all(
     results
       .filter((r) => r.success && r.translated)
       .map((r) => writeTranslation(file, r.lang, r.translated!))
   );
-  
-  // Build single-line log: [file.mdx] es✓ nl✓ fr✗ de✓ zh✓ it✓ ja✓
+
   const langStatus = langs
     .map((lang) => {
       const result = results.find((r) => r.lang === lang);
       return result?.success ? `${lang}✓` : `${lang}✗`;
     })
     .join(" ");
-  
+
   console.log(`[${file}] ${langStatus}`);
-  
+
   return { file, results };
 }
 
@@ -455,9 +439,8 @@ async function runCatchup(): Promise<TranslationResult> {
   const englishFiles = findEnglishMdxFiles();
   console.log(`Found ${englishFiles.length} English MDX files`);
 
-  // Build list of files that need translation
   const filesToTranslate: { file: string; langs: string[] }[] = [];
-  
+
   for (const file of englishFiles) {
     const missingLangs = getMissingTranslations(file);
     if (missingLangs.length > 0) {
@@ -474,7 +457,6 @@ async function runCatchup(): Promise<TranslationResult> {
   let totalTranslations = 0;
   const errors: TranslationError[] = [];
 
-  // Process files in batches of PARALLEL_FILES
   const fileResults = await processInBatches(
     filesToTranslate,
     PARALLEL_FILES,
@@ -492,7 +474,7 @@ async function runCatchup(): Promise<TranslationResult> {
   }
 
   console.log(`\nCatch-up complete: ${totalTranslations} translations created`);
-  
+
   return { totalTranslations, errors };
 }
 
@@ -505,8 +487,7 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
   console.log(`Translating ${files.length} changed files\n`);
 
   const allLangs = Object.keys(LANGUAGES);
-  
-  // Filter out deleted files
+
   const filesToTranslate = files
     .filter((file) => {
       const exists = fs.existsSync(path.join(DOCS_ROOT, file));
@@ -522,7 +503,6 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
   let totalTranslations = 0;
   const errors: TranslationError[] = [];
 
-  // Process files in batches of PARALLEL_FILES
   const fileResults = await processInBatches(
     filesToTranslate,
     PARALLEL_FILES,
@@ -540,12 +520,12 @@ async function runIncremental(files: string[]): Promise<TranslationResult> {
   }
 
   console.log(`\nIncremental complete: ${totalTranslations} translations updated`);
-  
+
   return { totalTranslations, errors };
 }
 
 /**
- * Writes to GitHub Actions step summary (if available)
+ * Writes to GitHub Actions step summary
  */
 function writeToSummary(content: string): void {
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
@@ -555,15 +535,11 @@ function writeToSummary(content: string): void {
 }
 
 /**
- * Checks translation results and handles errors appropriately
- * 
- * @param result - Translation results
- * @param phase - Phase name for logging
- * @param allowPartialFailure - If true, log errors but don't fail (for catch-up phase)
+ * Checks translation results and handles errors
  */
 function checkErrors(result: TranslationResult, phase: string, allowPartialFailure: boolean = false): void {
   const total = result.totalTranslations + result.errors.length;
-  
+
   if (total === 0) {
     console.log(`\n${phase}: No translations attempted`);
     return;
@@ -574,14 +550,11 @@ function checkErrors(result: TranslationResult, phase: string, allowPartialFailu
   console.log(`  Total errors: ${result.errors.length}`);
 
   if (result.errors.length > 0) {
-    // Log warnings that appear in GitHub Actions annotations
     console.log("\nFailed translations (will be retried on next run):");
     result.errors.forEach((e) => {
-      // ::warning:: creates a visible annotation in the GitHub UI
       console.log(`::warning file=${e.file},title=Translation Failed::Failed to translate to ${e.lang}: ${e.error}`);
     });
 
-    // Write to job summary for permanent record
     writeToSummary(`\n### ⚠️ Failed Translations (${phase})\n`);
     writeToSummary("| File | Language | Error |");
     writeToSummary("|------|----------|-------|");
@@ -591,11 +564,9 @@ function checkErrors(result: TranslationResult, phase: string, allowPartialFailu
     writeToSummary(`\n> These will be automatically retried on the next run.\n`);
 
     if (allowPartialFailure) {
-      // For catch-up: just warn, don't fail. Failed files will be picked up next time
       console.log(`\n⚠ ${result.errors.length} translation(s) failed but will be retried on next run.`);
       console.log("Continuing with deployment of successful translations...");
     } else {
-      // For incremental: fail the build since these are user-changed files
       console.error(`\n::error::${result.errors.length} translation(s) failed. Build cannot continue.`);
       console.error("Incremental translations must all succeed.");
       process.exit(1);
@@ -603,7 +574,6 @@ function checkErrors(result: TranslationResult, phase: string, allowPartialFailu
   }
 }
 
-// Parse CLI arguments
 function parseArgs(): { phase: string | undefined; files: string | undefined } {
   const args = process.argv.slice(2);
   const phase = args.find((a) => a.startsWith("--phase="))?.split("=")[1];
@@ -612,15 +582,11 @@ function parseArgs(): { phase: string | undefined; files: string | undefined } {
 }
 
 async function main(): Promise<void> {
-  // Check for API key
   if (!process.env.OPENAI_API_KEY) {
     console.error("::error::OPENAI_API_KEY environment variable is not set");
-    console.error("");
-    console.error("Please ensure the OPENAI_API_KEY secret is configured in GitHub.");
     process.exit(1);
   }
 
-  // Initialize OpenAI client
   openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -633,26 +599,22 @@ async function main(): Promise<void> {
       .join(", ")}\n`
   );
 
-  // Validate API key before starting
   await validateApiKey();
 
   const { phase, files: filesArg } = parseArgs();
 
   if (phase === "catchup") {
     const result = await runCatchup();
-    // Allow partial failure for catch-up - failed files will be retried next run
     checkErrors(result, "Catch-up", true);
   } else if (phase === "incremental" && filesArg) {
     const files = filesArg.split(",").filter((f) => f.trim());
     if (files.length > 0) {
       const result = await runIncremental(files);
-      // Incremental must succeed - these are user-changed files
       checkErrors(result, "Incremental", false);
     } else {
       console.log("No files to translate");
     }
   } else {
-    // Default: run catchup only
     const result = await runCatchup();
     checkErrors(result, "Catch-up", true);
   }

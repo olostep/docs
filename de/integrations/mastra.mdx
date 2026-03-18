@@ -1,0 +1,780 @@
+---
+sidebarTitle: 'Mastra'
+icon: robot
+title: Mastra-Integration
+description: Erstellen Sie KI-Agenten mit Websuche, Scraping- und Crawling-Fähigkeiten mithilfe des Agenten-Frameworks von Mastra.ai
+---
+
+Die Olostep Mastra-Integration bringt leistungsstarke Web-Datenextraktionsfähigkeiten zu Mastra.ai-Agenten. Olostep ist eine Websuch-, Scraping- und Crawling-API — eine API zum Suchen, Extrahieren und Strukturieren von Webdaten. Erstellen Sie intelligente KI-Agenten, die autonom Daten von jeder Website suchen, extrahieren, analysieren und strukturieren können.
+
+[Von npm installieren →](https://www.npmjs.com/package/@olostep/mastra-tools)
+
+## Funktionen
+
+Die Integration bietet 4 leistungsstarke APIs für die automatisierte Webdatenextraktion:
+
+<CardGroup cols={2}>
+  <Card title="Website scrapen" icon="file-lines">
+    Extrahieren Sie Inhalte von jeder einzelnen URL in mehreren Formaten (Markdown, HTML, JSON, Text)
+  </Card>
+  
+  <Card title="URLs im Batch scrapen" icon="layer-group">
+    Verarbeiten Sie bis zu 100.000 URLs parallel. Perfekt für die großflächige Datenextraktion
+  </Card>
+  
+  <Card title="Crawl erstellen" icon="spider-web">
+    Entdecken und scrapen Sie autonom ganze Websites, indem Sie Links folgen
+  </Card>
+  
+  <Card title="Karte erstellen" icon="map">
+    Extrahieren Sie alle URLs von einer Website zur Analyse der Seitenstruktur und Inhaltserkennung
+  </Card>
+</CardGroup>
+
+## Installation
+
+<CodeGroup>
+```bash npm
+npm install @olostep/mastra-tools
+```
+
+```bash yarn
+yarn add @olostep/mastra-tools
+```
+
+```bash pnpm
+pnpm add @olostep/mastra-tools
+```
+</CodeGroup>
+
+## Einrichtung
+
+### 1. Paket installieren
+
+```bash
+npm install @olostep/mastra-tools @mastra/core
+```
+
+### 2. Integration importieren und registrieren
+
+In Ihrer Mastra-Konfigurationsdatei:
+
+```typescript
+import { Mastra } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+// Erstellen Sie die Olostep-Integration
+const olostep = createOlostepIntegration();
+
+// APIs registrieren (macht sie für Agenten verfügbar)
+olostep.registerApis();
+
+// Zur Mastra-Konfiguration hinzufügen
+export const mastra = new Mastra({
+  config: {
+    integrations: [olostep],
+    // ... andere Konfigurationen
+  },
+});
+```
+
+### 3. API-Schlüssel konfigurieren
+
+Setzen Sie Ihren Olostep-API-Schlüssel als Umgebungsvariable:
+
+```bash
+export OLOSTEP_API_KEY=your-api-key-here
+```
+
+Oder in Ihrer `.env`-Datei:
+
+```
+OLOSTEP_API_KEY=your-api-key-here
+```
+
+Holen Sie sich Ihren API-Schlüssel vom [Olostep Dashboard](https://olostep.com/dashboard).
+
+## Verfügbare APIs
+
+Die Integration stellt 4 APIs bereit, die Ihre Mastra-Agenten verwenden können:
+
+### scrapeWebsite
+
+Extrahieren Sie Inhalte von einer einzelnen URL. Unterstützt mehrere Formate und JavaScript-Rendering.
+
+**Anwendungsfälle:**
+- Überwachen Sie bestimmte Seiten auf Änderungen
+- Extrahieren Sie Produktinformationen von E-Commerce-Seiten
+- Sammeln Sie Daten aus Nachrichtenartikeln oder Blogbeiträgen
+- Inhalte für Content-Aggregation abrufen
+
+**Schema-Parameter:**
+
+<ParamField path="apiKey" type="string" required>
+  Ihr Olostep-API-Schlüssel
+</ParamField>
+
+<ParamField path="url_to_scrape" type="string" required>
+  Website-URL zum Scrapen (muss http:// oder https:// enthalten)
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  Ausgabeformate: ['html', 'markdown', 'json', 'text']
+</ParamField>
+
+<ParamField path="country" type="string">
+  Ländercode für standortspezifische Inhalte (z.B. "US", "GB", "CA")
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="number">
+  Wartezeit in Millisekunden für JavaScript-Rendering (0-10000)
+</ParamField>
+
+<ParamField path="parser" type="string">
+  Optionaler Parser-ID für spezialisierte Extraktion (z.B. "@olostep/amazon-product")
+</ParamField>
+
+**Antwort:**
+- `id` - Scrape-ID
+- `url_to_scrape` - Gescrapte URL
+- `result.markdown_content` - Markdown-Inhalt
+- `result.html_content` - HTML-Inhalt
+- `result.json_content` - JSON-Inhalt
+- `result.text_content` - Textinhalt
+- `result.screenshot_hosted_url` - Screenshot-URL (falls verfügbar)
+- `result.markdown_hosted_url` - Gehostete Markdown-URL
+- `object` - Objekttyp ("scrape")
+- `created` - Unix-Zeitstempel
+
+**Beispielverwendung:**
+
+```typescript
+// In Ihrem Agenten oder Workflow
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'scrapeWebsite',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown'],
+      country: 'US',
+    }
+  }
+});
+```
+
+### batchScrape
+
+Verarbeiten Sie mehrere URLs parallel (bis zu 100.000 auf einmal). Perfekt für die großflächige Datenextraktion.
+
+**Anwendungsfälle:**
+- Scrapen Sie gesamte Produktkataloge
+- Extrahieren Sie Daten aus mehreren Suchergebnissen
+- Verarbeiten Sie Listen von URLs aus Tabellenkalkulationen
+- Massenhafte Inhaltsextraktion
+
+**Schema-Parameter:**
+
+<ParamField path="apiKey" type="string" required>
+  Ihr Olostep-API-Schlüssel
+</ParamField>
+
+<ParamField path="batch_array" type="array" required>
+  Array von Objekten mit `url` und optionalen `custom_id` Feldern
+  
+  Beispiel: `[{"url":"https://example.com","custom_id":"site1"}]`
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  Ausgabeformate für alle URLs
+</ParamField>
+
+<ParamField path="country" type="string">
+  Ländercode für standortspezifisches Scraping
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="number">
+  Wartezeit in Millisekunden für JavaScript-Rendering
+</ParamField>
+
+<ParamField path="parser" type="string">
+  Optionaler Parser-ID für spezialisierte Extraktion
+</ParamField>
+
+**Antwort:**
+- `batch_id` - Batch-ID (verwenden Sie diese, um Ergebnisse später abzurufen)
+- `status` - Verarbeitungsstatus
+- `object` - Objekttyp ("batch")
+
+**Beispielverwendung:**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'batchScrape',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      batch_array: [
+        { url: 'https://example.com', custom_id: 'site1' },
+        { url: 'https://test.com', custom_id: 'site2' },
+      ],
+      formats: ['markdown'],
+    }
+  }
+});
+```
+
+### createCrawl
+
+Entdecken und scrapen Sie autonom ganze Websites, indem Sie Links folgen. Perfekt für Dokumentationsseiten, Blogs und Inhaltsrepositorien.
+
+**Anwendungsfälle:**
+- Crawlen und archivieren Sie gesamte Dokumentationsseiten
+- Extrahieren Sie alle Blogbeiträge von einer Website
+- Erstellen Sie Wissensbasen aus Webinhalten
+- Überwachen Sie Änderungen in der Website-Struktur
+
+**Schema-Parameter:**
+
+<ParamField path="apiKey" type="string" required>
+  Ihr Olostep-API-Schlüssel
+</ParamField>
+
+<ParamField path="start_url" type="string" required>
+  Start-URL für das Crawlen (muss http:// oder https:// enthalten)
+</ParamField>
+
+<ParamField path="max_pages" type="number" default="10">
+  Maximale Anzahl der zu crawlenden Seiten
+</ParamField>
+
+<ParamField path="follow_links" type="boolean" default="true">
+  Ob Links auf Seiten gefolgt werden sollen
+</ParamField>
+
+<ParamField path="formats" type="array" default="['markdown']">
+  Format für gescrapten Inhalt
+</ParamField>
+
+<ParamField path="country" type="string">
+  Optionaler Ländercode für standortspezifisches Crawlen
+</ParamField>
+
+<ParamField path="parser" type="string">
+  Optionaler Parser-ID für spezialisierte Inhaltsextraktion
+</ParamField>
+
+**Antwort:**
+- `id` - Crawl-ID (verwenden Sie diese, um Ergebnisse später abzurufen)
+- `object` - Objekttyp ("crawl")
+- `status` - Crawl-Status
+- `created` - Unix-Zeitstempel
+
+**Beispielverwendung:**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createCrawl',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      start_url: 'https://docs.example.com',
+      max_pages: 50,
+      follow_links: true,
+      formats: ['markdown'],
+    }
+  }
+});
+```
+
+### createMap
+
+Extrahieren Sie alle URLs von einer Website zur Inhaltserkennung und Analyse der Seitenstruktur.
+
+**Anwendungsfälle:**
+- Erstellen Sie Sitemaps und Diagramme der Seitenstruktur
+- Entdecken Sie alle Seiten vor dem Batch-Scraping
+- Finden Sie defekte oder fehlende Seiten
+- SEO-Audits und Analysen
+
+**Schema-Parameter:**
+
+<ParamField path="apiKey" type="string" required>
+  Ihr Olostep-API-Schlüssel
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  Website-URL zum Extrahieren von Links (muss http:// oder https:// enthalten)
+</ParamField>
+
+<ParamField path="search_query" type="string">
+  Optionaler Suchbegriff zum Filtern von URLs (z.B. "blog")
+</ParamField>
+
+<ParamField path="top_n" type="number">
+  Begrenzen Sie die Anzahl der zurückgegebenen URLs
+</ParamField>
+
+<ParamField path="include_urls" type="array">
+  Glob-Muster zur Einbeziehung spezifischer Pfade (z.B. ["/blog/**"])
+</ParamField>
+
+<ParamField path="exclude_urls" type="array">
+  Glob-Muster zum Ausschluss spezifischer Pfade (z.B. ["/admin/**"])
+</ParamField>
+
+**Antwort:**
+- `id` - Map-ID
+- `object` - Objekttyp ("map")
+- `url` - Website-URL
+- `total_urls` - Gesamtanzahl gefundener URLs
+- `urls` - Array der entdeckten URLs
+
+**Beispielverwendung:**
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createMap',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url: 'https://example.com',
+      search_query: 'blog',
+      top_n: 100,
+      include_urls: ['/blog/**'],
+    }
+  }
+});
+```
+
+## Verwendung mit Agenten
+
+### Einfaches Agentenbeispiel
+
+Erstellen Sie einen Agenten, der Websites scrapen kann:
+
+```typescript
+import { Agent } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+const olostep = createOlostepIntegration();
+olostep.registerApis();
+
+const agent = new Agent({
+  name: 'web-researcher',
+  instructions: `
+    Sie sind ein Web-Forschungsassistent. Wenn Benutzer Sie bitten, Informationen von einer Website zu erhalten,
+    verwenden Sie die Olostep scrapeWebsite API, um den Inhalt zu extrahieren, und fassen Sie ihn dann für sie zusammen.
+  `,
+  model: 'openai/gpt-4',
+});
+
+// Der Agent kann nun Olostep-APIs über Mastras API-System verwenden
+```
+
+### Agenten-Workflow-Beispiel
+
+Erstellen Sie einen Forschungs-Workflow, der Inhalte entdeckt und scrapt:
+
+```typescript
+// 1. Eine Website kartieren, um URLs zu entdecken
+const mapResult = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'createMap',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url: 'https://example.com',
+      include_urls: ['/blog/**'],
+    }
+  }
+});
+
+// 2. Entdeckte URLs im Batch scrapen
+const batchResult = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'batchScrape',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      batch_array: mapResult.urls.slice(0, 10).map(url => ({ url })),
+      formats: ['markdown'],
+    }
+  }
+});
+
+// 3. Ergebnisse mit Ihrem Agenten verarbeiten
+const summary = await agent.generate({
+  messages: [{
+    role: 'user',
+    content: `Fassen Sie diesen Inhalt zusammen: ${batchResult.result.markdown_content}`
+  }]
+});
+```
+
+## Beliebte Anwendungsfälle
+
+### Forschungsagent
+
+Erstellen Sie einen Agenten, der autonom Themen recherchiert:
+
+<AccordionGroup>
+  <Accordion title="Multi-Source-Forschung">
+    **Workflow:**
+    1. Benutzer fragt: "Forschung zu KI-Trends"
+    2. Agent verwendet `createMap`, um relevante Seiten zu entdecken
+    3. Agent verwendet `batchScrape`, um Inhalte zu extrahieren
+    4. Agent analysiert und fasst die Ergebnisse zusammen
+    5. Gibt strukturierten Forschungsbericht zurück
+  </Accordion>
+
+  <Accordion title="Wettbewerbsüberwachung">
+    **Workflow:**
+    1. Tägliche Überwachung planen
+    2. Verwenden Sie `scrapeWebsite`, um Wettbewerberseiten zu überprüfen
+    3. Vergleichen Sie mit vorherigen Daten
+    4. Benachrichtigung bei wesentlichen Änderungen
+    5. Wöchentliche Berichte erstellen
+  </Accordion>
+
+  <Accordion title="Content-Aggregation">
+    **Workflow:**
+    1. Verwenden Sie `createCrawl`, um alle Blogbeiträge zu entdecken
+    2. Verwenden Sie `batchScrape`, um Inhalte zu extrahieren
+    3. Verarbeiten Sie mit KI, um Schlüsselthemen zu extrahieren
+    4. In Wissensdatenbank speichern
+    5. Content-Kalender erstellen
+  </Accordion>
+</AccordionGroup>
+
+### E-Commerce-Intelligenz
+
+Produkte und Preise überwachen:
+
+```
+Agenten-Workflow:
+1. Produktseiten scrapen (scrapeWebsite)
+2. Strukturierte Daten extrahieren (mit Parser)
+3. Preisänderungen verfolgen
+4. Benachrichtigungen generieren
+5. Datenbank aktualisieren
+```
+
+### SEO-Analyse
+
+Website-Struktur und Inhalte analysieren:
+
+```
+Agenten-Workflow:
+1. Website-Struktur kartieren (createMap)
+2. Wichtige Abschnitte crawlen (createCrawl)
+3. Inhaltsqualität analysieren
+4. SEO-Möglichkeiten identifizieren
+5. Empfehlungen generieren
+```
+
+## Spezialisierte Parser
+
+Olostep bietet vorgefertigte Parser für beliebte Websites. Verwenden Sie sie mit dem `parser`-Parameter:
+
+<CardGroup cols={2}>
+  
+  <Card title="Google-Suche" icon="google">
+    `@olostep/google-search`
+    
+    Extrahieren: Suchergebnisse, Titel, Snippets, URLs
+  </Card>
+  
+  <Card title="Google Maps" icon="map">
+    `@olostep/google-maps`
+    
+    Extrahieren: Geschäftsinformationen, Bewertungen, Bewertungen, Standort
+  </Card>
+
+</CardGroup>
+
+### Verwendung von Parsern
+
+Fügen Sie die Parser-ID dem `parser`-Parameter hinzu:
+
+```typescript
+const result = await mastra.callApi({
+  integrationName: 'olostep',
+  api: 'scrapeWebsite',
+  payload: {
+    data: {
+      apiKey: process.env.OLOSTEP_API_KEY,
+      url_to_scrape: 'https://www.amazon.com/dp/PRODUCT_ID',
+      formats: ['json'],
+      parser: '@olostep/amazon-product',
+    }
+  }
+});
+```
+
+Der Parser extrahiert automatisch strukturierte Daten, die spezifisch für diesen Website-Typ sind.
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Verwenden Sie Batch-Verarbeitung für mehrere URLs">
+    Wenn Sie mehr als 3-5 URLs scrapen, verwenden Sie `batchScrape` anstelle von mehreren `scrapeWebsite`-Aufrufen. Die Batch-Verarbeitung ist:
+    - Viel schneller (parallele Verarbeitung)
+    - Kostengünstiger
+    - Einfacher zu verwalten
+    - Besser für Ratenlimits
+  </Accordion>
+
+  <Accordion title="Setzen Sie geeignete Wartezeiten">
+    Für JavaScript-lastige Websites verwenden Sie den `wait_before_scraping`-Parameter:
+    - Einfache Websites: 0-1000ms
+    - Dynamische Websites: 2000-3000ms
+    - Schweres JavaScript: 5000-8000ms
+    
+    Testen Sie mit verschiedenen Werten, um die optimale Wartezeit zu finden.
+  </Accordion>
+
+  <Accordion title="Verwenden Sie spezialisierte Parser">
+    Für beliebte Websites (Amazon, LinkedIn, Google) verwenden Sie vorgefertigte Parser:
+    - Erhalten Sie automatisch strukturierte Daten
+    - Zuverlässigere Extraktion
+    - Kein Bedarf an benutzerdefiniertem Parsing
+    - Von Olostep gewartet
+  </Accordion>
+
+  <Accordion title="Asynchrone Operationen handhaben">
+    Batch-, Crawl- und Map-Operationen sind asynchron:
+    - Speichern Sie die zurückgegebene ID (batch_id, crawl_id, map_id)
+    - Polling auf Abschluss oder Verwendung von Webhooks
+    - Separate Workflows für den Abruf einrichten
+  </Accordion>
+
+  <Accordion title="Fehlerbehandlung">
+    Umgeben Sie API-Aufrufe immer mit try-catch-Blöcken:
+    ```typescript
+    try {
+      const result = await mastra.callApi({
+        integrationName: 'olostep',
+        api: 'scrapeWebsite',
+        payload: { data: {...} }
+      });
+    } catch (error) {
+      // Authentifizierungs-, Ratenlimit- oder Netzwerkfehler behandeln
+      console.error('Scraping fehlgeschlagen:', error.message);
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Ratenbegrenzung">
+    Achten Sie auf Ratenlimits:
+    - Verteilen Sie Anfragen mit Verzögerungen
+    - Verwenden Sie Batch-Verarbeitung, wenn möglich
+    - Überwachen Sie die Nutzung im Olostep-Dashboard
+    - Plan bei Bedarf upgraden
+  </Accordion>
+</AccordionGroup>
+
+## Komplettes Beispiel
+
+Hier ist ein vollständiges Beispiel für den Aufbau eines Forschungsagenten:
+
+```typescript
+import { Mastra } from '@mastra/core';
+import { Agent } from '@mastra/core';
+import { createOlostepIntegration } from '@olostep/mastra-tools';
+
+// Olostep-Integration erstellen und registrieren
+const olostep = createOlostepIntegration();
+olostep.registerApis();
+
+// Mastra initialisieren
+export const mastra = new Mastra({
+  config: {
+    integrations: [olostep],
+    // ... andere Konfigurationen
+  },
+});
+
+// Forschungsagenten erstellen
+const researchAgent = new Agent({
+  name: 'research-assistant',
+  instructions: `
+    Sie sind ein Forschungsassistent, der Webdaten suchen, extrahieren und strukturieren kann.
+    Wenn Benutzer Sie bitten, ein Thema zu recherchieren:
+    1. Verwenden Sie Olosteps createMap, um relevante Seiten zu entdecken
+    2. Verwenden Sie batchScrape, um Inhalte aus mehreren Quellen zu extrahieren
+    3. Analysieren und fassen Sie die Ergebnisse zusammen
+    4. Präsentieren Sie strukturierte Forschungsberichte
+  `,
+  model: 'openai/gpt-4',
+});
+
+// Den Agenten verwenden
+async function researchTopic(topic: string) {
+  // Schritt 1: Relevante Seiten entdecken
+  const mapResult = await mastra.callApi({
+    integrationName: 'olostep',
+    api: 'createMap',
+    payload: {
+      data: {
+        apiKey: process.env.OLOSTEP_API_KEY!,
+        url: `https://example.com/search?q=${topic}`,
+        top_n: 20,
+      }
+    }
+  });
+
+  // Schritt 2: Entdeckte Seiten scrapen
+  const batchResult = await mastra.callApi({
+    integrationName: 'olostep',
+    api: 'batchScrape',
+    payload: {
+      data: {
+        apiKey: process.env.OLOSTEP_API_KEY!,
+        batch_array: mapResult.urls.slice(0, 10).map(url => ({ url })),
+        formats: ['markdown'],
+      }
+    }
+  });
+
+  // Schritt 3: Mit Agenten analysieren
+  const summary = await researchAgent.generate({
+    messages: [{
+      role: 'user',
+      content: `Basierend auf diesen Forschungsdaten, geben Sie eine umfassende Zusammenfassung von ${topic}`
+    }]
+  });
+
+  return summary;
+}
+```
+
+## Fehlerbehebung
+
+<AccordionGroup>
+  <Accordion title="Authentifizierung fehlgeschlagen">
+    **Fehler**: "Ungültiger API-Schlüssel"
+    
+    **Lösungen**:
+    - Überprüfen Sie den API-Schlüssel vom [Dashboard](https://olostep.com/dashboard)
+    - Stellen Sie sicher, dass der API-Schlüssel als Umgebungsvariable gesetzt ist
+    - Überprüfen Sie, ob der API-Schlüssel aktiv ist
+    - Überprüfen Sie auf zusätzliche Leerzeichen im API-Schlüssel
+  </Accordion>
+
+  <Accordion title="API nicht gefunden">
+    **Fehler**: "API nicht gefunden" oder "Integration nicht registriert"
+    
+    **Lösungen**:
+    - Stellen Sie sicher, dass `registerApis()` nach der Erstellung der Integration aufgerufen wird
+    - Überprüfen Sie, ob die Integration zur Mastra-Konfiguration hinzugefügt wurde
+    - Überprüfen Sie, ob der Integrationsname 'olostep' ist
+    - Starten Sie den Mastra-Server nach Änderungen neu
+  </Accordion>
+
+  <Accordion title="Scrape liefert leere Inhalte">
+    **Fehler**: Inhaltsfelder sind leer
+    
+    **Lösungen**:
+    - Erhöhen Sie die `wait_before_scraping`-Zeit
+    - Überprüfen Sie, ob die Website eine Anmeldung erfordert
+    - Versuchen Sie ein anderes Format (HTML vs. Markdown)
+    - Überprüfen Sie, ob die URL zugänglich ist
+    - Überprüfen Sie, ob die Website automatisierten Zugriff blockiert
+  </Accordion>
+
+  <Accordion title="Ratenlimit überschritten">
+    **Fehler**: "Ratenlimit überschritten"
+    
+    **Lösungen**:
+    - Verteilen Sie Anfragen mit Verzögerungen
+    - Verwenden Sie Batch-Verarbeitung anstelle von einzelnen Scrapes
+    - Planen Sie ein Upgrade Ihres Olostep-Plans
+    - Überprüfen Sie das Ratenlimit im Dashboard
+  </Accordion>
+
+  <Accordion title="TypeScript-Fehler">
+    **Fehler**: Modul nicht gefunden oder Typfehler
+    
+    **Lösungen**:
+    - Stellen Sie sicher, dass `@mastra/core` installiert ist
+    - Überprüfen Sie die Kompatibilität der TypeScript-Version
+    - Überprüfen Sie, ob alle Abhängigkeiten installiert sind
+    - Neu bauen: `npm run build`
+  </Accordion>
+</AccordionGroup>
+
+## Preisgestaltung
+
+Olostep berechnet basierend auf der API-Nutzung, unabhängig von Mastra:
+
+- **Scrapes**: Bezahlung pro Scrape
+- **Batches**: Bezahlung pro URL im Batch
+- **Crawls**: Bezahlung pro gecrawlter Seite
+- **Maps**: Bezahlung pro Kartenoperation
+
+Aktuelle Preise finden Sie unter [olostep.com/pricing](https://olostep.com/pricing).
+
+## Support
+
+Benötigen Sie Hilfe bei der Mastra-Integration?
+
+<CardGroup cols={2}>
+  <Card title="Dokumentation" icon="book" href="https://docs.olostep.com">
+    Durchsuchen Sie die vollständigen API-Dokumente
+  </Card>
+  
+  <Card title="Support-E-Mail" icon="envelope" href="mailto:info@olostep.com">
+    E-Mail: info@olostep.com
+  </Card>
+  
+  <Card title="Mastra-Dokumente" icon="robot" href="https://mastra.ai/docs">
+    Erfahren Sie mehr über das Mastra-Framework
+  </Card>
+  
+  <Card title="Statusseite" icon="signal" href="https://status.olostep.com">
+    Überprüfen Sie den API-Status
+  </Card>
+</CardGroup>
+
+## Verwandte Ressourcen
+
+<CardGroup cols={2}>
+  <Card title="Scrapes-API" icon="file-lines" href="/features/scrapes/scrapes">
+    Erfahren Sie mehr über den Scrapes-Endpunkt
+  </Card>
+  
+  <Card title="Batches-API" icon="layer-group" href="/features/batches/batches">
+    Erfahren Sie mehr über den Batches-Endpunkt
+  </Card>
+  
+  <Card title="Crawls-API" icon="spider-web" href="/features/crawls/crawls">
+    Erfahren Sie mehr über den Crawls-Endpunkt
+  </Card>
+  
+  <Card title="Maps-API" icon="map" href="/features/maps/maps">
+    Erfahren Sie mehr über den Maps-Endpunkt
+  </Card>
+  
+  <Card title="Zapier-Integration" icon="bolt" href="/integrations/zapier">
+    Automatisieren Sie mit Zapier-Workflows
+  </Card>
+  
+  <Card title="LangChain-Integration" icon="link" href="/integrations/langchain">
+    Erstellen Sie KI-Agenten mit LangChain
+  </Card>
+</CardGroup>
+
+## Erste Schritte
+
+Bereit, KI-Agenten mit Web-Scraping-Fähigkeiten zu erstellen?
+
+<Card title="Paket installieren" icon="download" href="https://www.npmjs.com/package/@olostep/mastra-tools">
+  Installieren Sie @olostep/mastra-tools von npm
+</Card>
+
+Erstellen Sie intelligente KI-Agenten, die mit Olostep und Mastra Webdaten suchen, extrahieren und strukturieren können!

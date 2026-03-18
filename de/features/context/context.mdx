@@ -1,0 +1,58 @@
+---
+sidebarTitle: 'Kontext'
+icon: cookie
+title: Kontext
+description: Wiederverwendung von benutzerdefinierten Cookies, Authentifizierung und zwischengespeicherten Daten für KI-Automatisierungen
+---
+
+> **Hinweis:** Diese Funktion ist derzeit nur für ausgewählte Benutzer aktiviert. Um Zugang zu beantragen, kontaktieren Sie uns bitte unter info@olostep.com.
+
+Mit Kontexten können Sie benutzerdefinierte Cookies an die API übergeben. Dies ermöglicht es Ihnen, Cookies, Authentifizierung und gespeicherte Daten wiederzuverwenden, um KI-Automatisierungen zu unterstützen.
+
+### Erstellen eines Kontexts
+
+So können Sie einen Kontext erstellen, um benutzerdefinierte Cookies an die API zu übergeben:
+
+1. Installieren Sie das Olostep-Browser-Plugin von hier: [Olostep-Browser-Plugin](https://chromewebstore.google.com/detail/olostep/mjalbmdidmklbojfgakdpbifkgjjilkh)
+2. Besuchen Sie die Website, für die Sie die Cookies/Authentifizierung speichern möchten
+3. Melden Sie sich mit den Anmeldedaten an, die Sie speichern möchten
+4. Klicken Sie auf das Olostep-Plugin-Symbol und wählen Sie "Kontext übermitteln"
+5. Kopieren Sie die context_id (die etwa so aussieht: `ctx_yylqbfayto`) aus dem Plugin und verwenden Sie sie in Ihren API-Anfragen
+
+### Verwendung des Kontexts in den API-Anfragen
+
+```python
+import requests
+import json
+
+url = "https://api.olostep.com/v1/scrapes"
+
+payload = {
+    "url_to_scrape": "https://www.feizy.com/account-dashboard",
+    "formats": ["html", "markdown"],
+    "remove_css_selectors": "none",
+    "country": "US",
+    "context": {
+        "id": "ctx_yylqbfayto"
+    }
+}
+
+headers = {
+    "Authorization": "Bearer <API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+# JSON-Antwort parsen
+data = response.json()
+
+# JSON mit richtiger Einrückung ausgeben
+print(json.dumps(data, indent=4))
+```
+
+### Fazit
+
+Diese Funktion ermöglicht es Ihnen, Cookies, Authentifizierung und gespeicherte Daten für Ihre API-Anfragen wiederzuverwenden.
+
+Diese Funktion befindet sich in der Beta-Phase für Unternehmen, die KI-Automatisierungen entwickeln. Um Zugang zu dieser Funktion zu erhalten, kontaktieren Sie uns unter `info@olostep.com`.
