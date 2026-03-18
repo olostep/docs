@@ -1,0 +1,518 @@
+---
+sidebarTitle: 'Agno'
+icon: link
+title: Agno Integration
+description: Build intelligent AI agents with web scraping, crawling, search and AI-powered answers using Agno
+---
+
+The Olostep Agno integration provides a complete toolkit to build AI agents that can scrape, crawl, search, and extract structured data from any website. Works with any LLM provider supported by Agno (OpenAI, Anthropic, Groq, etc.).
+
+## Features
+
+The integration provides access to all 6 Olostep capabilities:
+
+<CardGroup cols={2}>
+  <Card title="Scrapes" icon="file-lines">
+    Extract content from any URL in markdown, HTML, text or structured JSON
+  </Card>
+  
+  <Card title="Crawls" icon="spider-web">
+    Recursively crawl entire websites by following links
+  </Card>
+  
+  <Card title="Maps" icon="map">
+    Discover all URLs on a website for content discovery and SEO analysis
+  </Card>
+  
+  <Card title="Batches" icon="layer-group">
+    Process up to 10,000 URLs concurrently in 5–8 minutes
+  </Card>
+  
+  <Card title="Answers" icon="question">
+    AI-powered web search with natural language queries and structured output
+  </Card>
+  
+  <Card title="Search" icon="magnifying-glass">
+    Get ranked web search results with titles, URLs and descriptions
+  </Card>
+</CardGroup>
+
+## Installation
+
+<CodeGroup>
+```bash pip
+pip install agno olostep openai
+```
+
+```bash poetry
+poetry add agno olostep openai
+```
+</CodeGroup>
+
+<Note>
+The Olostep integration is part of agno core. Install `agno` along with `olostep` and your preferred LLM provider.
+</Note>
+
+## Setup
+
+Set your Olostep and LLM provider API keys as environment variables:
+
+```bash
+export OLOSTEP_API_KEY="your_olostep_api_key_here"
+export OPENAI_API_KEY="your_openai_api_key_here"
+```
+
+Get your Olostep API key from the [Olostep Dashboard](https://olostep.com/dashboard/api-keys).
+
+## Available Tools
+
+### scrape_url
+
+Extract content from a single URL. Supports multiple formats and JavaScript rendering.
+
+<ParamField path="url" type="string" required>
+  Full URL to scrape
+</ParamField>
+
+<ParamField path="formats" type="string" default="markdown">
+  Comma-separated output formats: `markdown`, `html`, `text`, `json`
+</ParamField>
+
+<ParamField path="wait_before_scraping" type="integer">
+  Milliseconds to wait for JS rendering
+</ParamField>
+
+<ParamField path="remove_images" type="boolean">
+  Strip images from output
+</ParamField>
+
+<ParamField path="country" type="string">
+  Two-letter country code (e.g., "us", "gb")
+</ParamField>
+
+<ParamField path="parser_id" type="string">
+  Pre-built parser: `@olostep/google-search`, `@olostep/amazon-it-product`, `@olostep/extract-emails`, `@olostep/extract-socials`
+</ParamField>
+
+<ParamField path="llm_extract_prompt" type="string">
+  Natural language extraction instruction
+</ParamField>
+
+<ParamField path="llm_extract_schema" type="string">
+  JSON schema string for structured extraction
+</ParamField>
+
+<CodeGroup>
+```python Basic Scraping
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o-mini"),
+    tools=[OlostepTools(scrape_url=True)],
+    markdown=True,
+)
+agent.print_response("Scrape https://example.com and summarize it")
+```
+
+```python With JavaScript Rendering
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o-mini"),
+    tools=[OlostepTools(scrape_url=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Scrape https://example.com with 3000ms wait for JS "
+    "and extract the main heading"
+)
+```
+
+```python With Parser
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(scrape_url=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Scrape https://example.com using the google-search parser "
+    "and return structured JSON results"
+)
+```
+</CodeGroup>
+
+### crawl_website
+
+Recursively crawl entire websites by following links.
+
+<ParamField path="url" type="string" required>
+  Starting URL for the crawl
+</ParamField>
+
+<ParamField path="max_pages" type="integer" default="20">
+  Max pages to crawl, up to 1000
+</ParamField>
+
+<ParamField path="max_depth" type="integer">
+  Max link depth from start URL
+</ParamField>
+
+<ParamField path="include_urls" type="string">
+  Comma-separated glob patterns (e.g., "/blog/**, /docs/**")
+</ParamField>
+
+<ParamField path="exclude_urls" type="string">
+  Comma-separated glob patterns (e.g., "/admin/**")
+</ParamField>
+
+<ParamField path="search_query" type="string">
+  Filter crawled pages by relevance
+</ParamField>
+
+<ParamField path="top_n" type="integer">
+  Limit to top N most relevant pages
+</ParamField>
+
+<CodeGroup>
+```python Crawl Website
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(crawl_website=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Crawl https://docs.example.com/blog and summarize the last 5 posts"
+)
+```
+
+```python With URL Filters
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(crawl_website=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Crawl https://example.com, include only /product/** URLs, "
+    "exclude /admin/**, limit to 50 pages"
+)
+```
+</CodeGroup>
+
+### map_website
+
+Extract all URLs from a website for site structure analysis.
+
+<ParamField path="url" type="string" required>
+  Website to map
+</ParamField>
+
+<ParamField path="include_urls" type="string">
+  Comma-separated glob patterns to include
+</ParamField>
+
+<ParamField path="exclude_urls" type="string">
+  Comma-separated glob patterns to exclude
+</ParamField>
+
+<ParamField path="include_subdomain" type="boolean">
+  Include subdomain URLs, default: False
+</ParamField>
+
+<ParamField path="top_n" type="integer">
+  Limit number of URLs returned
+</ParamField>
+
+<CodeGroup>
+```python Map Website
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(map_website=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Map https://example.com and list all the product pages"
+)
+```
+
+```python Map with Filters
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(map_website=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Map https://example.com, include only /blog/** URLs, "
+    "exclude /private/**, and limit to top 100"
+)
+```
+</CodeGroup>
+
+### search_web
+
+Get ranked web search results with titles, URLs and descriptions.
+
+<ParamField path="query" type="string" required>
+  Natural language search query
+</ParamField>
+
+<CodeGroup>
+```python Web Search
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o-mini"),
+    tools=[OlostepTools(search_web=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Find the top 5 open source vector databases in 2025"
+)
+```
+</CodeGroup>
+
+### answer_question
+
+AI-powered web search with natural language queries and structured output.
+
+<ParamField path="task" type="string" required>
+  Question or research task
+</ParamField>
+
+<ParamField path="json_schema" type="string">
+  JSON schema string for structured output (e.g., '{"ceo": "", "founded": "", "valuation": ""}')
+</ParamField>
+
+<CodeGroup>
+```python Answer Question
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(answer_question=True)],
+    markdown=True,
+)
+agent.print_response(
+    "What is Stripe's current valuation and who is the CEO?"
+)
+```
+
+```python Structured Output
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(answer_question=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Find this data about Apple: CEO name, headquarters city, "
+    "founded year, number of employees. Return as JSON."
+)
+```
+</CodeGroup>
+
+### batch_scrape
+
+Process multiple URLs concurrently (up to 10,000 at once).
+
+<ParamField path="urls" type="string" required>
+  Comma-separated list of URLs
+</ParamField>
+
+<ParamField path="formats" type="string" default="markdown">
+  Output formats
+</ParamField>
+
+<ParamField path="parser_id" type="string">
+  Parser ID for structured extraction
+</ParamField>
+
+<ParamField path="country" type="string">
+  Two-letter country code
+</ParamField>
+
+<CodeGroup>
+```python Batch Scraping
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(map_website=True, batch_scrape=True)],
+    markdown=True,
+)
+agent.print_response(
+    "Map https://docs.olostep.com/features, then batch scrape "
+    "all feature pages and give me a summary of each one"
+)
+```
+</CodeGroup>
+
+## Full Agent Examples
+
+### Example 1: Competitive Research Agent
+
+Build an agent that researches competitors by scraping pricing pages, searching for news, and comparing.
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(scrape_url=True, search_web=True, answer_question=True)],
+    instructions="You are a competitive intelligence analyst.",
+    markdown=True,
+)
+
+agent.print_response(
+    "Research Firecrawl and Apify: scrape their pricing pages, "
+    "search for recent news about them, and give me a comparison table."
+)
+```
+
+### Example 2: Documentation Crawler
+
+Crawl entire documentation sites and generate feature reference guides.
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(map_website=True, batch_scrape=True)],
+    instructions="You are a documentation analyst.",
+    markdown=True,
+)
+
+agent.print_response(
+    "Map https://docs.olostep.com, find all feature pages, "
+    "batch scrape them all, and give me a complete feature reference guide."
+)
+```
+
+### Example 3: Data Enrichment Agent
+
+Enrich company databases with web research data in structured JSON format.
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.olostep import OlostepTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[OlostepTools(answer_question=True)],
+    instructions="You are a data enrichment specialist.",
+    markdown=True,
+)
+
+companies = ["Stripe", "Shopify", "Brex"]
+for company in companies:
+    agent.print_response(
+        f"Find this data about {company}: "
+        f"CEO name, founding year, latest valuation, headquarters city. "
+        f"Return as structured JSON."
+    )
+```
+
+## Enable Tools
+
+Control which tools are available to your agent:
+
+<CodeGroup>
+```python Enable Specific Tools
+from agno.tools.olostep import OlostepTools
+
+# Enable specific tools
+tools=[OlostepTools(scrape_url=True, search_web=True)]
+```
+
+```python Enable All Tools
+# Enable all tools
+tools=[OlostepTools(all_tools=True)]
+```
+</CodeGroup>
+
+## Specialized Parsers
+
+Olostep provides pre-built parsers for popular websites:
+
+- `@olostep/google-search` — Google SERP results as structured JSON
+- `@olostep/amazon-it-product` — Amazon product data
+- `@olostep/extract-emails` — Extract email addresses from any page
+- `@olostep/extract-socials` — Extract social media handles
+- `@olostep/extract-calendars` — Extract calendar and event data
+
+Use them with the `parser_id` parameter:
+
+```python
+agent.print_response(
+    "Scrape https://www.google.com/search?q=best+crm+software "
+    "using the google-search parser and return structured results"
+)
+# Pass parser_id='@olostep/google-search' and formats='json'
+```
+
+## Pricing
+
+Credits are deducted based on the tool used:
+
+- `scrape_url`: 1 credit (with parser: 1–5 credits, with llm_extract: 20 credits)
+- `crawl_website`: 1 credit per page
+- `map_website`: 1 credit + 1 per 1,000 URLs
+- `search_web`: 5 credits
+- `answer_question`: 20 credits
+- `batch_scrape`: 1 credit per URL
+
+View your usage and costs on the [Olostep Dashboard](https://olostep.com/dashboard).
+
+## Support
+
+- **PyPI Package**: [agno](https://pypi.org/project/agno/)
+- **Agno Docs**: [docs.agno.com](https://docs.agno.com/tools/toolkits/web-scrape/olostep)
+- **Olostep Docs**: [docs.olostep.com](https://docs.olostep.com)
+- **GitHub**: [github.com/agno-agi/agno](https://github.com/agno-agi/agno)
+- **Email**: info@olostep.com
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes/scrapes">
+    Learn about the Scrapes endpoint
+  </Card>
+  
+  <Card title="Batches API" icon="layer-group" href="/features/batches/batches">
+    Learn about the Batches endpoint
+  </Card>
+  
+  <Card title="Answers API" icon="question" href="/features/answers/answers">
+    Learn about the Answers endpoint
+  </Card>
+  
+  <Card title="Maps API" icon="map" href="/features/maps/maps">
+    Learn about the Maps endpoint
+  </Card>
+  
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls/crawls">
+    Learn about the Crawls endpoint
+  </Card>
+  
+  <Card title="Python SDK" icon="python" href="/sdks/python">
+    Explore the Python SDK
+  </Card>
+</CardGroup>
