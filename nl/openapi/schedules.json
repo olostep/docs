@@ -21,7 +21,7 @@
   "paths": {
     "/v1/schedules": {
       "post": {
-        "summary": "Schema aanmaken",
+        "summary": "Schema Aanmaken",
         "description": "Maakt een nieuw schema aan om API-aanroepen op gespecificeerde tijden uit te voeren. Ondersteunt zowel eenmalige uitvoeringen als terugkerende schema's met behulp van cron-expressies. Je kunt ook natuurlijke taal gebruiken om automatisch cron-expressies te genereren. Voor POST-verzoeken kun je korte Olostep-eindpunten gebruiken (bijv. 'v1/scrapes') die automatisch worden geprefixed, of een volledige URL opgeven. De payload kan elke JSON-structuur bevatten die je wilt verzenden.",
         "security": [
           {
@@ -45,16 +45,16 @@
                   },
                   "endpoint": {
                     "type": "string",
-                    "description": "De endpoint-URL om aan te roepen wanneer het schema wordt uitgevoerd. Voor POST-verzoeken met Olostep-eindpunten kun je korte vormen gebruiken (bijv. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') die automatisch worden geprefixed met 'https://api.olostep.com/'. Voor andere eindpunten geef je de volledige URL op."
+                    "description": "De endpoint-URL die wordt aangeroepen wanneer het schema wordt uitgevoerd. Voor POST-verzoeken met Olostep-eindpunten kun je korte vorm gebruiken (bijv. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') die automatisch worden geprefixed met 'https://api.olostep.com/'. Voor andere eindpunten geef je de volledige URL op."
                   },
                   "payload": {
                     "type": "object",
-                    "description": "De payload om mee te sturen met de API-aanroep. Kan elke JSON-structuur bevatten die je nodig hebt. Voor GET-verzoeken is dit meestal leeg. Voor POST-verzoeken moet dit de gegevens bevatten die je naar het eindpunt wilt sturen.",
+                    "description": "De payload die met de API-aanroep wordt verzonden. Kan elke JSON-structuur bevatten die je nodig hebt. Voor GET-verzoeken is dit meestal leeg. Voor POST-verzoeken moet dit de gegevens bevatten die je naar het eindpunt wilt verzenden.",
                     "default": {}
                   },
                   "cron_expression": {
                     "type": "string",
-                    "description": "Cron-expressie in 6-velden formaat (minuut uur dag maand dag-van-de-week jaar) voor terugkerende schema's. Vereist voor terugkerende schema's. Wederzijds exclusief met execute_at en text."
+                    "description": "Cron-expressie in 6 velden formaat (minuut uur dag maand dag-van-de-week jaar) voor terugkerende schema's. Vereist voor terugkerende schema's. Wederzijds exclusief met execute_at en text."
                   },
                   "execute_at": {
                     "type": "string",
@@ -67,7 +67,7 @@
                   },
                   "text": {
                     "type": "string",
-                    "description": "Natuurlijke taaltekst om automatisch een cron-expressie te genereren. Het systeem zal je tekst omzetten in een geldige cron-expressie. Voorbeelden: 'elke 3 minuten', 'elke dag om 10 uur', 'elke maandag om 9 uur'. Wederzijds exclusief met cron_expression en execute_at. Bij gebruik is expression_timezone standaard 'UTC'."
+                    "description": "Natuurlijke taaltekst om automatisch een cron-expressie te genereren. Het systeem zet je tekst om in een geldige cron-expressie. Voorbeelden: 'elke 3 minuten', 'elke dag om 10 uur', 'elke maandag om 9 uur'. Wederzijds exclusief met cron_expression en execute_at. Bij gebruik is expression_timezone standaard 'UTC'."
                   }
                 },
                 "required": [
@@ -146,7 +146,7 @@
       },
       "get": {
         "summary": "Lijst Schema's",
-        "description": "Haalt alle schema's voor jouw team op. Geeft een lijst van schema's terug met hun configuratie, status en metadata. Standaard worden verwijderde schema's eruit gefilterd.",
+        "description": "Haalt alle schema's voor je team op. Geeft een lijst van schema's terug met hun configuratie, status en metadata. Standaard worden verwijderde schema's eruit gefilterd.",
         "security": [
           {
             "Authorization": []
@@ -399,10 +399,10 @@
             "description": "Ongeldige API-sleutel."
           },
           "404": {
-            "description": "Schema niet gevonden voor de opgegeven ID."
+            "description": "Schema niet gevonden voor het opgegeven ID."
           },
           "500": {
-            "description": "Interne serverfout bij het ophalen van het schema."
+            "description": "Interne serverfout bij het ophalen van schema."
           }
         }
       },
@@ -440,7 +440,7 @@
                     },
                     "schedule_id": {
                       "type": "string",
-                      "description": "De ID van het verwijderde schema"
+                      "description": "Het ID van het verwijderde schema"
                     }
                   }
                 }
@@ -454,10 +454,10 @@
             "description": "Ongeldige API-sleutel."
           },
           "404": {
-            "description": "Schema niet gevonden voor de opgegeven ID."
+            "description": "Schema niet gevonden voor het opgegeven ID."
           },
           "500": {
-            "description": "Interne serverfout bij het verwijderen van het schema."
+            "description": "Interne serverfout bij het verwijderen van schema."
           }
         }
       }

@@ -42,7 +42,7 @@
                   },
                   "purpose": {
                     "type": "string",
-                    "description": "Le but du fichier. Valeurs supportées : 'context' ou 'batch'. Par défaut, 'context'.",
+                    "description": "Le but du fichier. Valeurs supportées : 'context' ou 'batch'. Par défaut, c'est 'context'.",
                     "enum": [
                       "context",
                       "batch"
@@ -59,7 +59,7 @@
         },
         "responses": {
           "200": {
-            "description": "Réponse réussie avec URL de téléchargement.",
+            "description": "Réponse réussie avec l'URL de téléchargement.",
             "content": {
               "application/json": {
                 "schema": {
@@ -104,7 +104,7 @@
       },
       "get": {
         "summary": "Lister les Fichiers",
-        "description": "Liste tous les fichiers complétés pour ton équipe. Filtre optionnellement par but. Retourne uniquement les fichiers avec le statut 'completed'.",
+        "description": "Liste tous les fichiers complétés pour ton équipe. Filtre optionnellement par but. Ne retourne que les fichiers avec le statut 'completed'.",
         "security": [
           {
             "Authorization": []
@@ -127,7 +127,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Réponse réussie avec liste de fichiers.",
+            "description": "Réponse réussie avec la liste des fichiers.",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,7 +255,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable ou fichier non téléchargé sur S3"
+            "description": "Fichier non trouvé ou fichier non téléchargé sur S3"
           },
           "500": {
             "description": "Erreur interne du serveur"
@@ -328,7 +328,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable"
+            "description": "Fichier non trouvé"
           },
           "500": {
             "description": "Erreur interne du serveur"
@@ -383,7 +383,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable"
+            "description": "Fichier non trouvé"
           },
           "500": {
             "description": "Erreur interne du serveur"
@@ -394,7 +394,7 @@
     "/v1/files/{file_id}/content": {
       "get": {
         "summary": "Obtenir l'objet fichier par ID",
-        "description": "Obtiens une URL pré-signée pour télécharger le contenu d'un fichier \"completed\". Tu peux éventuellement spécifier le temps d'expiration pour l'URL de téléchargement en utilisant le paramètre de requête expires_in (par défaut à 600 secondes / 10 minutes).",
+        "description": "Obtiens une URL pré-signée pour télécharger le contenu d'un fichier \"completed\". Tu peux éventuellement spécifier le temps d'expiration de l'URL de téléchargement en utilisant le paramètre de requête expires_in (par défaut à 600 secondes / 10 minutes).",
         "security": [
           {
             "Authorization": []
@@ -456,7 +456,7 @@
                     },
                     "expires_in": {
                       "type": "integer",
-                      "description": "Nombre de secondes avant l'expiration de l'URL de téléchargement."
+                      "description": "Nombre de secondes avant l'expiration de l'URL de téléchargement"
                     }
                   }
                 }
@@ -470,7 +470,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable"
+            "description": "Fichier non trouvé"
           },
           "500": {
             "description": "Erreur interne du serveur"

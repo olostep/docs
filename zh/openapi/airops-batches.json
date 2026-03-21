@@ -3,7 +3,7 @@
   "info": {
     "title": "AirOps 批处理 API",
     "version": "1.0.0",
-    "description": "用于 AirOps 专用批量抓取的内部 API，具有用于页面元数据提取的自动化 LLM 增强功能。"
+    "description": "用于 AirOps 专用批量抓取的内部 API，具有用于页面元数据提取的自动 LLM 增强功能。"
   },
   "servers": [
     {
@@ -149,7 +149,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "要检索的批处理的 ID。",
+            "description": "要检索的批处理 ID。",
             "example": "batch_abc123xyz"
           }
         ],
@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Bearer 身份验证头格式为 Bearer <token>，其中 <token> 是你的身份验证令牌。"
+        "description": "Bearer 认证头格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
       }
     },
     "schemas": {
@@ -540,7 +540,7 @@
               "job_posting",
               "other"
             ],
-            "description": "分类的页面类型（状态为\"completed\"时出现）。"
+            "description": "分类页面类型（状态为\"completed\"时出现）。"
           },
           "author": {
             "type": "string",
@@ -562,7 +562,7 @@
             "items": {
               "type": "string"
             },
-            "description": "页面上发现的品牌。"
+            "description": "页面上找到的品牌。"
           },
           "failed_stage": {
             "type": "string",
@@ -613,7 +613,7 @@
               "job_posting",
               "other"
             ],
-            "description": "分类的页面类型。"
+            "description": "分类页面类型。"
           },
           "author": {
             "type": "string",
@@ -654,7 +654,7 @@
       },
       "WorkflowStatus": {
         "type": "object",
-        "description": "显示所有工作流阶段的统一状态对象。",
+        "description": "显示所有工作流程阶段的统一状态对象。",
         "properties": {
           "overall": {
             "type": "string",
@@ -664,7 +664,7 @@
               "completed",
               "failed"
             ],
-            "description": "聚合工作流状态。"
+            "description": "汇总的工作流程状态。"
           },
           "scraping": {
             "$ref": "#/components/schemas/ScrapingStatus"

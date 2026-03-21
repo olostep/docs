@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Batches API",
+    "title": "Batches-API",
     "version": "1.0.0"
   },
   "servers": [
@@ -12,8 +12,8 @@
   "paths": {
     "/v1/test-batch": {
       "post": {
-        "summary": "Testbatch",
-        "description": "Testbatch",
+        "summary": "Test-Batch",
+        "description": "Test-Batch",
         "security": [
           {
             "Authorization": []
@@ -200,7 +200,7 @@
     "/v1/batches": {
       "post": {
         "summary": "Starte einen neuen Batch",
-        "description": "Initiert einen neuen Batch-Prozess mit den angegebenen Parametern.",
+        "description": "Initiiert einen neuen Batch-Prozess mit den angegebenen Parametern.",
         "security": [
           {
             "Authorization": []
@@ -245,7 +245,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "Land für die Batch-Ausführung. Gib es in ISO 3166-1 Alpha-2-Codes an, wie US(USA), IN(Indien) usw."
+                    "description": "Land für die Batch-Ausführung. Gib es in ISO 3166-1 Alpha-2-Codes an, wie US(USA), IN(Indien), etc."
                   },
                   "parser": {
                     "type": "object",
@@ -291,7 +291,7 @@
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "HTTPS-URL, um eine POST-Anfrage zu erhalten, wenn das Batch abgeschlossen ist. Muss eine öffentlich zugängliche URL mit `http://` oder `https://` Protokoll sein. Kann nicht auf localhost oder private IP-Adressen verweisen. Siehe [Webhooks](/api-reference/common/webhooks) für das Payload-Format und das Wiederholungsverhalten."
+                    "description": "HTTPS-URL, um eine POST-Anfrage zu erhalten, wenn das Batch abgeschlossen ist. Muss eine öffentlich zugängliche URL sein, die das `http://`- oder `https://`-Protokoll verwendet. Kann nicht auf localhost oder private IP-Adressen verweisen. Siehe [Webhooks](/api-reference/common/webhooks) für das Payload-Format und das Wiederholungsverhalten."
                   }
                 },
                 "required": [
@@ -672,7 +672,7 @@
       },
       "patch": {
         "summary": "Batch-Metadaten aktualisieren",
-        "description": "Aktualisiert die Metadaten für einen bestimmten Batch. Nur das `metadata`-Feld kann aktualisiert werden. Folgt den Merge-Semantiken von Stripe: Neue Schlüssel werden hinzugefügt, bestehende Schlüssel werden aktualisiert, und Schlüssel, die auf einen leeren String gesetzt sind, werden gelöscht.",
+        "description": "Aktualisiert die Metadaten für einen bestimmten Batch. Nur das Feld `metadata` kann aktualisiert werden. Folgt den Merge-Semantiken von Stripe: Neue Schlüssel werden hinzugefügt, bestehende Schlüssel werden aktualisiert, und Schlüssel, die auf einen leeren String gesetzt sind, werden gelöscht.",
         "security": [
           {
             "Authorization": []
@@ -855,8 +855,8 @@
     },
     "/v1/batches/{batch_id}/items": {
       "get": {
-        "summary": "Abgeschlossene oder fehlgeschlagene Elementliste optional mit Inhalt für einen bestimmten Batch abrufen",
-        "description": "Ruft die Liste der Elemente und Inhalte ab, die gemäß dem angeforderten Status für eine bestimmte Batch-ID vorliegen.",
+        "summary": "Abgeschlossene oder fehlgeschlagene Elementeliste optional mit Inhalt für einen bestimmten Batch abrufen",
+        "description": "Ruft die Liste der Elemente und Inhalte gemäß dem angeforderten Status für eine bestimmte Batch-ID ab.",
         "security": [
           {
             "Authorization": []
@@ -883,7 +883,7 @@
                 "failed"
               ]
             },
-            "description": "Status der abzurufenden URLs (completed oder failed)."
+            "description": "Status der URLs, die abgerufen werden sollen (completed oder failed)."
           },
           {
             "name": "cursor",
@@ -1145,7 +1145,7 @@
       },
       "Metadata": {
         "type": "object",
-        "description": "Satz von Schlüssel-Wert-Paaren zur Speicherung zusätzlicher Informationen über ein Objekt. Folgt dem Ansatz von Stripe mit Validierungsregeln: maximal 50 Schlüssel, Schlüssel maximal 40 Zeichen (keine eckigen Klammern), Wert maximal 500 Zeichen, alle Werte werden als Strings gespeichert.",
+        "description": "Satz von Schlüssel-Wert-Paaren zur Speicherung zusätzlicher Informationen über ein Objekt. Folgt dem Ansatz von Stripe mit Validierungsregeln: maximal 50 Schlüssel, Schlüssel maximal 40 Zeichen (keine eckigen Klammern), Wert maximal 500 Zeichen, alle Werte als Strings gespeichert.",
         "additionalProperties": {
           "type": "string",
           "maxLength": 500,

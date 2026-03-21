@@ -22,7 +22,7 @@
     "/v1/schedules": {
       "post": {
         "summary": "スケジュール作成",
-        "description": "指定された時間にAPIコールを実行する新しいスケジュールを作成します。一度だけの実行とcron式を使用した定期的なスケジュールの両方をサポートしています。自然言語テキストを使用してcron式を自動生成することもできます。POSTリクエストの場合、短縮形のOlostepエンドポイント（例: 'v1/scrapes'）を使用することができ、自動的にプレフィックスが追加されます。または、完全なURLを提供することもできます。ペイロードには送信したい任意のJSON構造を含めることができます。",
+        "description": "指定された時間にAPIコールを実行する新しいスケジュールを作成します。一度きりの実行とcron式を使用した定期的なスケジュールの両方をサポートしています。また、自然言語テキストを使用してcron式を自動生成することもできます。POSTリクエストの場合、短縮形のOlostepエンドポイント（例: 'v1/scrapes'）を使用することができ、自動的にプレフィックスが追加されます。または、完全なURLを提供することもできます。ペイロードには送信したい任意のJSON構造を含めることができます。",
         "security": [
           {
             "Authorization": []
@@ -41,11 +41,11 @@
                       "GET",
                       "POST"
                     ],
-                    "description": "スケジュールされたAPIコールのHTTPメソッド。GETまたはPOSTのいずれかである必要があります。"
+                    "description": "スケジュールされたAPIコールのHTTPメソッド。GETまたはPOSTのいずれかでなければなりません。"
                   },
                   "endpoint": {
                     "type": "string",
-                    "description": "スケジュールが実行されたときに呼び出されるエンドポイントURL。Olostepエンドポイントを使用したPOSTリクエストの場合、短縮形（例: 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers'）を使用することができ、自動的に 'https://api.olostep.com/' がプレフィックスされます。他のエンドポイントの場合は、完全なURLを提供してください。"
+                    "description": "スケジュールが実行されるときに呼び出すエンドポイントURL。Olostepエンドポイントを使用したPOSTリクエストの場合、短縮形（例: 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers'）を使用することができ、自動的に'https://api.olostep.com/'がプレフィックスされます。他のエンドポイントの場合は、完全なURLを提供してください。"
                   },
                   "payload": {
                     "type": "object",
@@ -59,15 +59,15 @@
                   "execute_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "一度だけのスケジュール実行のためのISO 8601日時文字列。有効な未来の日時である必要があります。一度だけのスケジュールには必須です。cron_expressionとは相互排他的です。"
+                    "description": "一度きりのスケジュール実行のためのISO 8601日時文字列。有効な未来の日時でなければなりません。一度きりのスケジュールには必須です。cron_expressionとは相互排他的です。"
                   },
                   "expression_timezone": {
                     "type": "string",
-                    "description": "スケジュールのためのIANAタイムゾーン識別子（例: 'UTC', 'America/New_York', 'Europe/London'）。定期的なスケジュールには必須で、一度だけのスケジュールにはオプションです。自然言語テキストを使用する場合、デフォルトは 'UTC' です。"
+                    "description": "スケジュールのためのIANAタイムゾーン識別子（例: 'UTC', 'America/New_York', 'Europe/London'）。定期的なスケジュールには必須で、一度きりのスケジュールにはオプションです。自然言語テキストを使用する場合、デフォルトは'UTC'です。"
                   },
                   "text": {
                     "type": "string",
-                    "description": "自動的にcron式を生成するための自然言語テキスト。システムはあなたのテキストを有効なcron式に変換します。例: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'。cron_expressionおよびexecute_atとは相互排他的です。使用する場合、expression_timezoneのデフォルトは 'UTC' です。"
+                    "description": "自動的にcron式を生成するための自然言語テキスト。システムはあなたのテキストを有効なcron式に変換します。例: 'every 3 minutes', 'every day at 10am', 'every Monday at 9am'。cron_expressionおよびexecute_atとは相互排他的です。使用する場合、expression_timezoneのデフォルトは'UTC'です。"
                   }
                 },
                 "required": [
@@ -96,7 +96,7 @@
                         "recurring",
                         "onetime"
                       ],
-                      "description": "スケジュールのタイプ: cronベースのスケジュールには 'recurring'、単一実行スケジュールには 'onetime'"
+                      "description": "スケジュールのタイプ: cronベースのスケジュールの場合は'recurring'、単一実行スケジュールの場合は'onetime'"
                     },
                     "method": {
                       "type": "string",
@@ -112,12 +112,12 @@
                     },
                     "cron_expression": {
                       "type": "string",
-                      "description": "cron式（定期的なスケジュールの場合のみ存在）"
+                      "description": "Cron式（定期的なスケジュールの場合のみ存在）"
                     },
                     "execute_at": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "実行日時（一度だけのスケジュールの場合のみ存在）"
+                      "description": "実行日時（一度きりのスケジュールの場合のみ存在）"
                     },
                     "expression_timezone": {
                       "type": "string",
@@ -134,7 +134,7 @@
             }
           },
           "400": {
-            "description": "不正なパラメータのための不正リクエスト。一般的なエラー: 無効なメソッド、エンドポイントの欠如、無効なcron_expression、無効なexecute_at日時、無効なタイムゾーン、または無効なschedule_id形式。"
+            "description": "不正なまたは不足しているパラメータによる不正なリクエスト。一般的なエラー: 無効なメソッド、エンドポイントの欠如、無効なcron_expression、無効なexecute_at日時、無効なタイムゾーン、または無効なschedule_id形式。"
           },
           "401": {
             "description": "無効なAPIキーです。もう一度確認するか、問題がある場合はinfo@olostep.comに連絡してください。"
@@ -207,12 +207,12 @@
                           },
                           "cron_expression": {
                             "type": "string",
-                            "description": "cron式（定期的なスケジュールの場合のみ存在）"
+                            "description": "Cron式（定期的なスケジュールの場合のみ存在）"
                           },
                           "execute_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "実行日時（一度だけのスケジュールの場合のみ存在）"
+                            "description": "実行日時（一度きりのスケジュールの場合のみ存在）"
                           },
                           "expression_timezone": {
                             "type": "string",
@@ -281,7 +281,7 @@
     "/v1/schedules/{schedule_id}": {
       "get": {
         "summary": "スケジュールを取得",
-        "description": "IDでスケジュールを1つ取得します。",
+        "description": "IDで単一のスケジュールを取得します。",
         "security": [
           {
             "Authorization": []
@@ -344,12 +344,12 @@
                         },
                         "cron_expression": {
                           "type": "string",
-                          "description": "cron式（定期的なスケジュールの場合のみ存在）"
+                          "description": "Cron式（定期的なスケジュールの場合のみ存在）"
                         },
                         "execute_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "実行日時（一度だけのスケジュールの場合のみ存在）"
+                          "description": "実行日時（一度きりのスケジュールの場合のみ存在）"
                         },
                         "expression_timezone": {
                           "type": "string",

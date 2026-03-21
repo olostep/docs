@@ -3,7 +3,7 @@
   "info": {
     "title": "API de Lotes de AirOps",
     "version": "1.0.0",
-    "description": "API interna para scraping de lotes específicos de AirOps con enriquecimiento automatizado de LLM para la extracción de metadatos de páginas."
+    "description": "API interna para scraping de lotes específico de AirOps con enriquecimiento automatizado de LLM para la extracción de metadatos de páginas."
   },
   "servers": [
     {
@@ -135,7 +135,7 @@
       "get": {
         "operationId": "getAirOpsBatch",
         "summary": "Obtener Estado del Lote de AirOps",
-        "description": "Recupera el estado y la configuración actual de un lote de AirOps.",
+        "description": "Recupera el estado actual y la configuración de un lote de AirOps.",
         "security": [
           {
             "Authorization": []
@@ -371,7 +371,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 255,
-            "description": "Tu identificador único para este ítem."
+            "description": "Tu identificador único para este elemento."
           }
         }
       },
@@ -433,7 +433,7 @@
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Si el modo de lote asincrónico LLM está habilitado."
+            "description": "Si el modo de lote LLM asíncrono está habilitado."
           },
           "scraping": {
             "$ref": "#/components/schemas/ScrapingStatus"
@@ -470,15 +470,15 @@
             "properties": {
               "total": {
                 "type": "integer",
-                "description": "Total de ítems en el lote."
+                "description": "Total de elementos en el lote."
               },
               "succeeded": {
                 "type": "integer",
-                "description": "Ítems procesados exitosamente."
+                "description": "Elementos procesados con éxito."
               },
               "failed": {
                 "type": "integer",
-                "description": "Ítems fallidos."
+                "description": "Elementos fallidos."
               }
             }
           },
@@ -496,7 +496,7 @@
       },
       "BatchItemResult": {
         "type": "object",
-        "description": "Un ítem procesado. La estructura varía según el estado.",
+        "description": "Un elemento procesado. La estructura varía según el estado.",
         "properties": {
           "custom_id": {
             "type": "string",
@@ -582,7 +582,7 @@
       "EnrichedData": {
         "type": "object",
         "nullable": true,
-        "description": "Salida final combinada que une los resultados del parser y la extracción de LLM.",
+        "description": "Salida final combinada que une los resultados del parser y la extracción LLM.",
         "properties": {
           "url": {
             "type": "string"
@@ -654,7 +654,7 @@
       },
       "WorkflowStatus": {
         "type": "object",
-        "description": "Objeto de estado unificado mostrando todas las fases del flujo de trabajo.",
+        "description": "Objeto de estado unificado que muestra todas las fases del flujo de trabajo.",
         "properties": {
           "overall": {
             "type": "string",
@@ -803,7 +803,7 @@
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Si se usó el API batch asíncrono"
+            "description": "Si se usó el batch API asíncrono"
           },
           "llm": {
             "$ref": "#/components/schemas/LLMInfo"

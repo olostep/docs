@@ -22,7 +22,7 @@
     "/v1/files": {
       "post": {
         "summary": "ファイルアップロードの作成",
-        "description": "JSONファイルをアップロードするための事前署名付きURLを生成します。アップロード後、アップロードを完了するためにcompleteエンドポイントを呼び出す必要があります。アップロードURLは10分で期限切れになります。",
+        "description": "JSONファイルをアップロードするための事前署名付きURLを生成する。アップロード後、アップロードを完了するためにcompleteエンドポイントを呼び出す必要がある。アップロードURLは10分で期限切れになる。",
         "security": [
           {
             "Authorization": []
@@ -37,12 +37,12 @@
                 "properties": {
                   "filename": {
                     "type": "string",
-                    "description": "ファイルのファイル名。拡張子は.jsonで終わる必要があります。",
+                    "description": "ファイルのファイル名。.json拡張子で終わる必要がある。",
                     "pattern": "\\.json$"
                   },
                   "purpose": {
                     "type": "string",
-                    "description": "ファイルの目的。サポートされている値: 'context' または 'batch'。デフォルトは 'context' です。",
+                    "description": "ファイルの目的。サポートされている値: 'context' または 'batch'。デフォルトは 'context'。",
                     "enum": [
                       "context",
                       "batch"
@@ -80,7 +80,7 @@
                     "upload_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "ファイルをアップロードするための事前署名付きURL。10分で期限切れになります。"
+                      "description": "ファイルをアップロードするための事前署名付きURL。10分で期限切れになる。"
                     },
                     "expires_in": {
                       "type": "integer",
@@ -104,7 +104,7 @@
       },
       "get": {
         "summary": "ファイル一覧",
-        "description": "チームのすべての完了したファイルを一覧表示します。目的でフィルタリングすることもできます。ステータスが 'completed' のファイルのみを返します。",
+        "description": "チームのすべての完了したファイルを一覧表示する。オプションで目的別にフィルタリング可能。ステータスが 'completed' のファイルのみを返す。",
         "security": [
           {
             "Authorization": []
@@ -122,7 +122,7 @@
                 "batch"
               ]
             },
-            "description": "目的でファイルをフィルタリングします。サポートされている値: 'context' または 'batch'。"
+            "description": "目的別にファイルをフィルタリングする。サポートされている値: 'context' または 'batch'。"
           }
         ],
         "responses": {
@@ -190,7 +190,7 @@
     "/v1/files/{file_id}/complete": {
       "post": {
         "summary": "ファイルアップロードを完了する",
-        "description": "ファイルアップロードプロセスを完了し、アップロードされたJSONファイルを検証する。このエンドポイントはファイルの存在を確認し、JSON形式を検証し、ファイルサイズ（最大200MB）をチェックし、ファイルステータスをcompletedに更新する。",
+        "description": "ファイルアップロードプロセスを完了し、アップロードされたJSONファイルを検証する。このエンドポイントはファイルの存在を確認し、JSON形式を検証し、ファイルサイズ（最大200MB）をチェックし、ファイルのステータスを 'completed' に更新する。",
         "security": [
           {
             "Authorization": []
@@ -414,7 +414,7 @@
             "name": "expires_in",
             "in": "query",
             "required": false,
-            "description": "ダウンロードURLの有効期限までの秒数。デフォルトは600秒（10分）。",
+            "description": "ダウンロードURLが有効期限切れになるまでの秒数。デフォルトは600秒（10分）。",
             "schema": {
               "type": "integer",
               "default": 600
@@ -452,11 +452,11 @@
                     "download_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "ファイルをダウンロードするための事前署名付きURL。指定された`expires_in`時間後に期限切れになります。"
+                      "description": "ファイルをダウンロードするための事前署名付きURL。指定された`expires_in`時間後に有効期限が切れます。"
                     },
                     "expires_in": {
                       "type": "integer",
-                      "description": "ダウンロードURLの有効期限までの秒数"
+                      "description": "ダウンロードURLが有効期限切れになるまでの秒数"
                     }
                   }
                 }

@@ -44,7 +44,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "URL-padpatronen om op te nemen in de crawl met behulp van glob-syntaxis.  Standaard ingesteld op `/**` wat alle URLs omvat. Gebruik patronen zoals `/blog/**` om specifieke secties te crawlen (bijv. alleen blogpagina's), `/products/*.html` voor productpagina's, of meerdere patronen voor verschillende secties. Ondersteunt standaard glob-functies zoals * (willekeurige tekens) en ** (recursieve matching)."
+                    "description": "URL-padpatronen om op te nemen in de crawl met behulp van glob-syntaxis.  Standaard ingesteld op `/**` wat alle URLs omvat. Gebruik patronen zoals `/blog/**` om specifieke secties te crawlen (bijv. alleen blogpagina's), `/products/*.html` voor productpagina's, of meerdere patronen voor verschillende secties. Ondersteunt standaard glob-functies zoals * (alle tekens) en ** (recursieve matching)."
                   },
                   "exclude_urls": {
                     "type": "array",
@@ -67,7 +67,7 @@
                   },
                   "include_subdomain": {
                     "type": "boolean",
-                    "description": "Subdomeinen van de website opnemen. Standaard `false`."
+                    "description": "Inclusief subdomeinen van de website. Standaard `false`."
                   },
                   "search_query": {
                     "type": "string",
@@ -107,7 +107,7 @@
                             "screenshot"
                           ]
                         },
-                        "description": "Uitvoerformaten om aan te vragen voor elke gescrapete pagina. Standaard ingesteld op `[\"html\", \"markdown\"]` wanneer weggelaten. `html` wordt altijd automatisch opgenomen. `json` wordt automatisch toegevoegd wanneer een `parser` is opgegeven. Let op: `raw_pdf` wordt niet ondersteund — PDF's kunnen niet gecrawld worden.",
+                        "description": "Uitvoerformaten om aan te vragen voor elke gescrapete pagina. Standaard ingesteld op `[\"html\", \"markdown\"]` wanneer weggelaten. `html` wordt altijd automatisch toegevoegd. `json` wordt automatisch toegevoegd wanneer een `parser` is opgegeven. Let op: `raw_pdf` wordt niet ondersteund — PDF's kunnen niet gecrawld worden.",
                         "example": [
                           "markdown",
                           "screenshot"
@@ -143,7 +143,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "Het soort object. \"crawl\" voor deze endpoint."
+                      "description": "Het soort object. \"crawl\" voor dit endpoint."
                     },
                     "status": {
                       "type": "string",
@@ -237,7 +237,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met crawl-informatie.",
+            "description": "Succesvolle reactie met crawl-informatie.",
             "content": {
               "application/json": {
                 "schema": {
@@ -249,7 +249,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "Het soort object. \"crawl\" voor deze endpoint."
+                      "description": "Het soort object. \"crawl\" voor dit endpoint."
                     },
                     "status": {
                       "type": "string",
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Optionele integer die de index vertegenwoordigt om te beginnen met het ophalen van inhoud. Handig om te pagineren totdat alle URLs zijn opgehaald. Begin met 0, geef dan de waarde van `response['cursor']` van het laatste verzoek."
+            "description": "Optioneel geheel getal dat de index vertegenwoordigt om inhoud vanaf te halen. Handig om te pagineren totdat alle URLs zijn opgehaald. Begin met 0, geef dan de `response['cursor']` waarde van de laatste aanvraag."
           },
           {
             "name": "limit",
@@ -359,7 +359,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Optionele integer om het aantal geretourneerde resultaten te beperken. Aanbevolen 10-50 resultaten per keer. Gepagineerd met behulp van *cursor*. Maximaal 10MB aan inhoud kan in één verzoek worden opgehaald."
+            "description": "Optioneel geheel getal om het aantal geretourneerde resultaten te beperken. Aanbevolen 10-50 resultaten per keer. Gepagineerd met behulp van *cursor*. Maximaal 10MB aan inhoud kan in één aanvraag worden opgehaald."
           },
           {
             "name": "search_query",
@@ -384,12 +384,12 @@
                 ]
               }
             },
-            "description": "**Verouderd:** Gebruik de `/retrieve` endpoint met `retrieve_id`.  Array van formaten om op te halen (bijv. [\"html\", \"markdown\"])."
+            "description": "**Verouderd:** Gebruik `/retrieve` endpoint met `retrieve_id`.  Array van formaten om op te halen (bijv. [\"html\", \"markdown\"])."
           }
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met de lijst van URLs.",
+            "description": "Succesvolle reactie met de lijst van URLs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -401,7 +401,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "Het soort object. \"crawl\" voor deze endpoint."
+                      "description": "Het soort object. \"crawl\" voor dit endpoint."
                     },
                     "status": {
                       "type": "string",
@@ -423,7 +423,7 @@
                           },
                           "retrieve_id": {
                             "type": "string",
-                            "description": "Om inhoud op te halen van de `/retrieve` endpoint."
+                            "description": "Om inhoud op te halen van het `/retrieve` endpoint"
                           },
                           "url": {
                             "type": "string"
@@ -463,7 +463,7 @@
                     },
                     "cursor": {
                       "type": "integer",
-                      "description": "Moet in de query worden doorgegeven in de volgende aanvraag om de volgende items te krijgen."
+                      "description": "Moet worden meegegeven in de query bij de volgende aanvraag om de volgende items te krijgen."
                     }
                   }
                 }

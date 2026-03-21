@@ -22,7 +22,7 @@
     "/v1/crawls": {
       "post": {
         "summary": "新しいクローラーを開始",
-        "description": "指定されたパラメーターで新しいクローラーのプロセスを開始します。",
+        "description": "指定されたパラメータで新しいクローラーのプロセスを開始します。",
         "security": [
           {
             "Authorization": []
@@ -44,14 +44,14 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "グロブ構文を使用してクローラーに含めるURLパスパターン。  デフォルトは`/**`で、すべてのURLを含みます。特定のセクションをクロールするには、`/blog/**`のようなパターンを使用します（例：ブログページのみ）、`/products/*.html`は商品ページ用、または異なるセクションのために複数のパターンを使用します。*（任意の文字）や**（再帰的なマッチング）などの標準的なグロブ機能をサポートしています。"
+                    "description": "glob構文を使用してクローラーに含めるURLパスパターン。  デフォルトは`/**`で、すべてのURLを含みます。特定のセクションをクロールするには、`/blog/**`のようなパターンを使用します（例：ブログページのみ）、`/products/*.html`は商品ページ用、または異なるセクション用に複数のパターンを使用します。*（任意の文字）や**（再帰的マッチング）などの標準的なglob機能をサポートしています。"
                   },
                   "exclude_urls": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "グロブパターンで除外するURLパス名。例：`/careers/**`。除外されたURLは、含まれるURLよりも優先されます。"
+                    "description": "除外するglobパターンのURLパス名。例：`/careers/**`。除外されたURLは、含まれるURLよりも優先されます。"
                   },
                   "max_pages": {
                     "type": "number",
@@ -75,20 +75,20 @@
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "検索クエリに従って、各ページで最も関連性の高いリンクのトップNのみをクロールするためのオプションの数。"
+                    "description": "検索クエリに従って、各ページで最も関連性の高いリンクのトップNのみをクロールするオプションの数。"
                   },
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "クロールが完了したときにPOSTリクエストを受け取るためのHTTPS URL。`http://`または`https://`プロトコルを使用して公開アクセス可能なURLでなければなりません。localhostやプライベートIPアドレスを指すことはできません。[Webhooks](/api-reference/common/webhooks)でペイロード形式とリトライの動作を参照してください。"
+                    "description": "クロールが完了したときにPOSTリクエストを受け取るためのHTTPS URL。`http://`または`https://`プロトコルを使用して公開アクセス可能なURLでなければなりません。localhostやプライベートIPアドレスを指すことはできません。[Webhooks](/api-reference/common/webhooks)でペイロード形式とリトライ動作を参照してください。"
                   },
                   "timeout": {
                     "type": "number",
-                    "description": "n秒後にクロールを終了し、それまでに完了したページを取得します。指定されたタイムアウトから約10秒余分にかかることがあります。"
+                    "description": "n秒後にクロールを終了し、それまでに完了したページを取得します。指定されたタイムアウトから約10秒余分にかかる場合があります。"
                   },
                   "follow_robots_txt": {
                     "type": "boolean",
-                    "description": "robots.txtのルールを尊重するかどうか。`false`に設定すると、クローラーはrobots.txtの禁止指令に関係なくウェブサイトをスクレイプします。デフォルトは`true`です。",
+                    "description": "robots.txtルールを尊重するかどうか。`false`に設定すると、クローラーはrobots.txtの禁止指令に関係なくウェブサイトをスクレイプします。デフォルトは`true`です。",
                     "default": true
                   },
                   "scrape_options": {
@@ -115,7 +115,7 @@
                       },
                       "parser": {
                         "type": "string",
-                        "description": "各ページで実行し、構造化された`json`出力を生成するためのパーサー名（例：`\"@olostep/extract-emails\"`）。設定されると`formats`に`json`を自動的に追加します。",
+                        "description": "各ページで実行し、構造化された`json`出力を生成するパーサー名（例：`\"@olostep/extract-emails\"`）。設定されると`formats`に`json`を自動的に追加します。",
                         "example": "@olostep/extract-emails"
                       }
                     }
@@ -326,7 +326,7 @@
     },
     "/v1/crawls/{crawl_id}/pages": {
       "get": {
-        "summary": "クロールされたページのリストを、オプションでコンテンツと共に取得",
+        "summary": "クロールされたページのリストを、コンテンツと共にオプションで取得",
         "description": "特定のクロールIDに対して処理されたクロールされたページとコンテンツのリストを取得します。",
         "security": [
           {
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "コンテンツの取得を開始するインデックスを表すオプションの整数。すべてのURLが取得されるまでページネーションに便利です。0から始め、最後のリクエストの `response['cursor']` 値を提供します。"
+            "description": "コンテンツの取得を開始するインデックスを表すオプションの整数。すべてのURLが取得されるまでページネーションに便利です。0から始め、最後のリクエストの `response['cursor']` の値を提供します。"
           },
           {
             "name": "limit",
@@ -359,7 +359,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "返される結果の数を制限するためのオプションの整数。1回に10〜50件の結果を推奨。*cursor* を使用してページネーション。1回のリクエストで最大10MBのコンテンツを取得可能。"
+            "description": "返される結果の数を制限するためのオプションの整数。1回に10〜50件の結果を推奨。*cursor* を使用してページネーション。1回のリクエストで最大10MBのコンテンツを取得できます。"
           },
           {
             "name": "search_query",
@@ -368,7 +368,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "結果を関連性でソートするためのオプションの検索クエリ。提供されている場合はデフォルトで元の search_query を使用。"
+            "description": "結果を関連性でソートするためのオプションの検索クエリ。提供されている場合はデフォルトで元の search_query を使用します。"
           },
           {
             "name": "formats",
@@ -433,11 +433,11 @@
                           },
                           "html_content": {
                             "type": "string",
-                            "description": "非推奨: `/retrieve` エンドポイントと `retrieve_id` を使用してね。"
+                            "description": "非推奨: `/retrieve` エンドポイントと `retrieve_id` を使ってね。"
                           },
                           "markdown_content": {
                             "type": "string",
-                            "description": "非推奨: `/retrieve` エンドポイントと `retrieve_id` を使用してね。"
+                            "description": "非推奨: `/retrieve` エンドポイントと `retrieve_id` を使ってね。"
                           }
                         }
                       }

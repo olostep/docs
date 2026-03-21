@@ -58,7 +58,7 @@
         },
         "responses": {
           "200": {
-            "description": "批处理启动成功。",
+            "description": "批处理已成功启动。",
             "content": {
               "application/json": {
                 "schema": {
@@ -79,7 +79,7 @@
     "/v1/batches/recent": {
       "get": {
         "summary": "列出最近的批处理",
-        "description": "获取经过身份验证用户的最近批处理列表。",
+        "description": "获取经过身份验证的用户的最近批处理列表。",
         "security": [
           {
             "Authorization": []
@@ -200,7 +200,7 @@
     "/v1/batches": {
       "post": {
         "summary": "启动新批处理",
-        "description": "使用指定的参数启动新的批处理过程。",
+        "description": "使用指定参数启动新的批处理过程。",
         "security": [
           {
             "Authorization": []
@@ -245,7 +245,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "批处理执行的国家。请使用 ISO 3166-1 alpha-2 代码，如 US（美国）、IN（印度）等。"
+                    "description": "批处理执行的国家。请以 ISO 3166-1 alpha-2 代码提供，如 US（美国）、IN（印度）等。"
                   },
                   "parser": {
                     "type": "object",
@@ -266,7 +266,7 @@
                       "absolute_links": {
                         "type": "boolean",
                         "default": true,
-                        "description": "当为 true 时，它返回完整的 URL（例如，'https://example.com/page'），而不是相对路径（例如，'/page'）。"
+                        "description": "当为 true 时，它返回完整的 URL（例如，'https://example.com/page'）而不是相对路径（例如，'/page'）。"
                       },
                       "include_links": {
                         "type": "array",
@@ -324,7 +324,7 @@
         },
         "responses": {
           "200": {
-            "description": "批处理启动成功。",
+            "description": "批处理已成功启动。",
             "content": {
               "application/json": {
                 "schema": {
@@ -344,7 +344,7 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建的纪元时间"
+                      "description": "创建的 epoch"
                     },
                     "total_urls": {
                       "type": "number",
@@ -557,7 +557,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功响应批次信息。",
+            "description": "成功响应，包含批次信息。",
             "content": {
               "application/json": {
                 "schema": {
@@ -577,7 +577,7 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建的纪元时间"
+                      "description": "创建的 epoch"
                     },
                     "total_urls": {
                       "type": "number",
@@ -735,7 +735,7 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建的纪元时间"
+                      "description": "创建的 epoch"
                     },
                     "total_urls": {
                       "type": "number",
@@ -855,7 +855,7 @@
     },
     "/v1/batches/{batch_id}/items": {
       "get": {
-        "summary": "获取特定批次的已完成或失败项目列表，可选择包含内容",
+        "summary": "可选地获取特定批次的已完成或失败项目列表及其内容",
         "description": "根据请求的状态获取特定批次ID的项目和内容列表。",
         "security": [
           {
@@ -883,7 +883,7 @@
                 "failed"
               ]
             },
-            "description": "要检索的URL状态（已完成或失败）。"
+            "description": "要获取的URL状态（已完成或失败）。"
           },
           {
             "name": "cursor",
@@ -906,7 +906,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功响应批次项目。",
+            "description": "成功响应，包含批次项目。",
             "content": {
               "application/json": {
                 "schema": {
@@ -941,7 +941,7 @@
                                 "$ref": "#/components/schemas/Metadata"
                               }
                             ],
-                            "description": "如果在批量创建时提供了项目级元数据。"
+                            "description": "如果在批量创建期间提供了项目级元数据。"
                           },
                           "links_on_page": {
                             "type": "array",
@@ -1105,11 +1105,11 @@
           "type": {
             "type": "string",
             "format": "uri",
-            "description": "标识问题类型的 URI 引用"
+            "description": "标识问题类型的 URI 参考"
           },
           "status": {
             "type": "integer",
-            "description": "HTTP 状态码"
+            "description": "HTTP 状态代码"
           },
           "title": {
             "type": "string",
@@ -1145,7 +1145,7 @@
       },
       "Metadata": {
         "type": "object",
-        "description": "用于存储对象附加信息的键值对集合。遵循 Stripe 的验证规则：最多 50 个键，键最多 40 个字符（不含方括号），值最多 500 个字符，所有值以字符串形式存储。",
+        "description": "用于存储有关对象的附加信息的键值对集合。遵循 Stripe 的验证规则：最多 50 个键，键最多 40 个字符（无方括号），值最多 500 个字符，所有值以字符串形式存储。",
         "additionalProperties": {
           "type": "string",
           "maxLength": 500,

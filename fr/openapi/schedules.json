@@ -22,7 +22,7 @@
     "/v1/schedules": {
       "post": {
         "summary": "Créer un Horaire",
-        "description": "Crée un nouvel horaire pour exécuter des appels API à des moments spécifiés. Prend en charge à la fois les exécutions uniques et les horaires récurrents utilisant des expressions cron. Tu peux aussi utiliser du texte en langage naturel pour générer automatiquement des expressions cron. Pour les requêtes POST, tu peux utiliser les points de terminaison Olostep en forme courte (par exemple, 'v1/scrapes') qui seront automatiquement préfixés, ou fournir une URL complète. La charge utile peut contenir n'importe quelle structure JSON que tu souhaites envoyer.",
+        "description": "Crée un nouvel horaire pour exécuter des appels API à des moments spécifiés. Prend en charge à la fois les exécutions uniques et les horaires récurrents utilisant des expressions cron. Tu peux aussi utiliser du texte en langage naturel pour générer automatiquement des expressions cron. Pour les requêtes POST, tu peux utiliser des points de terminaison Olostep en forme courte (par exemple, 'v1/scrapes') qui seront automatiquement préfixés, ou fournir une URL complète. La charge utile peut contenir n'importe quelle structure JSON que tu souhaites envoyer.",
         "security": [
           {
             "Authorization": []
@@ -96,7 +96,7 @@
                         "recurring",
                         "onetime"
                       ],
-                      "description": "Type d'horaire : 'recurring' pour les horaires basés sur cron, 'onetime' pour les horaires d'exécution unique"
+                      "description": "Type d'horaire : 'recurring' pour les horaires basés sur cron, 'onetime' pour les horaires à exécution unique"
                     },
                     "method": {
                       "type": "string",
@@ -137,7 +137,7 @@
             "description": "Mauvaise requête en raison de paramètres incorrects ou manquants. Erreurs courantes : méthode invalide, point de terminaison manquant, cron_expression invalide, datetime execute_at invalide, fuseau horaire invalide, ou format de schedule_id invalide."
           },
           "401": {
-            "description": "Clé API invalide. Essaie de la vérifier à nouveau ou contacte info@olostep.com si tu rencontres des problèmes."
+            "description": "Clé API invalide. Essaie de la vérifier ou contacte info@olostep.com si tu rencontres des problèmes."
           },
           "500": {
             "description": "Erreur interne du serveur lors de la création du planning."

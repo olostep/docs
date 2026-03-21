@@ -3,7 +3,7 @@
   "info": {
     "title": "AirOps Batches API",
     "version": "1.0.0",
-    "description": "AirOps専用のバッチスクレイピング用内部APIで、ページメタデータ抽出のための自動LLMエンリッチメントを行います。"
+    "description": "AirOps専用のバッチスクレイピング用内部APIで、ページメタデータ抽出のための自動LLM強化を行います。"
   },
   "servers": [
     {
@@ -15,7 +15,7 @@
       "post": {
         "operationId": "createAirOpsBatch",
         "summary": "AirOpsバッチを作成",
-        "description": "スクレイピングとLLMベースのエンリッチメントを組み合わせたバッチプロセスを開始します。ワークフロー: URLをスクレイプ → メタデータを抽出 → ギャップ分析 → 欠落フィールドのためのLLMエンリッチメント。",
+        "description": "スクレイピングとLLMベースの強化を組み合わせたバッチプロセスを開始します。ワークフロー: URLをスクレイピング → メタデータを抽出 → ギャップ分析 → 欠落フィールドのためのLLM強化。",
         "security": [
           {
             "Authorization": []
@@ -109,7 +109,7 @@
             }
           },
           "401": {
-            "description": "認証情報が欠落しているか無効です。",
+            "description": "認証資格情報が欠落しているか無効です。",
             "content": {
               "application/json": {
                 "schema": {
@@ -134,7 +134,7 @@
     "/v1/batches-airops/{batch_id}": {
       "get": {
         "operationId": "getAirOpsBatch",
-        "summary": "AirOpsバッチのステータスを取得",
+        "summary": "AirOpsバッチステータスを取得",
         "description": "AirOpsバッチの現在のステータスと設定を取得します。",
         "security": [
           {
@@ -218,7 +218,7 @@
       "get": {
         "operationId": "getAirOpsBatchItems",
         "summary": "AirOpsバッチアイテムを取得",
-        "description": "バッチ内のすべてのアイテムを、そのパーサーとエンリッチされたデータと共に取得します。",
+        "description": "バッチ内のすべてのアイテムを、そのパーサーと強化データと共に取得します。",
         "security": [
           {
             "Authorization": []
@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Bearer <token>形式のBearer認証ヘッダー。<token>はあなたの認証トークンです。"
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
       }
     },
     "schemas": {
@@ -342,7 +342,7 @@
           "country": {
             "type": "string",
             "default": "RANDOM",
-            "description": "ジオターゲティングされたスクレイピングのための国。ISO 3166-1 alpha-2 コード（US, GB, DE など）または自動選択のための 'RANDOM' を使用。"
+            "description": "ジオターゲットスクレイピング用の国。ISO 3166-1 alpha-2 コード（US, GB, DE など）または自動選択のための 'RANDOM' を使用。"
           },
           "webhook": {
             "type": "string",
@@ -391,7 +391,7 @@
           },
           "created": {
             "type": "integer",
-            "description": "バッチが作成されたときのUnixタイムスタンプ（ミリ秒）。"
+            "description": "バッチが作成された時のUnixタイムスタンプ（ミリ秒）。"
           },
           "total_urls": {
             "type": "integer",
@@ -455,7 +455,7 @@
           },
           "completed_at": {
             "type": "string",
-            "description": "バッチが完了したときのISO 8601タイムスタンプ。"
+            "description": "バッチが完了した時のISO 8601タイムスタンプ。"
           },
           "status": {
             "type": "string",
@@ -470,7 +470,7 @@
             "properties": {
               "total": {
                 "type": "integer",
-                "description": "バッチ内のアイテムの総数。"
+                "description": "バッチ内の総アイテム数。"
               },
               "succeeded": {
                 "type": "integer",
@@ -490,7 +490,7 @@
           },
           "message": {
             "type": "string",
-            "description": "バッチがまだ処理中の場合に表示されるステータスメッセージ。"
+            "description": "ステータスメッセージ（バッチがまだ処理中の場合に表示）。"
           }
         }
       },
@@ -562,7 +562,7 @@
             "items": {
               "type": "string"
             },
-            "description": "ページで見つかったブランド。"
+            "description": "ページに見つかったブランド。"
           },
           "failed_stage": {
             "type": "string",
@@ -703,7 +703,7 @@
           },
           "failed": {
             "type": "integer",
-            "description": "失敗したスクレイピング。"
+            "description": "スクレイピングに失敗したもの。"
           },
           "started_at": {
             "type": "integer",
@@ -739,12 +739,12 @@
           },
           "items_complete": {
             "type": "integer",
-            "description": "パーサーからすべてのフィールドが揃ったアイテム。"
+            "description": "パーサーからすべてのフィールドが揃っているアイテム。"
           },
           "fields_to_enrich": {
             "type": "object",
             "nullable": true,
-            "description": "各フィールドを必要とするアイテムの数。",
+            "description": "各フィールドが必要なアイテムの数。",
             "properties": {
               "page_type": {
                 "type": "integer"
@@ -824,7 +824,7 @@
       "LLMInfo": {
         "type": "object",
         "nullable": true,
-        "description": "LLMプロバイダーと使用詳細。",
+        "description": "LLMプロバイダーと使用の詳細。",
         "properties": {
           "provider": {
             "type": "string",
@@ -909,7 +909,7 @@
       },
       "Metadata": {
         "type": "object",
-        "description": "カスタムデータのキーと値のペア。最大50キー、キーは最大40文字、値は最大500文字。",
+        "description": "カスタムデータのキーと値のペア。最大50個のキー、キーは最大40文字、値は最大500文字。",
         "additionalProperties": {
           "type": "string",
           "maxLength": 500

@@ -1,18 +1,18 @@
 ---
-sidebarTitle: "Batch"
+sidebarTitle: "Lot"
 title: "Point de terminaison Batch"
 icon: "layer-group"
 ---
-Grâce au point de terminaison `/v1/batches` d'Olostep, tu peux traiter des milliers d'URLs en une seule tâche. Utilise-le pour extraire du contenu ou des données structurées à grande échelle.
+Grâce au point de terminaison `/v1/batches` d'Olostep, tu peux traiter des milliers d'URL en une seule tâche. Utilise-le pour extraire du contenu ou des données structurées à grande échelle.
 
-- Soumets jusqu'à 10 000 URLs par lot ; exécute de nombreux lots en parallèle
+- Soumets jusqu'à 10 000 URL par lot ; exécute plusieurs lots en parallèle
 - Temps de traitement constant (~5–8 minutes) quelle que soit la taille du lot
 - Utilise des parseurs pour retourner du JSON structuré, ou récupère du markdown/html via `/v1/retrieve`
 
-Pour plus de détails sur l'API, consulte la [Référence API du point de terminaison Batch](/api-reference/batches/create).
+Pour les détails de l'API, consulte la [Référence API du point de terminaison Batch](/api-reference/batches/create).
 
 <Warning>
-**Limitation pour les nouveaux comptes** : Pour les nouveaux comptes, les lots sont limités à 100 éléments par lot. Pour lever cette limitation, merci de nous contacter à info@olostep.com ou de nous rejoindre sur [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email).
+**Limitation des nouveaux comptes** : Pour les nouveaux comptes, les lots sont limités à 100 éléments par lot. Pour lever cette limitation, contacte-nous à info@olostep.com ou rejoins-nous sur [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email).
 </Warning>
 
 ## Installation
@@ -36,14 +36,14 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: le curl intégré convient
+# macOS: le curl intégré est suffisant
 ```
 
 </CodeGroup>
 
 ## Démarrer un lot
 
-Fournis un tableau d'`items` avec un `custom_id` et une `url`. Ce sont les URLs qui seront traitées dans le lot, le `custom_id` est un identifiant unique interne pour l'URL.
+Fournis un tableau d'`items` avec un `custom_id` et une `url`. Ce sont les URL qui seront traitées dans le lot, le `custom_id` est un identifiant unique interne pour l'URL.
 
 Optionnellement, passe `parser` ou `country`. Grâce au paramètre `parser`, tu peux spécifier le parseur à utiliser pour le lot, cela retournera du JSON structuré à partir des pages.
 
@@ -53,7 +53,7 @@ import requests
 import hashlib
 import time
 
-API_KEY = "<YOUR_API_KEY>"  # Remplace par ta clé API réelle
+API_KEY = "<YOUR_API_KEY>"  # Remplace par ta véritable clé API
 API_URL = "https://api.olostep.com/v1"
 
 
@@ -101,7 +101,7 @@ def start_batch(items):
     return response.json()["id"]
 
 
-# Étape 3 : Attendre la complétion
+# Étape 3 : Attendre la fin
 def check_batch_status(batch_id):
     headers = {"Authorization": f"Bearer {API_KEY}"}
     response = requests.get(
@@ -113,12 +113,12 @@ def check_batch_status(batch_id):
 
 
 def wait_until_complete(batch_id):
-    print("En attente de la complétion du lot...")
+    print("En attente de la fin du lot...")
     while True:
         status = check_batch_status(batch_id)
         print("Statut :", status)
         if status == "completed":
-            print("Lot complété !")
+            print("Lot terminé !")
             return
         time.sleep(10)
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
     wait_until_complete(batch_id)
 
-    print("Récupération des éléments complétés...")
+    print("Récupération des éléments terminés...")
     completed_items = get_completed_items(batch_id)
 
     print("Récupération du contenu...")
@@ -206,7 +206,7 @@ curl -s -X POST "https://api.olostep.com/v1/batches" \
 
 </CodeGroup>
 
-Puisque Olostep suit une approche orientée objet, tu recevras un objet `batch` en réponse. L'objet `batch` possède quelques propriétés comme `id` et `status`.
+Comme Olostep suit une approche orientée objet, tu recevras un objet `batch` en réponse. L'objet `batch` a quelques propriétés comme `id` et `status`.
 
 ```json
 {
@@ -225,7 +225,7 @@ Puisque Olostep suit une approche orientée objet, tu recevras un objet `batch` 
 
 ## Vérifier le statut du lot
 
-Interroge jusqu'à ce que le `status` soit `completed`. Tu peux également vérifier la propriété `completed_urls` pour voir combien d'URLs ont été traitées.
+Interroge jusqu'à ce que le `status` soit `completed`. Tu peux également vérifier la propriété `completed_urls` pour voir combien d'URL ont été traitées.
 
 <CodeGroup>
 
@@ -291,7 +291,7 @@ curl -s -G "https://api.olostep.com/v1/retrieve" \
 
 ## Lister les éléments (pagination avec curseur)
 
-Récupère les éléments en utilisant `cursor` et `limit`. Il est préférable d'utiliser `/v1/retrieve` avec `retrieve_id` pour le contenu.
+Récupère les éléments en utilisant `cursor` et `limit`. Préfère utiliser `/v1/retrieve` avec `retrieve_id` pour le contenu.
 
 <CodeGroup>
 
@@ -337,11 +337,11 @@ Lorsque tu exécutes le code d'exemple fourni, tu recevras une réponse comme la
 
 ```json
 
-En attente de la complétion du lot...
+En attente de la fin du lot...
 Statut : in_progress
 Statut : completed
-Lot complété !
-Récupération des éléments complétés...
+Lot terminé !
+Récupération des éléments terminés...
 Récupération du contenu...
 
 Récupération du contenu pour l'élément 4pjtky4don_86b1f04cec364903...
@@ -435,22 +435,52 @@ JSON :
  {"searchParameters":{"type":"search","engine":"google","q":"saas payments"},"knowledgeGraph":{"description":"Launch new plans and start accepting payments in minutes. Collect and store payment details including cards, ACH, and other popular payment methods. · Support ..."},"organic":[{"title":"Billing Platform for SaaS Businesses","link":"https://stripe.com/use-cases/saas","position":1,"snippet":"Launch new plans and start accepting payments in minutes. Collect and store payment details including cards, ACH, and other popular payment methods. · Support ..."},{"title":"Guidance for students from Scotland - GOV.UK","link":"https://www.gov.uk/guidance/guidance-for-students-from-scotland#:~:text=Student%20Loans%20Company%20(%20SLC%20)%20pays,do%20not%20pay%20student%20loans.","position":2},{"title":"What payment system do you use for your SaaS?","link":"https://www.reddit.com/r/SaaS/comments/1ejbn9i/what_payment_system_do_you_use_for_your_saas/","position":3,"snippet":"Try depositfix.com. It integrates a lot of possible payment systems, integrates with crm as well. Its great. Upvote 2. Downvote Reply reply"},{"title":"SaaS payment processing 101","link":"https://stripe.com/resources/more/challenges-of-saas-payment-processing","position":4,"snippet":"Mar 9, 2023 — SaaS payment processing refers to the way companies accept and process payments. While ecommerce sales consist of one-off online payments, SaaS ..."},{"title":"Moving Up(front) with Upfront SaaS Payments","link":"https://gsablogs.gsa.gov/technology/2024/07/25/moving-upfront-with-upfront-saas-payments/","position":5,"snippet":"Jul 25, 2024 — To offer the upfront payment option, vendors must submit a modification adding it to their schedule contract. We encourage vendors to offer SaaS ..."},{"title":"Understanding SaaS Payment Processing: Implementation ...","link":"https://staxpayments.com/blog/saas-payment-processing/","position":6,"snippet":"A SaaS payment processor is a service provider that focuses on providing the tools that SaaS companies need to manage payments and subscriptions accurately."},{"title":"Paddle - Payments, tax and subscription management for ...","link":"https://www.paddle.com/","position":7,"snippet":"The only complete billing solution for digital products. Payments, tax, subscription management and more, all handled for you. Discover Billing. SaaS billing ..."},{"title":"SaaS Spend Management Solution","link":"https://meshpayments.com/saas-spend-management/","position":8,"snippet":"Manage all your SaaS subscriptions from one platform, with actionable insights and controls at the right time to continuously optimize your spend."},{"title":"Top SaaS Payment Solutions for Streamlining Transactions","link":"https://wise.com/us/blog/saas-payment-solutions","position":9,"snippet":"Mar 10, 2025 — SaaS payment solutions are specialized payment platforms that enable software providers to efficiently manage and process recurring subscription ..."},{"title":"SaaS payments: everything SaaS businesses need to know","link":"https://www.checkout.com/blog/saas-payments","position":10,"snippet":"Sep 19, 2023 — SaaS payments are charged by subscription businesses on a recurring basis in exchange for access to a service."}],"peopleAlsoAsk":[{"question":"What are SaaS payments?","link":"https://www.gov.uk/guidance/guidance-for-students-from-scotland#:~:text=Student%20Loans%20Company%20(%20SLC%20)%20pays,do%20not%20pay%20student%20loans.","title":"Guidance for students from Scotland - GOV.UK"},{"question":"What are SaaS transactions?","link":"https://www.cognism.com/sales-saas#:~:text=SaaS%20sales%20is%20the%20process,their%20pain%20points%20or%20problems.","title":"What Is SaaS Sales? Everything You Need to Know in 2025 - Cognism"},{"question":"What does SaaS mean?","link":"https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-saas#:~:text=Software%20as%20a%20service%20definition,purchasing%20and%20installing%20them%20locally.","title":"What is Software as a Service (SaaS)? - Microsoft Azure"},{"question":"What date is the SaaS payment?","link":"https://www.saas.gov.uk/need-to-know/payments/loan-payments#:~:text=The%20SLC%20will%20issue%20a,released%20at%20the%20same%20time.","title":"Loan Payments - SAAS"}],"relatedSearches":[{"query":"Saas payments login"},{"query":"Saas payments reddit"},{"query":"SaaS billing"},{"query":"SaaS billing software"},{"query":"Best SaaS billing software"},{"query":"B2B SaaS billing software"},{"query":"Stripe SaaS billing"},{"query":"SaaS billing models"}]}
 ```
 
-Puisque nous avons passé le parseur pour récupérer le JSON structuré et que nous imprimons uniquement cela, la réponse contient :
+Comme nous avons passé le parseur pour récupérer le JSON structuré et que nous imprimons uniquement cela, la réponse contient :
 
 - **json_content** avec des résultats de recherche structurés incluant :
 - `searchParameters` : Informations sur la requête de recherche
-- `knowledgeGraph` : Informations détaillées sur le sujet de recherche (lorsqu'elles sont disponibles)
-- `organic` : Liste des résultats de recherche avec titre, lien, position et extrait
-- `peopleAlsoAsk` : Questions connexes que les utilisateurs recherchent couramment
-- `relatedSearches` : Requêtes de recherche suggérées
+- `knowledgeGraph` : Informations détaillées sur le sujet de recherche (lorsque disponible)
+- `organic` : Liste des résultats de recherche avec titre, lien, position, et extrait
+- `peopleAlsoAsk` : Questions connexes que les utilisateurs recherchent souvent
+- `relatedSearches` : Requêtes de recherche suggérées connexes
 
 Si tu ne veux pas le JSON structuré mais simplement le markdown ou html, tu peux les récupérer depuis le point de terminaison retrieve.
 
+## Webhooks
+
+Au lieu de sonder le statut du lot, tu peux passer une URL de **`webhook`** lorsque tu crées le lot. Olostep envoie un **HTTP POST** à cette URL lorsque le lot est terminé (tous les éléments sont complétés ou échoués).
+
+Ton point de terminaison webhook doit être **publiquement accessible** via **`http://` ou `https://`**. Il ne peut pas pointer vers localhost ou des adresses IP privées. Pour la forme complète de la charge utile, le comportement de réessai, et les meilleures pratiques (répondre rapidement avec `2xx`, dédupliquer en utilisant l'`id` de l'événement), consulte [Webhooks](/api-reference/common/webhooks).
+
+<Tip>
+**Nom du paramètre :** Le champ canonique est `webhook`. Pour la compatibilité ascendante, **`webhook_url`** est également accepté comme alias.
+</Tip>
+
+Pour les lots, l'événement **`batch.completed`** inclut l'identifiant du lot, le statut, et le nombre d'éléments. Les livraisons échouées sont réessayées automatiquement (jusqu'à **5 tentatives** sur environ **30 minutes** avec un backoff exponentiel). Ton gestionnaire doit retourner un statut **2xx** dans les **30 secondes** par tentative.
+
 ## Métadonnées
 
-Tu peux attacher des paires clé-valeur personnalisées aux lots en utilisant le paramètre `metadata`. Cela est utile pour suivre, filtrer et organiser tes lots en les liant à des systèmes internes comme des IDs de commande, des IDs de client ou des noms de projet.
+Attache des métadonnées **clé-valeur chaîne personnalisées** aux lots pour le suivi, le filtrage, et la corrélation des tâches avec tes propres systèmes (ID de commande, noms de projet, étape du pipeline, etc.). Les métadonnées suivent les mêmes règles que dans notre référence [Métadonnées](/api-reference/common/metadata).
 
-Pour les règles de validation et des exemples d'utilisation, consulte [Métadonnées](/api-reference/common/metadata).
+Tu peux définir des métadonnées à **deux niveaux** lors de la création d'un lot :
+
+- **Niveau lot** — `metadata` sur le **corps de la requête** (s'applique à l'ensemble du lot)
+- **Niveau élément** — `metadata` sur **chaque objet** dans le tableau `items` (par URL)
+
+Les métadonnées sont **retournées** lors des réponses **GET** ultérieures pour ce lot. Tu peux **mettre à jour par fusion** les métadonnées du lot plus tard avec [Update Batch](/api-reference/batches/update) (`PATCH`); consulte le guide des métadonnées pour le comportement d'ajout, de remplacement, et de suppression.
+
+| Contrainte | Limite |
+| --- | --- |
+| Clés maximum | 50 |
+| Longueur de la clé | 40 caractères |
+| Format de la clé | Pas de crochets (`[` ou `]`) |
+| Longueur de la valeur | 500 caractères (stockés sous forme de chaînes) |
+
+<Note>
+**Coercition de type :** Les nombres et les booléens sont convertis en chaînes (par exemple `42` → `"42"`, `true` → `"true"`). Les objets et tableaux imbriqués sont rejetés.
+</Note>
+
+Pour des exemples complets et les sémantiques PATCH, consulte [Métadonnées](/api-reference/common/metadata).
 
 ## Notes importantes
 
@@ -459,23 +489,23 @@ Tu peux créer tes propres parseurs pour récupérer les données que tu souhait
 
 ## Conclusion
 
-Le point de terminaison batch est utile si tu as besoin d'obtenir des données de nombreuses URLs en peu de temps. Tu dois déjà avoir la liste des URLs dont tu veux obtenir les données.
+Le point de terminaison batch est utile si tu as besoin d'obtenir des données de nombreuses URL en peu de temps. Tu dois déjà avoir la liste des URL dont tu veux obtenir les données.
 
 Les applications courantes peuvent être :
 
 - Services de suivi des prix qui surveillent plusieurs sites de commerce électronique pour les changements de prix sur les produits
 - Outils de surveillance de sites Web qui vérifient les mises à jour de contenu sur de nombreuses pages
-- Agrégation de données pour les organisateurs de concerts suivant la disponibilité des billets sur plusieurs sites
-- Moteurs de recherche collectant et indexant du contenu de nombreux sites Web simultanément
+- Agrégation de données pour les organisateurs de concerts suivant la disponibilité des billets dans plusieurs lieux
+- Moteurs de recherche recueillant et indexant le contenu de nombreux sites Web simultanément
 - Agrégateurs de nouvelles collectant des articles de diverses publications
 - Plateformes immobilières surveillant les annonces de propriétés sur plusieurs sites
-- Sites d'emploi agrégeant des offres d'emploi à partir de pages de carrière d'entreprise
+- Sites d'emploi agrégeant les offres d'emploi des pages de carrière des entreprises
 - Services de données financières suivant les prix des actions et les informations du marché
 - Outils de surveillance des médias sociaux analysant les mentions sur différentes plateformes
-- Recherche académique collectant des données de multiples sources pour analyse
+- Recherche académique recueillant des données de plusieurs sources pour analyse
 
-Il est préférable d'utiliser le point de terminaison batch si tu veux le contenu de 100 à 10 000 URLs à la fois. Si tu as besoin de scraper moins de 50 URLs à la fois, nous recommandons d'utiliser le point de terminaison scrape et de soumettre les URLs en parallèle car c'est plus rapide que le point de terminaison batch.
+Il est préférable d'utiliser le point de terminaison batch si tu veux le contenu de 100 à 10 000 URL à la fois. Si tu as besoin de scraper moins de 50 URL à la fois, nous recommandons d'utiliser le point de terminaison scrape et de soumettre les URL en parallèle car c'est plus rapide que le point de terminaison batch.
 
 ## Tarification
 
-Batch coûte 1 crédit par URL.
+Le batch coûte 1 crédit par URL.

@@ -3,16 +3,16 @@ sidebarTitle: "Batch"
 title: "Batch Eindpunt"
 icon: "layer-group"
 ---
-Via het Olostep `/v1/batches` eindpunt kun je duizenden URL's in één taak verwerken. Gebruik het om inhoud of gestructureerde data op grote schaal te extraheren.
+Via het Olostep `/v1/batches` eindpunt kun je duizenden URLs in één taak verwerken. Gebruik het om inhoud of gestructureerde data op grote schaal te extraheren.
 
-- Dien tot 10k URL's per batch in; voer meerdere batches parallel uit
+- Dien tot 10k URLs per batch in; voer meerdere batches parallel uit
 - Constante verwerkingstijd (~5–8 minuten) ongeacht de batchgrootte
-- Gebruik parsers om gestructureerde JSON terug te geven, of haal markdown/html op via `/v1/retrieve`
+- Gebruik parsers om gestructureerde JSON terug te krijgen, of haal markdown/html op via `/v1/retrieve`
 
 Voor API-details zie de [Batch Eindpunt API Referentie](/api-reference/batches/create).
 
 <Warning>
-**Beperking Nieuw Account**: Voor nieuwe accounts zijn batches beperkt tot 100 items per batch. Om deze beperking op te heffen, neem contact met ons op via info@olostep.com of via [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email).
+**Beperking voor Nieuwe Accounts**: Voor nieuwe accounts zijn batches beperkt tot 100 items per batch. Om deze beperking op te heffen, neem contact met ons op via info@olostep.com of bereik ons op [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email).
 </Warning>
 
 ## Installatie
@@ -43,9 +43,9 @@ const fetch = require('node-fetch')
 
 ## Start een batch
 
-Geef een array van `items` met een `custom_id` en `url`. Dit zijn de URL's die in de batch worden verwerkt, de `custom_id` is een interne unieke identificatie voor de URL.
+Geef een array van `items` met een `custom_id` en `url`. Dit zijn de URLs die in de batch verwerkt zullen worden, de `custom_id` is een interne unieke identificatie voor de URL.
 
-Optioneel kun je `parser` of `country` doorgeven. Met de `parser` parameter kun je de parser specificeren die voor de batch moet worden gebruikt, dit zal gestructureerde JSON van de pagina's retourneren.
+Optioneel kun je `parser` of `country` doorgeven. Via de `parser` parameter kun je de parser specificeren die voor de batch gebruikt moet worden, dit zal gestructureerde JSON van de pagina's teruggeven.
 
 <CodeGroup>
 ```python Python
@@ -131,7 +131,7 @@ def get_completed_items(batch_id):
     return response.json()["items"]
 
 
-# Stap 5: Haal inhoud op met opgegeven formaat
+# Stap 5: Haal inhoud op met gespecificeerd formaat
 def retrieve_content(retrieve_id):
     url = f"{API_URL}/retrieve"
     headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -225,7 +225,7 @@ Aangezien Olostep een objectgeoriënteerde benadering volgt, ontvang je een `bat
 
 ## Controleer batchstatus
 
-Poll totdat `status` `completed` is. Je kunt ook de eigenschap `completed_urls` controleren om te zien hoeveel URL's zijn verwerkt.
+Poll totdat `status` `completed` is. Je kunt ook de eigenschap `completed_urls` controleren om te zien hoeveel URLs zijn verwerkt.
 
 <CodeGroup>
 
@@ -260,7 +260,7 @@ curl -s -X GET "https://api.olostep.com/v1/batches/<BATCH_ID>" \
 
 ## Inhoud ophalen
 
-Gebruik de `retrieve_id` van elk item met `/v1/retrieve` om `html_content`, `markdown_content` of `json_content` op te halen.
+Gebruik de `retrieve_id` van elk item met `/v1/retrieve` om `html_content`, `markdown_content`, of `json_content` op te halen.
 
 <CodeGroup>
 
@@ -289,9 +289,9 @@ curl -s -G "https://api.olostep.com/v1/retrieve" \
 
 </CodeGroup>
 
-## Lijst items (pagineren met cursor)
+## Items weergeven (pagineren met cursor)
 
-Haal items op met behulp van `cursor` en `limit`. Gebruik bij voorkeur `/v1/retrieve` met `retrieve_id` voor inhoud.
+Haal items op met `cursor` en `limit`. Gebruik bij voorkeur `/v1/retrieve` met `retrieve_id` voor inhoud.
 
 <CodeGroup>
 
@@ -331,7 +331,7 @@ curl -s -G "https://api.olostep.com/v1/batches/<BATCH_ID>/items" \
 
 </CodeGroup>
 
-## Responsformaat
+## Antwoordformaat
 
 Wanneer je de meegeleverde voorbeeldcode uitvoert, ontvang je een antwoord zoals het volgende
 
@@ -435,46 +435,76 @@ JSON:
  {"searchParameters":{"type":"search","engine":"google","q":"saas payments"},"knowledgeGraph":{"description":"Launch new plans and start accepting payments in minutes. Collect and store payment details including cards, ACH, and other popular payment methods. · Support ..."},"organic":[{"title":"Billing Platform for SaaS Businesses","link":"https://stripe.com/use-cases/saas","position":1,"snippet":"Launch new plans and start accepting payments in minutes. Collect and store payment details including cards, ACH, and other popular payment methods. · Support ..."},{"title":"Guidance for students from Scotland - GOV.UK","link":"https://www.gov.uk/guidance/guidance-for-students-from-scotland#:~:text=Student%20Loans%20Company%20(%20SLC%20)%20pays,do%20not%20pay%20student%20loans.","position":2},{"title":"What payment system do you use for your SaaS?","link":"https://www.reddit.com/r/SaaS/comments/1ejbn9i/what_payment_system_do_you_use_for_your_saas/","position":3,"snippet":"Try depositfix.com. It integrates a lot of possible payment systems, integrates with crm as well. Its great. Upvote 2. Downvote Reply reply"},{"title":"SaaS payment processing 101","link":"https://stripe.com/resources/more/challenges-of-saas-payment-processing","position":4,"snippet":"Mar 9, 2023 — SaaS payment processing refers to the way companies accept and process payments. While ecommerce sales consist of one-off online payments, SaaS ..."},{"title":"Moving Up(front) with Upfront SaaS Payments","link":"https://gsablogs.gsa.gov/technology/2024/07/25/moving-upfront-with-upfront-saas-payments/","position":5,"snippet":"Jul 25, 2024 — To offer the upfront payment option, vendors must submit a modification adding it to their schedule contract. We encourage vendors to offer SaaS ..."},{"title":"Understanding SaaS Payment Processing: Implementation ...","link":"https://staxpayments.com/blog/saas-payment-processing/","position":6,"snippet":"A SaaS payment processor is a service provider that focuses on providing the tools that SaaS companies need to manage payments and subscriptions accurately."},{"title":"Paddle - Payments, tax and subscription management for ...","link":"https://www.paddle.com/","position":7,"snippet":"The only complete billing solution for digital products. Payments, tax, subscription management and more, all handled for you. Discover Billing. SaaS billing ..."},{"title":"SaaS Spend Management Solution","link":"https://meshpayments.com/saas-spend-management/","position":8,"snippet":"Manage all your SaaS subscriptions from one platform, with actionable insights and controls at the right time to continuously optimize your spend."},{"title":"Top SaaS Payment Solutions for Streamlining Transactions","link":"https://wise.com/us/blog/saas-payment-solutions","position":9,"snippet":"Mar 10, 2025 — SaaS payment solutions are specialized payment platforms that enable software providers to efficiently manage and process recurring subscription ..."},{"title":"SaaS payments: everything SaaS businesses need to know","link":"https://www.checkout.com/blog/saas-payments","position":10,"snippet":"Sep 19, 2023 — SaaS payments are charged by subscription businesses on a recurring basis in exchange for access to a service."}],"peopleAlsoAsk":[{"question":"What are SaaS payments?","link":"https://www.gov.uk/guidance/guidance-for-students-from-scotland#:~:text=Student%20Loans%20Company%20(%20SLC%20)%20pays,do%20not%20pay%20student%20loans.","title":"Guidance for students from Scotland - GOV.UK"},{"question":"What are SaaS transactions?","link":"https://www.cognism.com/sales-saas#:~:text=SaaS%20sales%20is%20the%20process,their%20pain%20points%20or%20problems.","title":"What Is SaaS Sales? Everything You Need to Know in 2025 - Cognism"},{"question":"What does SaaS mean?","link":"https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-saas#:~:text=Software%20as%20a%20service%20definition,purchasing%20and%20installing%20them%20locally.","title":"What is Software as a Service (SaaS)? - Microsoft Azure"},{"question":"What date is the SaaS payment?","link":"https://www.saas.gov.uk/need-to-know/payments/loan-payments#:~:text=The%20SLC%20will%20issue%20a,released%20at%20the%20same%20time.","title":"Loan Payments - SAAS"}],"relatedSearches":[{"query":"Saas payments login"},{"query":"Saas payments reddit"},{"query":"SaaS billing"},{"query":"SaaS billing software"},{"query":"Best SaaS billing software"},{"query":"B2B SaaS billing software"},{"query":"Stripe SaaS billing"},{"query":"SaaS billing models"}]}
 ```
 
-Aangezien we de parser hebben doorgegeven om de gestructureerde JSON op te halen en we alleen dat afdrukken, bevat de respons:
+Aangezien we de parser hebben doorgegeven om de gestructureerde JSON op te halen en we alleen dat afdrukken, bevat het antwoord:
 
 - **json_content** met gestructureerde zoekresultaten inclusief:
 - `searchParameters`: Informatie over de zoekopdracht
 - `knowledgeGraph`: Gedetailleerde informatie over het zoekonderwerp (indien beschikbaar)
-- `organic`: Lijst van zoekresultaten met titel, link, positie en snippet
+- `organic`: Lijst met zoekresultaten met titel, link, positie en snippet
 - `peopleAlsoAsk`: Gerelateerde vragen die gebruikers vaak zoeken
 - `relatedSearches`: Voorgestelde gerelateerde zoekopdrachten
 
-Als je niet de gestructureerde JSON wilt maar simpelweg de markdown of html, kun je die ophalen van het retrieve-eindpunt.
+Als je niet de gestructureerde JSON wilt maar gewoon de markdown of html, kun je die ophalen van het retrieve eindpunt.
+
+## Webhooks
+
+In plaats van de batchstatus te polleren, kun je een **`webhook`** URL doorgeven wanneer je de batch aanmaakt. Olostep stuurt een **HTTP POST** naar die URL wanneer de batch is voltooid (alle items voltooid of mislukt).
+
+Je webhook eindpunt moet **openbaar bereikbaar** zijn via **`http://` of `https://`**. Het kan niet wijzen naar localhost of privé IP-adressen. Voor de volledige payload-vorm, retry-gedrag, en best practices (snel reageren met `2xx`, dedupliceren met het event `id`), zie [Webhooks](/api-reference/common/webhooks).
+
+<Tip>
+**Parameternaam:** Het canonieke veld is `webhook`. Voor achterwaartse compatibiliteit wordt **`webhook_url`** ook geaccepteerd als alias.
+</Tip>
+
+Voor batches bevat het **`batch.completed`** event de batch id, status en itemaantallen. Mislukte leveringen worden automatisch opnieuw geprobeerd (tot **5 pogingen** over ongeveer **30 minuten** met exponentiële backoff). Je handler moet binnen **30 seconden** per poging een **2xx** status retourneren.
 
 ## Metadata
 
-Je kunt aangepaste sleutel-waardeparen aan batches toevoegen met de `metadata` parameter. Dit is handig voor het bijhouden, filteren en organiseren van je batches door ze te koppelen aan interne systemen zoals order-ID's, klant-ID's of projectnamen.
+Voeg aangepaste **string key-value** metadata toe aan batches voor tracking, filtering en het correleren van taken met je eigen systemen (order-ID's, projectnamen, pijplijnstadium, enzovoort). Metadata volgt dezelfde regels als in onze [Metadata](/api-reference/common/metadata) referentie.
 
-Voor validatieregels en gebruiksvoorbeelden, zie [Metadata](/api-reference/common/metadata).
+Je kunt metadata op **twee niveaus** instellen bij het aanmaken van een batch:
+
+- **Batch-niveau** — `metadata` op de **request body** (geldt voor de hele batch)
+- **Item-niveau** — `metadata` op **elk object** in de `items` array (per URL)
+
+Metadata wordt **teruggegeven** bij volgende **GET** antwoorden voor die batch. Je kunt batchmetadata later **merge-updaten** met [Update Batch](/api-reference/batches/update) (`PATCH`); zie de metadata-gids voor toevoegen, overschrijven en verwijderen gedrag.
+
+| Beperking | Limiet |
+| --- | --- |
+| Maximale sleutels | 50 |
+| Sleutellengte | 40 tekens |
+| Sleutelformaat | Geen vierkante haakjes (`[` of `]`) |
+| Waardelengte | 500 tekens (opgeslagen als strings) |
+
+<Note>
+**Type coercion:** Nummers en booleans worden omgezet naar strings (bijvoorbeeld `42` → `"42"`, `true` → `"true"`). Geneste objecten en arrays worden afgewezen.
+</Note>
+
+Voor complete voorbeelden en PATCH-semantiek, zie [Metadata](/api-reference/common/metadata).
 
 ## Belangrijke Opmerkingen
 
-Als je gestructureerde JSON wilt, moet je de specifieke parser doorgeven aan de API voordat je de verzoeken doet. Bijvoorbeeld, als je de JSON van Google Search wilt krijgen, geef je deze parser door `"parser": {"id": "@olostep/google-search"}`
-Je kunt je eigen parsers maken om de gegevens op te halen die je wilt van elke pagina. Neem contact op met `info@olostep.com` om meer te leren.
+Als je gestructureerde JSON wilt, moet je de specifieke parser naar de API doorgeven voordat je de verzoeken doet. Bijvoorbeeld, als je de JSON van Google Search wilt krijgen, geef je deze parser door `"parser": {"id": "@olostep/google-search"}`
+Je kunt je eigen parsers maken om de data te verkrijgen die je wilt van elke pagina. Neem contact op met `info@olostep.com` om meer te leren.
 
 ## Conclusie
 
-Het batch-eindpunt is nuttig als je gegevens van veel URL's in een korte tijd wilt verkrijgen. Je moet al de lijst met URL's hebben die je wilt ophalen.
+Het batch eindpunt is nuttig als je data van veel URLs in een korte tijd wilt verkrijgen. Je moet al de lijst met urls hebben waarvan je de data wilt verkrijgen.
 
 Veelvoorkomende toepassingen kunnen zijn:
 
 - Prijsvolgdiensten die meerdere e-commerce sites monitoren voor prijswijzigingen op producten
-- Website monitoring tools die controleren op inhoudsupdates op talrijke pagina's
-- Gegevensaggregatie voor concertorganisatoren die ticketbeschikbaarheid bijhouden op meerdere locaties
+- Website monitoring tools die controleren op inhoudsupdates over talrijke pagina's
+- Data-aggregatie voor concertorganisatoren die ticketbeschikbaarheid bijhouden over meerdere locaties
 - Zoekmachines die inhoud verzamelen en indexeren van vele websites tegelijkertijd
 - Nieuwsaggregatoren die artikelen verzamelen van verschillende publicaties
-- Vastgoedplatforms die vastgoedvermeldingen monitoren op meerdere sites
+- Vastgoedplatforms die vastgoedvermeldingen monitoren over meerdere sites
 - Vacaturebanken die vacatures verzamelen van bedrijfscarrièrepagina's
-- Financiële dataservices die aandelenkoersen en marktinformatie bijhouden
-- Social media monitoring tools die vermeldingen analyseren op verschillende platforms
-- Academisch onderzoek dat gegevens verzamelt van meerdere bronnen voor analyse
+- Financiële datadiensten die aandelenkoersen en marktinformatie bijhouden
+- Social media monitoring tools die vermeldingen analyseren over verschillende platforms
+- Academisch onderzoek dat data verzamelt van meerdere bronnen voor analyse
 
-Het is beter om het batch-eindpunt te gebruiken als je inhoud van 100 tot 10k URL's tegelijk wilt. Als je minder dan 50 URL's tegelijk moet scrapen, raden we aan om het scrape-eindpunt te gebruiken en de URL's parallel in te dienen, omdat dit sneller is dan het batch-eindpunt.
+Het is beter om het batch eindpunt te gebruiken als je de inhoud van 100 tot 10k urls tegelijk wilt. Als je minder dan 50 urls tegelijk moet scrapen, raden we aan om het scrape eindpunt te gebruiken en de urls parallel in te dienen, aangezien dit sneller is dan het batch eindpunt.
 
 ## Prijzen
 

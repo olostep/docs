@@ -109,7 +109,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle reactie met lijst van recente batches.",
+            "description": "Succesvolle respons met lijst van recente batches.",
             "content": {
               "application/json": {
                 "schema": {
@@ -245,7 +245,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "Land voor de batchuitvoering. Geef op in ISO 3166-1 alpha-2 codes zoals US(USA), IN(India), enz."
+                    "description": "Land voor de batchuitvoering. Geef op in ISO 3166-1 alpha-2 codes zoals US(VS), IN(India), enz."
                   },
                   "parser": {
                     "type": "object",
@@ -672,7 +672,7 @@
       },
       "patch": {
         "summary": "Batchmetadata bijwerken",
-        "description": "Werkt de metadata bij voor een specifieke batch. Alleen het veld `metadata` kan worden bijgewerkt. Volgt de merge-semantiek van Stripe: nieuwe sleutels worden toegevoegd, bestaande sleutels worden bijgewerkt en sleutels die op een lege string zijn ingesteld, worden verwijderd.",
+        "description": "Werkt de metadata bij voor een specifieke batch. Alleen het `metadata` veld kan worden bijgewerkt. Volgt de merge-semantiek van Stripe: nieuwe sleutels worden toegevoegd, bestaande sleutels worden bijgewerkt, en sleutels die op een lege string zijn ingesteld, worden verwijderd.",
         "security": [
           {
             "Authorization": []
@@ -883,7 +883,7 @@
                 "failed"
               ]
             },
-            "description": "Status van de URL's om op te halen (voltooid of mislukt)."
+            "description": "Status van de URLs om op te halen (voltooid of mislukt)."
           },
           {
             "name": "cursor",
@@ -892,7 +892,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Paginering cursor. Laat deze parameter weg bij de eerste aanvraag. Gebruik voor volgende aanvragen de `cursor` waarde van de vorige respons. Zie [Paginering](/api-reference/common/pagination) voor details."
+            "description": "Paginering cursor. Laat deze parameter weg bij de eerste aanvraag. Voor volgende aanvragen, gebruik de `cursor` waarde van de vorige respons. Zie [Paginering](/api-reference/common/pagination) voor details."
           },
           {
             "name": "limit",
@@ -987,7 +987,7 @@
             }
           },
           "400": {
-            "description": "Foutieve aanvraag door onjuiste parameters. Zie [Foutieve Aanvraag](/api-reference/errors/bad_request) voor details.",
+            "description": "Foute aanvraag door onjuiste parameters. Zie [Foute Aanvraag](/api-reference/errors/bad_request) voor details.",
             "content": {
               "application/problem+json": {
                 "schema": {

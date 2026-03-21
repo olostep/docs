@@ -22,7 +22,7 @@
     "/v1/crawls": {
       "post": {
         "summary": "开始新的爬虫",
-        "description": "使用指定的参数启动新的爬虫过程。",
+        "description": "使用指定的参数启动一个新的爬虫过程。",
         "security": [
           {
             "Authorization": []
@@ -44,18 +44,18 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "使用 glob 语法在爬虫中包含的 URL 路径模式。  默认为 `/**`，包括所有 URL。使用类似 `/blog/**` 的模式来爬取特定部分（例如，仅博客页面），`/products/*.html` 用于产品页面，或多个模式用于不同部分。支持标准的 glob 功能，如 *（任意字符）和 **（递归匹配）。"
+                    "description": "使用 glob 语法在爬虫中包含的 URL 路径模式。  默认为 `/**`，包括所有 URL。使用类似 `/blog/**` 的模式来爬取特定部分（例如，仅博客页面），`/products/*.html` 用于产品页面，或多个模式用于不同部分。支持标准 glob 功能，如 *（任意字符）和 **（递归匹配）。"
                   },
                   "exclude_urls": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "在 glob 模式中排除的 URL 路径名称。例如：`/careers/**`。排除的 URL 将优先于包含的 URL。"
+                    "description": "在 glob 模式中排除的 URL 路径名。例如：`/careers/**`。排除的 URL 将优先于包含的 URL。"
                   },
                   "max_pages": {
                     "type": "number",
-                    "description": "爬虫的最大页面数量。推荐用于大多数用例，如爬取整个网站。"
+                    "description": "要爬取的最大页面数。推荐用于大多数用例，如爬取整个网站。"
                   },
                   "max_depth": {
                     "type": "number",
@@ -88,12 +88,12 @@
                   },
                   "follow_robots_txt": {
                     "type": "boolean",
-                    "description": "是否遵守 robots.txt 规则。如果设置为 `false`，爬虫将不顾 robots.txt 的禁止指令抓取网站。默认 `true`。",
+                    "description": "是否遵循 robots.txt 规则。如果设置为 `false`，爬虫将不顾 robots.txt 的禁止指令抓取网站。默认 `true`。",
                     "default": true
                   },
                   "scrape_options": {
                     "type": "object",
-                    "description": "控制每个页面抓取请求从 Olostep API 获取的内容。所有字段都是可选的。",
+                    "description": "控制每个单独页面从 Olostep API 请求的内容。所有字段都是可选的。",
                     "properties": {
                       "formats": {
                         "type": "array",
@@ -232,7 +232,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "要获取信息的爬取ID。"
+            "description": "要获取信息的爬取的ID。"
           }
         ],
         "responses": {
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "可选整数，表示开始获取内容的索引。用于分页，直到获取所有URL。从0开始，然后提供上次请求的 `response['cursor']` 值。"
+            "description": "可选整数，表示开始获取内容的索引。用于分页直到获取所有URL。从0开始，然后提供上次请求的 `response['cursor']` 值。"
           },
           {
             "name": "limit",
@@ -447,14 +447,14 @@
                       "properties": {
                         "external_urls": {
                           "type": "array",
-                          "description": "在爬取过程中发现的外部 URL",
+                          "description": "在爬取过程中发现的外部 URLs",
                           "items": {
                             "type": "string"
                           }
                         },
                         "failed_urls": {
                           "type": "array",
-                          "description": "找到但无法抓取的 URL",
+                          "description": "找到但无法抓取的 URLs",
                           "items": {
                             "type": "string"
                           }
@@ -463,7 +463,7 @@
                     },
                     "cursor": {
                       "type": "integer",
-                      "description": "在下一个请求的查询中传递以获取下一个项目。"
+                      "description": "在下一个请求的查询中传递，以获取下一个项目。"
                     }
                   }
                 }

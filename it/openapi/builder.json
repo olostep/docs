@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Builder API",
+    "title": "API Builder",
     "version": "1.0.0"
   },
   "servers": [
@@ -25,7 +25,7 @@
     "/olostep-p2p-incomingAPI": {
       "get": {
         "summary": "Inizia lo scraping delle pagine web con varie configurazioni",
-        "description": "Questo endpoint ti permette di fare lo scraping delle pagine web con varie opzioni come impostare timeout, tempo di attesa prima dello scraping, preferenze di formato dei dati e altro.",
+        "description": "Questo endpoint ti permette di fare scraping delle pagine web con varie opzioni come impostare timeout, tempo di attesa prima dello scraping, preferenze di formato dei dati e altro.",
         "servers": [
           {
             "url": "https://agent.olostep.com"
@@ -106,7 +106,7 @@
             "name": "htmlTransformer",
             "in": "query",
             "required": false,
-            "description": "Specifica il trasformatore HTML da usare, se presente. La libreria Mercury Parser di Postlight viene utilizzata per rimuovere annunci e altri contenuti indesiderati dal contenuto estratto.",
+            "description": "Specifica il trasformatore HTML da usare, se presente. La libreria Mercury Parser di Postlight è usata per rimuovere annunci e altri contenuti indesiderati dal contenuto estratto.",
             "schema": {
               "type": "string",
               "default": "none",
@@ -130,7 +130,7 @@
             "name": "expandMarkdown",
             "in": "query",
             "required": false,
-            "description": "Se vero, il contenuto markdown viene restituito nel campo markdown_content.",
+            "description": "Se vero, il contenuto markdown è restituito nel campo markdown_content.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -140,7 +140,7 @@
             "name": "expandHtml",
             "in": "query",
             "required": false,
-            "description": "Se vero, il contenuto HTML viene restituito nel campo html_content.",
+            "description": "Se vero, il contenuto HTML è restituito nel campo html_content.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -172,7 +172,7 @@
                         "enum": [
                           "wait"
                         ],
-                        "description": "Attendere per un determinato numero di millisecondi"
+                        "description": "Attendere per un tempo specificato in millisecondi"
                       },
                       "milliseconds": {
                         "type": "integer",
@@ -183,7 +183,7 @@
                   },
                   {
                     "type": "object",
-                    "title": "Clic",
+                    "title": "Cliccare",
                     "required": [
                       "type",
                       "selector"
@@ -194,7 +194,7 @@
                         "enum": [
                           "click"
                         ],
-                        "description": "Clicca su un elemento"
+                        "description": "Cliccare su un elemento"
                       },
                       "selector": {
                         "type": "string",
@@ -216,11 +216,11 @@
                         "enum": [
                           "fill_input"
                         ],
-                        "description": "Compila un elemento di input con un valore"
+                        "description": "Compila un elemento input con un valore"
                       },
                       "selector": {
                         "type": "string",
-                        "description": "Selettore CSS per l'elemento di input"
+                        "description": "Selettore CSS per l'elemento input"
                       },
                       "value": {
                         "type": "string",
@@ -252,7 +252,7 @@
                           "left",
                           "right"
                         ],
-                        "description": "Direzione dello scorrimento"
+                        "description": "Direzione di scorrimento"
                       },
                       "amount": {
                         "type": "number",
@@ -289,7 +289,7 @@
           }
         ],
         "summary": "Recupera informazioni sul dataset",
-        "description": "Permette agli utenti di recuperare informazioni sul dataset in formato Markdown e/o HTML in base all'ID del dataset fornito.",
+        "description": "Permette agli utenti di recuperare informazioni sul dataset in formato Markdown e/o HTML basato sull'ID del dataset fornito.",
         "security": [
           {
             "Authorization": []
@@ -300,7 +300,7 @@
             "name": "datasetId",
             "in": "query",
             "required": true,
-            "description": "Identificatore univoco per il dataset da recuperare.",
+            "description": "Identificatore unico per il dataset da recuperare.",
             "schema": {
               "type": "string"
             }

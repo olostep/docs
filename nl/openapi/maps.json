@@ -21,7 +21,7 @@
   "paths": {
     "/v1/maps/{map_id}": {
       "get": {
-        "summary": "Haal Kaart op",
+        "summary": "Haal Kaart Op",
         "description": "Haal een eerder voltooide kaart op met zijn ID.",
         "security": [
           {
@@ -41,7 +41,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met het kaartobject.",
+            "description": "Succesvolle reactie met het kaartobject.",
             "content": {
               "application/json": {
                 "schema": {
@@ -53,7 +53,7 @@
                     },
                     "urls_count": {
                       "type": "integer",
-                      "description": "Aantal URLs in de huidige respons"
+                      "description": "Aantal URLs in de huidige reactie"
                     },
                     "urls": {
                       "type": "array",
@@ -87,7 +87,7 @@
     "/v1/maps": {
       "post": {
         "summary": "Haal alle urls op een bepaalde website op",
-        "description": "Deze endpoint stelt gebruikers in staat om alle urls op een bepaalde website op te halen. Het kan tot 120 seconden duren voor complexe websites. Voor grote websites worden resultaten gepagineerd met cursor-gebaseerde paginering.",
+        "description": "Dit eindpunt stelt gebruikers in staat om alle urls op een bepaalde website op te halen. Het kan tot 120 seconden duren voor complexe websites. Voor grote websites worden resultaten gepagineerd met cursor-gebaseerde paginering.",
         "security": [
           {
             "Authorization": []
@@ -111,7 +111,7 @@
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "Een optioneel nummer om te beperken tot alleen de top n links voor een zoekopdracht."
+                    "description": "Een optioneel aantal om te beperken tot alleen de top n links voor een zoekopdracht."
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -129,11 +129,11 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "URL-padpatronen om uit te sluiten met behulp van glob-syntaxis. Bijvoorbeeld: `/careers/**`. Uitgesloten URLs zullen de opgenomen URLs overschrijven."
+                    "description": "URL-padpatronen om uit te sluiten met behulp van glob-syntaxis. Bijvoorbeeld: `/careers/**`. Uitgesloten URLs zullen opgenomen URLs overschrijven."
                   },
                   "cursor": {
                     "type": "string",
-                    "description": "OPTIONEEL: Paginering cursor van een vorige respons. Wanneer verstrekt, retourneert het de volgende set URLs vanaf waar het vorige verzoek stopte vanwege de responsgrootte limiet."
+                    "description": "OPTIONEEL: Paginering cursor van een vorige reactie. Wanneer verstrekt, retourneert het de volgende set URLs vanaf waar het vorige verzoek stopte vanwege de limiet van de reactiesomvang."
                   }
                 },
                 "required": [
@@ -168,7 +168,7 @@
         },
         "responses": {
           "200": {
-            "description": "Succesvolle respons met URLs gevonden op de pagina",
+            "description": "Succesvolle reactie met URLs gevonden op de pagina",
             "content": {
               "application/json": {
                 "schema": {
@@ -184,7 +184,7 @@
                     },
                     "urls_count": {
                       "type": "integer",
-                      "description": "Aantal URLs in de huidige respons"
+                      "description": "Aantal URLs in de huidige reactie"
                     },
                     "urls": {
                       "type": "array",
@@ -243,7 +243,7 @@
             "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
           },
           "401": {
-            "description": "Ongeautoriseerde toegang vanwege ontbrekende of ongeldige API-token."
+            "description": "Ongeautoriseerde toegang door ontbrekende of ongeldige API-token."
           },
           "500": {
             "description": "Interne serverfout."

@@ -21,7 +21,7 @@
   "paths": {
     "/v1/maps/{map_id}": {
       "get": {
-        "summary": "マップ取得",
+        "summary": "マップを取得",
         "description": "以前に完了したマップをそのIDで取得します。",
         "security": [
           {
@@ -33,7 +33,7 @@
             "name": "map_id",
             "in": "path",
             "required": true,
-            "description": "取得するマップのユニークな識別子。",
+            "description": "取得するマップの一意の識別子。",
             "schema": {
               "type": "string"
             }
@@ -49,7 +49,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "このマップのユニークな識別子"
+                      "description": "このマップの一意の識別子"
                     },
                     "urls_count": {
                       "type": "integer",
@@ -87,7 +87,7 @@
     "/v1/maps": {
       "post": {
         "summary": "特定のウェブサイト上のすべてのURLを取得",
-        "description": "このエンドポイントでは、特定のウェブサイト上のすべてのURLを取得できます。複雑なウェブサイトの場合、最大120秒かかることがあります。大規模なウェブサイトの場合、結果はカーソルベースのページネーションを使用してページ分けされます。",
+        "description": "このエンドポイントは、特定のウェブサイト上のすべてのURLを取得することを可能にします。複雑なウェブサイトの場合、最大120秒かかることがあります。大規模なウェブサイトの場合、結果はカーソルベースのページネーションを使用してページ分けされます。",
         "security": [
           {
             "Authorization": []
@@ -107,7 +107,7 @@
                   },
                   "search_query": {
                     "type": "string",
-                    "description": "検索の関連性でリンクをソートするためのオプションの検索クエリ。"
+                    "description": "リンクを検索の関連性でソートするためのオプションの検索クエリ。"
                   },
                   "top_n": {
                     "type": "number",
@@ -115,21 +115,21 @@
                   },
                   "include_subdomain": {
                     "type": "boolean",
-                    "description": "指定されたURLのサブドメインを含める。デフォルトは`true`です。"
+                    "description": "指定されたURLのサブドメインを含める。デフォルトは`true`。"
                   },
                   "include_urls": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "グロブ構文を使用して含めるURLパスパターン。例えば、`/blog/**`はブログURLのみを含めます。これらのパターンに一致するURLのみが返されます。"
+                    "description": "グロブ構文を使用して含めるURLパスパターン。例えば、`/blog/**`はブログURLのみを含める。これらのパターンに一致するURLのみが返されます。"
                   },
                   "exclude_urls": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "グロブ構文を使用して除外するURLパスパターン。例えば、`/careers/**`。除外されたURLは、含まれるURLよりも優先されます。"
+                    "description": "グロブ構文を使用して除外するURLパスパターン。例えば、`/careers/**`。除外されたURLは含まれるURLよりも優先されます。"
                   },
                   "cursor": {
                     "type": "string",
@@ -180,7 +180,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "このマップのユニークな識別子"
+                      "description": "このマップの一意の識別子"
                     },
                     "urls_count": {
                       "type": "integer",
@@ -243,7 +243,7 @@
             "description": "不正なリクエスト：パラメータが間違っているか不足しています。"
           },
           "401": {
-            "description": "不正アクセス：APIトークンがないか無効です。"
+            "description": "不正なアクセス：APIトークンが不足しているか無効です。"
           },
           "500": {
             "description": "内部サーバーエラー。"

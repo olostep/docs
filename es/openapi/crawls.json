@@ -80,7 +80,7 @@
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL HTTPS para recibir una solicitud POST cuando el rastreo se complete. Debe ser una URL públicamente accesible usando el protocolo `http://` o `https://`. No puede apuntar a localhost o direcciones IP privadas. Ver [Webhooks](/api-reference/common/webhooks) para el formato de carga útil y comportamiento de reintento."
+                    "description": "URL HTTPS para recibir una solicitud POST cuando el rastreo se complete. Debe ser una URL públicamente accesible usando el protocolo `http://` o `https://`. No puede apuntar a localhost o direcciones IP privadas. Consulta [Webhooks](/api-reference/common/webhooks) para el formato de carga útil y el comportamiento de reintento."
                   },
                   "timeout": {
                     "type": "number",
@@ -107,7 +107,7 @@
                             "screenshot"
                           ]
                         },
-                        "description": "Formatos de salida a solicitar para cada página raspada. Por defecto es `[\"html\", \"markdown\"]` cuando se omite. `html` siempre se incluye automáticamente. `json` se agrega automáticamente cuando se proporciona un `parser`. Nota: `raw_pdf` no es compatible — los PDFs no pueden ser rastreados.",
+                        "description": "Formatos de salida a solicitar para cada página raspada. Por defecto es `[\"html\", \"markdown\"]` cuando se omite. `html` siempre se incluye automáticamente. `json` se añade automáticamente cuando se proporciona un `parser`. Nota: `raw_pdf` no es compatible — los PDFs no pueden ser rastreados.",
                         "example": [
                           "markdown",
                           "screenshot"
@@ -115,7 +115,7 @@
                       },
                       "parser": {
                         "type": "string",
-                        "description": "Nombre del parser para ejecutar en cada página y producir salida `json` estructurada (por ejemplo, `\"@olostep/extract-emails\"`). Agrega automáticamente `json` a `formats` cuando se establece.",
+                        "description": "Nombre del parser para ejecutar en cada página y producir salida `json` estructurada (por ejemplo, `\"@olostep/extract-emails\"`). Añade automáticamente `json` a `formats` cuando se establece.",
                         "example": "@olostep/extract-emails"
                       }
                     }
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Entero opcional que representa el índice para comenzar a obtener contenido. Útil para paginar hasta que se obtengan todas las URLs. Comienza con 0, luego proporciona el valor de `response['cursor']` de la última solicitud."
+            "description": "Entero opcional que representa el índice para comenzar a obtener contenido. Útil para paginar hasta que se obtengan todas las URLs. Comienza con 0, luego proporciona el valor `response['cursor']` de la última solicitud."
           },
           {
             "name": "limit",
@@ -423,7 +423,7 @@
                           },
                           "retrieve_id": {
                             "type": "string",
-                            "description": "Para obtener contenido del endpoint `/retrieve`"
+                            "description": "Para obtener contenido desde el endpoint `/retrieve`"
                           },
                           "url": {
                             "type": "string"

@@ -21,8 +21,8 @@
   "paths": {
     "/v1/scrapes": {
       "post": {
-        "summary": "Eine Webseitenscrape initiieren",
-        "description": "Dieser Endpunkt ermöglicht es Nutzern, eine Webseitenscrape mit verschiedenen Konfigurationen zu starten.",
+        "summary": "Starte einen Webseitenscrape",
+        "description": "Dieser Endpunkt ermöglicht es Benutzern, einen Webseitenscrape mit verschiedenen Konfigurationen zu starten.",
         "security": [
           {
             "Authorization": []
@@ -42,7 +42,7 @@
                   },
                   "wait_before_scraping": {
                     "type": "integer",
-                    "description": "Wartezeit in Millisekunden, bevor das Scraping beginnt."
+                    "description": "Wartezeit in Millisekunden, bevor der Scrape beginnt."
                   },
                   "formats": {
                     "type": "array",
@@ -111,7 +111,7 @@
                               "enum": [
                                 "click"
                               ],
-                              "description": "Auf ein Element klicken"
+                              "description": "Klicke auf ein Element"
                             },
                             "selector": {
                               "type": "string",
@@ -183,7 +183,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "Wohnsitzland, von dem aus die Anfrage geladen wird.  Unterstützte Werte sind: - US (Vereinigte Staaten) - CA (Kanada) - IT (Italien) - IN (Indien) - GB (England) - JP (Japan) - MX (Mexiko) - AU (Australien) - ID (Indonesien) - UA (VAE) - RU (Russland) - RANDOM  Einige Operationen, wie das Scraping von Google Search und Google News, unterstützen alle Länder."
+                    "description": "Wohnsitzland, von dem aus die Anfrage geladen wird.  Unterstützte Werte sind: - US (Vereinigte Staaten) - CA (Kanada) - IT (Italien) - IN (Indien) - GB (England) - JP (Japan) - MX (Mexiko) - AU (Australien) - ID (Indonesien) - UA (VAE) - RU (Russland) - RANDOM  Einige Operationen, wie das Scrapen von Google Search und Google News, unterstützen alle Länder."
                   },
                   "transformer": {
                     "type": "string",
@@ -191,7 +191,7 @@
                       "postlight",
                       "none"
                     ],
-                    "description": "Gib den HTML-Transformer an, der verwendet werden soll, falls vorhanden. Die Mercury Parser-Bibliothek von Postlight wird verwendet, um Anzeigen und andere unerwünschte Inhalte aus dem gescrapten Inhalt zu entfernen."
+                    "description": "Gib den HTML-Transformer an, der verwendet werden soll, falls vorhanden. Die Mercury Parser-Bibliothek von Postlight wird verwendet, um Werbung und andere unerwünschte Inhalte aus dem gescrapten Inhalt zu entfernen."
                   },
                   "remove_images": {
                     "type": "boolean",
@@ -266,15 +266,15 @@
                           "mobile",
                           "desktop"
                         ],
-                        "description": "Art des Bildschirms. Desktop verwendet 1920x1080 Pixel, Mobilgerät verwendet 414x896 Pixel und Standard verwendet 1024x768 Pixel."
+                        "description": "Art des Bildschirms. Desktop verwendet 1920x1080 Pixel, mobil verwendet 414x896 Pixel und Standard verwendet 1024x768 Pixel."
                       },
                       "screen_width": {
                         "type": "integer",
-                        "description": "Breite des Bildschirms in Pixel. Desktop: 1920px, Mobilgerät: 414px, Standard: 768px."
+                        "description": "Breite des Bildschirms in Pixel. Desktop: 1920px, mobil: 414px, Standard: 768px."
                       },
                       "screen_height": {
                         "type": "integer",
-                        "description": "Höhe des Bildschirms in Pixel. Desktop: 1080px, Mobilgerät: 896px, Standard: 1024px."
+                        "description": "Höhe des Bildschirms in Pixel. Desktop: 1080px, mobil: 896px, Standard: 1024px."
                       }
                     },
                     "description": "Konfiguration für Bildschirmgröße. Voreingestellte Abmessungen sind über screen_type verfügbar: desktop (1920x1080), mobile (414x896) oder default (768x1024)."
@@ -302,7 +302,7 @@
         },
         "responses": {
           "200": {
-            "description": "Erfolgreiche Antwort mit den Details zur Scrape-Initiierung.",
+            "description": "Erfolgreiche Antwort mit den Details zur Einleitung des Scrapes.",
             "content": {
               "application/json": {
                 "schema": {
@@ -387,7 +387,7 @@
             "description": "Zahlung erforderlich aufgrund eines ungültigen API-Schlüssels."
           },
           "404": {
-            "description": "Fehler \"Nicht gefunden\", wenn der angeforderte Scrape nicht gefunden wird."
+            "description": "Fehler \"Nicht gefunden\", wenn das angeforderte Scrape nicht gefunden wird."
           },
           "500": {
             "description": "Interner Serverfehler."
@@ -409,7 +409,7 @@
             "name": "scrape_id",
             "in": "path",
             "required": true,
-            "description": "Eindeutiger Bezeichner für den abzurufenden Scrape.",
+            "description": "Eindeutiger Bezeichner für das abzurufende Scrape.",
             "schema": {
               "type": "string"
             }
@@ -500,7 +500,7 @@
             "description": "Zahlung erforderlich aufgrund eines ungültigen API-Schlüssels."
           },
           "404": {
-            "description": "Fehler \"Nicht gefunden\", wenn der angeforderte Scrape nicht gefunden wird."
+            "description": "Fehler \"Nicht gefunden\", wenn das angeforderte Scrape nicht gefunden wird."
           },
           "500": {
             "description": "Interner Serverfehler."

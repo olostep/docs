@@ -387,11 +387,11 @@
             "enum": [
               "batch_airops"
             ],
-            "description": "Object type identificatie."
+            "description": "Objecttype identificatie."
           },
           "created": {
             "type": "integer",
-            "description": "Unix timestamp (milliseconden) wanneer de batch is aangemaakt."
+            "description": "Unix-timestamp (milliseconden) wanneer de batch is aangemaakt."
           },
           "total_urls": {
             "type": "integer",
@@ -416,7 +416,7 @@
           },
           "created_at": {
             "type": "integer",
-            "description": "Unix timestamp (ms)"
+            "description": "Unix-timestamp (ms)"
           },
           "total_urls": {
             "type": "integer"
@@ -433,7 +433,7 @@
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Of async LLM batch modus is ingeschakeld."
+            "description": "Of async LLM batchmodus is ingeschakeld."
           },
           "scraping": {
             "$ref": "#/components/schemas/ScrapingStatus"
@@ -455,7 +455,7 @@
           },
           "completed_at": {
             "type": "string",
-            "description": "ISO 8601 timestamp wanneer batch voltooid is."
+            "description": "ISO 8601-timestamp wanneer de batch voltooid is."
           },
           "status": {
             "type": "string",
@@ -470,7 +470,7 @@
             "properties": {
               "total": {
                 "type": "integer",
-                "description": "Totaal aantal items in batch."
+                "description": "Totaal aantal items in de batch."
               },
               "succeeded": {
                 "type": "integer",
@@ -490,7 +490,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Statusbericht (aanwezig wanneer batch nog steeds verwerkt wordt)."
+            "description": "Statusbericht (aanwezig wanneer de batch nog wordt verwerkt)."
           }
         }
       },
@@ -512,7 +512,7 @@
               "completed",
               "failed"
             ],
-            "description": "Status van itemverwerking."
+            "description": "Verwerkingsstatus van het item."
           },
           "page_type": {
             "type": "string",
@@ -571,7 +571,7 @@
               "analyzing",
               "enriching"
             ],
-            "description": "Fase waarin de fout optrad (aanwezig wanneer status \"failed\" is)."
+            "description": "Fase waar de fout optrad (aanwezig wanneer status \"failed\" is)."
           },
           "error": {
             "$ref": "#/components/schemas/StepError",
@@ -720,7 +720,7 @@
       },
       "AnalyzingStatus": {
         "type": "object",
-        "description": "Gap-analysefase - bepaalt welke verrijking door LLM nodig is.",
+        "description": "Gap-analysefase - bepaalt welke verrijking met LLM nodig is.",
         "properties": {
           "state": {
             "type": "string",
@@ -803,7 +803,7 @@
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Of de asynchrone batch API is gebruikt"
+            "description": "Of de asynchrone batch API werd gebruikt"
           },
           "llm": {
             "$ref": "#/components/schemas/LLMInfo"

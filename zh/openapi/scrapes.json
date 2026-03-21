@@ -42,7 +42,7 @@
                   },
                   "wait_before_scraping": {
                     "type": "integer",
-                    "description": "开始抓取前等待的时间，以毫秒为单位。"
+                    "description": "在开始抓取前等待的时间，以毫秒为单位。"
                   },
                   "formats": {
                     "type": "array",
@@ -66,7 +66,7 @@
                       "none",
                       "array"
                     ],
-                    "description": "选项用于从内容中移除某些CSS选择器。你也可以传递一个JSON字符串化的特定选择器数组来移除。当此选项设置为默认时，移除的CSS选择器为 ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
+                    "description": "选项：从内容中移除某些CSS选择器。你也可以传递一个JSON字符串化的特定选择器数组来移除。默认情况下移除的CSS选择器是 ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
                   },
                   "actions": {
                     "type": "array",
@@ -133,7 +133,7 @@
                               "enum": [
                                 "fill_input"
                               ],
-                              "description": "用一个值填写输入元素"
+                              "description": "用一个值填充输入元素"
                             },
                             "selector": {
                               "type": "string",
@@ -183,7 +183,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "加载请求的住宅国家。  支持的值有： - US (United States) - CA (Canada) - IT (Italy) - IN (India) - GB (England) - JP (Japan) - MX (Mexico) - AU (Australia) - ID (Indonesia) - UA (UAE) - RU (Russia) - RANDOM  一些操作，如抓取Google搜索和Google新闻，支持所有国家。"
+                    "description": "加载请求的住宅国家。  支持的值有： - US (美国) - CA (加拿大) - IT (意大利) - IN (印度) - GB (英国) - JP (日本) - MX (墨西哥) - AU (澳大利亚) - ID (印度尼西亚) - UA (阿联酋) - RU (俄罗斯) - RANDOM  一些操作，比如抓取Google搜索和Google新闻，支持所有国家。"
                   },
                   "transformer": {
                     "type": "string",
@@ -191,11 +191,11 @@
                       "postlight",
                       "none"
                     ],
-                    "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的抓取内容。"
+                    "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的内容。"
                   },
                   "remove_images": {
                     "type": "boolean",
-                    "description": "选项用于从抓取的内容中移除图像。默认为false。",
+                    "description": "选项：从抓取的内容中移除图片。默认为false。",
                     "default": false
                   },
                   "remove_class_names": {
@@ -216,7 +216,7 @@
                     "required": [
                       "id"
                     ],
-                    "description": "当定义json作为格式时，你可以使用此参数指定要使用的解析器。解析器对于从网页中提取结构化内容非常有用。Olostep为大多数常见网页内置了一些解析器，你也可以创建自己的解析器。"
+                    "description": "当定义json作为格式时，你可以使用这个参数来指定要使用的解析器。解析器对于从网页中提取结构化内容非常有用。Olostep为大多数常见网页内置了一些解析器，你也可以创建自己的解析器。"
                   },
                   "llm_extract": {
                     "type": "object",
@@ -233,25 +233,25 @@
                       "absolute_links": {
                         "type": "boolean",
                         "default": true,
-                        "description": "当为 true 时，它返回完整的 URL（例如，'https://example.com/page'），而不是相对路径（例如，'/page'）。"
+                        "description": "当为 true 时，它返回完整的 URL（例如，'https://example.com/page'）而不是相对路径（例如，'/page'）。"
                       },
                       "query_to_order_links_by": {
                         "type": "string",
-                        "description": "按与提供的查询文本的相似性对返回的链接进行排序，优先显示最相关的匹配项。"
+                        "description": "根据提供的查询文本的相似性对返回的链接进行排序，优先显示最相关的匹配项。"
                       },
                       "include_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "使用`include_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"用于特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
+                        "description": "使用`include_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"匹配特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
                       },
                       "exclude_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "使用`exclude_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"用于特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
+                        "description": "使用`exclude_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"匹配特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
                       }
                     },
                     "description": "使用此选项，你可以获取你抓取的页面上存在的所有链接。"
@@ -290,7 +290,7 @@
                   },
                   "metadata": {
                     "type": "object",
-                    "description": "用户定义的元数据。尚不支持"
+                    "description": "用户定义的元数据。尚不支持。"
                   }
                 },
                 "required": [
@@ -302,7 +302,7 @@
         },
         "responses": {
           "200": {
-            "description": "成功响应包含抓取启动的详细信息。",
+            "description": "成功响应，包含抓取启动的详细信息。",
             "content": {
               "application/json": {
                 "schema": {
@@ -318,7 +318,7 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建的纪元时间"
+                      "description": "创建的 epoch"
                     },
                     "metadata": {
                       "type": "object",
@@ -342,7 +342,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "来自解析器的内容"
+                          "description": "来自解析器的内容。"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"
@@ -397,7 +397,7 @@
     },
     "/v1/scrapes/{scrape_id}": {
       "get": {
-        "summary": "获取抓取结果",
+        "summary": "获取抓取结果。",
         "description": "此端点允许用户获取之前启动的抓取结果。",
         "security": [
           {
@@ -417,7 +417,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功响应包含抓取结果。",
+            "description": "成功响应，包含抓取结果。",
             "content": {
               "application/json": {
                 "schema": {
@@ -433,7 +433,7 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建的纪元时间"
+                      "description": "创建的 epoch"
                     },
                     "metadata": {
                       "type": "object",
@@ -454,7 +454,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "来自解析器的内容"
+                          "description": "来自解析器的内容。"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"

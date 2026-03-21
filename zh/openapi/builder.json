@@ -91,7 +91,7 @@
             "name": "removeCSSselectors",
             "in": "query",
             "required": false,
-            "description": "选项：从内容中移除某些CSS选择器。你也可以传递一个JSON字符串化的特定选择器数组来移除。设置为`default`时移除的CSS选择器为`['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "description": "选项：从内容中移除某些CSS选择器。你也可以传递一个JSON字符串化的特定选择器数组来移除。当此选项设置为`default`时，移除的CSS选择器为`['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
             "schema": {
               "type": "string",
               "default": "default",
@@ -106,7 +106,7 @@
             "name": "htmlTransformer",
             "in": "query",
             "required": false,
-            "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的抓取内容。",
+            "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的内容。",
             "schema": {
               "type": "string",
               "default": "none",
@@ -120,7 +120,7 @@
             "name": "removeImages",
             "in": "query",
             "required": false,
-            "description": "选项：从抓取的内容中移除图片。",
+            "description": "选项：从抓取的内容中移除图像。",
             "schema": {
               "type": "boolean",
               "default": true
@@ -216,7 +216,7 @@
                         "enum": [
                           "fill_input"
                         ],
-                        "description": "用一个值填写输入元素"
+                        "description": "用一个值填充输入元素"
                       },
                       "selector": {
                         "type": "string",
@@ -267,13 +267,13 @@
         ],
         "responses": {
           "200": {
-            "description": "请求数据成功响应。"
+            "description": "成功响应请求的数据。"
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "请求错误，参数不正确或缺失。"
           },
           "401": {
-            "description": "由于缺少或无效的API令牌导致的未授权访问。"
+            "description": "未授权访问，缺少或无效的API令牌。"
           },
           "500": {
             "description": "内部服务器错误。"
@@ -309,7 +309,7 @@
             "name": "retrieveMarkdown",
             "in": "query",
             "required": false,
-            "description": "选择以Markdown格式检索数据集。",
+            "description": "选项以Markdown格式检索数据集。",
             "schema": {
               "type": "boolean",
               "default": true
@@ -319,7 +319,7 @@
             "name": "retrieveHtml",
             "in": "query",
             "required": false,
-            "description": "选择以HTML格式检索数据集。",
+            "description": "选项以HTML格式检索数据集。",
             "schema": {
               "type": "boolean",
               "default": false
@@ -338,10 +338,10 @@
         ],
         "responses": {
           "200": {
-            "description": "数据集信息成功响应。"
+            "description": "成功响应数据集信息。"
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "请求错误，参数不正确或缺失。"
           },
           "404": {
             "description": "提供的ID未找到数据集。"

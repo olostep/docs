@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "バッチAPI",
+    "title": "バッチ API",
     "version": "1.0.0"
   },
   "servers": [
@@ -33,12 +33,12 @@
                       "properties": {
                         "custom_id": {
                           "type": "string",
-                          "description": "URLの内部ユニーク識別子。"
+                          "description": "URL の内部ユニーク識別子。"
                         },
                         "url": {
                           "type": "string",
                           "format": "uri",
-                          "description": "アイテムのURL。"
+                          "description": "アイテムの URL。"
                         }
                       },
                       "required": [
@@ -66,7 +66,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "バッチID"
+                      "description": "バッチ ID"
                     }
                   }
                 }
@@ -95,7 +95,7 @@
               "default": 50,
               "maximum": 100
             },
-            "description": "返すバッチの最大数（デフォルト50、最大100）。"
+            "description": "返すバッチの最大数（デフォルト 50、最大 100）。"
           },
           {
             "name": "source",
@@ -153,7 +153,7 @@
             }
           },
           "401": {
-            "description": "認証情報が欠落しているか無効です。詳細は[Unauthorized](/api-reference/errors/unauthorized)を参照してください。",
+            "description": "認証情報が欠落しているか無効です。詳細は [Unauthorized](/api-reference/errors/unauthorized) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -174,7 +174,7 @@
             }
           },
           "500": {
-            "description": "内部サーバーエラー。詳細は[Internal Error](/api-reference/errors/internal_error)を参照してください。",
+            "description": "内部サーバーエラー。詳細は [Internal Error](/api-reference/errors/internal_error) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -220,12 +220,12 @@
                       "properties": {
                         "custom_id": {
                           "type": "string",
-                          "description": "URLの内部ユニーク識別子。"
+                          "description": "URL の内部ユニーク識別子。"
                         },
                         "url": {
                           "type": "string",
                           "format": "uri",
-                          "description": "アイテムのURL。"
+                          "description": "アイテムの URL。"
                         },
                         "metadata": {
                           "allOf": [
@@ -245,7 +245,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "バッチ実行の国。ISO 3166-1 alpha-2コードで提供してください。例：US（アメリカ）、IN（インド）など。"
+                    "description": "バッチ実行の国。ISO 3166-1 alpha-2 コードで提供してください。例: US(USA), IN(India) など。"
                   },
                   "parser": {
                     "type": "object",
@@ -266,7 +266,7 @@
                       "absolute_links": {
                         "type": "boolean",
                         "default": true,
-                        "description": "trueの場合、相対パス（例: '/page'）の代わりに完全なURL（例: 'https://example.com/page'）を返すよ。"
+                        "description": "trueの場合、相対パス（例: '/page'）ではなく、完全なURL（例: 'https://example.com/page'）を返すよ。"
                       },
                       "include_links": {
                         "type": "array",
@@ -291,7 +291,7 @@
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "バッチが完了したときにPOSTリクエストを受け取るためのHTTPS URL。`http://`または`https://`プロトコルを使用して公開アクセス可能なURLでなければならないよ。localhostやプライベートIPアドレスを指すことはできないよ。ペイロードの形式やリトライの動作については[Webhooks](/api-reference/common/webhooks)を参照してね。"
+                    "description": "バッチが完了したときにPOSTリクエストを受け取るためのHTTPS URL。`http://`または`https://`プロトコルを使用して公開アクセス可能なURLでなければならないよ。localhostやプライベートIPアドレスを指すことはできないよ。[Webhooks](/api-reference/common/webhooks)でペイロード形式とリトライの動作を確認してね。"
                   }
                 },
                 "required": [
@@ -332,7 +332,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "バッチID"
+                      "description": "バッチ ID"
                     },
                     "object": {
                       "type": "string",
@@ -386,7 +386,7 @@
             }
           },
           "400": {
-            "description": "不正なパラメータのための不正リクエスト。詳細は[Bad Request](/api-reference/errors/bad_request)を参照してね。",
+            "description": "不正なリクエスト - パラメータが間違っているか不足しているよ。[Bad Request](/api-reference/errors/bad_request)で詳細を確認してね。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -398,7 +398,7 @@
                   "code": "validation_error",
                   "type": "https://docs.olostep.com/api-reference/errors/bad_request",
                   "status": 400,
-                  "title": "不正リクエスト",
+                  "title": "不正なリクエスト",
                   "detail": "The 'items' array is required and must contain at least one item.",
                   "created": 1704067200,
                   "metadata": {}
@@ -407,7 +407,7 @@
             }
           },
           "401": {
-            "description": "認証情報が欠落しているか無効です。詳細は[Unauthorized](/api-reference/errors/unauthorized)を参照してください。",
+            "description": "認証情報が欠落しているか無効です。詳細は [Unauthorized](/api-reference/errors/unauthorized) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -428,7 +428,7 @@
             }
           },
           "402": {
-            "description": "支払いが必要 - クレジットが不足しているよ。詳細は[Payment Required](/api-reference/errors/payment_required)を参照してね。",
+            "description": "支払いが必要 - クレジットが不足しているよ。[Payment Required](/api-reference/errors/payment_required)で詳細を確認してね。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -449,7 +449,7 @@
             }
           },
           "403": {
-            "description": "禁止 - この機能へのアクセスが拒否されたよ。詳細は[Forbidden](/api-reference/errors/forbidden)を参照してね。",
+            "description": "禁止 - この機能へのアクセスが拒否されたよ。[Forbidden](/api-reference/errors/forbidden)で詳細を確認してね。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -470,7 +470,7 @@
             }
           },
           "409": {
-            "description": "冪等性の競合 - このキーを持つリクエストが進行中だよ。詳細は[Idempotency Error](/api-reference/errors/idempotency_error)を参照してね。",
+            "description": "冪等性の競合 - このキーを使ったリクエストが進行中だよ。[Idempotency Error](/api-reference/errors/idempotency_error)で詳細を確認してね。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -512,7 +512,7 @@
             }
           },
           "500": {
-            "description": "内部サーバーエラー。詳細は[Internal Error](/api-reference/errors/internal_error)を参照してください。",
+            "description": "内部サーバーエラー。詳細は [Internal Error](/api-reference/errors/internal_error) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -565,7 +565,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "バッチID"
+                      "description": "バッチ ID"
                     },
                     "object": {
                       "type": "string",
@@ -606,7 +606,7 @@
             }
           },
           "401": {
-            "description": "認証情報が欠落しているか無効です。詳細は[Unauthorized](/api-reference/errors/unauthorized)を参照してください。",
+            "description": "認証情報が欠落しているか無効です。詳細は [Unauthorized](/api-reference/errors/unauthorized) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -648,7 +648,7 @@
             }
           },
           "500": {
-            "description": "内部サーバーエラー。詳細は[Internal Error](/api-reference/errors/internal_error)を参照してください。",
+            "description": "内部サーバーエラー。詳細は [Internal Error](/api-reference/errors/internal_error) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -723,7 +723,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "バッチID"
+                      "description": "バッチ ID"
                     },
                     "object": {
                       "type": "string",
@@ -779,7 +779,7 @@
                   "code": "invalid_metadata",
                   "type": "https://docs.olostep.com/api-reference/errors/bad_request",
                   "status": 400,
-                  "title": "不正リクエスト",
+                  "title": "不正なリクエスト",
                   "detail": "No metadata field provided. Only metadata can be updated.",
                   "created": 1704067200,
                   "metadata": {}
@@ -788,7 +788,7 @@
             }
           },
           "401": {
-            "description": "認証情報が欠落しているか無効です。詳細は[Unauthorized](/api-reference/errors/unauthorized)を参照してください。",
+            "description": "認証情報が欠落しているか無効です。詳細は [Unauthorized](/api-reference/errors/unauthorized) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -830,7 +830,7 @@
             }
           },
           "500": {
-            "description": "内部サーバーエラー。詳細は[Internal Error](/api-reference/errors/internal_error)を参照してください。",
+            "description": "内部サーバーエラー。詳細は [Internal Error](/api-reference/errors/internal_error) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -855,7 +855,7 @@
     },
     "/v1/batches/{batch_id}/items": {
       "get": {
-        "summary": "特定のバッチに対する完了または失敗したアイテムリストを、オプションでコンテンツと共に取得",
+        "summary": "特定のバッチに対して、完了または失敗したアイテムリストをオプションでコンテンツと共に取得",
         "description": "指定されたバッチIDに対して、リクエストされたステータスに基づくアイテムとコンテンツのリストを取得します。",
         "security": [
           {
@@ -999,7 +999,7 @@
                   "code": "validation_error",
                   "type": "https://docs.olostep.com/api-reference/errors/bad_request",
                   "status": 400,
-                  "title": "不正リクエスト",
+                  "title": "不正なリクエスト",
                   "detail": "Status must be either 'completed' or 'failed'",
                   "created": 1704067200,
                   "metadata": {}
@@ -1008,7 +1008,7 @@
             }
           },
           "401": {
-            "description": "認証情報が欠落しているか無効です。詳細は[Unauthorized](/api-reference/errors/unauthorized)を参照してください。",
+            "description": "認証情報が欠落しているか無効です。詳細は [Unauthorized](/api-reference/errors/unauthorized) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1050,7 +1050,7 @@
             }
           },
           "500": {
-            "description": "内部サーバーエラー。詳細は[Internal Error](/api-reference/errors/internal_error)を参照してください。",
+            "description": "内部サーバーエラー。詳細は [Internal Error](/api-reference/errors/internal_error) を参照してください。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1100,12 +1100,12 @@
           },
           "code": {
             "type": "string",
-            "description": "機械可読のエラーコード"
+            "description": "機械可読なエラーコード"
           },
           "type": {
             "type": "string",
             "format": "uri",
-            "description": "問題のタイプを識別するURI参照"
+            "description": "問題の種類を識別するURI参照"
           },
           "status": {
             "type": "integer",
@@ -1145,7 +1145,7 @@
       },
       "Metadata": {
         "type": "object",
-        "description": "オブジェクトに関する追加情報を保存するためのキーと値のペアのセット。Stripeのアプローチに従い、検証ルールがあります：最大50キー、キーは最大40文字（角括弧なし）、値は最大500文字、すべての値は文字列として保存されます。",
+        "description": "オブジェクトに関する追加情報を保存するためのキーと値のペアのセット。Stripeのアプローチに従った検証ルール：最大50キー、キーは最大40文字（角括弧なし）、値は最大500文字、すべての値は文字列として保存されます。",
         "additionalProperties": {
           "type": "string",
           "maxLength": 500,

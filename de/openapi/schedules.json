@@ -22,7 +22,7 @@
     "/v1/schedules": {
       "post": {
         "summary": "Zeitplan erstellen",
-        "description": "Erstellt einen neuen Zeitplan, um API-Aufrufe zu festgelegten Zeiten auszuführen. Unterstützt sowohl einmalige Ausführungen als auch wiederkehrende Zeitpläne mit Cron-Ausdrücken. Du kannst auch natürliche Sprache verwenden, um Cron-Ausdrücke automatisch zu generieren. Für POST-Anfragen kannst du die Kurzform der Olostep-Endpunkte verwenden (z.B. 'v1/scrapes'), die automatisch vorangestellt werden, oder eine vollständige URL angeben. Die Nutzlast kann jede JSON-Struktur enthalten, die du senden möchtest.",
+        "description": "Erstellt einen neuen Zeitplan, um API-Aufrufe zu bestimmten Zeiten auszuführen. Unterstützt sowohl einmalige Ausführungen als auch wiederkehrende Zeitpläne mit Cron-Ausdrücken. Du kannst auch natürliche Sprache verwenden, um Cron-Ausdrücke automatisch zu generieren. Für POST-Anfragen kannst du kurze Olostep-Endpunkte (z.B. 'v1/scrapes') verwenden, die automatisch vorangestellt werden, oder eine vollständige URL angeben. Die Nutzlast kann jede JSON-Struktur enthalten, die du senden möchtest.",
         "security": [
           {
             "Authorization": []
@@ -63,7 +63,7 @@
                   },
                   "expression_timezone": {
                     "type": "string",
-                    "description": "IANA-Zeitzonenkennung (z.B. 'UTC', 'America/New_York', 'Europe/London') für den Zeitplan. Erforderlich für wiederkehrende Zeitpläne, optional für einmalige Zeitpläne. Bei Verwendung von natürlichem Sprachtext wird standardmäßig 'UTC' verwendet."
+                    "description": "IANA-Zeitzonenkennung (z.B. 'UTC', 'America/New_York', 'Europe/London') für den Zeitplan. Erforderlich für wiederkehrende Zeitpläne, optional für einmalige Zeitpläne. Bei Verwendung von natürlicher Sprache wird standardmäßig 'UTC' verwendet."
                   },
                   "text": {
                     "type": "string",
@@ -88,7 +88,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "Eindeutige Zeitplankennung"
+                      "description": "Eindeutige Zeitplan-Kennung"
                     },
                     "type": {
                       "type": "string",
@@ -117,7 +117,7 @@
                     "execute_at": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                      "description": "Ausführungsdatum und -uhrzeit (nur bei einmaligen Zeitplänen vorhanden)"
                     },
                     "expression_timezone": {
                       "type": "string",
@@ -187,7 +187,7 @@
                           },
                           "schedule_id": {
                             "type": "string",
-                            "description": "Eindeutige Zeitplankennung"
+                            "description": "Eindeutige Zeitplan-Kennung"
                           },
                           "type": {
                             "type": "string",
@@ -203,7 +203,7 @@
                           },
                           "payload": {
                             "type": "object",
-                            "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird"
+                            "description": "Die Nutzlast, die mit dem API-Aufruf gesendet werden soll"
                           },
                           "cron_expression": {
                             "type": "string",
@@ -212,7 +212,7 @@
                           "execute_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                            "description": "Ausführungsdatum und -uhrzeit (nur bei einmaligen Zeitplänen vorhanden)"
                           },
                           "expression_timezone": {
                             "type": "string",
@@ -246,7 +246,7 @@
                               "ENABLED",
                               "DELETED"
                             ],
-                            "description": "Aktueller Zustand des Zeitplans"
+                            "description": "Aktueller Status des Zeitplans"
                           },
                           "method": {
                             "type": "string",
@@ -316,7 +316,7 @@
                         },
                         "schedule_id": {
                           "type": "string",
-                          "description": "Eindeutige Zeitplankennung"
+                          "description": "Eindeutige Zeitplan-Kennung"
                         },
                         "type": {
                           "type": "string",
@@ -340,7 +340,7 @@
                         },
                         "payload": {
                           "type": "object",
-                          "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird"
+                          "description": "Die Nutzlast, die mit dem API-Aufruf gesendet werden soll"
                         },
                         "cron_expression": {
                           "type": "string",
@@ -349,7 +349,7 @@
                         "execute_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                          "description": "Ausführungsdatum und -uhrzeit (nur bei einmaligen Zeitplänen vorhanden)"
                         },
                         "expression_timezone": {
                           "type": "string",
@@ -383,7 +383,7 @@
                             "ENABLED",
                             "DELETED"
                           ],
-                          "description": "Aktueller Zustand des Zeitplans"
+                          "description": "Aktueller Status des Zeitplans"
                         }
                       }
                     }
@@ -399,7 +399,7 @@
             "description": "Ungültiger API-Schlüssel."
           },
           "404": {
-            "description": "Kein Zeitplan für die angegebene ID gefunden."
+            "description": "Zeitplan für die angegebene ID nicht gefunden."
           },
           "500": {
             "description": "Interner Serverfehler beim Abrufen des Zeitplans."
@@ -454,7 +454,7 @@
             "description": "Ungültiger API-Schlüssel."
           },
           "404": {
-            "description": "Kein Zeitplan für die angegebene ID gefunden."
+            "description": "Zeitplan für die angegebene ID nicht gefunden."
           },
           "500": {
             "description": "Interner Serverfehler beim Löschen des Zeitplans."

@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "API di Scraping",
+    "title": "API di Scrapes",
     "version": "1.0.0"
   },
   "servers": [
@@ -89,7 +89,7 @@
                               "enum": [
                                 "wait"
                               ],
-                              "description": "Attendere per un determinato numero di millisecondi"
+                              "description": "Attendere per un tempo specificato in millisecondi"
                             },
                             "milliseconds": {
                               "type": "integer",
@@ -100,7 +100,7 @@
                         },
                         {
                           "type": "object",
-                          "title": "Clic",
+                          "title": "Cliccare",
                           "required": [
                             "type",
                             "selector"
@@ -111,7 +111,7 @@
                               "enum": [
                                 "click"
                               ],
-                              "description": "Clicca su un elemento"
+                              "description": "Cliccare su un elemento"
                             },
                             "selector": {
                               "type": "string",
@@ -133,11 +133,11 @@
                               "enum": [
                                 "fill_input"
                               ],
-                              "description": "Compila un elemento di input con un valore"
+                              "description": "Compila un elemento input con un valore"
                             },
                             "selector": {
                               "type": "string",
-                              "description": "Selettore CSS per l'elemento di input"
+                              "description": "Selettore CSS per l'elemento input"
                             },
                             "value": {
                               "type": "string",
@@ -169,7 +169,7 @@
                                 "left",
                                 "right"
                               ],
-                              "description": "Direzione dello scorrimento"
+                              "description": "Direzione di scorrimento"
                             },
                             "amount": {
                               "type": "number",
@@ -191,11 +191,11 @@
                       "postlight",
                       "none"
                     ],
-                    "description": "Specifica il trasformatore HTML da usare, se presente. La libreria Mercury Parser di Postlight viene utilizzata per rimuovere annunci e altri contenuti indesiderati dal contenuto estratto."
+                    "description": "Specifica il trasformatore HTML da usare, se presente. La libreria Mercury Parser di Postlight è usata per rimuovere annunci e altri contenuti indesiderati dal contenuto estratto."
                   },
                   "remove_images": {
                     "type": "boolean",
-                    "description": "Opzione per rimuovere le immagini dal contenuto estratto. Il valore predefinito è false.",
+                    "description": "Opzione per rimuovere le immagini dal contenuto estratto. Di default è false.",
                     "default": false
                   },
                   "remove_class_names": {
@@ -237,7 +237,7 @@
                       },
                       "query_to_order_links_by": {
                         "type": "string",
-                        "description": "Ordina i link restituiti in base alla loro somiglianza con il testo della query fornita, dando priorità alle corrispondenze più rilevanti per prime."
+                        "description": "Ordina i link restituiti in base alla loro somiglianza con il testo della query fornita, dando priorità alle corrispondenze più rilevanti."
                       },
                       "include_links": {
                         "type": "array",
@@ -284,13 +284,13 @@
                     "properties": {
                       "full_page": {
                         "type": "boolean",
-                        "description": "Se passato true, lo screenshot dell'intera pagina viene effettuato dopo aver scrollato fino in fondo al sito."
+                        "description": "se passato true, lo screenshot dell'intera pagina viene preso dopo aver scrollato fino in fondo al sito."
                       }
                     }
                   },
                   "metadata": {
                     "type": "object",
-                    "description": "Metadati definiti dall'utente. Non ancora supportato."
+                    "description": "Metadati definiti dall'utente. Non supportato ancora."
                   }
                 },
                 "required": [
@@ -310,7 +310,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "ID dello scrape."
+                      "description": "ID dello Scrape"
                     },
                     "object": {
                       "type": "string",
@@ -326,7 +326,7 @@
                     },
                     "url_to_scrape": {
                       "type": "string",
-                      "description": "L'URL che è stato sottoposto a scraping."
+                      "description": "L'URL che è stato sottoposto a scrape."
                     },
                     "result": {
                       "type": "object",
@@ -342,7 +342,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "Contenuto dal parser."
+                          "description": "Contenuto dal parser"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"
@@ -381,7 +381,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri mancanti o errati."
           },
           "402": {
             "description": "Pagamento richiesto a causa di una chiave API non valida."
@@ -397,7 +397,7 @@
     },
     "/v1/scrapes/{scrape_id}": {
       "get": {
-        "summary": "Recupera il risultato dello scrape.",
+        "summary": "Recupera il risultato dello scrape",
         "description": "Questo endpoint permette agli utenti di recuperare il risultato di uno scrape avviato in precedenza.",
         "security": [
           {
@@ -425,7 +425,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "ID dello scrape."
+                      "description": "ID dello Scrape"
                     },
                     "object": {
                       "type": "string",
@@ -441,7 +441,7 @@
                     },
                     "url_to_scrape": {
                       "type": "string",
-                      "description": "L'URL che è stato sottoposto a scraping."
+                      "description": "L'URL che è stato sottoposto a scrape."
                     },
                     "result": {
                       "type": "object",
@@ -454,7 +454,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "Contenuto dal parser."
+                          "description": "Contenuto dal parser"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"
@@ -494,7 +494,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri mancanti o errati."
           },
           "402": {
             "description": "Pagamento richiesto a causa di una chiave API non valida."

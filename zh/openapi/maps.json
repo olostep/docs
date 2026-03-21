@@ -65,7 +65,7 @@
                     "cursor": {
                       "type": "string",
                       "nullable": true,
-                      "description": "分页游标以检索下一组 URL。如果为 null，则表示所有 URL 已被检索。"
+                      "description": "分页游标以检索下一组 URL。如果为 null，则表示已检索到所有 URL。"
                     }
                   }
                 }
@@ -107,11 +107,11 @@
                   },
                   "search_query": {
                     "type": "string",
-                    "description": "可选的搜索查询，用于按搜索相关性排序链接。"
+                    "description": "一个可选的搜索查询，用于按搜索相关性排序链接。"
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "可选的数字，用于限制搜索查询的前 n 个链接。"
+                    "description": "一个可选的数字，用于限制搜索查询的前 n 个链接。"
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -129,11 +129,11 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "使用 glob 语法排除的 URL 路径模式。例如：`/careers/**`。排除的 URL 将优先于包含的 URL。"
+                    "description": "使用 glob 语法排除的 URL 路径模式。例如：`/careers/**`。被排除的 URL 将优先于包含的 URL。"
                   },
                   "cursor": {
                     "type": "string",
-                    "description": "可选：来自上一个响应的分页游标。当提供时，从上一个请求由于响应大小限制而停止的地方返回下一组 URL。"
+                    "description": "可选：来自先前响应的分页游标。当提供时，将从上一个请求由于响应大小限制而停止的地方返回下一组 URL。"
                   }
                 },
                 "required": [
@@ -195,7 +195,7 @@
                     },
                     "cursor": {
                       "type": "string",
-                      "description": "分页游标用于检索由于10MB大小限制而受限的下一组URL。如果为null或不存在，则表示所有URL已被检索。"
+                      "description": "分页游标用于获取下一个因10MB大小限制而受限的URL集。如果为null或不存在，则表示所有URL已被检索。"
                     }
                   }
                 },
@@ -243,7 +243,7 @@
             "description": "由于参数错误或缺失导致的错误请求。"
           },
           "401": {
-            "description": "由于缺少或无效的API令牌导致的未授权访问。"
+            "description": "未授权访问，缺少或无效的API令牌。"
           },
           "500": {
             "description": "内部服务器错误。"

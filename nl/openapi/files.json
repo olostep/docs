@@ -122,7 +122,7 @@
                 "batch"
               ]
             },
-            "description": "Filter bestanden op doel. Ondersteunde waarden: 'context' of 'batch'."
+            "description": "Bestanden filteren op doel. Ondersteunde waarden: 'context' of 'batch'."
           }
         ],
         "responses": {
@@ -189,7 +189,7 @@
     },
     "/v1/files/{file_id}/complete": {
       "post": {
-        "summary": "Voltooi Bestandsupload",
+        "summary": "Voltooi Bestand Upload",
         "description": "Voltooi het uploadproces van het bestand en valideer het geüploade JSON-bestand. Deze endpoint controleert of het bestand bestaat, valideert het JSON-formaat, controleert de bestandsgrootte (max 200MB), en werkt de bestandsstatus bij naar completed.",
         "security": [
           {
@@ -209,7 +209,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Bestandsupload succesvol voltooid.",
+            "description": "Bestand upload succesvol voltooid.",
             "content": {
               "application/json": {
                 "schema": {
@@ -265,7 +265,7 @@
     },
     "/v1/files/{file_id}": {
       "get": {
-        "summary": "Verkrijg Bestandsmetadata op ID",
+        "summary": "Haal Bestandsmetadata op via ID",
         "description": "Haal metadata op voor een bestand via zijn ID.",
         "security": [
           {
@@ -285,7 +285,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle reactie met bestandsmetadata.",
+            "description": "Succesvolle respons met bestandsmetadata.",
             "content": {
               "application/json": {
                 "schema": {
@@ -394,7 +394,7 @@
     "/v1/files/{file_id}/content": {
       "get": {
         "summary": "Haal Bestandsobject op via ID",
-        "description": "Verkrijg een vooraf ondertekende URL om de inhoud van een \"completed\" bestand te downloaden. Optioneel kun je de vervaltijd voor de download-URL specificeren met de expires_in queryparameter (standaard is 600 seconden / 10 minuten).",
+        "description": "Verkrijg een vooraf ondertekende URL om de inhoud van een voltooid bestand te downloaden. Geef optioneel de vervaltijd voor de download-URL op met behulp van de expires_in queryparameter (standaard is 600 seconden / 10 minuten).",
         "security": [
           {
             "Authorization": []
@@ -452,11 +452,11 @@
                     "download_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "Vooraf ondertekende URL voor het downloaden van het bestand. Verloopt na de gespecificeerde expires_in tijd."
+                      "description": "Vooraf ondertekende URL voor het downloaden van het bestand. Verloopt na de opgegeven expires_in tijd."
                     },
                     "expires_in": {
                       "type": "integer",
-                      "description": "Aantal seconden totdat de download-URL verloopt."
+                      "description": "Aantal seconden totdat de download-URL verloopt"
                     }
                   }
                 }
@@ -464,7 +464,7 @@
             }
           },
           "400": {
-            "description": "Foute aanvraag. Bestand niet \"completed\"."
+            "description": "Foute aanvraag. Bestand niet voltooid."
           },
           "401": {
             "description": "Ongeldige API-sleutel"

@@ -21,7 +21,7 @@
   "paths": {
     "/v1/searches/{search_id}": {
       "get": {
-        "summary": "Haal Zoekopdracht",
+        "summary": "Haal Zoekopdracht op",
         "description": "Haal een eerder voltooide zoekopdracht op met zijn ID.",
         "security": [
           {
@@ -41,7 +41,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met het zoekobject.",
+            "description": "Succesvolle reactie met het zoekobject.",
             "content": {
               "application/json": {
                 "schema": {
@@ -113,7 +113,7 @@
     "/v1/searches": {
       "post": {
         "summary": "Maak Zoekopdracht",
-        "description": "Doorzoek het web met een natuurlijke taalquery en krijg een gededupliceerde lijst van relevante links met titels en beschrijvingen terug.  Het zal de query semantisch over het web doorzoeken en resultaten teruggeven.  Zie [Zoekfunctie](/searches/searches).",
+        "description": "Doorzoek het web met een natuurlijke taalquery en krijg een gededupliceerde lijst van relevante links met titels en beschrijvingen terug.  Het zal de query semantisch door het web zoeken en resultaten teruggeven.  Zie [Zoekfunctie](/searches/searches).",
         "security": [
           {
             "Authorization": []
@@ -140,7 +140,7 @@
         },
         "responses": {
           "200": {
-            "description": "Succesvolle respons met zoekresultaten.",
+            "description": "Succesvolle reactie met zoekresultaten.",
             "content": {
               "application/json": {
                 "schema": {
@@ -179,7 +179,7 @@
                         },
                         "links": {
                           "type": "array",
-                          "description": "Gededupliceerde lijst van relevante links gevonden over meerdere zoekopdrachten.",
+                          "description": "Gededupliceerde lijst van relevante links gevonden in meerdere zoekopdrachten.",
                           "items": {
                             "type": "object",
                             "properties": {
@@ -195,7 +195,7 @@
                               "description": {
                                 "type": "string",
                                 "nullable": true,
-                                "description": "Een kort fragment of beschrijving van het resultaat."
+                                "description": "Een korte snippet of beschrijving van het resultaat."
                               }
                             }
                           }
