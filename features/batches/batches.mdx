@@ -444,13 +444,43 @@ Since we passed the parser to retrieve the structured JSON and we are printing o
 - `peopleAlsoAsk`: Related questions that users commonly search for
 - `relatedSearches`: Suggested related search queries
 
-If you don't want the structured JSON but simply the markdown or html you can retrieve those from the retrieve endpoint. 
+If you don't want the structured JSON but simply the markdown or html you can retrieve those from the retrieve endpoint.
+
+## Webhooks
+
+Instead of polling batch status, you can pass a **`webhook`** URL when you create the batch. Olostep sends an **HTTP POST** to that URL when the batch finishes (all items completed or failed).
+
+Your webhook endpoint must be **publicly reachable** over **`http://` or `https://`**. It cannot point to localhost or private IP addresses. For the full payload shape, retry behavior, and best practices (respond quickly with `2xx`, deduplicate using the event `id`), see [Webhooks](/api-reference/common/webhooks).
+
+<Tip>
+**Parameter name:** The canonical field is `webhook`. For backward compatibility, **`webhook_url`** is also accepted as an alias.
+</Tip>
+
+For batches, the **`batch.completed`** event includes the batch id, status, and item counts. Failed deliveries are retried automatically (up to **5 attempts** over about **30 minutes** with exponential backoff). Your handler must return a **2xx** status within **30 seconds** per attempt.
 
 ## Metadata
 
-You can attach custom key-value pairs to batches using the `metadata` parameter. This is useful for tracking, filtering, and organizing your batches by linking them to internal systems like order IDs, customer IDs, or project names.
+Attach custom **string key-value** metadata to batches for tracking, filtering, and correlating jobs with your own systems (order IDs, project names, pipeline stage, and so on). Metadata follows the same rules as in our [Metadata](/api-reference/common/metadata) reference.
 
-For validation rules and usage examples, see [Metadata](/api-reference/common/metadata).
+You can set metadata at **two levels** when creating a batch:
+
+- **Batch-level** — `metadata` on the **request body** (applies to the whole batch)
+- **Item-level** — `metadata` on **each object** in the `items` array (per URL)
+
+Metadata is **returned** on subsequent **GET** responses for that batch. You can **merge-update** batch metadata later with [Update Batch](/api-reference/batches/update) (`PATCH`); see the metadata guide for add, overwrite, and delete behavior.
+
+| Constraint | Limit |
+| --- | --- |
+| Maximum keys | 50 |
+| Key length | 40 characters |
+| Key format | No square brackets (`[` or `]`) |
+| Value length | 500 characters (stored as strings) |
+
+<Note>
+**Type coercion:** Numbers and booleans are converted to strings (for example `42` → `"42"`, `true` → `"true"`). Nested objects and arrays are rejected.
+</Note>
+
+For complete examples and PATCH semantics, see [Metadata](/api-reference/common/metadata).
 
 ## Important Notes
 
