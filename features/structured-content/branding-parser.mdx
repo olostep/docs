@@ -1,0 +1,250 @@
+---
+title: 'Branding Parser'
+sidebarTitle: 'Branding'
+description: 'Extract logos, colors, fonts, spacing, and component styles from any website into structured JSON.'
+icon: 'palette'
+---
+
+The `@olostep/branding-parser` extracts a website's complete brand identity — colors, typography, spacing, component styles, logo, and images — as structured JSON. It works by analyzing CSS custom properties, inline styles, and DOM elements from the rendered page.
+
+## Usage
+
+Pass `formats: ["json"]` with `parser.id` set to `@olostep/branding-parser`.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+response = requests.post(
+    "https://api.olostep.com/v1/scrapes",
+    headers={
+        "Authorization": "Bearer <YOUR_API_KEY>",
+        "Content-Type": "application/json"
+    },
+    json={
+        "url_to_scrape": "https://replit.com",
+        "formats": ["json"],
+        "parser": {
+            "id": "@olostep/branding-parser"
+        }
+    }
+)
+
+data = response.json()
+branding = json.loads(data["result"]["json_content"])
+print(json.dumps(branding, indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url_to_scrape: 'https://replit.com',
+    formats: ['json'],
+    parser: { id: '@olostep/branding-parser' }
+  })
+});
+
+const { result } = await res.json();
+const branding = JSON.parse(result.json_content);
+console.log(branding);
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://replit.com",
+    "formats": ["json"],
+    "parser": { "id": "@olostep/branding-parser" }
+  }'
+```
+
+</CodeGroup>
+
+## Response
+
+The `json_content` field contains a stringified JSON object. Below is the parsed structure from [replit.com](https://replit.com):
+
+```json
+{
+  "success": true,
+  "timestamp": "2026-03-23T12:51:06.176Z",
+  "branding": {
+    "colorScheme": "light",
+    "fonts": [
+      { "family": "ABC Diatype", "role": "heading" },
+      { "family": "IBM Plex Sans", "role": "unknown" }
+    ],
+    "colors": {
+      "primary": "#2492ff",
+      "accent": "#ec4e02",
+      "background": "#fafaf9",
+      "textPrimary": "#0e0e0f",
+      "link": "#ec4e02"
+    },
+    "typography": {
+      "fontFamilies": {
+        "primary": "ABC Diatype",
+        "heading": "ABC Diatype"
+      },
+      "fontStacks": {
+        "heading": ["ABC Diatype", "sans-serif"],
+        "body": ["IBM Plex Sans", "sans-serif"],
+        "paragraph": ["ABC Diatype", "sans-serif"]
+      },
+      "fontSizes": {
+        "h1": "48px",
+        "h2": "42px",
+        "body": "14px"
+      }
+    },
+    "spacing": {
+      "baseUnit": 4,
+      "borderRadius": "6px"
+    },
+    "components": {
+      "input": {
+        "background": "transparent",
+        "textColor": "#0e0e0f",
+        "borderColor": null,
+        "borderRadius": "6px",
+        "borderRadiusCorners": {
+          "topLeft": "6px",
+          "topRight": "6px",
+          "bottomRight": "6px",
+          "bottomLeft": "6px"
+        },
+        "shadow": "none"
+      },
+      "buttonPrimary": {
+        "background": "#ec4e02",
+        "textColor": "#ffffff",
+        "borderRadius": "1028px",
+        "borderRadiusCorners": {
+          "topLeft": "1028px",
+          "topRight": "1028px",
+          "bottomRight": "1028px",
+          "bottomLeft": "1028px"
+        },
+        "shadow": "none"
+      },
+      "buttonSecondary": {
+        "background": "#1a1a1a",
+        "textColor": "#ffffff",
+        "borderRadius": "1028px",
+        "borderRadiusCorners": {
+          "topLeft": "1028px",
+          "topRight": "1028px",
+          "bottomRight": "1028px",
+          "bottomLeft": "1028px"
+        },
+        "shadow": "none"
+      }
+    },
+    "images": {
+      "logo": "data:image/svg+xml;base64,...",
+      "favicon": "https://www.google.com/s2/favicons?domain=replit.com&sz=64",
+      "ogImage": "https://replit.com/public/images/opengraph_rebrand.jpg",
+      "logoHref": "/",
+      "logoAlt": "Replit – Build apps and sites with AI - Replit"
+    }
+  },
+  "metadata": {
+    "title": "Replit – Build apps and sites with AI - Replit",
+    "ogTitle": "Replit – Build apps and sites with AI",
+    "ogDescription": "Build and deploy software collaboratively with the power of AI without spending a second on setup.",
+    "ogImage": "https://replit.com/public/images/opengraph_rebrand.jpg",
+    "description": "Build and deploy software collaboratively with the power of AI without spending a second on setup.",
+    "keywords": "replit,ai,software,build,collaborate,IDE,platform,code,deploy,prototype,online,agent",
+    "author": "replit",
+    "twitter:card": "summary",
+    "twitter:site": "@replit",
+    "viewport": "width=device-width, initial-scale=1",
+    "theme-color": "#1a1b1b"
+  }
+}
+```
+
+## Response fields
+
+### `branding.colorScheme`
+`"light"` or `"dark"`, determined from the page background color.
+
+### `branding.fonts`
+Array of detected font families, each with a `family` name and a `role`:
+
+| Role | Description |
+|------|-------------|
+| `heading` | Font used predominantly for large/heading text |
+| `body` | Font used predominantly for body/paragraph text |
+| `unknown` | Additional detected font without a clear role |
+
+### `branding.colors`
+Exact hex values extracted from CSS custom properties, inline styles, and computed stylesheet values.
+
+| Field | Description |
+|-------|-------------|
+| `primary` | Main brand color, often used for interactive elements |
+| `accent` | Secondary highlight color (CTAs, links, icons) |
+| `background` | Page background color |
+| `textPrimary` | Main body text color |
+| `link` | Link / anchor color |
+
+### `branding.typography`
+
+| Field | Description |
+|-------|-------------|
+| `fontFamilies.primary` | Primary body font family |
+| `fontFamilies.heading` | Primary heading font family |
+| `fontStacks.heading` | Full heading font stack array |
+| `fontStacks.body` | Full body font stack array |
+| `fontStacks.paragraph` | Full paragraph font stack array |
+| `fontSizes.h1` | Detected `h1` font size |
+| `fontSizes.h2` | Detected `h2` font size |
+| `fontSizes.body` | Detected body font size |
+
+### `branding.spacing`
+
+| Field | Description |
+|-------|-------------|
+| `baseUnit` | Base grid unit in pixels (commonly 4 or 8) |
+| `borderRadius` | Most common border-radius across the site |
+
+### `branding.components`
+Ready-to-use style objects for `buttonPrimary`, `buttonSecondary`, and `input`.
+
+Each component includes:
+- `background` — background color
+- `textColor` — text color
+- `borderRadius` — shorthand border-radius
+- `borderRadiusCorners` — per-corner border-radius object (`topLeft`, `topRight`, `bottomRight`, `bottomLeft`)
+- `shadow` — box-shadow value
+- `borderColor` *(input only)* — border color, or `null` if not set
+
+### `branding.images`
+
+| Field | Description |
+|-------|-------------|
+| `logo` | Extracted logo as a data URI or absolute URL |
+| `favicon` | Favicon URL (falls back to Google's favicon service) |
+| `ogImage` | OpenGraph image URL |
+| `logoHref` | The href the logo links to |
+| `logoAlt` | The logo's alt text |
+
+### `metadata`
+Standard page metadata extracted from `<meta>` tags, including `title`, `ogTitle`, `ogDescription`, `ogImage`, `description`, `keywords`, `author`, Twitter card fields, `viewport`, and `theme-color`.
+
+## Use cases
+
+- **AI website generators** — feed design tokens directly into a generator to replicate a brand's look and feel.
+- **Competitor monitoring** — track design system changes (color shifts, font swaps) over time.
+- **Brand asset collection** — programmatically retrieve logos, favicons, and OG images at scale.
+- **Design system audits** — compare declared CSS values against actual DOM rendering.
