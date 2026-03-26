@@ -263,6 +263,63 @@ const info = await map.info();
 ```
 </CodeGroup>
 
+### AI-Powered Answers
+
+Get answers from web pages using AI:
+
+<CodeGroup>
+```ts camelCase
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// Simple task — pass a string directly
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// With structured JSON output
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  jsonFormat: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// Retrieve a previously created answer by ID
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Simple task — pass a string directly
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// With structured JSON output
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  json_format: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// Retrieve a previously created answer by ID
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+</CodeGroup>
+
 ### Content Retrieval
 
 Retrieve previously scraped content:
