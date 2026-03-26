@@ -13,7 +13,8 @@ description: 'Official NodeJS SDK to search, extract and structure data from the
 npm install olostep
 ```
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
@@ -22,14 +23,28 @@ const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
 const result = await client.scrapes.create('https://example.com');
 console.log(result.id, result.html_content);
 ```
+```ts snake_case
+import Olostep from 'olostep';
 
+const client = new Olostep({api_key: process.env.OLOSTEP_API_KEY});
+
+// Minimal scrape example
+const result = await client.scrapes.create('https://example.com');
+console.log(result.id, result.html_content);
+```
+</CodeGroup>
+
+<Note>
+The NodeJS SDK accepts both **camelCase** and **snake_case** for all parameters. Use **snake_case** if you're building for AI agents, it matches the API's native field names.
+</Note>
 ## Usage
 
 ### Scraping
 
 Scrape a single URL with various options:
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Format} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -52,12 +67,37 @@ console.log(scrape.markdown_content);
 // Get scrape by ID
 const fetched = await client.scrapes.get(scrape.id);
 ```
+```ts snake_case
+import Olostep, {Format} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Simple scrape
+const scrape = await client.scrapes.create('https://example.com');
+
+// With multiple formats
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  formats: [Format.HTML, Format.MARKDOWN, Format.TEXT],
+  wait_before_scraping: 1000,
+  remove_images: true
+});
+
+// Access the content
+console.log(scrape.html_content);
+console.log(scrape.markdown_content);
+
+// Get scrape by ID
+const fetched = await client.scrapes.get(scrape.id);
+```
+</CodeGroup>
 
 ### Batch Processing
 
 Process multiple URLs in a single batch:
 
-```ts
+<CodeGroup>
+```ts camelCase
 // Using URL strings (custom IDs auto-generated)
 const batch = await client.batches.create([
   'https://example.com',
@@ -85,15 +125,48 @@ console.log(info);
 
 // Stream individual results
 for await (const item of batch.items()) {
-  console.log(item.customId);
+  console.log(item.custom_id);
 }
 ```
+```ts snake_case
+// Using URL strings (custom IDs auto-generated)
+const batch = await client.batches.create([
+  'https://example.com',
+  'https://example.org',
+  'https://example.net'
+]);
+
+// Or with explicit custom IDs
+const batch = await client.batches.create([
+  {url: 'https://example.com', custom_id: 'site-1'},
+  {url: 'https://example.org', custom_id: 'site-2'}
+]);
+
+console.log(`Batch ${batch.id} created with ${batch.total_urls} URLs`);
+
+// Wait for completion
+await batch.waitTillDone({
+  check_every_n_secs: 5,
+  timeout_seconds: 120
+});
+
+// Get batch info
+const info = await batch.info();
+console.log(info);
+
+// Stream individual results
+for await (const item of batch.items()) {
+  console.log(item.custom_id);
+}
+```
+</CodeGroup>
 
 ### Crawling
 
 Crawl an entire website:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const crawl = await client.crawls.create({
   url: 'https://example.com',
   maxPages: 100,
@@ -119,12 +192,40 @@ for await (const page of crawl.pages()) {
   console.log(page.url, page.status_code);
 }
 ```
+```ts snake_case
+const crawl = await client.crawls.create({
+  url: 'https://example.com',
+  max_pages: 100,
+  max_depth: 3,
+  include_urls: ['*/blog/*'],
+  exclude_urls: ['*/admin/*']
+});
+
+console.log(`Crawl ${crawl.id} started`);
+
+// Wait for completion
+await crawl.waitTillDone({
+  check_every_n_secs: 10,
+  timeout_seconds: 300
+});
+
+// Get crawl info
+const info = await crawl.info();
+console.log(`Crawled ${info.pages_crawled} pages`);
+
+// Stream crawled pages
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.status_code);
+}
+```
+</CodeGroup>
 
 ### Site Mapping
 
 Generate a sitemap of URLs from a website:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const map = await client.maps.create({
   url: 'https://example.com',
   topN: 100,
@@ -142,6 +243,82 @@ for await (const url of map.urls()) {
 // Get map info
 const info = await map.info();
 ```
+```ts snake_case
+const map = await client.maps.create({
+  url: 'https://example.com',
+  top_n: 100,
+  include_subdomain: true,
+  search_query: 'blog posts'
+});
+
+console.log(`Map ${map.id} created`);
+
+// Stream URLs
+for await (const url of map.urls()) {
+  console.log(url);
+}
+
+// Get map info
+const info = await map.info();
+```
+</CodeGroup>
+
+### AI-Powered Answers
+
+Get answers from web pages using AI:
+
+<CodeGroup>
+```ts camelCase
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// Simple task — pass a string directly
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// With structured JSON output
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  jsonFormat: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// Retrieve a previously created answer by ID
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Simple task — pass a string directly
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// With structured JSON output
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  json_format: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// Retrieve a previously created answer by ID
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+</CodeGroup>
 
 ### Content Retrieval
 
@@ -181,7 +358,8 @@ const scrape = await client.scrapes.create({
 
 Scrape from different countries using predefined country codes or any valid country code string:
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Country} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -198,12 +376,31 @@ const scrape2 = await client.scrapes.create({
   country: 'jp'  // Japan
 });
 ```
+```ts snake_case
+import Olostep, {Country} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Using predefined enum values (US, DE, FR, GB, SG)
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  country: Country.DE  // Germany
+});
+
+// Or use any valid country code as a string
+const scrape2 = await client.scrapes.create({
+  url: 'https://example.com',
+  country: 'jp'  // Japan
+});
+```
+</CodeGroup>
 
 #### LLM Extraction
 
 Extract structured data using LLMs:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const scrape = await client.scrapes.create({
   url: 'https://example.com',
   llmExtract: {
@@ -212,15 +409,29 @@ const scrape = await client.scrapes.create({
       price: 'number',
       description: 'string'
     },
-    // Optionally provide a prompt to guide extraction
     prompt: 'Extract product information from this page'
   }
 });
 ```
+```ts snake_case
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  llm_extract: {
+    schema: {
+      title: 'string',
+      price: 'number',
+      description: 'string'
+    },
+    prompt: 'Extract product information from this page'
+  }
+});
+```
+</CodeGroup>
 
 ### Client Configuration
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({
@@ -234,6 +445,21 @@ const client = new Olostep({
   userAgent: 'MyApp/1.0'  // optional
 });
 ```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({
+  api_key: 'your_api_key',
+  api_base_url: 'https://api.olostep.com/v1',  // optional
+  timeout_ms: 150000,  // 150 seconds (optional)
+  retry: {
+    max_retries: 3,
+    initial_delay_ms: 1000
+  },
+  user_agent: 'MyApp/1.0'  // optional
+});
+```
+</CodeGroup>
 
 ### Feature highlights
 
