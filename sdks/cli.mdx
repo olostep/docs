@@ -1,0 +1,186 @@
+---
+sidebarTitle: 'CLI'
+title: 'Olostep CLI'
+icon: terminal
+description: 'Command-line interface for map, scrape, crawl, batches, and answers: JSON output for scripts, CI, and agents'
+---
+
+**NPM package:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
+
+CLI for the [Olostep API](https://www.olostep.com/): **map**, **answer**, **scrape**, **scrape-get**, **crawl**, **batch-scrape**, and **batch-update**. Responses are **JSON** (pretty-printed) for scripts, CI, and agents.
+
+Installing this package downloads a **standalone binary** for your OS. You do not need Python to run `olostep`.
+
+<Note>
+  On install, a postinstall step downloads the matching binary from the package's [GitHub releases](https://github.com/olostep-api/CLI/releases). If that fails, confirm a release exists for this package version and your platform, then reinstall.
+</Note>
+
+## Install
+
+**Requirements:** Node.js **16+** (only for `npm` / `npx`; the CLI itself is a native binary).
+
+```bash
+npm install -g olostep-cli
+```
+
+Run without a global install:
+
+```bash
+npx -y olostep-cli@latest --help
+```
+
+**Platforms:** macOS (Apple Silicon and Intel), Linux x64, Windows x64.
+
+## API key
+
+Set **`OLOSTEP_API_KEY`** in your environment, or in a `.env` file in the directory where you run `olostep`.
+
+Create keys: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys).
+
+```bash
+export OLOSTEP_API_KEY=your_key_here
+olostep --help
+```
+
+## Output
+
+| Flag | Behavior |
+| ---- | -------- |
+| `--out <path>` | Write JSON to a file (parent dirs created if needed). |
+| `--out -` | Write JSON to **stdout** only (UTF-8, indented). Good for pipes and subprocess capture. |
+
+Progress and log lines go to **stderr**, so stdout stays parseable.
+
+```bash
+olostep map "https://example.com" --top-n 20 --out - | jq '.urls[:10]'
+olostep scrape "https://example.com" --out - | jq .result.markdown_content
+```
+
+If you omit `--out`, files go under `output/` (see [Default `--out` paths](#default-out-paths)).
+
+## Commands
+
+Use `olostep <command> --help` for every option. Most commands accept `--timeout` (HTTP, seconds).
+
+### `map`: discover URLs
+
+| Option | Description |
+| ------ | ----------- |
+| `--out` | File path or `-` |
+| `--top-n` | Max URLs |
+| `--search-query` | Guide discovery |
+| `--include-subdomain` / `--no-include-subdomain` | Subdomains |
+| `--include-url` / `--exclude-url` | Repeatable patterns |
+| `--cursor` | Pagination |
+
+Use `--top-n`, not `--limit` (removed).
+
+```bash
+olostep map "https://example.com" --top-n 100 --search-query "blog"
+```
+
+### `answer`: researched answer
+
+Polls until the answer is ready.
+
+| Option | Description |
+| ------ | ----------- |
+| `--out` | File or `-` |
+| `--json-format` | Optional structured output hint (JSON object string) |
+| `--poll-interval` / `--poll-timeout` | Polling (seconds) |
+
+Use `--json-format`, not `--model` (removed).
+
+```bash
+olostep answer "What does this company build?" --out answer.json
+olostep answer "Extract facts" --json-format '{"company":"","year":""}' --out -
+```
+
+### `scrape`: one URL
+
+**Formats:** `html`, `markdown`, `text`, `json`, `raw_pdf`, `screenshot` (comma-separated; default `markdown`).
+
+| Option | Description |
+| ------ | ----------- |
+| `--formats` | Comma-separated |
+| `--country` | Country code |
+| `--wait-before-scraping` | Ms to wait before scrape |
+| `--payload-json` | Advanced options as JSON object string |
+| `--payload-file` | Same, from file (not together with `--payload-json`) |
+
+```bash
+olostep scrape "https://example.com" --formats markdown,html
+olostep scrape "https://example.com" --payload-file scrape-options.json --out -
+```
+
+### `scrape-get`: by scrape ID
+
+```bash
+olostep scrape-get "scrape_abc123" --out -
+```
+
+### `crawl`: site crawl
+
+**Retrieve formats:** `markdown`, `html`, `json`.
+
+Notable flags: `--max-pages`, `--max-depth`, `--include-subdomain`, `--include-external`, `--include-url`, `--exclude-url`, `--search-query`, `--top-n`, `--webhook`, `--crawl-timeout`, `--follow-robots-txt` / `--ignore-robots-txt`, `--formats`, `--pages-limit`, `--pages-search-query`, `--poll-seconds`, `--poll-timeout`, `--dry-run` (print payload, no request).
+
+```bash
+olostep crawl "https://docs.example.com" --max-pages 50 --formats markdown,html
+olostep crawl "https://example.com" --max-pages 10 --dry-run
+```
+
+### `batch-scrape`: CSV
+
+CSV columns: **`custom_id` or `id`**, and **`url`**.
+
+| Option | Description |
+| ------ | ----------- |
+| `--formats` | `markdown`, `html`, `json` |
+| `--country` | Optional |
+| `--parser-id` | Structured extraction parser |
+| `--poll-seconds`, `--log-every`, `--items-limit` | Polling / paging |
+| `--dry-run` | Print payload only |
+
+```bash
+olostep batch-scrape urls.csv --formats markdown,html
+```
+
+### `batch-update`: batch metadata
+
+Requires **one of** `--metadata-json` or `--metadata-file` (JSON object).
+
+```bash
+olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
+```
+
+## Default `--out` paths {#default-out-paths}
+
+When `--out` is omitted:
+
+| Command | Default |
+| ------- | ------- |
+| `map` | `output/map.json` |
+| `answer` | `output/answer.json` |
+| `scrape` | `output/scrape.json` |
+| `scrape-get` | `output/scrape_get.json` |
+| `crawl` | `output/crawl_results.json` |
+| `batch-scrape` | `output/batch_results.json` |
+| `batch-update` | `output/batch_update.json` |
+
+## Global flags
+
+| Flag | Description |
+| ---- | ----------- |
+| `-V`, `--version` | Version |
+| `-h`, `--help` | Help |
+
+## Related documentation
+
+- [Maps](/features/maps/maps) · [Batches](/features/batches/batches) · [Parsers](/features/structured-content/parsers)
+
+**Repository:** [github.com/olostep-api/CLI](https://github.com/olostep-api/CLI)
+
+## Security
+
+Keep API keys out of source control; rotate if leaked.

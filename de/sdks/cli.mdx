@@ -1,0 +1,186 @@
+---
+sidebarTitle: "CLI"
+title: "Olostep CLI"
+icon: "terminal"
+description: "Befehlszeilenschnittstelle für Karten, Scraping, Crawls, Batches und Antworten: JSON-Ausgabe für Skripte, CI und Agents"
+---
+
+**NPM-Paket:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
+
+CLI für die [Olostep-API](https://www.olostep.com/): **map**, **answer**, **scrape**, **scrape-get**, **crawl**, **batch-scrape** und **batch-update**. Antworten sind **JSON** (formatiert) für Skripte, CI und Agents.
+
+Die Installation dieses Pakets lädt ein **eigenständiges Binary** für Ihr Betriebssystem herunter. Zum Ausführen von `olostep` ist **kein Python** nötig.
+
+<Note>
+  Beim Installieren lädt ein Postinstall-Schritt das passende Binary aus den [GitHub-Releases](https://github.com/olostep-api/CLI/releases) des Pakets. Wenn das fehlschlägt, prüfen Sie, ob es ein Release für diese Paketversion und Ihre Plattform gibt, und installieren Sie erneut.
+</Note>
+
+## Installation
+
+**Voraussetzungen:** Node.js **16+** (nur für `npm` / `npx`; die CLI selbst ist ein natives Binary).
+
+```bash
+npm install -g olostep-cli
+```
+
+Ohne globale Installation:
+
+```bash
+npx -y olostep-cli@latest --help
+```
+
+**Plattformen:** macOS (Apple Silicon und Intel), Linux x64, Windows x64.
+
+## API-Schlüssel
+
+Legen Sie **`OLOSTEP_API_KEY`** in Ihrer Umgebung fest oder in einer `.env`-Datei im Verzeichnis, in dem Sie `olostep` ausführen.
+
+Schlüssel anlegen: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys).
+
+```bash
+export OLOSTEP_API_KEY=your_key_here
+olostep --help
+```
+
+## Ausgabe
+
+| Flag | Verhalten |
+| ---- | --------- |
+| `--out <path>` | JSON in eine Datei schreiben (übergeordnete Verzeichnisse werden bei Bedarf angelegt). |
+| `--out -` | JSON nur nach **stdout** (UTF-8, eingerückt). Gut für Pipes und Subprozesse. |
+
+Fortschritt und Logs gehen nach **stderr**, damit stdout maschinenlesbar bleibt.
+
+```bash
+olostep map "https://example.com" --top-n 20 --out - | jq '.urls[:10]'
+olostep scrape "https://example.com" --out - | jq .result.markdown_content
+```
+
+Ohne `--out` landen Dateien unter `output/` (siehe [Standardpfade für `--out`](#default-out-paths)).
+
+## Befehle
+
+Verwenden Sie `olostep <befehl> --help` für alle Optionen. Die meisten Befehle akzeptieren `--timeout` (HTTP, Sekunden).
+
+### `map`: URLs finden
+
+| Option | Beschreibung |
+| ------ | ------------ |
+| `--out` | Dateipfad oder `-` |
+| `--top-n` | Maximale Anzahl URLs |
+| `--search-query` | Leitet die Entdeckung |
+| `--include-subdomain` / `--no-include-subdomain` | Subdomains |
+| `--include-url` / `--exclude-url` | Wiederholbare Muster |
+| `--cursor` | Seitennummerierung |
+
+Verwenden Sie `--top-n`, nicht `--limit` (entfernt).
+
+```bash
+olostep map "https://example.com" --top-n 100 --search-query "blog"
+```
+
+### `answer`: recherchierte Antwort
+
+Pollt, bis die Antwort fertig ist.
+
+| Option | Beschreibung |
+| ------ | ------------ |
+| `--out` | Datei oder `-` |
+| `--json-format` | Optionaler Hinweis für strukturierte Ausgabe (JSON-Objekt als String) |
+| `--poll-interval` / `--poll-timeout` | Polling (Sekunden) |
+
+Verwenden Sie `--json-format`, nicht `--model` (entfernt).
+
+```bash
+olostep answer "What does this company build?" --out answer.json
+olostep answer "Extract facts" --json-format '{"company":"","year":""}' --out -
+```
+
+### `scrape`: eine URL
+
+**Formate:** `html`, `markdown`, `text`, `json`, `raw_pdf`, `screenshot` (kommagetrennt; Standard `markdown`).
+
+| Option | Beschreibung |
+| ------ | ------------ |
+| `--formats` | Kommagetrennt |
+| `--country` | Ländercode |
+| `--wait-before-scraping` | Millisekunden Wartezeit vor dem Scraping |
+| `--payload-json` | Erweiterte Optionen als JSON-Objekt-String |
+| `--payload-file` | Dasselbe aus Datei (nicht zusammen mit `--payload-json`) |
+
+```bash
+olostep scrape "https://example.com" --formats markdown,html
+olostep scrape "https://example.com" --payload-file scrape-options.json --out -
+```
+
+### `scrape-get`: per Scrape-ID
+
+```bash
+olostep scrape-get "scrape_abc123" --out -
+```
+
+### `crawl`: Website-Crawl
+
+**Abruf-Formate:** `markdown`, `html`, `json`.
+
+Wichtige Flags: `--max-pages`, `--max-depth`, `--include-subdomain`, `--include-external`, `--include-url`, `--exclude-url`, `--search-query`, `--top-n`, `--webhook`, `--crawl-timeout`, `--follow-robots-txt` / `--ignore-robots-txt`, `--formats`, `--pages-limit`, `--pages-search-query`, `--poll-seconds`, `--poll-timeout`, `--dry-run` (Payload ausgeben, kein Request).
+
+```bash
+olostep crawl "https://docs.example.com" --max-pages 50 --formats markdown,html
+olostep crawl "https://example.com" --max-pages 10 --dry-run
+```
+
+### `batch-scrape`: CSV
+
+CSV-Spalten: **`custom_id` oder `id`**, und **`url`**.
+
+| Option | Beschreibung |
+| ------ | ------------ |
+| `--formats` | `markdown`, `html`, `json` |
+| `--country` | Optional |
+| `--parser-id` | Parser für strukturierte Extraktion |
+| `--poll-seconds`, `--log-every`, `--items-limit` | Paging / Polling |
+| `--dry-run` | Nur Payload ausgeben |
+
+```bash
+olostep batch-scrape urls.csv --formats markdown,html
+```
+
+### `batch-update`: Batch-Metadaten
+
+Erfordert **eines von** `--metadata-json` oder `--metadata-file` (JSON-Objekt).
+
+```bash
+olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
+```
+
+## Standardpfade für `--out` {#default-out-paths}
+
+Wenn `--out` fehlt:
+
+| Befehl | Standard |
+| ------ | -------- |
+| `map` | `output/map.json` |
+| `answer` | `output/answer.json` |
+| `scrape` | `output/scrape.json` |
+| `scrape-get` | `output/scrape_get.json` |
+| `crawl` | `output/crawl_results.json` |
+| `batch-scrape` | `output/batch_results.json` |
+| `batch-update` | `output/batch_update.json` |
+
+## Globale Flags
+
+| Flag | Beschreibung |
+| ---- | ------------ |
+| `-V`, `--version` | Version |
+| `-h`, `--help` | Hilfe |
+
+## Weitere Dokumentation
+
+- [Maps](/features/maps/maps) · [Batches](/features/batches/batches) · [Parsers](/features/structured-content/parsers)
+
+**Repository:** [github.com/olostep-api/CLI](https://github.com/olostep-api/CLI)
+
+## Sicherheit
+
+API-Schlüssel nicht in die Versionskontrolle legen; bei Lecks rotieren.
