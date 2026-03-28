@@ -1,0 +1,682 @@
+---
+sidebarTitle: "Bestanden"
+title: "Bestanden"
+description: "Upload en beheer JSON-bestanden voor gebruik als context in API-verzoeken"
+icon: "file-upload"
+---
+
+Via het Olostep `/v1/files` eindpunt kun je JSON-bestanden uploaden die gebruikt kunnen worden als context in je API-verzoeken. Dit stelt je in staat om gestructureerde data te leveren om je scrapes, antwoorden en andere operaties te verbeteren.
+
+- Upload JSON-bestanden tot 200MB
+- Bestanden worden automatisch gevalideerd op correct JSON-formaat
+- Gebruik bestanden als context in scrapes, antwoorden en andere eindpunten
+- Bestanden verlopen na 30 dagen
+- Beveiligd uploadproces met vooraf ondertekende URL
+
+Voor API-details zie de [Files Endpoint API Reference](/api-reference/files/create).
+
+## Installatie
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: ingebouwde curl is prima
+```
+
+</CodeGroup>
+
+## Upload een bestand
+
+Het uploadproces van een bestand bestaat uit twee stappen:
+1. **Maak upload-URL aan**: Vraag een vooraf ondertekende URL aan voor het uploaden van je bestand
+2. **Voltooi upload**: Upload je bestand naar de vooraf ondertekende URL en roep vervolgens het complete eindpunt aan om te valideren en finaliseren
+
+### Stap 1: Maak upload-URL aan
+
+Maak eerst een upload-URL aan door de bestandsnaam en optioneel het doel op te geven. De `purpose` parameter ondersteunt alleen twee waarden: `"context"` (standaard) of `"batch"`.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Stap 1: Maak upload-URL aan
+payload = {
+    "filename": "mijn-data.json",
+    "purpose": "context"  # Optioneel, standaard is "context". Ondersteunde waarden: "context" of "batch"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/files", headers=headers, json=payload)
+upload_data = response.json()
+
+print(json.dumps(upload_data, indent=2))
+# Reactie bevat: id, upload_url, expires_in
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    filename: 'mijn-data.json',
+    purpose: 'context'  // Optioneel, standaard is "context". Ondersteunde waarden: "context" of "batch"
+  })
+})
+const uploadData = await res.json()
+console.log(uploadData)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "mijn-data.json",
+    "purpose": "context"
+  }'
+
+# Voorbeeld met "batch" doel:
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-data.json",
+    "purpose": "batch"
+  }'
+```
+
+</CodeGroup>
+
+De reactie bevat een vooraf ondertekende `upload_url` die verloopt na 10 minuten:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file.upload",
+  "created": 1760329882,
+  "upload_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
+### Stap 2: Upload bestand en voltooi
+
+Upload je JSON-bestand naar de vooraf ondertekende URL en roep vervolgens het complete eindpunt aan om de upload te valideren en finaliseren.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Na het verkrijgen van upload_url van Stap 1
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Bereid je JSON-data voor
+json_data = {
+    "users": [
+        {"name": "John Doe", "email": "john@example.com"},
+        {"name": "Jane Smith", "email": "jane@example.com"}
+    ]
+}
+
+# Stap 2a: Upload bestand naar vooraf ondertekende URL
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(json_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Stap 2b: Voltooi de upload
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(json.dumps(file_info, indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Na het verkrijgen van upload_url van Stap 1
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Bereid je JSON-data voor
+const jsonData = {
+  users: [
+    { name: 'John Doe', email: 'john@example.com' },
+    { name: 'Jane Smith', email: 'jane@example.com' }
+  ]
+}
+
+// Stap 2a: Upload bestand naar vooraf ondertekende URL
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData)
+})
+
+// Stap 2b: Voltooi de upload
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+console.log(fileInfo)
+```
+
+```bash cURL
+# Stap 2a: Upload bestand naar vooraf ondertekende URL
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @mijn-data.json
+
+# Stap 2b: Voltooi de upload
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+Het complete eindpunt valideert het JSON-bestand en retourneert bestandsmetadata:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "mijn-data.json",
+  "bytes": 1024,
+  "purpose": "context",
+  "status": "completed"
+}
+```
+
+## Haal bestandsmetadata op via ID
+
+Haal metadata op voor een bestand via zijn ID.
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+response = requests.get(
+    f"{API_URL}/files/{file_id}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = response.json()
+print(json.dumps(file_info, indent=2))
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+const res = await fetch(`${API_URL}/files/${fileId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await res.json()
+console.log(fileInfo)
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Haal bestand op via ID
+
+Verkrijg een vooraf ondertekende URL om de JSON-inhoud van een voltooid bestand te downloaden. Geef optioneel de vervaltijd voor de download-URL op met behulp van de `expires_in` queryparameter (standaard is 600 seconden / 10 minuten).
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+# Verkrijg download-URL (standaard vervaltijd: 600 seconden)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+download_url = download_info["download_url"]
+
+# Download de bestandsinhoud met de vooraf ondertekende URL
+file_response = requests.get(download_url)
+file_content = file_response.json()
+print(json.dumps(file_content, indent=2))
+
+# Voorbeeld met aangepaste vervaltijd (3600 seconden = 1 uur)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content?expires_in=3600",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+print(f"Download-URL verloopt in: {download_info['expires_in']} seconden")
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+
+// Verkrijg download-URL (standaard vervaltijd: 600 seconden)
+const res = await fetch(`${API_URL}/files/${fileId}/content`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const downloadInfo = await res.json()
+const downloadUrl = downloadInfo.download_url
+
+// Download de bestandsinhoud met de vooraf ondertekende URL
+const fileRes = await fetch(downloadUrl)
+const fileContent = await fileRes.json()
+console.log(fileContent)
+
+// Voorbeeld met aangepaste vervaltijd (3600 seconden = 1 uur)
+const customRes = await fetch(`${API_URL}/files/${fileId}/content?expires_in=3600`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const customDownloadInfo = await customRes.json()
+console.log(`Download-URL verloopt in: ${customDownloadInfo.expires_in} seconden`)
+```
+
+```bash cURL
+# Verkrijg download-URL (standaard vervaltijd: 600 seconden)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Verkrijg download-URL met aangepaste vervaltijd (3600 seconden = 1 uur)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content?expires_in=3600" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Download het bestand met de vooraf ondertekende URL
+curl -s "$DOWNLOAD_URL"
+```
+
+</CodeGroup>
+
+De reactie bevat een vooraf ondertekende `download_url` die verloopt na de opgegeven tijd:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "mijn-data.json",
+  "bytes": 1024,
+  "download_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
+## Lijst bestanden
+
+Lijst alle voltooide bestanden voor je team. Filter optioneel op doel (ondersteunde waarden: `"context"` of `"batch"`).
+
+<CodeGroup>
+
+```python Python
+# Lijst alle bestanden
+response = requests.get(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+files = response.json()
+print(json.dumps(files, indent=2))
+
+# Lijst bestanden gefilterd op doel
+response = requests.get(
+    f"{API_URL}/files?purpose=context",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+context_files = response.json()
+print(json.dumps(context_files, indent=2))
+```
+
+```js Node
+// Lijst alle bestanden
+const res = await fetch(`${API_URL}/files`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const files = await res.json()
+console.log(files)
+
+// Lijst bestanden gefilterd op doel
+const contextRes = await fetch(`${API_URL}/files?purpose=context`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const contextFiles = await contextRes.json()
+console.log(contextFiles)
+```
+
+```bash cURL
+# Lijst alle bestanden
+curl -s -X GET "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Lijst bestanden gefilterd op doel
+curl -s -X GET "https://api.olostep.com/v1/files?purpose=context" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+De reactie bevat een lijst van bestanden:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "file_abc123xyz789",
+      "object": "file",
+      "created": 1760329882,
+      "filename": "mijn-data.json",
+      "bytes": 1024,
+      "purpose": "context",
+      "status": "completed"
+    }
+  ]
+}
+```
+
+## Verwijder een bestand
+
+Verwijder een bestand en de bijbehorende data uit de opslag.
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+response = requests.delete(
+    f"{API_URL}/files/{file_id}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+result = response.json()
+print(json.dumps(result, indent=2))
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+const res = await fetch(`${API_URL}/files/${fileId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(result)
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Voltooi upload voorbeeld (context doel)
+
+Hier is een compleet voorbeeld dat een JSON-bestand uploadt met `purpose="context"`:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Stap 1: Maak upload-URL aan
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "user-data.json", "purpose": "context"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Stap 2: Bereid en upload JSON-data
+json_data = {
+    "users": [
+        {"id": 1, "name": "Alice", "role": "admin"},
+        {"id": 2, "name": "Bob", "role": "user"}
+    ]
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(json_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Stap 3: Voltooi de upload
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Bestand succesvol geüpload: {file_info['id']}")
+print(f"Bestandsgrootte: {file_info['bytes']} bytes")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Stap 1: Maak upload-URL aan
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'user-data.json', purpose: 'context' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Stap 2: Bereid en upload JSON-data
+const jsonData = {
+  users: [
+    { id: 1, name: 'Alice', role: 'admin' },
+    { id: 2, name: 'Bob', role: 'user' }
+  ]
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData)
+})
+
+// Stap 3: Voltooi de upload
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Bestand succesvol geüpload: ${fileInfo.id}`)
+console.log(`Bestandsgrootte: ${fileInfo.bytes} bytes`)
+```
+
+</CodeGroup>
+
+## Upload batchbestand voorbeeld
+
+Hier is een voorbeeld dat een JSON-bestand uploadt met `purpose="batch"` dat geldige batchdata bevat die kan worden gebruikt met het `/v1/batches` eindpunt:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Stap 1: Maak upload-URL aan met purpose="batch"
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "batch-items.json", "purpose": "batch"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Stap 2: Bereid batch JSON-data voor (geldig formaat voor /v1/batches eindpunt)
+batch_data = {
+    "items": [
+        {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+        {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+        {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+    ],
+    "parser": {"id": "@olostep/google-search"},
+    "country": "US"
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(batch_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Stap 3: Voltooi de upload
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Batchbestand succesvol geüpload: {file_info['id']}")
+print(f"Bestandsgrootte: {file_info['bytes']} bytes")
+print(f"Doel: {file_info['purpose']}")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Stap 1: Maak upload-URL aan met purpose="batch"
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'batch-items.json', purpose: 'batch' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Stap 2: Bereid batch JSON-data voor (geldig formaat voor /v1/batches eindpunt)
+const batchData = {
+  items: [
+    { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
+    { custom_id: 'item-2', url: 'https://www.google.com/search?q=paddle&gl=us&hl=en' },
+    { custom_id: 'item-3', url: 'https://www.google.com/search?q=payment+gateway&gl=us&hl=en' }
+  ],
+  parser: { id: '@olostep/google-search' },
+  country: 'US'
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(batchData)
+})
+
+// Stap 3: Voltooi de upload
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Batchbestand succesvol geüpload: ${fileInfo.id}`)
+console.log(`Bestandsgrootte: ${fileInfo.bytes} bytes`)
+console.log(`Doel: ${fileInfo.purpose}`)
+```
+
+```bash cURL
+# Stap 1: Maak upload-URL aan met purpose="batch"
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-items.json",
+    "purpose": "batch"
+  }'
+
+# Stap 2: Upload batch JSON-data (sla op in batch-items.json eerst)
+# batch-items.json inhoud:
+# {
+#   "items": [
+#     {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+#     {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+#     {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+#   ],
+#   "parser": {"id": "@olostep/google-search"},
+#   "country": "US"
+# }
+
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @batch-items.json
+
+# Stap 3: Voltooi de upload
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+Het geüploade batchbestand bevat een geldige JSON-structuur die overeenkomt met het `/v1/batches` eindpunt formaat:
+- `items`: Array van objecten met `custom_id` en `url` velden
+- `parser`: Optionele parserconfiguratie
+- `country`: Optionele landcode
+
+Dit bestand kan worden gebruikt als invoer voor batchverwerkingsoperaties.
+
+## Bestandsvereisten
+
+- **Bestandsformaat**: Alleen JSON-bestanden worden ondersteund (`.json` extensie vereist)
+- **Bestandsgrootte**: Maximaal 200MB per bestand
+- **Vervaldatum**: Bestanden verlopen na 30 dagen
+- **Upload-URL**: Vooraf ondertekende URL's verlopen na 10 minuten
+- **Doelparameter**: Ondersteunt alleen `"context"` of `"batch"` waarden (standaard is `"context"`)
+
+## Prijzen
+
+Bestandsuploads zijn gratis. Bestanden worden veilig opgeslagen en verlopen automatisch na 30 dagen.

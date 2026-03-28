@@ -1,0 +1,166 @@
+---
+sidebarTitle: "Kaart"
+icon: "map"
+title: "Kaarten"
+description: "Verkrijg alle URL’s op een website."
+---
+Via de Olostep `/v1/maps` endpoint kun je alle URL's op een website verkrijgen. Dit is nuttig voor contentontdekking, analyse van de sitestructuur (bijv. SEO), of om te beslissen welke URL's je vervolgens wilt scrapen.
+
+- Verkrijg alle URL's op een website (inclusief sitemaps en ontdekte links)
+- Gebruik speciale patronen om paden in of uit te sluiten (bijv. `/blog/**`)
+- Pagineer grote reacties met `cursor` (tot 10MB per reactie)
+- Beperk het volume met `top_n`
+
+Voor API-details zie de [Map Endpoint API Reference](/api-reference/maps/create).
+
+## Installatie
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: ingebouwde curl is prima
+```
+
+</CodeGroup>
+
+## Gebruik
+
+Stuur een POST-verzoek met de website `url`. Optioneel kun je `include_urls`, `exclude_urls` (glob patronen), en `top_n` doorgeven.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/maps"
+
+payload = {
+    "url": "https://docs.olostep.com"
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/maps', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ url: 'https://docs.olostep.com' })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/maps" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://docs.olostep.com"
+  }'
+```
+
+</CodeGroup>
+
+De responstijd is meestal binnen enkele seconden, maar kan oplopen tot 120 seconden voor complexere websites. Het kan alle URL's van een website extraheren, zelfs backlinks en die niet aanwezig zijn in de Sitemaps. Je kunt ook beslissen welke URL-paden je wilt opnemen of uitsluiten van de reactie.
+
+Standaard retourneert de endpoint ongeveer 100k URL's in een enkele oproep (maximaal 10MB). Als de reactie meer data bevat, retourneert de API een `cursor` parameter die kan worden gebruikt voor paginering en het verkrijgen van de volgende URL's. Voor meer details raadpleeg de [API Reference](/api-reference/maps/create#body-cursor)
+
+Deze endpoint is bijzonder nuttig wanneer je:
+- Alle contentpagina's op een website wilt ontdekken
+- De sitestructuur en hiërarchie wilt analyseren
+- URL's wilt voorbereiden voor batchverwerking
+- Wilt beslissen welke specifieke URL's je wilt scrapen
+
+Voor meer gedetailleerde controle over de geretourneerde URL's kun je de parameters `include_urls` en `exclude_urls` gebruiken.
+
+### Voorbeeld
+
+Stel dat je van www.brex.com alle URL's wilt extraheren die de paden na `/product/` hebben, bijv. `https://www.brex.com/product/api/no-code`, maar ook `www.brex.com/product` wilt opnemen.
+Je kunt de volgende code gebruiken:
+
+<CodeGroup>
+
+    ```python maps.py
+    import requests
+    
+    endpoint = "https://api.olostep.com/v1/maps"
+    
+    payload = {
+        "url": "https://www.brex.com/",
+        "include_urls": ["/product", "/product/**"],
+        "top_n": 100000
+    }
+    
+    headers = {
+        "Authorization": "Bearer <YOUR_API_KEY>",
+        "Content-Type": "application/json"
+    }
+    
+    response = requests.post(endpoint, json=payload, headers=headers)
+    
+    print(response.text)
+    ```
+
+    ```js Node
+    const endpoint = 'https://api.olostep.com/v1/maps'
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer <YOUR_API_KEY>',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url: 'https://www.brex.com/',
+        include_urls: ['/product', '/product/**'],
+        top_n: 100000
+      })
+    })
+    console.log(await res.text())
+    ```
+
+    ```bash cURL
+    curl -s -X POST "https://api.olostep.com/v1/maps" \
+      -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://www.brex.com/",
+        "include_urls": ["/product", "/product/**"],
+        "top_n": 100000
+      }'
+    ```
+
+</CodeGroup>
+
+## Conclusie
+
+De maps endpoint is een krachtig hulpmiddel voor contentontdekking en site-analyse. Het biedt een uitgebreide lijst van URL's op een website, waardoor je content van specifieke pagina's kunt extraheren of de sitestructuur kunt analyseren. Deze endpoint is bijzonder nuttig voor SEO-professionals, contentmarketeers, AI-agenten die website-inhoud of -structuur moeten analyseren.
+
+## Prijzen
+
+Kaart kost 1 credit. Vervolgens wordt voor elke extra 1000 URL's die in de reactie worden geretourneerd, een extra credit in rekening gebracht.

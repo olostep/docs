@@ -1,0 +1,131 @@
+---
+sidebarTitle: 'Search'
+title: 'Search API'
+icon: 'magnifying-glass'
+---
+
+The Olostep `/v1/searches` endpoint lets you search the web with a natural language query and get back a deduplicated list of relevant links with titles and descriptions.
+
+- Send a query in plain English
+- Get back structured links from across the web
+
+It will search for the query semantically across the web and return results.
+
+For API details, see the [Search Endpoint API Reference](/api-reference/searches/create).
+
+## Installation
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+</CodeGroup>
+
+## Usage
+
+Send a natural language query and receive a list of relevant links.
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/searches"
+payload = {
+  "query": "Best Answer Engine Optimization startups"
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/searches', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'Best Answer Engine Optimization startups'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/searches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Best Answer Engine Optimization startups"
+  }'
+```
+
+</CodeGroup>
+
+## Response
+
+You will receive a `search` object in response. The `search` object contains an `id`, your original `query`, and a `result` with a list of `links`.
+
+```json
+{
+  "id": "search_9bi0sbj9xa",
+  "object": "search",
+  "created": 1760327323,
+  "metadata": {},
+  "query": "Best Answer Engine Optimization startups",
+  "result": {
+    "json_content": "...",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/search_9bi0sbj9xa.json",
+    "links": [
+      {
+        "url": "https://www.adweek.com/media/hottest-startups-shaping-the-future-of-ai-search-optimization-aeo-geo/",
+        "title": "Meet the 7 Hottest Startups Shaping the Future of AI SEO",
+        "description": "1. Profound · 2. Bluefish · 3. Scrunch · 4. Evertune · 5. Peec AI · 6. Brandlight · 7. AthenaHQ."
+      },
+      {
+        "url": "https://www.failory.com/startups/search-engine",
+        "title": "Top 48 Search Engine Startups to Watch in 2026",
+        "description": "A deep dive into the 48 most promising search engine startups..."
+      },
+      {
+        "url": "https://clutch.co/seo-firms/startups",
+        "title": "Top 30 SEO Companies for Startups - Mar 2026 Rankings",
+        "description": "Connect with the best SEO companies..."
+      }
+    ]
+  }
+}
+```
+
+Each link in `result.links` contains:
+
+| Field         | Type   | Description                              |
+|---------------|--------|------------------------------------------|
+| `url`         | string | The URL of the search result             |
+| `title`       | string | The title of the result page             |
+| `description` | string | A short snippet describing the result    |
+
+The full result is also available as a hosted JSON file at `result.json_hosted_url`.
+
+## Pricing
+
+Search costs 5 credits per request.
+

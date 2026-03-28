@@ -1,0 +1,682 @@
+---
+sidebarTitle: "Archivos"
+title: "Archivos"
+description: "Sube y gestiona archivos JSON para usarlos como contexto en solicitudes API"
+icon: "file-upload"
+---
+
+A través del endpoint de Olostep `/v1/files` puedes subir archivos JSON que pueden ser utilizados como contexto en tus solicitudes API. Esto te permite proporcionar datos estructurados para mejorar tus scrapes, respuestas y otras operaciones.
+
+- Sube archivos JSON de hasta 200MB
+- Los archivos se validan automáticamente para asegurar el formato JSON correcto
+- Usa archivos como contexto en scrapes, respuestas y otros endpoints
+- Los archivos expiran después de 30 días
+- Proceso de subida seguro con URL pre-firmada
+
+Para detalles del API, consulta la [Referencia del API del Endpoint de Archivos](/api-reference/files/create).
+
+## Instalación
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: el curl incorporado está bien
+```
+
+</CodeGroup>
+
+## Subir un archivo
+
+El proceso de subida de archivos consta de dos pasos:
+1. **Crear URL de subida**: Solicita una URL pre-firmada para subir tu archivo
+2. **Completar subida**: Sube tu archivo a la URL pre-firmada y luego llama al endpoint de completar para validar y finalizar
+
+### Paso 1: Crear URL de subida
+
+Primero, crea una URL de subida proporcionando el nombre del archivo y un propósito opcional. El parámetro `purpose` solo admite dos valores: `"context"` (por defecto) o `"batch"`.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Paso 1: Crear URL de subida
+payload = {
+    "filename": "my-data.json",
+    "purpose": "context"  # Opcional, por defecto es "context". Valores soportados: "context" o "batch"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/files", headers=headers, json=payload)
+upload_data = response.json()
+
+print(json.dumps(upload_data, indent=2))
+# La respuesta incluye: id, upload_url, expires_in
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    filename: 'my-data.json',
+    purpose: 'context'  // Opcional, por defecto es "context". Valores soportados: "context" o "batch"
+  })
+})
+const uploadData = await res.json()
+console.log(uploadData)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "my-data.json",
+    "purpose": "context"
+  }'
+
+# Ejemplo con propósito "batch":
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-data.json",
+    "purpose": "batch"
+  }'
+```
+
+</CodeGroup>
+
+La respuesta incluye una `upload_url` pre-firmada que expira en 10 minutos:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file.upload",
+  "created": 1760329882,
+  "upload_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
+### Paso 2: Subir archivo y completar
+
+Sube tu archivo JSON a la URL pre-firmada y luego llama al endpoint de completar para validar y finalizar la subida.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Después de obtener upload_url del Paso 1
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Prepara tus datos JSON
+json_data = {
+    "users": [
+        {"name": "John Doe", "email": "john@example.com"},
+        {"name": "Jane Smith", "email": "jane@example.com"}
+    ]
+}
+
+# Paso 2a: Subir archivo a URL pre-firmada
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(json_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Paso 2b: Completar la subida
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(json.dumps(file_info, indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Después de obtener upload_url del Paso 1
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Prepara tus datos JSON
+const jsonData = {
+  users: [
+    { name: 'John Doe', email: 'john@example.com' },
+    { name: 'Jane Smith', email: 'jane@example.com' }
+  ]
+}
+
+// Paso 2a: Subir archivo a URL pre-firmada
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData)
+})
+
+// Paso 2b: Completar la subida
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+console.log(fileInfo)
+```
+
+```bash cURL
+# Paso 2a: Subir archivo a URL pre-firmada
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @my-data.json
+
+# Paso 2b: Completar la subida
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+El endpoint de completar valida el archivo JSON y devuelve los metadatos del archivo:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "my-data.json",
+  "bytes": 1024,
+  "purpose": "context",
+  "status": "completed"
+}
+```
+
+## Recuperar metadatos de archivo por ID
+
+Recupera los metadatos de un archivo por su ID.
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+response = requests.get(
+    f"{API_URL}/files/{file_id}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = response.json()
+print(json.dumps(file_info, indent=2))
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+const res = await fetch(`${API_URL}/files/${fileId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await res.json()
+console.log(fileInfo)
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Recuperar objeto de archivo por ID
+
+Obtén una URL pre-firmada para descargar el contenido JSON de un archivo completado. Opcionalmente, especifica el tiempo de expiración para la URL de descarga usando el parámetro de consulta `expires_in` (por defecto es 600 segundos / 10 minutos).
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+# Obtener URL de descarga (expiración por defecto: 600 segundos)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+download_url = download_info["download_url"]
+
+# Descargar el contenido del archivo usando la URL pre-firmada
+file_response = requests.get(download_url)
+file_content = file_response.json()
+print(json.dumps(file_content, indent=2))
+
+# Ejemplo con expiración personalizada (3600 segundos = 1 hora)
+response = requests.get(
+    f"{API_URL}/files/{file_id}/content?expires_in=3600",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+download_info = response.json()
+print(f"Download URL expires in: {download_info['expires_in']} seconds")
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+
+// Obtener URL de descarga (expiración por defecto: 600 segundos)
+const res = await fetch(`${API_URL}/files/${fileId}/content`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const downloadInfo = await res.json()
+const downloadUrl = downloadInfo.download_url
+
+// Descargar el contenido del archivo usando la URL pre-firmada
+const fileRes = await fetch(downloadUrl)
+const fileContent = await fileRes.json()
+console.log(fileContent)
+
+// Ejemplo con expiración personalizada (3600 segundos = 1 hora)
+const customRes = await fetch(`${API_URL}/files/${fileId}/content?expires_in=3600`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const customDownloadInfo = await customRes.json()
+console.log(`Download URL expires in: ${customDownloadInfo.expires_in} seconds`)
+```
+
+```bash cURL
+# Obtener URL de descarga (expiración por defecto: 600 segundos)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Obtener URL de descarga con expiración personalizada (3600 segundos = 1 hora)
+curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content?expires_in=3600" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Descargar el archivo usando la URL pre-firmada
+curl -s "$DOWNLOAD_URL"
+```
+
+</CodeGroup>
+
+La respuesta incluye una `download_url` pre-firmada que expira después del tiempo especificado:
+
+```json
+{
+  "id": "file_abc123xyz789",
+  "object": "file",
+  "created": 1760329882,
+  "filename": "my-data.json",
+  "bytes": 1024,
+  "download_url": "https://olostep-files.s3.amazonaws.com/files/...",
+  "expires_in": 600
+}
+```
+
+## Listar archivos
+
+Lista todos los archivos completados para tu equipo. Opcionalmente, filtra por propósito (valores soportados: `"context"` o `"batch"`).
+
+<CodeGroup>
+
+```python Python
+# Listar todos los archivos
+response = requests.get(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+files = response.json()
+print(json.dumps(files, indent=2))
+
+# Listar archivos filtrados por propósito
+response = requests.get(
+    f"{API_URL}/files?purpose=context",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+context_files = response.json()
+print(json.dumps(context_files, indent=2))
+```
+
+```js Node
+// Listar todos los archivos
+const res = await fetch(`${API_URL}/files`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const files = await res.json()
+console.log(files)
+
+// Listar archivos filtrados por propósito
+const contextRes = await fetch(`${API_URL}/files?purpose=context`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const contextFiles = await contextRes.json()
+console.log(contextFiles)
+```
+
+```bash cURL
+# Listar todos los archivos
+curl -s -X GET "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Listar archivos filtrados por propósito
+curl -s -X GET "https://api.olostep.com/v1/files?purpose=context" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+La respuesta incluye una lista de archivos:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "file_abc123xyz789",
+      "object": "file",
+      "created": 1760329882,
+      "filename": "my-data.json",
+      "bytes": 1024,
+      "purpose": "context",
+      "status": "completed"
+    }
+  ]
+}
+```
+
+## Eliminar un archivo
+
+Elimina un archivo y sus datos asociados del almacenamiento.
+
+<CodeGroup>
+
+```python Python
+file_id = "file_abc123xyz789"
+response = requests.delete(
+    f"{API_URL}/files/{file_id}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+result = response.json()
+print(json.dumps(result, indent=2))
+```
+
+```js Node
+const fileId = 'file_abc123xyz789'
+const res = await fetch(`${API_URL}/files/${fileId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(result)
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Ejemplo de subida completa (propósito context)
+
+Aquí tienes un ejemplo completo que sube un archivo JSON con `purpose="context"`:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Paso 1: Crear URL de subida
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "user-data.json", "purpose": "context"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Paso 2: Preparar y subir datos JSON
+json_data = {
+    "users": [
+        {"id": 1, "name": "Alice", "role": "admin"},
+        {"id": 2, "name": "Bob", "role": "user"}
+    ]
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(json_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Paso 3: Completar la subida
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Archivo subido exitosamente: {file_info['id']}")
+print(f"Tamaño del archivo: {file_info['bytes']} bytes")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Paso 1: Crear URL de subida
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'user-data.json', purpose: 'context' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Paso 2: Preparar y subir datos JSON
+const jsonData = {
+  users: [
+    { id: 1, name: 'Alice', role: 'admin' },
+    { id: 2, name: 'Bob', role: 'user' }
+  ]
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData)
+})
+
+// Paso 3: Completar la subida
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Archivo subido exitosamente: ${fileInfo.id}`)
+console.log(`Tamaño del archivo: ${fileInfo.bytes} bytes`)
+```
+
+</CodeGroup>
+
+## Ejemplo de subida de archivo batch
+
+Aquí tienes un ejemplo que sube un archivo JSON con `purpose="batch"` que contiene datos batch válidos que pueden ser usados con el endpoint `/v1/batches`:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Paso 1: Crear URL de subida con purpose="batch"
+create_response = requests.post(
+    f"{API_URL}/files",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={"filename": "batch-items.json", "purpose": "batch"}
+)
+upload_data = create_response.json()
+file_id = upload_data["id"]
+upload_url = upload_data["upload_url"]
+
+# Paso 2: Preparar datos JSON batch (formato válido para el endpoint /v1/batches)
+batch_data = {
+    "items": [
+        {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+        {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+        {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+    ],
+    "parser": {"id": "@olostep/google-search"},
+    "country": "US"
+}
+
+upload_response = requests.put(
+    upload_url,
+    data=json.dumps(batch_data),
+    headers={"Content-Type": "application/json"}
+)
+upload_response.raise_for_status()
+
+# Paso 3: Completar la subida
+complete_response = requests.post(
+    f"{API_URL}/files/{file_id}/complete",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+file_info = complete_response.json()
+
+print(f"Archivo batch subido exitosamente: {file_info['id']}")
+print(f"Tamaño del archivo: {file_info['bytes']} bytes")
+print(f"Propósito: {file_info['purpose']}")
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+// Paso 1: Crear URL de subida con purpose="batch"
+const createRes = await fetch(`${API_URL}/files`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ filename: 'batch-items.json', purpose: 'batch' })
+})
+const uploadData = await createRes.json()
+const fileId = uploadData.id
+const uploadUrl = uploadData.upload_url
+
+// Paso 2: Preparar datos JSON batch (formato válido para el endpoint /v1/batches)
+const batchData = {
+  items: [
+    { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
+    { custom_id: 'item-2', url: 'https://www.google.com/search?q=paddle&gl=us&hl=en' },
+    { custom_id: 'item-3', url: 'https://www.google.com/search?q=payment+gateway&gl=us&hl=en' }
+  ],
+  parser: { id: '@olostep/google-search' },
+  country: 'US'
+}
+
+await fetch(uploadUrl, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(batchData)
+})
+
+// Paso 3: Completar la subida
+const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const fileInfo = await completeRes.json()
+
+console.log(`Archivo batch subido exitosamente: ${fileInfo.id}`)
+console.log(`Tamaño del archivo: ${fileInfo.bytes} bytes`)
+console.log(`Propósito: ${fileInfo.purpose}`)
+```
+
+```bash cURL
+# Paso 1: Crear URL de subida con purpose="batch"
+curl -s -X POST "https://api.olostep.com/v1/files" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filename": "batch-items.json",
+    "purpose": "batch"
+  }'
+
+# Paso 2: Subir datos JSON batch (guardar en batch-items.json primero)
+# contenido de batch-items.json:
+# {
+#   "items": [
+#     {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
+#     {"custom_id": "item-2", "url": "https://www.google.com/search?q=paddle&gl=us&hl=en"},
+#     {"custom_id": "item-3", "url": "https://www.google.com/search?q=payment+gateway&gl=us&hl=en"}
+#   ],
+#   "parser": {"id": "@olostep/google-search"},
+#   "country": "US"
+# }
+
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: application/json" \
+  -d @batch-items.json
+
+# Paso 3: Completar la subida
+curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+El archivo batch subido contiene una estructura JSON válida que coincide con el formato del endpoint `/v1/batches`:
+- `items`: Array de objetos con campos `custom_id` y `url`
+- `parser`: Configuración opcional del parser
+- `country`: Código de país opcional
+
+Este archivo puede ser usado como entrada para operaciones de procesamiento batch.
+
+## Requisitos de archivo
+
+- **Formato de archivo**: Solo se admiten archivos JSON (se requiere extensión `.json`)
+- **Tamaño de archivo**: Máximo 200MB por archivo
+- **Expiración**: Los archivos expiran después de 30 días
+- **URL de subida**: Las URLs pre-firmadas expiran después de 10 minutos
+- **Parámetro de propósito**: Solo admite valores `"context"` o `"batch"` (por defecto es `"context"`)
+
+## Precios
+
+Las subidas de archivos son gratuitas. Los archivos se almacenan de forma segura y expiran automáticamente después de 30 días.

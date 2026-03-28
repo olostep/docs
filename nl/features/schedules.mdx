@@ -1,0 +1,565 @@
+---
+sidebarTitle: "Schema"
+title: "Schema"
+description: "Plan API-aanroepen om automatisch op gespecificeerde tijden uit te voeren"
+icon: "clock"
+---
+
+Via het Olostep `/v1/schedules` eindpunt kun je API-aanroepen plannen om automatisch op gespecificeerde tijden uit te voeren. Plan eenmalige uitvoeringen of terugkerende taken met behulp van cron-expressies of natuurlijke taal.
+
+- Plan eenmalige uitvoeringen op een specifieke datum en tijd
+- Maak terugkerende schema's met cron-expressies
+- Gebruik natuurlijke taal om automatisch cron-expressies te genereren
+- Plan HTTP-eindpunten (GET of POST)
+- Voor POST-verzoeken, gebruik korte Olostep-eindpunten (automatisch voorvoegsel) of volledige URL's
+- Verstuur elke gewenste payload - de payload wordt precies verzonden zoals je deze specificeert
+- Beheer automatisch de levenscyclus van het schema
+
+Voor API-details zie de [Schema Eindpunt API Referentie](/api-reference/schedules/create).
+
+## Installatie
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: ingebouwde curl is prima
+```
+
+</CodeGroup>
+
+## Maak een schema
+
+Maak een schema om API-aanroepen automatisch uit te voeren. Je kunt eenmalige schema's of terugkerende schema's maken met behulp van cron-expressies. Het `endpoint` kan elke URL zijn (niet beperkt tot Olostep-eindpunten), en de `payload` kan alle gegevens bevatten die je wilt verzenden.
+
+### Eenmalig schema
+
+Plan een API-aanroep om één keer uit te voeren op een specifieke datum en tijd.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Plan een scraping om over 1 uur uit te voeren
+execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
+
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "execute_at": execute_at,
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 uur vanaf nu
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### Terugkerend schema met cron-expressie
+
+Maak een terugkerend schema met een cron-expressie. Cron-expressies gebruiken een formaat van 6 velden: minuut uur dag maand dag-van-de-week jaar.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Plan een scraping om elke dag om 10 uur UTC uit te voeren
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    cron_expression: '0 10 * * ? *', // Elke dag om 10 uur UTC
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "cron_expression": "0 10 * * ? *",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+### Planning met natuurlijke taal
+
+Gebruik natuurlijke taal om automatisch cron-expressies te genereren. Het systeem zal je tekst omzetten in een geldige cron-expressie.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Plan met behulp van natuurlijke taal
+payload = {
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+        "url_to_scrape": "https://example.com",
+        "formats": ["markdown"]
+    },
+    "text": "elke 3 minuten",
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'v1/scrapes',
+    payload: {
+      url_to_scrape: 'https://example.com',
+      formats: ['markdown']
+    },
+    text: 'elke maandag om 9 uur',
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "v1/scrapes",
+    "payload": {
+      "url_to_scrape": "https://example.com",
+      "formats": ["markdown"]
+    },
+    "text": "elke dag om 10 uur",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+## Responsformaat
+
+Wanneer je een schema maakt, ontvang je een schema-object met de volgende eigenschappen:
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "recurring",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "cron_expression": "0 10 * * ? *",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T10:00:00.000Z"
+}
+```
+
+Voor eenmalige schema's bevat de respons `execute_at` in plaats van `cron_expression`:
+
+```json
+{
+  "id": "schedule_abc123xyz",
+  "object": "schedule"
+  "type": "onetime",
+  "method": "POST",
+  "endpoint": "v1/scrapes",
+  "execute_at": "2025-01-15T10:00:00.000Z",
+  "expression_timezone": "UTC",
+  "created": "2025-01-15T09:00:00.000Z"
+}
+```
+
+## Lijst schema's
+
+Haal alle schema's voor je team op. Standaard worden verwijderde schema's eruit gefilterd. Gebruik de `include_deleted` queryparameter om ze op te nemen.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules", headers=headers)
+result = response.json()
+print(f"Totaal aantal schema's: {result['count']}")
+for schedule in result['schedules']:
+    print(json.dumps(schedule, indent=2))
+
+# Om verwijderde schema's op te nemen:
+# response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+
+const res = await fetch(`${API_URL}/schedules`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+const result = await res.json()
+console.log(`Totaal aantal schema's: ${result.count}`)
+result.schedules.forEach(s => console.log(s))
+
+// Om verwijderde schema's op te nemen:
+// const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+
+# Om verwijderde schema's op te nemen:
+# curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
+#   -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Haal een schema op
+
+Haal een enkel schema op via zijn ID.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.get(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Verwijder een schema
+
+Verwijder een schema via zijn ID. Dit stopt toekomstige uitvoeringen.
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+schedule_id = "schedule_abc123xyz"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+response = requests.delete(f"{API_URL}/schedules/{schedule_id}", headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const scheduleId = 'schedule_abc123xyz'
+
+const res = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+## Ondersteunde eindpunten
+
+### Olostep eindpunten (korte vorm)
+
+Voor POST-verzoeken kun je korte vormen gebruiken voor Olostep-eindpunten. Het systeem zal automatisch `https://api.olostep.com/` voorvoegen voor deze:
+
+- `v1/scrapes` - Plan web scraping taken
+- `v1/batches` - Plan batchverwerkingstaken
+- `v1/crawls` - Plan website crawling operaties
+- `v1/maps` - Plan kaartdata-extractie
+- `v1/answers` - Plan antwoordgeneratie
+
+### Volledige URL's
+
+Je kunt ook volledige URL's opgeven voor je eindpunten. Dit is vereist voor externe API's of webhooks:
+
+<CodeGroup>
+
+```python Python
+import requests
+import json
+from datetime import datetime, timedelta
+
+API_KEY = "<YOUR_API_KEY>"
+API_URL = "https://api.olostep.com/v1"
+
+# Plan een oproep naar een externe API
+payload = {
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+        "custom_field": "any value",
+        "data": {"nested": "structure"},
+        "timestamp": datetime.now().isoformat()
+    },
+    "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "expression_timezone": "UTC"
+}
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(f"{API_URL}/schedules", headers=headers, json=payload)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com/v1'
+const execute_at = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+
+const res = await fetch(`${API_URL}/schedules`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'POST',
+    endpoint: 'https://api.example.com/webhook',
+    payload: {
+      custom_field: 'any value',
+      data: { nested: 'structure' },
+      timestamp: new Date().toISOString()
+    },
+    execute_at: execute_at,
+    expression_timezone: 'UTC'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/schedules" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "POST",
+    "endpoint": "https://api.example.com/webhook",
+    "payload": {
+      "custom_field": "any value",
+      "data": {"nested": "structure"}
+    },
+    "execute_at": "2025-01-15T10:00:00Z",
+    "expression_timezone": "UTC"
+  }'
+```
+
+</CodeGroup>
+
+Het `payload` veld accepteert elk JSON-object - je kunt het structureren zoals je nodig hebt voor je doeleindpunt.
+
+## Cron-expressieformaat
+
+Cron-expressies gebruiken een formaat van 6 velden:
+
+```
+minuut uur dag maand dag-van-de-week jaar
+```
+
+Voorbeelden:
+- `0/3 * * * ? *` - Elke 3 minuten
+- `0 10 * * ? *` - Elke dag om 10:00 uur
+- `0 9 ? * MON *` - Elke maandag om 9:00 uur
+- `0 0 1 * ? *` - Eerste dag van elke maand om middernacht
+
+Gebruik `?` voor dag-van-de-maand of dag-van-de-week wanneer niet gespecificeerd.
+
+## Voorbeelden van natuurlijke taal
+
+Je kunt natuurlijke taal gebruiken om schema's te beschrijven. Het systeem zal ze automatisch omzetten naar cron-expressies:
+
+- "elke 3 minuten" → `0/3 * * * ? *`
+- "elke dag om 10 uur" → `0 10 * * ? *`
+- "elke maandag om 9 uur" → `0 9 ? * MON *`
+- "elk uur" → `0 * * * ? *`
+- "elke week op maandag" → `0 0 ? * MON *`
+
+## Belangrijke opmerkingen
+
+- Eenmalige schema's worden automatisch verwijderd na uitvoering
+- Terugkerende schema's gaan door totdat ze handmatig worden verwijderd
+- Tijdzone moet een geldige IANA-tijdzone-identificator zijn (bijv. "UTC", "America/New_York", "Europe/London")
+- De `execute_at` datum en tijd moet in de toekomst liggen
+- Natuurlijke taalomzetting kan herhalingen vereisen; het systeem zal tot 3 keer proberen
+- Bij gebruik van natuurlijke taaltekst (`text` parameter), is de tijdzone standaard "UTC"
+- Schema's voeren de API-aanroep uit met de opgegeven payload precies zoals gespecificeerd - je kunt elke JSON-structuur doorgeven die je nodig hebt
+- Voor POST-verzoeken worden korte Olostep-eindpunten (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) automatisch voorzien van `https://api.olostep.com/`
+- Voor andere eindpunten, geef de volledige URL op
+- De `payload` kan elke datastructuur bevatten - het wordt zoals het is verzonden naar je doeleindpunt
+- Het verwijderen van een al verwijderd schema zal een 400 fout opleveren
+
+## Prijzen
+
+Schema's zelf zijn gratis. Je betaalt alleen voor de API-aanroepen die worden uitgevoerd wanneer het schema wordt uitgevoerd. Bijvoorbeeld, als je een scraping plant, wordt er 1 credit per uitvoering in rekening gebracht (of meer als je parsers of LLM-extractie gebruikt).

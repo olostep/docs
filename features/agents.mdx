@@ -1,0 +1,116 @@
+---
+sidebarTitle: 'Agents'
+title: 'Agents API'
+icon: 'robot'
+---
+
+Through the Olostep Agents API you can create autonomous research agents that can automate data pipelines and search tasks on a schedule and deliver structured results.
+
+- Web research across sites with automated extraction
+- Multi-step workflows with scheduled execution and notifications
+- Output to JSON/CSV/Sheets/DB
+
+For availability and details, contact us at [info@olostep.com](mailto:info@olostep.com) or [Contact Sales](https://www.olostep.com/contact-sales).
+
+## Installation
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+</CodeGroup>
+
+## Create an agent
+
+Create an agent with a natural language prompt and a target model.
+
+<CodeGroup>
+
+```python Python
+API_URL = 'https://api.olostep.com/v1/agents' # endpoint available to select customers
+API_KEY = '<YOUR_API_KEY>'
+
+headers = {
+  'Authorization': f'Bearer {API_KEY}', 
+  'Content-Type': 'application/json'
+}
+
+data = {
+  "prompt": """
+    Find portfolio companies from https://www.vcsheet.com/funds and 
+    write to a Google Sheet with columns (Fund Name, Fund Website URL, 
+    Fund LinkedIn URL, Portfolio Company Name, Portfolio Company URL, 
+    Portfolio Company LinkedIn URL). Run weekly on Monday at 9:00 AM 
+    and email steve@example.com when new companies are added.
+  """,
+  "model": "gpt-4.1"
+}
+
+response = requests.post(API_URL, headers=headers, json=data)
+result = response.json()
+print(result)
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/agents', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    prompt: 'Find portfolio companies from https://www.vcsheet.com/funds and write to a Google Sheet...',
+    model: 'gpt-4.1'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/agents" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Find portfolio companies from https://www.vcsheet.com/funds and write to a Google Sheet...",
+    "model": "gpt-4.1"
+  }'
+```
+
+</CodeGroup>
+
+## Capabilities
+
+The Olostep agent can:
+
+- **Web Research**: Automatically search and extract data from websites
+- **Data Organization**: Structure information into spreadsheets, databases, or other formats
+- **Scheduled Execution**: Run tasks on a recurring schedule (daily, weekly, at a predefined time)
+- **Multi-step Workflows**: Perform complex, multi-part research tasks autonomously
+- **Notifications**: Send email alerts when new data is found or tasks complete
+- **Custom Output**: Return data as CSV, JSON, Google Sheet, or directly in your database
+
+## Access
+
+The Agents API is currently available to select customers. To get access:
+
+- Email us at [info@olostep.com](mailto:info@olostep.com)
+- Or [contact our sales team](https://www.olostep.com/contact-sales)
+
+## Pricing
+
+Agents pricing is variable. It's billed by outcome. The price is negotiated between the client and the agent. Reach out to info@olostep.com for more details
