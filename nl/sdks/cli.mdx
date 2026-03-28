@@ -1,0 +1,186 @@
+---
+sidebarTitle: "CLI"
+title: "Olostep CLI"
+icon: "terminal"
+description: "Command-line interface voor maps, scrapen, crawls, batches en antwoorden: JSON-output voor scripts, CI en agents"
+---
+
+**NPM-pakket:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
+
+CLI voor de [Olostep API](https://www.olostep.com/): **map**, **answer**, **scrape**, **scrape-get**, **crawl**, **batch-scrape** en **batch-update**. Antwoorden zijn **JSON** (netjes geformatteerd) voor scripts, CI en agents.
+
+Bij installatie wordt een **standalone binary** voor jouw besturingssysteem gedownload. Je hebt geen Python nodig om `olostep` te draaien.
+
+<Note>
+  Na installatie downloadt een postinstall-stap de juiste binary uit de [GitHub-releases](https://github.com/olostep-api/CLI/releases) van het pakket. Als dat mislukt, controleer of er een release is voor deze pakketversie en jouw platform en installeer opnieuw.
+</Note>
+
+## Installatie
+
+**Vereisten:** Node.js **16+** (alleen voor `npm` / `npx`; de CLI zelf is een native binary).
+
+```bash
+npm install -g olostep-cli
+```
+
+Zonder globale installatie:
+
+```bash
+npx -y olostep-cli@latest --help
+```
+
+**Platforms:** macOS (Apple Silicon en Intel), Linux x64, Windows x64.
+
+## API-sleutel
+
+Zet **`OLOSTEP_API_KEY`** in je omgeving of in een `.env`-bestand in de map waar je `olostep` uitvoert.
+
+Sleutels aanmaken: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys).
+
+```bash
+export OLOSTEP_API_KEY=your_key_here
+olostep --help
+```
+
+## Uitvoer
+
+| Flag | Gedrag |
+| ---- | ------ |
+| `--out <path>` | Schrijf JSON naar een bestand (bovenliggende mappen worden zo nodig aangemaakt). |
+| `--out -` | Schrijf JSON alleen naar **stdout** (UTF-8, ingesprongen). Handig voor pipes en subprocess-capture. |
+
+Voortgang en logs gaan naar **stderr**, zodat stdout parseerbaar blijft.
+
+```bash
+olostep map "https://example.com" --top-n 20 --out - | jq '.urls[:10]'
+olostep scrape "https://example.com" --out - | jq .result.markdown_content
+```
+
+Zonder `--out` komen bestanden in `output/` (zie [standaardpaden voor `--out`](#default-out-paths)).
+
+## Commando's
+
+Gebruik `olostep <commando> --help` voor alle opties. De meeste commando's accepteren `--timeout` (HTTP, seconden).
+
+### `map`: URL's ontdekken
+
+| Optie | Beschrijving |
+| ----- | ------------ |
+| `--out` | Bestandspad of `-` |
+| `--top-n` | Maximaal aantal URL's |
+| `--search-query` | Stuurt het ontdekken |
+| `--include-subdomain` / `--no-include-subdomain` | Subdomeinen |
+| `--include-url` / `--exclude-url` | Herhaalbare patronen |
+| `--cursor` | Paginering |
+
+Gebruik `--top-n`, niet `--limit` (verwijderd).
+
+```bash
+olostep map "https://example.com" --top-n 100 --search-query "blog"
+```
+
+### `answer`: onderzocht antwoord
+
+Pollt tot het antwoord klaar is.
+
+| Optie | Beschrijving |
+| ----- | ------------ |
+| `--out` | Bestand of `-` |
+| `--json-format` | Optionele hint voor gestructureerde uitvoer (JSON-object als string) |
+| `--poll-interval` / `--poll-timeout` | Polling (seconden) |
+
+Gebruik `--json-format`, niet `--model` (verwijderd).
+
+```bash
+olostep answer "What does this company build?" --out answer.json
+olostep answer "Extract facts" --json-format '{"company":"","year":""}' --out -
+```
+
+### `scrape`: één URL
+
+**Formaten:** `html`, `markdown`, `text`, `json`, `raw_pdf`, `screenshot` (kommagescheiden; standaard `markdown`).
+
+| Optie | Beschrijving |
+| ----- | ------------ |
+| `--formats` | Kommagescheiden |
+| `--country` | Landcode |
+| `--wait-before-scraping` | Milliseconden wachten vóór scrape |
+| `--payload-json` | Geavanceerde opties als JSON-string |
+| `--payload-file` | Zelfde uit bestand (niet samen met `--payload-json`) |
+
+```bash
+olostep scrape "https://example.com" --formats markdown,html
+olostep scrape "https://example.com" --payload-file scrape-options.json --out -
+```
+
+### `scrape-get`: op scrape-ID
+
+```bash
+olostep scrape-get "scrape_abc123" --out -
+```
+
+### `crawl`: site-crawl
+
+**Ophaalformaten:** `markdown`, `html`, `json`.
+
+Belangrijke flags: `--max-pages`, `--max-depth`, `--include-subdomain`, `--include-external`, `--include-url`, `--exclude-url`, `--search-query`, `--top-n`, `--webhook`, `--crawl-timeout`, `--follow-robots-txt` / `--ignore-robots-txt`, `--formats`, `--pages-limit`, `--pages-search-query`, `--poll-seconds`, `--poll-timeout`, `--dry-run` (payload tonen, geen request).
+
+```bash
+olostep crawl "https://docs.example.com" --max-pages 50 --formats markdown,html
+olostep crawl "https://example.com" --max-pages 10 --dry-run
+```
+
+### `batch-scrape`: CSV
+
+CSV-kolommen: **`custom_id` of `id`**, en **`url`**.
+
+| Optie | Beschrijving |
+| ----- | ------------ |
+| `--formats` | `markdown`, `html`, `json` |
+| `--country` | Optioneel |
+| `--parser-id` | Parser voor gestructureerde extractie |
+| `--poll-seconds`, `--log-every`, `--items-limit` | Polling / paginering |
+| `--dry-run` | Alleen payload tonen |
+
+```bash
+olostep batch-scrape urls.csv --formats markdown,html
+```
+
+### `batch-update`: batch-metadata
+
+Vereist **één van** `--metadata-json` of `--metadata-file` (JSON-object).
+
+```bash
+olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
+```
+
+## Standaardpaden voor `--out` {#default-out-paths}
+
+Zonder `--out`:
+
+| Commando | Standaard |
+| -------- | --------- |
+| `map` | `output/map.json` |
+| `answer` | `output/answer.json` |
+| `scrape` | `output/scrape.json` |
+| `scrape-get` | `output/scrape_get.json` |
+| `crawl` | `output/crawl_results.json` |
+| `batch-scrape` | `output/batch_results.json` |
+| `batch-update` | `output/batch_update.json` |
+
+## Globale flags
+
+| Flag | Beschrijving |
+| ---- | ------------ |
+| `-V`, `--version` | Versie |
+| `-h`, `--help` | Help |
+
+## Gerelateerde documentatie
+
+- [Maps](/features/maps/maps) · [Batches](/features/batches/batches) · [Parsers](/features/structured-content/parsers)
+
+**Repository:** [github.com/olostep-api/CLI](https://github.com/olostep-api/CLI)
+
+## Beveiliging
+
+Houd API-sleutels buiten versiebeheer; roteer bij lekken.
