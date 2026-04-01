@@ -1,0 +1,430 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Users API — Partnerships",
+    "version": "1.0.0",
+    "description": "Affiliate partner endpoints on **users.olostep.com**. Every request needs **`Content-Type: application/json`** plus **`X-Partner-Key`** and **`Idempotency-Key`**. **`X-Partner-Key`** is issued by Olostep out of band and authenticates **your integration**—not your customer’s Olostep API key. **`Idempotency-Key`** is chosen by you (1–255 characters, one per logical onboarding); after a successful response Olostep stores it for safe replay (~**24 hours**, DynamoDB TTL, same window as batches). See each operation’s **Authentication** and **Parameters** for full semantics."
+  },
+  "servers": [
+    {
+      "url": "https://users.olostep.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Partnerships",
+      "description": "Partner-provisioned user onboarding and promo credits."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "PartnerKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Partner-Key",
+        "description": "Olostep issues this **partner API key** out of band during onboarding. Send it on every request, for example `X-Partner-Key: <your_partnership_api_key>`. It authenticates **your integration**—not your customer’s Olostep API key. A wrong or missing value returns **401** with `invalid_partner_key`."
+      }
+    },
+    "schemas": {
+      "PartnerQuickConnectRequestBody": {
+        "type": "object",
+        "required": [
+          "verified_email"
+        ],
+        "properties": {
+          "verified_email": {
+            "type": "string",
+            "format": "email",
+            "description": "End-user email (already verified by the partner). Normalized server-side to lowercase trimmed form."
+          }
+        }
+      },
+      "PartnerQuickConnectUserApiKey": {
+        "type": "object",
+        "required": [
+          "has_existing_api_key"
+        ],
+        "properties": {
+          "has_existing_api_key": {
+            "type": "boolean",
+            "description": "Whether the user already had at least one token before this request completed."
+          },
+          "auto_generated_api_key": {
+            "type": "string",
+            "nullable": true,
+            "description": "New default API key minted during this request, if any. Omitted/null when not created in this call or when credits were already claimed."
+          }
+        }
+      },
+      "PartnerQuickConnectUser": {
+        "type": "object",
+        "required": [
+          "object",
+          "id",
+          "email",
+          "is_new_user",
+          "api_key"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "user"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Olostep user id (Cognito `sub`)."
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "is_new_user": {
+            "type": "boolean",
+            "description": "`true` if a new Cognito user was created; `false` if the email already existed in the user pool."
+          },
+          "api_key": {
+            "$ref": "#/components/schemas/PartnerQuickConnectUserApiKey"
+          }
+        }
+      },
+      "PartnerQuickConnectResult": {
+        "type": "object",
+        "required": [
+          "object",
+          "partner_name",
+          "applied_quick_connect_credits",
+          "user_message",
+          "user"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "partner_quick_connect_result"
+            ]
+          },
+          "partner_name": {
+            "type": "string",
+            "description": "Display name for your partner integration, resolved server-side from your `X-Partner-Key`."
+          },
+          "applied_quick_connect_credits": {
+            "type": "integer",
+            "description": "Promo credits granted in this response. `0` when the account already claimed partner quick-connect credits."
+          },
+          "user_message": {
+            "type": "string",
+            "description": "Human-readable outcome summary for the partner UI."
+          },
+          "user": {
+            "$ref": "#/components/schemas/PartnerQuickConnectUser"
+          }
+        }
+      },
+      "ProblemJsonErrorItem": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "description": "Location of the invalid field (e.g. `[\"header\",\"Idempotency-Key\"]` or `[\"body\",\"verified_email\"]`)."
+          },
+          "msg": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "Machine issue code (e.g. Zod `code`)."
+          }
+        }
+      },
+      "ProblemJson": {
+        "type": "object",
+        "required": [
+          "object",
+          "id",
+          "code",
+          "type",
+          "status",
+          "title",
+          "detail",
+          "created",
+          "metadata"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "error"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique error instance id (`error_` + hex)."
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable machine code, e.g. `validation_error`, `invalid_partner_key`, `idempotency_key_reuse`, `internal_server_error`."
+          },
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "Problem type URI (RFC 7807)."
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code repeated in the body."
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Safe, client-facing explanation."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (seconds)."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemJsonErrorItem"
+            },
+            "description": "Present for `validation_error` (400)."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/partnerships/quick-connect/user": {
+      "post": {
+        "operationId": "partnerQuickConnectUser",
+        "tags": [
+          "Partnerships"
+        ],
+        "summary": "Partner user quick-connect",
+        "description": "## Headers & authentication\n\nEvery request must include `Content-Type: application/json` plus **`X-Partner-Key`** (Authentication) and **`Idempotency-Key`** (Parameters).\n\n### `X-Partner-Key`\n\nOlostep issues this **partner API key** out of band during onboarding. Send it on every request, for example `X-Partner-Key: <your_partnership_api_key>`. It authenticates **your integration**, not your customer's Olostep API key. Wrong or missing returns **401** with `invalid_partner_key`.\n\n### `Idempotency-Key`\n\n**Required.** Unique key for this logical operation (max **255** characters). **You** choose it - Olostep does not assign it. Use one string per logical onboarding (for example a UUID or a stable hash of your internal user id).\n\n**Replay:** Same key + same `verified_email` replays the **completed response** (stored JSON) while the idempotency record exists - no second credit grant. Same key + **different** `verified_email` is rejected (**422**).\n\n**Retention:** About **24 hours** (DynamoDB TTL, same window as batches). After expiry, replay may not return the saved body - **persist Olostep's success JSON** on your side if you need it longer.\n\n**Customer API key:** When Olostep mints a default `olostep_...` key on the first successful grant, it appears in `user.api_key.auto_generated_api_key`. That value is returned again only via **stored replay** (same idempotency key + same email). If you call again with a **new** idempotency key after the grant is already recorded, **200** is the already-claimed shape **without** the API key in the payload. The customer can still manage keys in the **Olostep dashboard**.\n\n**Recommended:** Stable idempotency key per signup, persist Olostep's JSON on success, retry with the **same** key on timeouts.\n\n---\n\n## Endpoint behavior\n\nCreates or resolves a user by verified email, enforces a one-time affiliate claim per Cognito user, grants partner promo credits on first success, and returns account metadata.\n\n**Idempotent:** Repeat the same `Idempotency-Key` with the same `verified_email` to retrieve the stored success body. Reusing the key with a different email returns **422**.\n\nThe same header and idempotency details are repeated under **Authentication** and **Parameters** in this reference.",
+        "security": [
+          {
+            "PartnerKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "description": "Required. Unique key for this logical operation (max 255 characters). Same key + same verified_email replays the completed response while the idempotency record exists (~24 hours, DynamoDB TTL); same key + different email is rejected. Full semantics (API key replay, persistence, retries) are in Headers & authentication and this endpoint description."
+            },
+            "description": "Required. Unique key for this logical operation (max 255 characters). Same key + same `verified_email` replays the completed response while the idempotency record exists (~24 hours, DynamoDB TTL, same as batches); same key + different email is rejected (**422**).\n\n**You** choose this value (1-255 characters), one per logical onboarding (for example UUID or stable hash of your internal user id).\n\nAfter **200**, Olostep persists the response for replay under your partner scope and this key - **stored JSON verbatim**, no duplicate side effects.\n\n**Customer API key:** `user.api_key.auto_generated_api_key` only on first mint plus replay with the same key + email; a new idempotency key after claim yields already-claimed **200** without the key. **Recommended:** stable key per signup, persist JSON, retry with the same key on timeouts."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerQuickConnectRequestBody"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Verified email",
+                  "value": {
+                    "verified_email": "customer@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success — user resolved or created; see `applied_quick_connect_credits` for credits granted in this call (may be `0` if already claimed).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerQuickConnectResult"
+                },
+                "examples": {
+                  "newUserWithCredits": {
+                    "summary": "New user, credits granted",
+                    "value": {
+                      "object": "partner_quick_connect_result",
+                      "partner_name": "acme_partner",
+                      "applied_quick_connect_credits": 200000,
+                      "user_message": "Account created and partner credits added.",
+                      "user": {
+                        "object": "user",
+                        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "email": "customer@example.com",
+                        "is_new_user": true,
+                        "api_key": {
+                          "has_existing_api_key": false,
+                          "auto_generated_api_key": "olostep_ExampleKeyReplaceMe"
+                        }
+                      }
+                    }
+                  },
+                  "alreadyClaimed": {
+                    "summary": "Credits already claimed earlier",
+                    "value": {
+                      "object": "partner_quick_connect_result",
+                      "partner_name": "acme_partner",
+                      "applied_quick_connect_credits": 0,
+                      "user_message": "Partner quick-connect credits were already claimed for this account.",
+                      "user": {
+                        "object": "user",
+                        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "email": "customer@example.com",
+                        "is_new_user": false,
+                        "api_key": {
+                          "has_existing_api_key": true,
+                          "auto_generated_api_key": null
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (missing/invalid `Idempotency-Key`, invalid email, malformed JSON, etc.). `Content-Type: application/problem+json`.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Request validation failed",
+                  "created": 1710000000,
+                  "metadata": {},
+                  "errors": [
+                    {
+                      "loc": [
+                        "header",
+                        "Idempotency-Key"
+                      ],
+                      "msg": "Idempotency-Key header is required.",
+                      "type": "too_small"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or unknown `X-Partner-Key`.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "invalid_partner_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "Unauthorized",
+                  "detail": "The partner key is missing or invalid.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Same `Idempotency-Key` is still being processed; retry later.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "idempotency_key_in_progress",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 409,
+                  "title": "Conflict",
+                  "detail": "A request with this idempotency key is currently being processed. Please retry.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`Idempotency-Key` reused with a different `verified_email` than the first request.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "idempotency_key_reuse",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 422,
+                  "title": "Unprocessable Entity",
+                  "detail": "A request with this idempotency key was already made with different parameters.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Credit grant or unexpected failure. Public `code` is `internal_server_error`; retry may be appropriate for transient errors.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 500,
+                  "title": "Internal Server Error",
+                  "detail": "Could not complete credit grant. Please retry.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
