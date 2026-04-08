@@ -1,0 +1,169 @@
+---
+sidebarTitle: 'Skills'
+title: Skills
+description: Install and manage Olostep skills in your AI coding agents
+icon: wand-magic-sparkles
+---
+
+Install Olostep skill folders directly into your AI coding agents from the command line.
+
+- Installs Olostep skills into agents like Cursor, Claude, Codex, Windsurf, and more
+- Skills land in a canonical store (`~/.agents/skills`) and are symlinked or copied into each agent's skills directory
+- Tracks all installs in a lockfile at `~/.agents/.skill-lock.json`
+
+This feature is available via the [Olostep CLI](/sdks/cli).
+
+## `olostep add skills`
+
+Syncs skills from a source directory into the CLI, installs them into the canonical store, then deploys them into each agent's skills directory.
+
+### Install the CLI
+
+```bash
+# Global install
+npm install -g olostep-cli
+
+# Or run without installing
+npx -y olostep-cli@latest add skills
+```
+
+### Usage
+
+```bash
+# Install all skills into all detected agents (default)
+olostep add skills
+
+# Authenticate first, then install
+olostep add skills --login
+
+# Target specific agents
+olostep add skills --agent cursor --agent claude
+
+# Always copy instead of symlinking
+olostep add skills --link-mode copy
+
+# Machine-readable JSON output
+olostep add skills --json
+```
+
+### Options
+
+| Option | Default | Description |
+| ------ | ------- | ----------- |
+| `--login` | — | Run browser login before installing |
+| `--source <path>` | CLI bundled skills dir | Skills source directory |
+| `--cli-local-dir <path>` | CLI/skills | Directory where source skills are synced for CLI-local use |
+| `--agent <name>` | — | Target a specific agent — repeatable |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | If no `--agent` is set, targets all detected installed agents |
+| `--global` / `--no-global` | `--global` | Install into known agent global skill dirs |
+| `--canonical-dir <path>` | `~/.agents/skills` | Canonical storage location for Olostep skills |
+| `--agent-skills-dir <path>` | — | Custom target skills dir (requires `--no-global`) |
+| `--skill <name>` | — | Include only this skill — repeatable |
+| `--exclude <name>` | — | Exclude this skill — repeatable |
+| `--overwrite` / `--no-overwrite` | `--overwrite` | Replace existing targets |
+| `--link-mode <auto\|symlink\|copy>` | `auto` | `auto` tries symlink, falls back to copy |
+| `--json` | — | Emit machine-readable JSON output |
+
+<Note>
+**Validation rules:**
+- `--link-mode` must be `auto`, `symlink`, or `copy`
+- `--agent-skills-dir` requires `--no-global`
+- `--no-global` requires `--agent-skills-dir`
+- Unknown agent names will error
+- An empty skill selection after `--skill` / `--exclude` will error
+</Note>
+
+### JSON output
+
+```json
+{
+  "sync": {
+    "plugin_source_dir": "/path/to/CLI/skills",
+    "cli_local_dir": "/path/to/CLI/skills"
+  },
+  "selected_skills": ["research-agent"],
+  "canonical_dir": "~/.agents/skills",
+  "lockfile_path": "~/.agents/.skill-lock.json",
+  "installed": [
+    {
+      "skill": "research-agent",
+      "canonical_path": "~/.agents/skills/olostep-research-agent",
+      "targets": [
+        { "agent": "cursor", "mode": "symlink", "path": "~/.cursor/skills/olostep-research-agent" },
+        { "agent": "claude", "mode": "symlink", "path": "~/.claude/skills/olostep-research-agent" }
+      ]
+    }
+  ]
+}
+```
+
+## Skill discovery and format
+
+Skills are discovered by scanning subdirectories for a `SKILL.md` file. The file must include a frontmatter block with `name` and `description` fields. Duplicate sanitized names are rejected.
+
+```markdown
+---
+name: research-agent
+description: Autonomous research agent for deep web investigation
+---
+
+# Research Agent
+
+...skill instructions here...
+```
+
+## Supported agents
+
+| Agent | Key |
+| ----- | --- |
+| Cursor | `cursor` |
+| Claude | `claude` |
+| Codex | `codex` |
+| Windsurf | `windsurf` |
+| Continue | `continue` |
+| Augment | `augment` |
+| Roo | `roo` |
+| Gemini | `gemini` |
+| Copilot | `copilot` |
+| Factory | `factory` |
+
+Each key maps to a known home-directory skills path. Use `--all-agents` (the default) to target all detected installed agents, or pass `--agent <key>` to target specific ones.
+
+## Naming convention
+
+Installed folder names always use the `olostep-` prefix: e.g., `research-agent` becomes `olostep-research-agent`. Names are sanitized to lowercase with invalid characters replaced by `-`. This prefix keeps Olostep-managed skills clearly identifiable and prevents conflicts with other tools.
+
+## `olostep remove skills`
+
+Removes Olostep-installed skill folders from the canonical store and agent skill directories, and cleans up the lockfile.
+
+### Usage
+
+```bash
+# Remove all Olostep skills from all agents
+olostep remove skills
+
+# Remove a specific skill
+olostep remove skills --skill research-agent
+
+# Remove from a specific agent only
+olostep remove skills --agent cursor
+
+# Machine-readable JSON output
+olostep remove skills --json
+```
+
+### Options
+
+| Option | Default | Description |
+| ------ | ------- | ----------- |
+| `--agent <name>` | — | Remove only from specified agent(s) — repeatable |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | If no `--agent` or custom dir, uses all detected installed agents |
+| `--canonical-dir <path>` | `~/.agents/skills` | Canonical skills directory to remove from |
+| `--agent-skills-dir <path>` | — | Custom target skills directory for removal |
+| `--skill <name>` | — | Remove only matching skill(s) — repeatable |
+| `--json` | — | Emit machine-readable JSON output |
+
+<Note>
+**Safety:** Only folders with the `olostep-` prefix are touched. Non-Olostep agent folders are never modified. Lockfile cleanup only removes `olostep-`-prefixed keys.
+</Note>
