@@ -1,0 +1,169 @@
+---
+sidebarTitle: 'Fähigkeiten'
+title: Fähigkeiten
+description: Olostep-Fähigkeiten in deinen KI-Coding-Agenten installieren und verwalten
+icon: wand-magic-sparkles
+---
+
+Installiere Olostep-Skill-Ordner direkt ueber die Kommandozeile in deine KI-Coding-Agenten.
+
+- Installiert Olostep-Skills in Agenten wie Cursor, Claude, Codex, Windsurf und mehr
+- Skills werden in einem kanonischen Speicher (`~/.agents/skills`) abgelegt und in das Skill-Verzeichnis jedes Agenten verlinkt oder kopiert
+- Verfolgt alle Installationen in einer Lockdatei unter `~/.agents/.skill-lock.json`
+
+Diese Funktion ist ueber die [Olostep CLI](/sdks/cli) verfuegbar.
+
+## `olostep add skills`
+
+Synchronisiert Skills aus einem Quellverzeichnis in die CLI, installiert sie im kanonischen Speicher und verteilt sie dann in die Skill-Verzeichnisse der jeweiligen Agenten.
+
+### CLI installieren
+
+```bash
+# Global installieren
+npm install -g olostep-cli
+
+# Oder ohne Installation ausfuehren
+npx -y olostep-cli@latest add skills
+```
+
+### Verwendung
+
+```bash
+# Alle Skills in alle erkannten Agenten installieren (Standard)
+olostep add skills
+
+# Zuerst authentifizieren, dann installieren
+olostep add skills --login
+
+# Bestimmte Agenten ansprechen
+olostep add skills --agent cursor --agent claude
+
+# Immer kopieren statt Symlink zu verwenden
+olostep add skills --link-mode copy
+
+# Maschinenlesbare JSON-Ausgabe
+olostep add skills --json
+```
+
+### Optionen
+
+| Option | Standard | Beschreibung |
+| ------ | ------- | ----------- |
+| `--login` | — | Browser-Login vor der Installation ausfuehren |
+| `--source <path>` | Mit der CLI gebuendeltes Skill-Verzeichnis | Skill-Quellverzeichnis |
+| `--cli-local-dir <path>` | CLI/skills | Verzeichnis, in das Quell-Skills fuer die lokale CLI-Nutzung synchronisiert werden |
+| `--agent <name>` | — | Bestimmten Agenten ansprechen - mehrfach nutzbar |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | Wenn kein `--agent` gesetzt ist, werden alle erkannten installierten Agenten angesprochen |
+| `--global` / `--no-global` | `--global` | In bekannte globale Skill-Verzeichnisse der Agenten installieren |
+| `--canonical-dir <path>` | `~/.agents/skills` | Kanonischer Speicherort fuer Olostep-Skills |
+| `--agent-skills-dir <path>` | — | Benutzerdefiniertes Ziel-Skill-Verzeichnis (erfordert `--no-global`) |
+| `--skill <name>` | — | Nur diesen Skill einschliessen - mehrfach nutzbar |
+| `--exclude <name>` | — | Diesen Skill ausschliessen - mehrfach nutzbar |
+| `--overwrite` / `--no-overwrite` | `--overwrite` | Bestehende Ziele ersetzen |
+| `--link-mode <auto\|symlink\|copy>` | `auto` | `auto` versucht Symlink und faellt bei Bedarf auf Kopieren zurueck |
+| `--json` | — | Maschinenlesbare JSON-Ausgabe ausgeben |
+
+<Note>
+**Validierungsregeln:**
+- `--link-mode` muss `auto`, `symlink` oder `copy` sein
+- `--agent-skills-dir` erfordert `--no-global`
+- `--no-global` erfordert `--agent-skills-dir`
+- Unbekannte Agentennamen fuehren zu einem Fehler
+- Eine leere Skill-Auswahl nach `--skill` / `--exclude` fuehrt zu einem Fehler
+</Note>
+
+### JSON-Ausgabe
+
+```json
+{
+  "sync": {
+    "plugin_source_dir": "/path/to/CLI/skills",
+    "cli_local_dir": "/path/to/CLI/skills"
+  },
+  "selected_skills": ["research-agent"],
+  "canonical_dir": "~/.agents/skills",
+  "lockfile_path": "~/.agents/.skill-lock.json",
+  "installed": [
+    {
+      "skill": "research-agent",
+      "canonical_path": "~/.agents/skills/olostep-research-agent",
+      "targets": [
+        { "agent": "cursor", "mode": "symlink", "path": "~/.cursor/skills/olostep-research-agent" },
+        { "agent": "claude", "mode": "symlink", "path": "~/.claude/skills/olostep-research-agent" }
+      ]
+    }
+  ]
+}
+```
+
+## Skill-Erkennung und Format
+
+Skills werden erkannt, indem Unterverzeichnisse nach einer `SKILL.md`-Datei durchsucht werden. Die Datei muss einen Frontmatter-Block mit den Feldern `name` und `description` enthalten. Doppelte bereinigte Namen werden abgelehnt.
+
+```markdown
+---
+name: research-agent
+description: Autonomous research agent for deep web investigation
+---
+
+# Research Agent
+
+...skill instructions here...
+```
+
+## Unterstuetzte Agenten
+
+| Agent | Schluessel |
+| ----- | --- |
+| Cursor | `cursor` |
+| Claude | `claude` |
+| Codex | `codex` |
+| Windsurf | `windsurf` |
+| Continue | `continue` |
+| Augment | `augment` |
+| Roo | `roo` |
+| Gemini | `gemini` |
+| Copilot | `copilot` |
+| Factory | `factory` |
+
+Jeder Schluessel wird einem bekannten Skill-Pfad im Home-Verzeichnis zugeordnet. Verwende `--all-agents` (Standard), um alle erkannten installierten Agenten anzusprechen, oder `--agent <key>` fuer bestimmte Agenten.
+
+## Namenskonvention
+
+Installierte Ordnernamen verwenden immer das Praefix `olostep-`: z. B. wird aus `research-agent` `olostep-research-agent`. Namen werden in Kleinbuchstaben bereinigt, ungueltige Zeichen werden durch `-` ersetzt. Dieses Praefix macht von Olostep verwaltete Skills klar erkennbar und verhindert Konflikte mit anderen Tools.
+
+## `olostep remove skills`
+
+Entfernt von Olostep installierte Skill-Ordner aus dem kanonischen Speicher und aus den Skill-Verzeichnissen der Agenten und bereinigt die Lockdatei.
+
+### Verwendung
+
+```bash
+# Alle Olostep-Skills von allen Agenten entfernen
+olostep remove skills
+
+# Einen bestimmten Skill entfernen
+olostep remove skills --skill research-agent
+
+# Nur von einem bestimmten Agenten entfernen
+olostep remove skills --agent cursor
+
+# Maschinenlesbare JSON-Ausgabe
+olostep remove skills --json
+```
+
+### Optionen
+
+| Option | Standard | Beschreibung |
+| ------ | ------- | ----------- |
+| `--agent <name>` | — | Nur von angegebenen Agenten entfernen - mehrfach nutzbar |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | Wenn kein `--agent` oder benutzerdefiniertes Verzeichnis gesetzt ist, werden alle erkannten installierten Agenten verwendet |
+| `--canonical-dir <path>` | `~/.agents/skills` | Kanonisches Skill-Verzeichnis, aus dem entfernt wird |
+| `--agent-skills-dir <path>` | — | Benutzerdefiniertes Ziel-Skill-Verzeichnis fuer das Entfernen |
+| `--skill <name>` | — | Nur passende Skills entfernen - mehrfach nutzbar |
+| `--json` | — | Maschinenlesbare JSON-Ausgabe ausgeben |
+
+<Note>
+**Sicherheit:** Es werden nur Ordner mit dem Praefix `olostep-` bearbeitet. Nicht-Olostep-Agentenordner werden niemals geaendert. Bei der Lockfile-Bereinigung werden nur Schluessel mit `olostep-`-Praefix entfernt.
+</Note>

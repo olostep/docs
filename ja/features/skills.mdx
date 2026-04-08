@@ -1,0 +1,169 @@
+---
+sidebarTitle: 'スキル'
+title: スキル
+description: AI コーディングエージェントで Olostep スキルをインストールして管理する
+icon: wand-magic-sparkles
+---
+
+コマンドラインから Olostep のスキルフォルダを AI コーディングエージェントに直接インストールします。
+
+- Cursor、Claude、Codex、Windsurf などのエージェントに Olostep スキルをインストールします
+- スキルは正規ストア (`~/.agents/skills`) に配置され、各エージェントのスキルディレクトリにシンボリックリンクまたはコピーされます
+- すべてのインストールは `~/.agents/.skill-lock.json` のロックファイルで追跡されます
+
+この機能は [Olostep CLI](/sdks/cli) で利用できます。
+
+## `olostep add skills`
+
+ソースディレクトリから CLI にスキルを同期し、正規ストアにインストールした後、各エージェントのスキルディレクトリに展開します。
+
+### CLI をインストール
+
+```bash
+# グローバルインストール
+npm install -g olostep-cli
+
+# またはインストールせずに実行
+npx -y olostep-cli@latest add skills
+```
+
+### 使い方
+
+```bash
+# 検出されたすべてのエージェントに全スキルをインストール（デフォルト）
+olostep add skills
+
+# 先に認証してからインストール
+olostep add skills --login
+
+# 特定のエージェントを対象にする
+olostep add skills --agent cursor --agent claude
+
+# シンボリックリンクではなく常にコピーする
+olostep add skills --link-mode copy
+
+# 機械可読な JSON 出力
+olostep add skills --json
+```
+
+### オプション
+
+| オプション | デフォルト | 説明 |
+| ------ | ------- | ----------- |
+| `--login` | — | インストール前にブラウザログインを実行 |
+| `--source <path>` | CLI 同梱のスキルディレクトリ | スキルのソースディレクトリ |
+| `--cli-local-dir <path>` | CLI/skills | CLI ローカル利用のためにソーススキルを同期するディレクトリ |
+| `--agent <name>` | — | 特定のエージェントを対象にする（繰り返し指定可） |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | `--agent` が未指定の場合、検出されたすべてのインストール済みエージェントを対象にします |
+| `--global` / `--no-global` | `--global` | 既知のエージェントのグローバルスキルディレクトリにインストール |
+| `--canonical-dir <path>` | `~/.agents/skills` | Olostep スキルの正規保存先 |
+| `--agent-skills-dir <path>` | — | カスタム対象スキルディレクトリ（`--no-global` が必要） |
+| `--skill <name>` | — | このスキルのみ含める（繰り返し指定可） |
+| `--exclude <name>` | — | このスキルを除外（繰り返し指定可） |
+| `--overwrite` / `--no-overwrite` | `--overwrite` | 既存ターゲットを置き換える |
+| `--link-mode <auto\|symlink\|copy>` | `auto` | `auto` は symlink を試し、失敗時は copy にフォールバック |
+| `--json` | — | 機械可読な JSON 出力を生成 |
+
+<Note>
+**検証ルール:**
+- `--link-mode` は `auto`、`symlink`、`copy` のいずれかである必要があります
+- `--agent-skills-dir` には `--no-global` が必要です
+- `--no-global` には `--agent-skills-dir` が必要です
+- 不明なエージェント名はエラーになります
+- `--skill` / `--exclude` の後にスキル選択が空だとエラーになります
+</Note>
+
+### JSON 出力
+
+```json
+{
+  "sync": {
+    "plugin_source_dir": "/path/to/CLI/skills",
+    "cli_local_dir": "/path/to/CLI/skills"
+  },
+  "selected_skills": ["research-agent"],
+  "canonical_dir": "~/.agents/skills",
+  "lockfile_path": "~/.agents/.skill-lock.json",
+  "installed": [
+    {
+      "skill": "research-agent",
+      "canonical_path": "~/.agents/skills/olostep-research-agent",
+      "targets": [
+        { "agent": "cursor", "mode": "symlink", "path": "~/.cursor/skills/olostep-research-agent" },
+        { "agent": "claude", "mode": "symlink", "path": "~/.claude/skills/olostep-research-agent" }
+      ]
+    }
+  ]
+}
+```
+
+## スキルの検出と形式
+
+スキルはサブディレクトリをスキャンして `SKILL.md` ファイルを検出することで見つかります。このファイルには `name` と `description` を含む frontmatter ブロックが必要です。サニタイズ後に重複する名前は拒否されます。
+
+```markdown
+---
+name: research-agent
+description: Autonomous research agent for deep web investigation
+---
+
+# Research Agent
+
+...skill instructions here...
+```
+
+## サポートされるエージェント
+
+| エージェント | キー |
+| ----- | --- |
+| Cursor | `cursor` |
+| Claude | `claude` |
+| Codex | `codex` |
+| Windsurf | `windsurf` |
+| Continue | `continue` |
+| Augment | `augment` |
+| Roo | `roo` |
+| Gemini | `gemini` |
+| Copilot | `copilot` |
+| Factory | `factory` |
+
+各キーは既知のホームディレクトリ内スキルパスに対応します。`--all-agents`（デフォルト）で検出されたすべてのインストール済みエージェントを対象にするか、`--agent <key>` で特定のエージェントを指定できます。
+
+## 命名規則
+
+インストールされるフォルダ名は常に `olostep-` プレフィックスを使用します（例: `research-agent` は `olostep-research-agent` になります）。名前は小文字に正規化され、無効な文字は `-` に置き換えられます。このプレフィックスにより、Olostep 管理スキルを明確に識別でき、他ツールとの競合を防げます。
+
+## `olostep remove skills`
+
+Olostep がインストールしたスキルフォルダを正規ストアと各エージェントのスキルディレクトリから削除し、ロックファイルをクリーンアップします。
+
+### 使い方
+
+```bash
+# すべてのエージェントから Olostep スキルを削除
+olostep remove skills
+
+# 特定のスキルを削除
+olostep remove skills --skill research-agent
+
+# 特定のエージェントからのみ削除
+olostep remove skills --agent cursor
+
+# 機械可読な JSON 出力
+olostep remove skills --json
+```
+
+### オプション
+
+| オプション | デフォルト | 説明 |
+| ------ | ------- | ----------- |
+| `--agent <name>` | — | 指定したエージェントからのみ削除（繰り返し指定可） |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | `--agent` またはカスタムディレクトリが未指定の場合、検出されたすべてのインストール済みエージェントを使用 |
+| `--canonical-dir <path>` | `~/.agents/skills` | 削除元となる正規スキルディレクトリ |
+| `--agent-skills-dir <path>` | — | 削除対象のカスタムスキルディレクトリ |
+| `--skill <name>` | — | 一致するスキルのみ削除（繰り返し指定可） |
+| `--json` | — | 機械可読な JSON 出力を生成 |
+
+<Note>
+**安全性:** `olostep-` プレフィックスを持つフォルダのみが対象です。Olostep 以外のエージェントフォルダは変更されません。ロックファイルのクリーンアップでも `olostep-` プレフィックスのキーのみ削除されます。
+</Note>

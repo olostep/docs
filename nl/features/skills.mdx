@@ -1,0 +1,169 @@
+---
+sidebarTitle: 'Vaardigheden'
+title: Vaardigheden
+description: Installeer en beheer Olostep-vaardigheden in je AI-codeeragenten
+icon: wand-magic-sparkles
+---
+
+Installeer Olostep-vaardigheidsmappen rechtstreeks in je AI-codeeragenten vanaf de opdrachtregel.
+
+- Installs Olostep skills into agents like Cursor, Claude, Codex, Windsurf, and more
+- Skills land in a canonical store (`~/.agents/skills`) and are symlinked or copied into each agent's skills directory
+- Tracks all installs in a lockfile at `~/.agents/.skill-lock.json`
+
+Deze functie is beschikbaar via de [Olostep CLI](/sdks/cli).
+
+## `olostep add skills`
+
+Syncs skills from a source directory into the CLI, installs them into the canonical store, then deploys them into each agent's skills directory.
+
+### Installeer de CLI
+
+```bash
+# Globale installatie
+npm install -g olostep-cli
+
+# Of uitvoeren zonder installatie
+npx -y olostep-cli@latest add skills
+```
+
+### Gebruik
+
+```bash
+# Installeer alle vaardigheden in alle gedetecteerde agenten (standaard)
+olostep add skills
+
+# Eerst authenticeren, daarna installeren
+olostep add skills --login
+
+# Richt op specifieke agenten
+olostep add skills --agent cursor --agent claude
+
+# Altijd kopieren in plaats van symlink
+olostep add skills --link-mode copy
+
+# Machineleesbare JSON-uitvoer
+olostep add skills --json
+```
+
+### Opties
+
+| Optie | Standaard | Beschrijving |
+| ------ | ------- | ----------- |
+| `--login` | — | Run browser login before installing |
+| `--source <path>` | CLI bundled skills dir | Skills source directory |
+| `--cli-local-dir <path>` | CLI/skills | Directory where source skills are synced for CLI-local use |
+| `--agent <name>` | — | Target a specific agent — repeatable |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | If no `--agent` is set, targets all detected installed agents |
+| `--global` / `--no-global` | `--global` | Install into known agent global skill dirs |
+| `--canonical-dir <path>` | `~/.agents/skills` | Canonical storage location for Olostep skills |
+| `--agent-skills-dir <path>` | — | Custom target skills dir (requires `--no-global`) |
+| `--skill <name>` | — | Include only this skill — repeatable |
+| `--exclude <name>` | — | Exclude this skill — repeatable |
+| `--overwrite` / `--no-overwrite` | `--overwrite` | Replace existing targets |
+| `--link-mode <auto\|symlink\|copy>` | `auto` | `auto` tries symlink, falls back to copy |
+| `--json` | — | Emit machine-readable JSON output |
+
+<Note>
+**Validatieregels:**
+- `--link-mode` must be `auto`, `symlink`, or `copy`
+- `--agent-skills-dir` requires `--no-global`
+- `--no-global` requires `--agent-skills-dir`
+- Unknown agent names will error
+- An empty skill selection after `--skill` / `--exclude` will error
+</Note>
+
+### JSON-uitvoer
+
+```json
+{
+  "sync": {
+    "plugin_source_dir": "/path/to/CLI/skills",
+    "cli_local_dir": "/path/to/CLI/skills"
+  },
+  "selected_skills": ["research-agent"],
+  "canonical_dir": "~/.agents/skills",
+  "lockfile_path": "~/.agents/.skill-lock.json",
+  "installed": [
+    {
+      "skill": "research-agent",
+      "canonical_path": "~/.agents/skills/olostep-research-agent",
+      "targets": [
+        { "agent": "cursor", "mode": "symlink", "path": "~/.cursor/skills/olostep-research-agent" },
+        { "agent": "claude", "mode": "symlink", "path": "~/.claude/skills/olostep-research-agent" }
+      ]
+    }
+  ]
+}
+```
+
+## Vaardigheidsdetectie en formaat
+
+Vaardigheden worden gevonden door submappen te scannen op een `SKILL.md`-bestand. Het bestand moet een frontmatterblok bevatten met de velden `name` en `description`. Dubbele opgeschoonde namen worden afgewezen.
+
+```markdown
+---
+name: research-agent
+description: Autonomous research agent for deep web investigation
+---
+
+# Research Agent
+
+...skill instructions here...
+```
+
+## Ondersteunde agenten
+
+| Agent | Sleutel |
+| ----- | --- |
+| Cursor | `cursor` |
+| Claude | `claude` |
+| Codex | `codex` |
+| Windsurf | `windsurf` |
+| Continue | `continue` |
+| Augment | `augment` |
+| Roo | `roo` |
+| Gemini | `gemini` |
+| Copilot | `copilot` |
+| Factory | `factory` |
+
+Elke sleutel verwijst naar een bekend vaardighedenpad in de home-directory. Gebruik `--all-agents` (standaard) om alle gedetecteerde geinstalleerde agenten te targeten, of geef `--agent <key>` op voor specifieke agenten.
+
+## Naamconventie
+
+Geinstalleerde mapnamen gebruiken altijd het voorvoegsel `olostep-`: bijvoorbeeld, `research-agent` wordt `olostep-research-agent`. Namen worden opgeschoond naar kleine letters waarbij ongeldige tekens worden vervangen door `-`. Dit voorvoegsel maakt door Olostep beheerde vaardigheden duidelijk herkenbaar en voorkomt conflicten met andere tools.
+
+## `olostep remove skills`
+
+Verwijdert door Olostep geinstalleerde vaardigheidsmappen uit de canonieke opslag en agent-vaardigheidsmappen, en ruimt het lockbestand op.
+
+### Gebruik
+
+```bash
+# Remove all Olostep skills from all agents
+olostep remove skills
+
+# Remove a specific skill
+olostep remove skills --skill research-agent
+
+# Remove from a specific agent only
+olostep remove skills --agent cursor
+
+# Machineleesbare JSON-uitvoer
+olostep remove skills --json
+```
+
+### Opties
+
+| Optie | Standaard | Beschrijving |
+| ------ | ------- | ----------- |
+| `--agent <name>` | — | Remove only from specified agent(s) — repeatable |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | If no `--agent` or custom dir, uses all detected installed agents |
+| `--canonical-dir <path>` | `~/.agents/skills` | Canonical skills directory to remove from |
+| `--agent-skills-dir <path>` | — | Custom target skills directory for removal |
+| `--skill <name>` | — | Remove only matching skill(s) — repeatable |
+| `--json` | — | Emit machine-readable JSON output |
+
+<Note>
+**Veiligheid:** Alleen mappen met het voorvoegsel `olostep-` worden aangepast. Niet-Olostep-agentmappen worden nooit gewijzigd. Het opschonen van het lockbestand verwijdert alleen sleutels met het voorvoegsel `olostep-`.
+</Note>
