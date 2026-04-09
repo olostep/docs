@@ -18,12 +18,22 @@ For API details see the [Map Endpoint API Reference](/api-reference/maps/create)
 <CodeGroup>
 
 ```python Python
-# pip install requests
+pip install olostep
 
-import requests
+from olostep import Olostep
 ```
 
 ```js Node
+npm install olostep
+
+import Olostep from 'olostep'
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+```js Node (API)
 // npm install node-fetch
 
 // ESM
@@ -33,8 +43,10 @@ import fetch from 'node-fetch'
 const fetch = require('node-fetch')
 ```
 
-```bash cURL
-# macOS: builtin curl is fine
+```python Python (API)
+# pip install requests
+
+import requests
 ```
 
 </CodeGroup>
@@ -46,6 +58,50 @@ Send a POST request with the website `url`. Optionally pass `include_urls`, `exc
 <CodeGroup>
 
 ```python Python
+from olostep import Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+sitemap = client.maps.create(url="https://docs.olostep.com")
+
+for url in sitemap.urls():
+    print(url)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const map = await client.maps.create({ url: 'https://docs.olostep.com' })
+
+for await (const url of map.urls()) {
+  console.log(url)
+}
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/maps" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://docs.olostep.com"
+  }'
+```
+
+```js Node (API)
+const res = await fetch('https://api.olostep.com/v1/maps', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ url: 'https://docs.olostep.com' })
+})
+console.log(await res.json())
+```
+
+```python Python (API)
 import requests
 import json
 
@@ -61,27 +117,6 @@ headers = {
 
 response = requests.post(endpoint, json=payload, headers=headers)
 print(json.dumps(response.json(), indent=2))
-```
-
-```js Node
-const res = await fetch('https://api.olostep.com/v1/maps', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer <YOUR_API_KEY>',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ url: 'https://docs.olostep.com' })
-})
-console.log(await res.json())
-```
-
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/maps" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://docs.olostep.com"
-  }'
 ```
 
 </CodeGroup>
@@ -106,55 +141,86 @@ You can use the following code:
 
 <CodeGroup>
 
-    ```python maps.py
-    import requests
-    
-    endpoint = "https://api.olostep.com/v1/maps"
-    
-    payload = {
-        "url": "https://www.brex.com/",
-        "include_urls": ["/product", "/product/**"],
-        "top_n": 100000
-    }
-    
-    headers = {
-        "Authorization": "Bearer <YOUR_API_KEY>",
-        "Content-Type": "application/json"
-    }
-    
-    response = requests.post(endpoint, json=payload, headers=headers)
-    
-    print(response.text)
-    ```
+```python Python
+from olostep import Olostep
 
-    ```js Node
-    const endpoint = 'https://api.olostep.com/v1/maps'
+client = Olostep(api_key="YOUR_REAL_KEY")
 
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer <YOUR_API_KEY>',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        url: 'https://www.brex.com/',
-        include_urls: ['/product', '/product/**'],
-        top_n: 100000
-      })
-    })
-    console.log(await res.text())
-    ```
+sitemap = client.maps.create(
+    url="https://www.brex.com/",
+    include_urls=["/product", "/product/**"],
+    top_n=100000,
+)
 
-    ```bash cURL
-    curl -s -X POST "https://api.olostep.com/v1/maps" \
-      -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "url": "https://www.brex.com/",
-        "include_urls": ["/product", "/product/**"],
-        "top_n": 100000
-      }'
-    ```
+for url in sitemap.urls():
+    print(url)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const map = await client.maps.create({
+  url: 'https://www.brex.com/',
+  includeUrls: ['/product', '/product/**'],
+  topN: 100000,
+})
+
+for await (const url of map.urls()) {
+  console.log(url)
+}
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/maps" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.brex.com/",
+    "include_urls": ["/product", "/product/**"],
+    "top_n": 100000
+  }'
+```
+
+```js Node (API)
+const endpoint = 'https://api.olostep.com/v1/maps'
+
+const res = await fetch(endpoint, {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://www.brex.com/',
+    include_urls: ['/product', '/product/**'],
+    top_n: 100000
+  })
+})
+console.log(await res.text())
+```
+
+```python Python (API)
+import requests
+
+endpoint = "https://api.olostep.com/v1/maps"
+
+payload = {
+    "url": "https://www.brex.com/",
+    "include_urls": ["/product", "/product/**"],
+    "top_n": 100000
+}
+
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+
+print(response.text)
+```
 
 </CodeGroup>
 

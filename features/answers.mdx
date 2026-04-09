@@ -37,12 +37,22 @@ https://www.olostep.com/demos/spreadsheet-enrich
 <CodeGroup>
 
 ```python Python
-# pip install requests
+pip install olostep
 
-import requests
+from olostep import Olostep
 ```
 
 ```js Node
+npm install olostep
+
+import Olostep from 'olostep'
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+```js Node (API)
 // npm install node-fetch
 
 // ESM
@@ -52,8 +62,10 @@ import fetch from 'node-fetch'
 const fetch = require('node-fetch')
 ```
 
-```bash cURL
-# macOS: builtin curl is fine
+```python Python (API)
+# pip install requests
+
+import requests
 ```
 
 </CodeGroup>
@@ -65,20 +77,44 @@ Ask a question and pass a JSON schema to guide the output. You can also not pass
 <CodeGroup>
 
 ```python Python
-import requests, json
+from olostep import Olostep
 
-endpoint = "https://api.olostep.com/v1/answers"
-payload = {
-  "task": "What is the latest book by J.K. Rowling?",
-  "json": {"book_title": "", "author": "", "release_date": ""}
-}
-headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+client = Olostep(api_key="YOUR_REAL_KEY")
 
-response = requests.post(endpoint, json=payload, headers=headers)
-print(json.dumps(response.json(), indent=2))
+answer = client.answers.create(
+    task="What is the latest book by J.K. Rowling?",
+    json_format={"book_title": "", "author": "", "release_date": ""},
+)
+
+print(answer.json_content)
+print(answer.sources)
 ```
 
 ```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const answer = await client.answers.create({
+  task: 'What is the latest book by J.K. Rowling?',
+  jsonFormat: { book_title: '', author: '', release_date: '' },
+})
+
+console.log(answer.json_content)
+console.log(answer.sources)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/answers" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "What is the latest book by J.K. Rowling?",
+    "json": {"book_title": "", "author": "", "release_date": ""}
+  }'
+```
+
+```js Node (API)
 const res = await fetch('https://api.olostep.com/v1/answers', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
@@ -90,14 +126,18 @@ const res = await fetch('https://api.olostep.com/v1/answers', {
 console.log(await res.json())
 ```
 
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/answers" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task": "What is the latest book by J.K. Rowling?",
-    "json": {"book_title": "", "author": "", "release_date": ""}
-  }'
+```python Python (API)
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "What is the latest book by J.K. Rowling?",
+  "json": {"book_title": "", "author": "", "release_date": ""}
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
 ```
 
 </CodeGroup>
@@ -167,7 +207,35 @@ When you don't pass the `json` parameter, the API will return a json object with
 - Provide a JSON object with empty values as a schema, or a string describing the data you want.
 - If the agent isn’t confident, it returns `NOT_FOUND` for that field.
 
+<CodeGroup>
+
 ```python Python
+from olostep import Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+answer = client.answers.create(
+    task="how much did Olostep raise?",
+    json_format={"amount": ""},
+)
+
+print(answer.json_content)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const answer = await client.answers.create({
+  task: 'how much did Olostep raise?',
+  jsonFormat: { amount: '' },
+})
+
+console.log(answer.json_content)
+```
+
+```python Python (API)
 import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
@@ -184,6 +252,8 @@ headers = {
 response = requests.post(endpoint, json=payload, headers=headers)
 print(json.dumps(response.json(), indent=2))
 ```
+
+</CodeGroup>
 
 This would return:
 
