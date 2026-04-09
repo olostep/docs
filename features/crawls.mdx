@@ -19,12 +19,22 @@ For API details see the [Crawl Endpoint API Reference](/api-reference/crawls/cre
 <CodeGroup>
 
 ```python Python
-# pip install requests
+pip install olostep
 
-import requests
+from olostep import Olostep
 ```
 
 ```js Node
+npm install olostep
+
+import Olostep from 'olostep'
+```
+
+```bash cURL
+# macOS: builtin curl is fine
+```
+
+```js Node (API)
 // npm install node-fetch
 
 // ESM
@@ -34,8 +44,10 @@ import fetch from 'node-fetch'
 const fetch = require('node-fetch')
 ```
 
-```bash cURL
-# macOS: builtin curl is fine
+```python Python (API)
+# pip install requests
+
+import requests
 ```
 
 </CodeGroup>
@@ -47,6 +59,65 @@ Provide the starting URL, include/exclude URL globs, and `max_pages`. Optional: 
 <CodeGroup>
 
 ```python Python
+from olostep import Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+crawl = client.crawls.create(
+    start_url="https://olostep.com",
+    max_pages=100,
+    include_urls=["/**"],
+    exclude_urls=["/collections/**"],
+    include_external=False,
+)
+
+print(crawl.id, crawl.status)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const crawl = await client.crawls.create({
+  url: 'https://olostep.com',
+  maxPages: 100,
+  includeUrls: ['/**'],
+  excludeUrls: ['/collections/**'],
+  includeExternal: false,
+})
+
+console.log(crawl.id, crawl.status)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://olostep.com",
+    "max_pages": 100,
+    "include_urls": ["/**"],
+    "exclude_urls": ["/collections/**"]
+  }'
+```
+
+```js Node (API)
+const API_URL = 'https://api.olostep.com'
+const res = await fetch(`${API_URL}/v1/crawls`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    start_url: 'https://olostep.com',
+    max_pages: 100,
+    include_urls: ['/**'],
+    exclude_urls: ['/collections/**']
+  })
+})
+console.log(await res.json())
+```
+
+```python Python (API)
 import time, json
 
 API_URL = 'https://api.olostep.com'
@@ -57,7 +128,7 @@ HEADERS = {
 }
 
 data = {
-  "start_url": "https://sugarbooandco.com",
+  "start_url": "https://olostep.com",
   "max_pages": 100,
   "include_urls": ["/**"],
   "exclude_urls": ["/collections/**"],
@@ -67,33 +138,6 @@ data = {
 res = requests.post(f"{API_URL}/v1/crawls", headers=HEADERS, json=data)
 crawl = res.json()
 print(json.dumps(crawl, indent=2))
-```
-
-```js Node
-const API_URL = 'https://api.olostep.com'
-const res = await fetch(`${API_URL}/v1/crawls`, {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    start_url: 'https://sugarbooandco.com',
-    max_pages: 100,
-    include_urls: ['/**'],
-    exclude_urls: ['/collections/**']
-  })
-})
-console.log(await res.json())
-```
-
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/crawls" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "start_url": "https://sugarbooandco.com",
-    "max_pages": 100,
-    "include_urls": ["/**"],
-    "exclude_urls": ["/collections/**"]
-  }'
 ```
 
 </CodeGroup>
@@ -107,6 +151,37 @@ Poll the crawl to track progress until `status` is `completed`.
 <CodeGroup>
 
 ```python Python
+# Using the crawl object from the previous step
+info = crawl.info()
+print(info.status, info.pages_count)
+
+# Or wait until completed
+crawl.wait_till_done(check_every_n_secs=5)
+```
+
+```js Node
+// Using the crawl object from the previous step
+const info = await crawl.info()
+console.log(info.status, info.pages_count)
+
+// Or wait until completed
+await crawl.waitTillDone({ checkEveryNSecs: 5 })
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/crawls/<CRAWL_ID>" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+```js Node (API)
+const crawlId = '<CRAWL_ID>'
+const status = await fetch(`${API_URL}/v1/crawls/${crawlId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+}).then(r => r.json())
+console.log(status)
+```
+
+```python Python (API)
 import time
 
 def get_crawl_info(crawl_id):
@@ -121,19 +196,6 @@ while True:
     time.sleep(5)
 ```
 
-```js Node
-const crawlId = '<CRAWL_ID>'
-const status = await fetch(`${API_URL}/v1/crawls/${crawlId}`, {
-  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
-}).then(r => r.json())
-console.log(status)
-```
-
-```bash cURL
-curl -s -X GET "https://api.olostep.com/v1/crawls/<CRAWL_ID>" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY"
-```
-
 </CodeGroup>
 
 Alternatively, you can pass a `webhook_url` when starting the crawl to be notified when the crawl is completed.
@@ -145,6 +207,38 @@ Fetch pages and iterate using `cursor` and `limit`. Works while the crawl is `in
 <CodeGroup>
 
 ```python Python
+# Iterate all pages (auto-waits for crawl completion, handles pagination)
+for page in crawl.pages():
+    print(page.url, page.retrieve_id)
+```
+
+```js Node
+// Iterate all pages (auto-waits for crawl completion, handles pagination)
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.retrieve_id)
+}
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/crawls/<CRAWL_ID>/pages" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "cursor=0" \
+  --data-urlencode "limit=10"
+```
+
+```js Node (API)
+let cursor = 0
+while (true) {
+  const pages = await fetch(`${API_URL}/v1/crawls/${crawlId}/pages?cursor=${cursor}&limit=10`, {
+    headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+  }).then(r => r.json())
+  pages.pages.forEach(p => console.log(p.url, p.retrieve_id))
+  if (pages.cursor === undefined) break
+  cursor = pages.cursor
+}
+```
+
+```python Python (API)
 def get_pages(crawl_id, cursor=None, limit=10, search_query=None):
     params = { 
         'cursor': cursor, 
@@ -163,25 +257,6 @@ while True:
     time.sleep(5)
 ```
 
-```js Node
-let cursor = 0
-while (true) {
-  const pages = await fetch(`${API_URL}/v1/crawls/${crawlId}/pages?cursor=${cursor}&limit=10`, {
-    headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
-  }).then(r => r.json())
-  pages.pages.forEach(p => console.log(p.url, p.retrieve_id))
-  if (pages.cursor === undefined) break
-  cursor = pages.cursor
-}
-```
-
-```bash cURL
-curl -s -G "https://api.olostep.com/v1/crawls/<CRAWL_ID>/pages" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  --data-urlencode "cursor=0" \
-  --data-urlencode "limit=10"
-```
-
 </CodeGroup>
 
 ## Search query (limit to top N relevant)
@@ -191,8 +266,60 @@ Use `search_query` at start, and optionally filter listing with `search_query`. 
 <CodeGroup>
 
 ```python Python
+from olostep import Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+crawl = client.crawls.create(
+    start_url="https://olostep.com",
+    max_pages=100,
+    include_urls=["/**"],
+    search_query="contact us",
+    top_n=5,
+)
+
+for page in crawl.pages(search_query="contact us"):
+    print(page.url)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const crawl = await client.crawls.create({
+  url: 'https://olostep.com',
+  maxPages: 100,
+  includeUrls: ['/**'],
+  searchQuery: 'contact us',
+  topN: 5,
+})
+
+for await (const page of crawl.pages()) {
+  console.log(page.url)
+}
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://olostep.com",
+    "max_pages": 100,
+    "include_urls": ["/**"],
+    "search_query": "contact us",
+    "top_n": 5
+  }'
+```
+
+```js Node (API)
+await fetch(`${API_URL}/v1/crawls`, { method: 'POST', headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' }, body: JSON.stringify({ start_url: 'https://olostep.com', max_pages: 100, include_urls: ['/**'], search_query: 'contact us', top_n: 5 }) })
+```
+
+```python Python (API)
 data = {
-  "start_url": "https://sugarbooandco.com",
+  "start_url": "https://olostep.com",
   "max_pages": 100,
   "include_urls": ["/**"],
   "search_query": "contact us",
@@ -201,23 +328,6 @@ data = {
 crawl = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data).json()
 pages = requests.get(f"{API_URL}/v1/crawls/{crawl['id']}/pages", headers=HEADERS, params={'search_query': 'contact us'}).json()
 print(len(pages['pages']))
-```
-
-```js Node
-await fetch(`${API_URL}/v1/crawls`, { method: 'POST', headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' }, body: JSON.stringify({ start_url: 'https://sugarbooandco.com', max_pages: 100, include_urls: ['/**'], search_query: 'contact us', top_n: 5 }) })
-```
-
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/crawls" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "start_url": "https://sugarbooandco.com",
-    "max_pages": 100,
-    "include_urls": ["/**"],
-    "search_query": "contact us",
-    "top_n": 5
-  }'
 ```
 
 </CodeGroup>
@@ -229,23 +339,38 @@ Use each page's `retrieve_id` with `/v1/retrieve` to fetch `html_content` and/or
 <CodeGroup>
 
 ```python Python
-def retrieve_content(retrieve_id):
-    return requests.get(f"{API_URL}/v1/retrieve", headers=HEADERS, params={"retrieve_id": retrieve_id}).json()
-
-for page in get_pages(crawl['id'], limit=5)['pages']:
-    retrieved = retrieve_content(page['retrieve_id'])
-    print(retrieved.get('markdown_content'))
+# Retrieve content for each crawled page
+for page in crawl.pages():
+    content = page.retrieve(["markdown"])
+    print(content.markdown_content)
 ```
 
 ```js Node
-const retrieved = await fetch(`${API_URL}/v1/retrieve?retrieve_id=<RETRIEVE_ID>`, { headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' } }).then(r => r.json())
-console.log(retrieved.markdown_content)
+// Retrieve content for each crawled page
+for await (const page of crawl.pages()) {
+  const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
+  console.log(content.markdown_content)
+}
 ```
 
 ```bash cURL
 curl -s -G "https://api.olostep.com/v1/retrieve" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   --data-urlencode "retrieve_id=<RETRIEVE_ID>"
+```
+
+```js Node (API)
+const retrieved = await fetch(`${API_URL}/v1/retrieve?retrieve_id=<RETRIEVE_ID>`, { headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' } }).then(r => r.json())
+console.log(retrieved.markdown_content)
+```
+
+```python Python (API)
+def retrieve_content(retrieve_id):
+    return requests.get(f"{API_URL}/v1/retrieve", headers=HEADERS, params={"retrieve_id": retrieve_id}).json()
+
+for page in get_pages(crawl['id'], limit=5)['pages']:
+    retrieved = retrieve_content(page['retrieve_id'])
+    print(retrieved.get('markdown_content'))
 ```
 
 </CodeGroup>
