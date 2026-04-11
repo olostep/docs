@@ -37,23 +37,23 @@ https://www.olostep.com/demos/spreadsheet-enrich
 <CodeGroup>
 
 ```python Python
-# pip install requests
-
-import requests
+pip install olostep
 ```
 
-```js Node
-// npm install node-fetch
-
-// ESM
-import fetch from 'node-fetch'
-
-// CommonJS
-const fetch = require('node-fetch')
+```javascript Node
+npm install olostep
 ```
 
 ```bash cURL
-# macOS: ingebouwde curl is prima
+# curl is available by default on macOS, Linux, and Windows
+```
+
+```javascript Node (API)
+npm install node-fetch
+```
+
+```bash Python (API)
+pip install requests
 ```
 
 </CodeGroup>
@@ -65,29 +65,31 @@ Stel een vraag en geef een JSON-schema door om de output te sturen. Je kunt ook 
 <CodeGroup>
 
 ```python Python
-import requests, json
+from olostep import Olostep
 
-endpoint = "https://api.olostep.com/v1/answers"
-payload = {
-  "task": "Wat is het nieuwste boek van J.K. Rowling?",
-  "json": {"book_title": "", "author": "", "release_date": ""}
-}
-headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+client = Olostep(api_key="YOUR_REAL_KEY")
 
-response = requests.post(endpoint, json=payload, headers=headers)
-print(json.dumps(response.json(), indent=2))
+answer = client.answers.create(
+    task="What is the latest book by J.K. Rowling?",
+    json_format={"book_title": "", "author": "", "release_date": ""},
+)
+
+print(answer.json_content)
+print(answer.sources)
 ```
 
 ```js Node
-const res = await fetch('https://api.olostep.com/v1/answers', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    task: 'Wat is het nieuwste boek van J.K. Rowling?',
-    json: { book_title: '', author: '', release_date: '' }
-  })
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const answer = await client.answers.create({
+  task: 'What is the latest book by J.K. Rowling?',
+  jsonFormat: { book_title: '', author: '', release_date: '' },
 })
-console.log(await res.json())
+
+console.log(answer.json_content)
+console.log(answer.sources)
 ```
 
 ```bash cURL
@@ -95,9 +97,35 @@ curl -s -X POST "https://api.olostep.com/v1/answers" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "Wat is het nieuwste boek van J.K. Rowling?",
+    "task": "What is the latest book by J.K. Rowling?",
     "json": {"book_title": "", "author": "", "release_date": ""}
   }'
+```
+
+```js Node (API)
+const res = await fetch('https://api.olostep.com/v1/answers', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    task: 'What is the latest book by J.K. Rowling?',
+    json: { book_title: '', author: '', release_date: '' }
+  })
+})
+console.log(await res.json())
+```
+
+```python Python (API)
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "What is the latest book by J.K. Rowling?",
+  "json": {"book_title": "", "author": "", "release_date": ""}
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
 ```
 
 </CodeGroup>
@@ -167,12 +195,40 @@ Wanneer je de `json` parameter niet doorgeeft, zal de API een json-object retour
 - Geef een JSON-object met lege waarden als een schema, of een string die de gegevens beschrijft die je wilt.
 - Als de agent niet zeker is, retourneert het `NOT_FOUND` voor dat veld.
 
+<CodeGroup>
+
 ```python Python
+from olostep import Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+answer = client.answers.create(
+    task="how much did Olostep raise?",
+    json_format={"amount": ""},
+)
+
+print(answer.json_content)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const answer = await client.answers.create({
+  task: 'how much did Olostep raise?',
+  jsonFormat: { amount: '' },
+})
+
+console.log(answer.json_content)
+```
+
+```python Python (API)
 import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "hoeveel heeft Olostep opgehaald?", 
+  "task": "how much did Olostep raise?", 
   "json": {
     "amount": ""
   }
@@ -184,6 +240,8 @@ headers = {
 response = requests.post(endpoint, json=payload, headers=headers)
 print(json.dumps(response.json(), indent=2))
 ```
+
+</CodeGroup>
 
 Dit zou retourneren:
 
