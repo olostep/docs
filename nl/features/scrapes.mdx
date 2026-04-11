@@ -22,23 +22,23 @@ Gebruik de `/v1/scrapes` endpoint om een enkele URL te scrapen en kies uitvoerfo
 <CodeGroup>
 
 ```python Python
-# pip install requests
-
-import requests
+pip install olostep
 ```
 
-```js Node
-// npm install node-fetch
-
-// ESM
-import fetch from 'node-fetch'
-
-// CommonJS
-const fetch = require('node-fetch')
+```javascript Node
+npm install olostep
 ```
 
 ```bash cURL
-# macOS: ingebouwde curl is prima
+# curl is available by default on macOS, Linux, and Windows
+```
+
+```javascript Node (API)
+npm install node-fetch
+```
+
+```bash Python (API)
+pip install requests
 ```
 
 </CodeGroup>
@@ -52,24 +52,44 @@ Andere veelvoorkomende parameters zijn `wait_before_scraping` (in milliseconden)
 <CodeGroup>
 
 ```python Python
-import requests
-import json
+from olostep import Olostep
 
-endpoint = "https://api.olostep.com/v1/scrapes"
-payload = {
-    "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
-    "formats": ["markdown", "html"]
-}
-headers = {
-    "Authorization": "Bearer <YOUR_API_KEY>",
-    "Content-Type": "application/json"
-}
+client = Olostep(api_key="YOUR_REAL_KEY")
 
-response = requests.post(endpoint, json=payload, headers=headers)
-print(json.dumps(response.json(), indent=2))
+result = client.scrapes.create(
+    url_to_scrape="https://en.wikipedia.org/wiki/Alexander_the_Great",
+    formats=["markdown", "html"],
+)
+
+print(result.markdown_content)
+print(result.html_content)
 ```
 
 ```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const result = await client.scrapes.create({
+  url: 'https://en.wikipedia.org/wiki/Alexander_the_Great',
+  formats: ['markdown', 'html'],
+})
+
+console.log(result.markdown_content)
+console.log(result.html_content)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+    "formats": ["markdown", "html"]
+  }'
+```
+
+```js Node (API)
 const endpoint = 'https://api.olostep.com/v1/scrapes'
 const payload = {
   url_to_scrape: 'https://en.wikipedia.org/wiki/Alexander_the_Great',
@@ -87,14 +107,22 @@ const data = await res.json()
 console.log(data)
 ```
 
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/scrapes" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
+```python Python (API)
+import requests
+import json
+
+endpoint = "https://api.olostep.com/v1/scrapes"
+payload = {
     "url_to_scrape": "https://en.wikipedia.org/wiki/Alexander_the_Great",
     "formats": ["markdown", "html"]
-  }'
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
 ```
 
 </CodeGroup>
@@ -166,6 +194,58 @@ Definieer `formats: ["json"]` en geef een parser `id`.
 <CodeGroup>
 
 ```python Python
+from olostep import Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+result = client.scrapes.create(
+    url_to_scrape="https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    formats=["json"],
+    parser="@olostep/google-search",
+)
+
+print(result.json_content)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const result = await client.scrapes.create({
+  url: 'https://www.google.com/search?q=alexander+the+great&gl=us&hl=en',
+  formats: ['json'],
+  parser: '@olostep/google-search',
+})
+
+console.log(result.json_content)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
+    "formats": ["json"],
+    "parser": {"id": "@olostep/google-search"}
+  }'
+```
+
+```js Node (API)
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://www.google.com/search?q=alexander+the+great&gl=us&hl=en',
+    formats: ['json'],
+    parser: { id: '@olostep/google-search' }
+  })
+})
+console.log(await res.json())
+```
+
+```python Python (API)
 import requests, json
 
 endpoint = "https://api.olostep.com/v1/scrapes"
@@ -185,30 +265,6 @@ res = requests.post(endpoint, json=payload, headers=headers)
 print(json.dumps(res.json(), indent=2))
 ```
 
-```js Node
-const res = await fetch('https://api.olostep.com/v1/scrapes', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    url_to_scrape: 'https://www.google.com/search?q=alexander+the+great&gl=us&hl=en',
-    formats: ['json'],
-    parser: { id: '@olostep/google-search' }
-  })
-})
-console.log(await res.json())
-```
-
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/scrapes" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url_to_scrape": "https://www.google.com/search?q=alexander+the+great&gl=us&hl=en",
-    "formats": ["json"],
-    "parser": {"id": "@olostep/google-search"}
-  }'
-```
-
 </CodeGroup>
 
 Olostep heeft een paar vooraf gebouwde parsers voor [populaire websites](https://www.olostep.com/store) maar je kunt ook je eigen parsers maken via het dashboard of ons team vragen om het voor je te doen.
@@ -224,6 +280,90 @@ Als je in plaats daarvan alleen een `prompt` doorgeeft, zal de LLM de data extra
 <CodeGroup>
 
 ```python Python
+from olostep import LLMExtract, Olostep
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+result = client.scrapes.create(
+    url_to_scrape="https://www.berklee.edu/events/stefano-marchese-friends",
+    formats=["markdown", "json"],
+    llm_extract=LLMExtract(
+        schema={
+            "event": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "date": {"type": "string"},
+                    "description": {"type": "string"},
+                    "venue": {"type": "string"},
+                    "address": {"type": "string"},
+                    "start_time": {"type": "string"},
+                },
+            }
+        }
+    ),
+)
+
+print(result.json_content)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const result = await client.scrapes.create({
+  url: 'https://www.berklee.edu/events/stefano-marchese-friends',
+  formats: ['markdown', 'json'],
+  llmExtract: {
+    schema: {
+      event: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          date: { type: 'string' },
+          description: { type: 'string' },
+          venue: { type: 'string' },
+          address: { type: 'string' },
+          start_time: { type: 'string' },
+        },
+      },
+    },
+  },
+})
+
+console.log(result.json_content)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
+    "formats": ["json"],
+    "llm_extract": {
+      "prompt": "Extract the event title, date, description, venue, address, and start time from the page."
+    }
+  }'
+```
+
+```js Node (API)
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://www.berklee.edu/events/stefano-marchese-friends',
+    formats: ['json'],
+    llm_extract: {
+      prompt: 'Extract the event title, date, description, venue, address, and start time from the page.'
+    }
+  })
+})
+console.log(await res.json())
+```
+
+```python Python (API)
 import requests, json
 
 endpoint = "https://api.olostep.com/v1/scrapes"
@@ -254,40 +394,6 @@ res = requests.post(endpoint, json=payload, headers=headers)
 print(json.dumps(res.json(), indent=2))
 ```
 
-```python Python (prompt only)
-import requests, json
-
-endpoint = "https://api.olostep.com/v1/scrapes"
-payload = {
-  "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
-  "formats": ["json"],
-  "llm_extract": {
-    "prompt": "Haal de titel van het evenement, datum, beschrijving, locatie, adres en starttijd van de pagina."
-  }
-}
-headers = {
-    "Authorization": "Bearer <YOUR_API_KEY>",
-    "Content-Type": "application/json"
-}
-res = requests.post(endpoint, json=payload, headers=headers)
-print(json.dumps(res.json(), indent=2))
-```
-
-```js Node
-const res = await fetch('https://api.olostep.com/v1/scrapes', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    url_to_scrape: 'https://www.berklee.edu/events/stefano-marchese-friends',
-    formats: ['json'],
-    llm_extract: {
-      prompt: 'Haal de titel van het evenement, datum, beschrijving, locatie, adres en starttijd van de pagina.'
-    }
-  })
-})
-console.log(await res.json())
-```
-
 </CodeGroup>
 
 Opmerking: `result.json_content` retourneert een ge-stringifieerde JSON. Parse het in je code als je een object nodig hebt.
@@ -308,6 +414,82 @@ Het is vaak nuttig om `wait` te gebruiken voor/na andere acties om de pagina te 
 <CodeGroup>
 
 ```python Python
+from olostep import FillInputAction, Olostep, WaitAction
+
+client = Olostep(api_key="YOUR_REAL_KEY")
+
+result = client.scrapes.create(
+    url_to_scrape="https://example.com/login",
+    formats=["markdown"],
+    actions=[
+        FillInputAction(selector="input[type=email]", value="john@example.com"),
+        WaitAction(milliseconds=500),
+        FillInputAction(selector="input[type=password]", value="secret"),
+        {"type": "click", "selector": "button[type=\"submit\"]"},
+        WaitAction(milliseconds=1500),
+    ],
+)
+
+print(result.markdown_content)
+```
+
+```js Node
+import Olostep from 'olostep'
+
+const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
+
+const result = await client.scrapes.create({
+  url: 'https://example.com/login',
+  formats: ['markdown'],
+  actions: [
+    { type: 'fill_input', selector: 'input[type=email]', value: 'john@example.com' },
+    { type: 'wait', milliseconds: 500 },
+    { type: 'fill_input', selector: 'input[type=password]', value: 'secret' },
+    { type: 'click', selector: 'button[type="submit"]' },
+    { type: 'wait', milliseconds: 1500 },
+  ],
+})
+
+console.log(result.markdown_content)
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/scrapes" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url_to_scrape": "https://example.com/login",
+    "formats": ["markdown"],
+    "actions": [
+      { "type": "fill_input", "selector": "input[type=email]", "value": "john@example.com" },
+      { "type": "wait", "milliseconds": 500 },
+      { "type": "fill_input", "selector": "input[type=password]", "value": "secret" },
+      { "type": "click", "selector": "button[type=\"submit\"]" },
+      { "type": "wait", "milliseconds": 1500 }
+    ]
+  }'
+```
+
+```js Node (API)
+const res = await fetch('https://api.olostep.com/v1/scrapes', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url_to_scrape: 'https://example.com/login',
+    formats: ['markdown'],
+    actions: [
+      { type: 'fill_input', selector: 'input[type=email]', value: 'john@example.com' },
+      { type: 'wait', milliseconds: 500 },
+      { type: 'fill_input', selector: 'input[type=password]', value: 'secret' },
+      { type: 'click', selector: 'button[type="submit"]' },
+      { type: 'wait', milliseconds: 1500 }
+    ]
+  })
+})
+console.log(await res.json())
+```
+
+```python Python (API)
 import requests, json
 
 endpoint = "https://api.olostep.com/v1/scrapes"
@@ -328,42 +510,6 @@ headers = {
 }
 res = requests.post(endpoint, json=payload, headers=headers)
 print(json.dumps(res.json(), indent=2))
-```
-
-```js Node
-const res = await fetch('https://api.olostep.com/v1/scrapes', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    url_to_scrape: 'https://example.com/login',
-    formats: ['markdown'],
-    actions: [
-      { type: 'fill_input', selector: 'input[type=email]', value: 'john@example.com' },
-      { type: 'wait', milliseconds: 500 },
-      { type: 'fill_input', selector: 'input[type=password]', value: 'secret' },
-      { type: 'click', selector: 'button[type="submit"]' },
-      { type: 'wait', milliseconds: 1500 }
-    ]
-  })
-})
-console.log(await res.json())
-```
-
-```bash cURL
-curl -s -X POST "https://api.olostep.com/v1/scrapes" \
-  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url_to_scrape": "https://example.com/login",
-    "formats": ["markdown"],
-    "actions": [
-      { "type": "fill_input", "selector": "input[type=email]", "value": "john@example.com" },
-      { "type": "wait", "milliseconds": 500 },
-      { "type": "fill_input", "selector": "input[type=password]", "value": "secret" },
-      { "type": "click", "selector": "button[type=\"submit\"]" },
-      { "type": "wait", "milliseconds": 1500 }
-    ]
-  }'
 ```
 
 </CodeGroup>
