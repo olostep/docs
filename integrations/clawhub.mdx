@@ -1,0 +1,183 @@
+---
+sidebarTitle: 'Olostep + OpenClaw'
+title: Olostep + OpenClaw Integration
+description: Give your OpenClaw agent live web access with 13 skills and a 9-tool MCP server
+---
+
+Your OpenClaw agent can read documentation, but it can't read the web. The [Olostep Web Agent plugin](https://clawhub.ai/plugins/olostep-web-agent) fixes that — search, scrape, crawl, and extract structured data from any website, directly inside your agent workflow.
+
+One install gives you **13 skills** for high-level tasks (debug an error from live StackOverflow threads, write integration code from current docs, research tools with structured comparisons) and a **9-tool MCP server** for direct programmatic access. JS-heavy SPAs, CAPTCHAs, Cloudflare, residential proxies — handled automatically.
+
+## Installation
+
+```bash
+clawhub install olostep
+```
+
+That's it. If you prefer to wire the MCP server manually, add this to your OpenClaw configuration:
+
+```json
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+Get a free API key at [olostep.com/auth](https://olostep.com/auth) — 500 requests/month, no credit card.
+
+## Skills
+
+### Core Data Skills
+
+These six skills are the building blocks. Each one does one thing well, and your agent can compose them for complex workflows.
+
+<CardGroup cols={2}>
+  <Card title="scrape" icon="file-lines">
+    Any URL to clean markdown, HTML, JSON, or text. Full browser rendering, anti-bot bypass, geo-targeting, browser actions (click, scroll, type), and pre-built parsers for common site types.
+  </Card>
+
+  <Card title="search" icon="magnifying-glass">
+    Three modes: AI-synthesized answers with citations, raw Google SERP data (organic results, PAA, knowledge graph), and domain-scoped URL discovery.
+  </Card>
+
+  <Card title="crawl" icon="spider-web">
+    Start from one URL, follow links, scrape every page discovered. Set max pages, include/exclude URL patterns, and control crawl depth.
+  </Card>
+
+  <Card title="batch" icon="layer-group">
+    Scrape up to 10,000 URLs in parallel with full rendering. Tag each URL with `custom_id` to map results back to your sources.
+  </Card>
+
+  <Card title="map" icon="map">
+    Discover every URL on a website without scraping any of them. Filter by glob patterns, rank by search query relevance, cap with `top_n`.
+  </Card>
+
+  <Card title="answers" icon="question">
+    Ask a plain-language question, get an AI-synthesized answer grounded in live web sources. Pass a `json` parameter to get structured output matching any schema you define.
+  </Card>
+</CardGroup>
+
+### Workflow Skills
+
+These seven skills chain multiple core operations together. They handle the thinking — your agent just picks the right skill for the job.
+
+<CardGroup cols={2}>
+  <Card title="research" icon="microscope">
+    "Compare the top 3 ORMs for Node.js" — the agent searches multiple sources, scrapes pricing and feature pages, and returns a structured comparison with citations and a recommendation.
+  </Card>
+
+  <Card title="debug-error" icon="bug">
+    Paste a stack trace or error message. The agent searches GitHub issues and StackOverflow for that exact error, scrapes the relevant threads, and returns a fix grounded in what developers who hit the same problem actually did.
+  </Card>
+
+  <Card title="docs-to-code" icon="code">
+    Point at a docs URL. The agent scrapes the current API reference and writes working integration code from what is actually published — not from stale training data that may reference deprecated methods.
+  </Card>
+
+  <Card title="migrate-code" icon="code-branch">
+    Give it your current version and target version. The agent scrapes the migration guide, extracts every breaking change with before/after patterns, and rewrites your code to match.
+  </Card>
+
+  <Card title="extract-schema" icon="table">
+    Turn any unstructured webpage — product listings, job posts, articles — into typed JSON matching a TypeScript interface, JSON schema, or database model you provide.
+  </Card>
+
+  <Card title="integrate" icon="plug">
+    Auto-detects your stack (language, framework, AI toolkit) and writes a complete Olostep SDK integration: install commands, client setup, tool wiring, and a verification step.
+  </Card>
+
+  <Card title="setup" icon="key">
+    Configure the Olostep API key and verify the connection. Includes troubleshooting for common setup issues.
+  </Card>
+</CardGroup>
+
+## MCP Tools
+
+The bundled MCP server (`olostep-mcp`) gives your agent 9 tools it can call directly. Use these when you need fine-grained control beyond what the workflow skills provide.
+
+| Tool | What it does |
+|------|-------------|
+| `scrape_website` | Scrape a single URL to markdown, HTML, JSON, or text |
+| `get_webpage_content` | Fetch a webpage as clean, LLM-ready markdown |
+| `search_web` | Search the live web, get AI-synthesized answers |
+| `google_search` | Structured Google SERP data — organic results, PAA, knowledge graph |
+| `answers` | Ask a question, get a cited answer with optional structured JSON output |
+| `batch_scrape_urls` | Scrape up to 10,000 URLs in parallel with full rendering |
+| `create_crawl` | Crawl a website by following links from a starting URL |
+| `create_map` | Discover all URLs on a website, filterable by pattern and query |
+| `get_website_urls` | Find and retrieve relevant URLs from a specific domain |
+
+## What This Looks Like in Practice
+
+### "Why is this failing?" — Debug from the live web
+
+You paste `ECONNRESET when calling Stripe webhook endpoint` into your agent. It searches GitHub issues and StackOverflow for that exact error, scrapes the three most relevant threads, and returns a concrete fix — not "check your network settings," but the actual timeout configuration that solved it for other developers hitting the same wall.
+
+### "Write the integration" — Code from current docs, not stale training data
+
+You need to integrate a payment API. The `docs-to-code` skill scrapes the current API reference — the one published today, not the version your model was trained on six months ago — and writes working code using the parameters and endpoints that actually exist.
+
+### "Which one should I use?" — Structured tool comparisons
+
+Evaluating ORMs? Comparing auth providers? The `research` skill searches multiple sources, scrapes real pricing pages and feature matrices, and returns a structured comparison table with citations. You get a recommendation backed by what's actually on each product's website, not by training-data popularity.
+
+### Build a RAG pipeline from any docs site
+
+```
+map   → discover every URL on the docs site
+batch → scrape all pages in parallel as clean markdown
+      → feed into your vector store
+```
+
+Two skills, one pipeline. Works on documentation sites with hundreds or thousands of pages.
+
+### Extract structured data at scale
+
+```
+map   → find all product, listing, or job URLs
+batch → scrape each page with a pre-built parser → typed JSON
+      → pipe into your database, API, or seed files
+```
+
+### Migrate to a new framework version
+
+You're upgrading Next.js 13 to 15. The `migrate-code` skill scrapes the official migration guide, extracts every breaking change with before/after code patterns, and rewrites your files to match — based on the real documentation, not on the model's best guess.
+
+## Pre-built Parsers
+
+Pass the `parser` parameter to any scrape call and get typed JSON back instead of raw content. No schema definition needed — these handle the extraction for you.
+
+| Parser | Returns |
+|--------|---------|
+| `@olostep/google-search` | Organic results, knowledge graph, People Also Ask |
+| `@olostep/amazon-it-product` | Price, rating, features, availability |
+| `@olostep/extract-emails` | Every email address found on the page |
+| `@olostep/extract-calendars` | Structured calendar events |
+| `@olostep/extract-socials` | Social media profile links |
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="Install on ClawHub" icon="store" href="https://clawhub.ai/plugins/olostep-web-agent">
+    Plugin listing, version history, and one-command install
+  </Card>
+
+  <Card title="Get API Key" icon="key" href="https://olostep.com/auth">
+    500 free requests/month, no credit card
+  </Card>
+
+  <Card title="MCP Server Docs" icon="server" href="/integrations/mcp-server">
+    Full MCP server setup for Cursor, Claude Desktop, and other clients
+  </Card>
+
+  <Card title="API Reference" icon="book" href="https://docs.olostep.com">
+    Complete endpoint documentation with examples
+  </Card>
+</CardGroup>

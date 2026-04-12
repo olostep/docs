@@ -1,0 +1,176 @@
+---
+sidebarTitle: 'Olostep + ViaSocket'
+title: Olostep + ViaSocket
+description: Connect Olostep to any AI client — Claude, Cursor, ChatGPT, and more — using ViaSocket Mushrooms as an MCP gateway.
+---
+
+[ViaSocket Mushrooms](https://mushrooms.viasocket.com/) is an MCP gateway that bridges apps like Olostep to any AI client through a single MCP endpoint URL. Once you connect Olostep as a Mushroom, you can instruct Claude, Cursor, ChatGPT, or any other supported client to scrape websites, run batch jobs, crawl sites, and get AI-grounded answers — all in plain language, without writing a single line of code.
+
+## Before you start
+
+- **An Olostep account with an API key:** [get one free](https://olostep.com/dashboard), no credit card required. Your first 500 credits are included.
+- **A ViaSocket account:** create one at [viasocket.com](https://viasocket.com/).
+- **An AI client:** Claude, Cursor, ChatGPT, Windsurf, VS Code, or any MCP-compatible client.
+
+---
+
+## Setup
+
+<Steps>
+  <Step title="Create a new Cluster">
+    Open [ViaSocket Mushrooms](https://mushrooms.viasocket.com/) and click **+ New Cluster**. ViaSocket will prompt you to choose the AI client this Cluster will connect to — select Claude, Cursor, ChatGPT, or whichever client you use.
+
+    ![ViaSocket New Cluster dialog — Choose your AI client, showing Claude, ChatGPT, Cursor, Windsurf and more](/images/integrations/viasocket/step1.png)
+  </Step>
+
+  <Step title="Browse integrations">
+    Inside your Cluster, click **+ BROWSE INTEGRATIONS** to open the Mushrooms library — a catalog of 2,500+ apps you can give your AI access to.
+
+    ![ViaSocket Mushrooms dashboard showing Add New Mushroom and Browse Integrations button](/images/integrations/viasocket/step2.png)
+  </Step>
+
+  <Step title="Find Olostep">
+    Search for **olostep** in the search bar. Select **Olostep** from the results.
+
+    ![Searching for olostep in ViaSocket Mushrooms — Olostep appears in results](/images/integrations/viasocket/step3.png)
+  </Step>
+
+  <Step title="Connect to Olostep">
+    On the Olostep detail page, click **CONNECT TO OLOSTEP** to authorize your account and start adding Olostep actions to your Cluster.
+
+    ![Olostep detail page in ViaSocket showing Connect to get started and CONNECT TO OLOSTEP button](/images/integrations/viasocket/step4.png)
+  </Step>
+
+  <Step title="Select actions">
+    Choose which Olostep actions your AI client can use. All seven are enabled by default — toggle off any you don't need, then click **NEXT**.
+
+    ![Olostep Select Actions screen in ViaSocket showing 7 available actions with toggle switches](/images/integrations/viasocket/step5.png)
+  </Step>
+
+  <Step title="Enter your Olostep API key">
+    Paste your Olostep API key into the **API Key** field and click **ADD CONNECTION**. ViaSocket will verify the key and save the credential.
+
+    ![Add New Connection screen for Olostep in ViaSocket with API Key input field](/images/integrations/viasocket/step6.png)
+
+    Get your key from the [Olostep dashboard →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="Copy your MCP endpoint and connect your AI client">
+    Olostep now appears as an enabled Mushroom in your Cluster. Copy the **MCP Endpoint URL** (or the full JSON config block) from the **Cursor Configuration** panel and paste it into your AI client's MCP settings file.
+
+    ![ViaSocket Cluster showing Olostep enabled and the MCP endpoint URL with JSON config ready to copy](/images/integrations/viasocket/step7.png)
+
+    The config looks like this — paste it into your AI client's settings:
+
+    ```json
+    {
+      "mcpServers": {
+        "viasocket": {
+          "type": "http",
+          "url": "https://mcp.viasocket.com/mcp/<YOUR-CLUSTER-ID>"
+        }
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Actions
+
+<CardGroup cols={2}>
+  <Card title="Scrape Website" icon="file-lines">
+    Pull content from any URL as Markdown, HTML, JSON, or plain text. Handles JS-rendered pages with optional wait times and country targeting.
+  </Card>
+
+  <Card title="Generate AI Answer" icon="sparkles">
+    Ask a natural-language question and get a cited answer grounded in pages you provide or a live web search.
+  </Card>
+
+  <Card title="Batch URL Scraper" icon="layer-group">
+    Submit up to 100,000 URLs in one job, processed in parallel. Returns a `batch_id` for async retrieval.
+  </Card>
+
+  <Card title="Fetch Batch Items" icon="download">
+    Retrieve the results of a completed batch job using its `batch_id`.
+  </Card>
+
+  <Card title="Start Crawl" icon="spider-web">
+    Start from a seed URL, follow links, and scrape all subpages. Returns a `crawl_id`.
+  </Card>
+
+  <Card title="Get Crawl Info" icon="circle-info">
+    Check the status and retrieve results for a running or completed crawl by `crawl_id`.
+  </Card>
+
+  <Card title="Create Map" icon="map">
+    Get every URL on a site without scraping content. Useful for discovery before a batch job.
+  </Card>
+</CardGroup>
+
+---
+
+## Example: Ask Claude to research a competitor
+
+Once your MCP endpoint is configured in Claude, you can issue plain-language instructions like:
+
+> *"Scrape the pricing page at acme.com/pricing and give me a summary of their plans and prices."*
+
+Claude will call Olostep's **Scrape Website** action through ViaSocket, return the page content, and summarize it — no workflow builder, no code.
+
+You can chain actions the same way:
+
+> *"Map all the pages on docs.example.com, then batch-scrape the first 50 and build a knowledge base summary."*
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="API key rejected">
+    Copy the key directly from [olostep.com/dashboard](https://olostep.com/dashboard) with no trailing spaces. Delete and recreate the Olostep connection in ViaSocket if the error persists.
+  </Accordion>
+
+  <Accordion title="AI client can't see the Olostep tools">
+    Make sure you've pasted the MCP endpoint URL (or JSON config block) into the correct settings file for your AI client. For Claude Desktop, this is `claude_desktop_config.json`. For Cursor, it's `.cursor/mcp.json` in your project or the global Cursor settings. Restart the client after saving.
+  </Accordion>
+
+  <Accordion title="Scraped content is empty">
+    Increase the wait time when calling **Scrape Website** (try 2000–5000ms for JS-heavy pages). Confirm the URL is publicly accessible without a login.
+  </Accordion>
+
+  <Accordion title="MCP endpoint URL keeps changing">
+    The endpoint URL is tied to your Cluster. If you delete and recreate the Cluster, you'll get a new URL and will need to update your AI client config. Keep the URL private — it authorizes all actions on your connected accounts.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
+    Full reference for the scrape endpoint
+  </Card>
+
+  <Card title="Batches API" icon="layer-group" href="/features/batches">
+    How batch jobs work and how to retrieve results
+  </Card>
+
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls">
+    Crawl configuration and result retrieval
+  </Card>
+
+  <Card title="Maps API" icon="map" href="/features/maps">
+    URL discovery and filtering options
+  </Card>
+
+  <Card title="MCP Server" icon="server" href="/integrations/mcp-server">
+    Use Olostep's native MCP server directly
+  </Card>
+
+  <Card title="ViaSocket Website" icon="link" href="https://viasocket.com">
+    ViaSocket platform
+  </Card>
+</CardGroup>
