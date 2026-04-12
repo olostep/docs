@@ -1,0 +1,183 @@
+---
+sidebarTitle: "Olostep + OpenClaw"
+title: "Olostep + OpenClaw Integratie"
+description: "Geef je OpenClaw-agent live webtoegang met 13 vaardigheden en een 9-tool MCP-server"
+---
+
+Je OpenClaw-agent kan documentatie lezen, maar het kan het web niet lezen. De [Olostep Web Agent plugin](https://clawhub.ai/plugins/olostep-web-agent) lost dat op — zoek, schraap, kruip en extraheer gestructureerde gegevens van elke website, direct binnen je agent workflow.
+
+Eén installatie geeft je **13 vaardigheden** voor taken op hoog niveau (debug een fout van live StackOverflow threads, schrijf integratiecode vanuit actuele documentatie, onderzoek tools met gestructureerde vergelijkingen) en een **9-tool MCP-server** voor directe programmatische toegang. JS-zware SPA's, CAPTCHA's, Cloudflare, residentiële proxies — automatisch afgehandeld.
+
+## Installatie
+
+```bash
+clawhub install olostep
+```
+
+Dat is alles. Als je de MCP-server handmatig wilt aansluiten, voeg dit toe aan je OpenClaw-configuratie:
+
+```json
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+Verkrijg een gratis API-sleutel op [olostep.com/auth](https://olostep.com/auth) — 500 verzoeken/maand, geen creditcard nodig.
+
+## Vaardigheden
+
+### Kerngegevensvaardigheden
+
+Deze zes vaardigheden zijn de bouwstenen. Elk doet één ding goed, en je agent kan ze samenstellen voor complexe workflows.
+
+<CardGroup cols={2}>
+  <Card title="scrape" icon="file-lines">
+    Elke URL naar schone markdown, HTML, JSON of tekst. Volledige browserweergave, anti-bot omzeiling, geo-targeting, browseracties (klikken, scrollen, typen) en vooraf gebouwde parsers voor veelvoorkomende site types.
+  </Card>
+
+  <Card title="search" icon="magnifying-glass">
+    Drie modi: AI-gesynthetiseerde antwoorden met citaten, ruwe Google SERP-gegevens (organische resultaten, PAA, kennisgrafiek), en domeingerichte URL-ontdekking.
+  </Card>
+
+  <Card title="crawl" icon="spider-web">
+    Begin vanaf één URL, volg links, schraap elke ontdekte pagina. Stel max pagina's in, sluit URL-patronen in/uit, en beheer kruipdiepte.
+  </Card>
+
+  <Card title="batch" icon="layer-group">
+    Schraap tot 10.000 URL's parallel met volledige weergave. Label elke URL met `custom_id` om resultaten terug te koppelen aan je bronnen.
+  </Card>
+
+  <Card title="map" icon="map">
+    Ontdek elke URL op een website zonder ze te schrapen. Filter op glob-patronen, rangschik op relevantie van zoekopdrachten, beperk met `top_n`.
+  </Card>
+
+  <Card title="answers" icon="question">
+    Stel een vraag in gewone taal, krijg een AI-gesynthetiseerd antwoord gebaseerd op live webbronnen. Geef een `json` parameter door om gestructureerde output te krijgen die overeenkomt met elk schema dat je definieert.
+  </Card>
+</CardGroup>
+
+### Workflow Vaardigheden
+
+Deze zeven vaardigheden koppelen meerdere kernoperaties aan elkaar. Ze doen het denkwerk — je agent kiest gewoon de juiste vaardigheid voor de taak.
+
+<CardGroup cols={2}>
+  <Card title="research" icon="microscope">
+    "Vergelijk de top 3 ORM's voor Node.js" — de agent zoekt meerdere bronnen, schraapt prijs- en functiepagin's en geeft een gestructureerde vergelijking met citaten en een aanbeveling.
+  </Card>
+
+  <Card title="debug-error" icon="bug">
+    Plak een stack trace of foutmelding. De agent zoekt GitHub-issues en StackOverflow voor die exacte fout, schraapt de relevante threads en geeft een oplossing gebaseerd op wat ontwikkelaars die hetzelfde probleem hadden daadwerkelijk deden.
+  </Card>
+
+  <Card title="docs-to-code" icon="code">
+    Wijs naar een documentatie-URL. De agent schraapt de huidige API-referentie en schrijft werkende integratiecode van wat daadwerkelijk is gepubliceerd — niet van verouderde trainingsgegevens die mogelijk verouderde methoden refereren.
+  </Card>
+
+  <Card title="migrate-code" icon="code-branch">
+    Geef je huidige versie en doelversie. De agent schraapt de migratiehandleiding, extraheert elke brekende verandering met voor/na-patronen en herschrijft je code om te passen.
+  </Card>
+
+  <Card title="extract-schema" icon="table">
+    Zet elke ongestructureerde webpagina — productvermeldingen, vacatures, artikelen — om in getypte JSON die overeenkomt met een TypeScript-interface, JSON-schema of databasemodel dat je verstrekt.
+  </Card>
+
+  <Card title="integrate" icon="plug">
+    Detecteert automatisch je stack (taal, framework, AI-toolkit) en schrijft een complete Olostep SDK-integratie: installatiecommando's, clientconfiguratie, toolbedrading en een verificatiestap.
+  </Card>
+
+  <Card title="setup" icon="key">
+    Configureer de Olostep API-sleutel en verifieer de verbinding. Inclusief probleemoplossing voor veelvoorkomende installatieproblemen.
+  </Card>
+</CardGroup>
+
+## MCP Tools
+
+De meegeleverde MCP-server (`olostep-mcp`) geeft je agent 9 tools die het direct kan aanroepen. Gebruik deze wanneer je fijnmazige controle nodig hebt die verder gaat dan wat de workflowvaardigheden bieden.
+
+| Tool | Wat het doet |
+|------|-------------|
+| `scrape_website` | Schraap een enkele URL naar markdown, HTML, JSON of tekst |
+| `get_webpage_content` | Haal een webpagina op als schone, LLM-klaar markdown |
+| `search_web` | Zoek op het live web, krijg AI-gesynthetiseerde antwoorden |
+| `google_search` | Gestructureerde Google SERP-gegevens — organische resultaten, PAA, kennisgrafiek |
+| `answers` | Stel een vraag, krijg een geciteerd antwoord met optionele gestructureerde JSON-output |
+| `batch_scrape_urls` | Schraap tot 10.000 URL's parallel met volledige weergave |
+| `create_crawl` | Kruip een website door links te volgen vanaf een start-URL |
+| `create_map` | Ontdek alle URL's op een website, filterbaar op patroon en query |
+| `get_website_urls` | Vind en haal relevante URL's op van een specifiek domein |
+
+## Hoe Dit Er In De Praktijk Uitziet
+
+### "Waarom faalt dit?" — Debug vanaf het live web
+
+Je plakt `ECONNRESET bij het aanroepen van Stripe webhook endpoint` in je agent. Het zoekt GitHub-issues en StackOverflow voor die exacte fout, schraapt de drie meest relevante threads en geeft een concrete oplossing — niet "controleer je netwerkinstellingen," maar de daadwerkelijke timeout-configuratie die het oploste voor andere ontwikkelaars die tegen dezelfde muur aanliepen.
+
+### "Schrijf de integratie" — Code van actuele documentatie, niet van verouderde trainingsgegevens
+
+Je moet een betalings-API integreren. De `docs-to-code` vaardigheid schraapt de huidige API-referentie — degene die vandaag is gepubliceerd, niet de versie waarop je model zes maanden geleden is getraind — en schrijft werkende code met de parameters en eindpunten die daadwerkelijk bestaan.
+
+### "Welke moet ik gebruiken?" — Gestructureerde toolvergelijkingen
+
+ORM's evalueren? Auth-providers vergelijken? De `research` vaardigheid zoekt meerdere bronnen, schraapt echte prijspagina's en functiematrices en geeft een gestructureerde vergelijkingstabel met citaten. Je krijgt een aanbeveling ondersteund door wat er daadwerkelijk op de website van elk product staat, niet door de populariteit van trainingsgegevens.
+
+### Bouw een RAG-pijplijn van elke documentatiesite
+
+```
+map   → ontdek elke URL op de documentatiesite
+batch → schraap alle pagina's parallel als schone markdown
+      → voer in je vectorstore
+```
+
+Twee vaardigheden, één pijplijn. Werkt op documentatiesites met honderden of duizenden pagina's.
+
+### Extraheer gestructureerde gegevens op schaal
+
+```
+map   → vind alle product-, lijst- of vacature-URL's
+batch → schraap elke pagina met een vooraf gebouwde parser → getypte JSON
+      → voer in je database, API of seed-bestanden
+```
+
+### Migreer naar een nieuwe frameworkversie
+
+Je upgrade van Next.js 13 naar 15. De `migrate-code` vaardigheid schraapt de officiële migratiehandleiding, extraheert elke brekende verandering met voor/na-codepatronen en herschrijft je bestanden om te passen — gebaseerd op de echte documentatie, niet op de beste gok van het model.
+
+## Vooraf Gebouwde Parsers
+
+Geef de `parser` parameter door aan elke schraapoproep en krijg getypte JSON terug in plaats van ruwe inhoud. Geen schema-definitie nodig — deze verzorgen de extractie voor je.
+
+| Parser | Geeft terug |
+|--------|------------|
+| `@olostep/google-search` | Organische resultaten, kennisgrafiek, People Also Ask |
+| `@olostep/amazon-it-product` | Prijs, beoordeling, functies, beschikbaarheid |
+| `@olostep/extract-emails` | Elk e-mailadres gevonden op de pagina |
+| `@olostep/extract-calendars` | Gestructureerde kalenderevenementen |
+| `@olostep/extract-socials` | Links naar sociale mediaprofielen |
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="Installeer op ClawHub" icon="store" href="https://clawhub.ai/plugins/olostep-web-agent">
+    Pluginvermelding, versiegeschiedenis en installatie met één commando
+  </Card>
+
+  <Card title="Verkrijg API-sleutel" icon="key" href="https://olostep.com/auth">
+    500 gratis verzoeken/maand, geen creditcard nodig
+  </Card>
+
+  <Card title="MCP Server Docs" icon="server" href="/integrations/mcp-server">
+    Volledige MCP-serverinstelling voor Cursor, Claude Desktop en andere clients
+  </Card>
+
+  <Card title="API Referentie" icon="book" href="https://docs.olostep.com">
+    Complete eindpuntdocumentatie met voorbeelden
+  </Card>
+</CardGroup>

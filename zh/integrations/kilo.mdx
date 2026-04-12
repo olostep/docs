@@ -1,0 +1,241 @@
+---
+sidebarTitle: "Olostep + Kilo"
+title: "Olostep + Kilo 集成"
+description: "在 Kilo 中使用 Olostep MCP 服务器作为外部工具进行网页搜索、抓取和内容提取"
+---
+
+Kilo 是一个支持 MCP（模型上下文协议）服务器的全能代理工程平台。Olostep MCP 服务器与 Kilo 无缝集成，为你的 AI 代理提供强大的网页数据能力。
+
+## 功能
+
+Olostep MCP 服务器提供访问 5 个核心 Olostep 功能的能力：
+
+<CardGroup cols={2}>
+  <Card title="抓取网站" icon="file-lines">
+    从任何单一 URL 提取内容，支持多种格式（Markdown、HTML、JSON、文本）
+  </Card>
+  
+  <Card title="搜索网页" icon="search">
+    搜索网页并获取结构化、基于解析器的结果
+  </Card>
+  
+  <Card title="答案（AI）" icon="brain">
+    使用自然语言查询和引用获取 AI 驱动的答案
+  </Card>
+  
+  <Card title="批量抓取 URL" icon="layer-group">
+    并行处理多达 10,000 个 URL。非常适合大规模数据提取
+  </Card>
+  
+  <Card title="爬取网站" icon="spider-web">
+    通过跟随链接自主发现并抓取整个网站
+  </Card>
+</CardGroup>
+
+## 安装
+
+### 1. 获取你的 API 密钥
+
+从 [Olostep 仪表板](https://olostep.com/dashboard/api-keys)获取你的 Olostep API 密钥。
+
+### 2. 配置 Kilo
+
+在你的项目目录中，创建或编辑 `.kilocode/mcp.json` 以添加 Olostep MCP 服务器：
+
+<CodeGroup>
+```json Remote Hosted MCP (Recommended)
+{
+  "mcpServers": {
+    "olostep": {
+      "url": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+```json Local/Stdio MCP
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+将 `YOUR_OLOSTEP_API_KEY` 替换为你从 Olostep 仪表板获取的实际 API 密钥。
+
+### 3. 验证安装
+
+运行 Kilo，Olostep 工具应该会自动可用：
+
+```bash
+kilo
+```
+
+## 可用工具
+
+配置完成后，以下 Olostep 工具可供你的 Kilo 代理使用：
+
+### scrape_website
+
+从单一 URL 提取内容。支持多种格式和 JavaScript 渲染。
+
+**示例提示：**
+```
+抓取 https://example.com 的内容，并给我 Markdown 版本
+```
+
+**参数：**
+- `url` - 要抓取的网站 URL（必需）
+- `format` - 输出格式：`markdown`、`html`、`json` 或 `text`（默认：markdown）
+- `country` - 特定位置内容的国家代码（例如，“US”，“GB”）
+- `wait_before_scraping` - JavaScript 渲染的等待时间（0-10000 毫秒）
+- `parser` - 用于专门提取的可选解析器 ID（例如，“@olostep/amazon-product”）
+
+### search_web
+
+搜索网页并返回结构化、基于解析器的结果。
+
+**示例提示：**
+```
+搜索关于欧盟 AI 法规的最新新闻
+```
+
+**参数：**
+- `query` - 搜索查询（必需）
+- `country` - 特定位置结果的国家代码
+
+### answers
+
+从网页搜索中获取带有来源和引用的 AI 驱动答案。
+
+**示例提示：**
+```
+2026 年的前 5 大 AI 新兴趋势是什么？给我结构化的答案和来源。
+```
+
+**参数：**
+- `query` - 自然语言问题（必需）
+- `format` - 答案的输出格式（你选择的 JSON 结构）
+- `country` - 特定位置搜索的国家代码
+
+### batch_scrape_urls
+
+并行处理多个 URL。非常适合大规模数据提取。
+
+**示例提示：**
+```
+抓取这 50 个产品 URL，并以 JSON 格式提取标题、价格和描述
+```
+
+**参数：**
+- `urls` - 要抓取的 URL 数组（必需）
+- `format` - 所有 URL 的输出格式
+- `country` - 特定位置内容的国家代码
+- `parser` - 所有 URL 的可选解析器 ID
+
+### create_crawl
+
+通过从起始 URL 跟随链接自主发现并抓取整个网站。
+
+**示例提示：**
+```
+从 https://example.com 开始爬取网站，并提取所有产品页面
+```
+
+**参数：**
+- `start_url` - 爬取的起始 URL（必需）
+- `max_pages` - 爬取的最大页面数（默认：10）
+- `follow_links` - 是否跟随链接（默认：true）
+
+### create_map
+
+提取网站上的所有 URL 以进行站点结构分析和内容发现。
+
+**示例提示：**
+```
+映射 https://example.com 上的所有 URL 以了解站点结构
+```
+
+**参数：**
+- `website_url` - 要映射的网站（必需）
+- `search_query` - 用于过滤结果的可选查询
+- `top_n` - 返回的 URL 数量限制
+
+## 示例工作流程
+
+### 使用网页搜索的研究任务
+
+让 Kilo 代理从网络收集信息：
+
+```
+使用 search_web 工具查找关于 LLM 安全性的最新文章，
+然后使用 answers 工具综合关键发现和来源。
+给我一个全面的总结。
+```
+
+### 产品数据提取
+
+抓取多个产品页面：
+
+```
+我有来自一个电商网站的 100 个产品 URL。使用 batch_scrape_urls
+提取每个的标题、价格、描述和可用性。
+将结果格式化为 JSON。
+```
+
+### 网站发现和分析
+
+爬取并分析网站结构：
+
+```
+我想了解 https://example.com 的结构。
+首先，使用 create_map 获取所有 URL，然后爬取主要部分
+并给我一个网站内容组织的总结。
+```
+
+## 环境变量
+
+使用本地/stdio 配置时，确保你的环境设置了 API 密钥：
+
+```bash
+export OLOSTEP_API_KEY="your_api_key_here"
+kilo
+```
+
+或在你的 `.env` 文件中：
+```
+OLOSTEP_API_KEY=your_api_key_here
+```
+
+## 故障排除
+
+**工具未出现在 Kilo 中：**
+- 验证 `.kilocode/mcp.json` 格式是否正确（有效的 JSON）
+- 确保配置中的 API 密钥正确
+- 配置更改后尝试重启 Kilo
+
+**API 密钥认证错误：**
+- 仔细检查你的 API 密钥是否来自 [Olostep 仪表板](https://olostep.com/dashboard/api-keys)
+- 确保密钥中没有多余的空格或特殊字符
+
+**远程托管 MCP 无法连接：**
+- 验证你的互联网连接
+- 检查 `https://mcp.olostep.com/mcp` 是否可访问
+- 确保 Authorization 头格式正确：`Bearer YOUR_KEY`
+
+## 了解更多
+
+- [Kilo 网站](https://kilo.ai/)
+- [Kilo 文档](https://docs.kilo.ai/)
+- [Olostep MCP 服务器仓库](https://github.com/olostep/olostep-mcp-server)
+- [模型上下文协议（MCP）规范](https://modelcontextprotocol.io/)

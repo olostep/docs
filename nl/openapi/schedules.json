@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Schema's API",
+    "title": "Schedules API",
     "version": "1.0.0"
   },
   "servers": [
@@ -21,8 +21,8 @@
   "paths": {
     "/v1/schedules": {
       "post": {
-        "summary": "Schema aanmaken",
-        "description": "Maakt een nieuw schema aan om API-aanroepen op gespecificeerde tijden uit te voeren. Ondersteunt zowel eenmalige uitvoeringen als terugkerende schema's met behulp van cron-expressies. Je kunt ook natuurlijke taal gebruiken om automatisch cron-expressies te genereren. Voor POST-verzoeken kun je korte Olostep-eindpunten gebruiken (bijv. 'v1/scrapes') die automatisch worden geprefixed, of een volledige URL opgeven. De payload kan elke JSON-structuur bevatten die je wilt verzenden.",
+        "summary": "Maak Schema",
+        "description": "Maakt een nieuw schema om API-aanroepen op gespecificeerde tijden uit te voeren. Ondersteunt zowel eenmalige uitvoeringen als terugkerende schema's met behulp van cron-expressies. Je kunt ook natuurlijke taal gebruiken om automatisch cron-expressies te genereren. Voor POST-verzoeken kun je korte Olostep-eindpunten gebruiken (bijv. 'v1/scrapes') die automatisch worden geprefixed, of een volledige URL opgeven. De payload kan elke JSON-structuur bevatten die je wilt verzenden.",
         "security": [
           {
             "Authorization": []
@@ -45,16 +45,16 @@
                   },
                   "endpoint": {
                     "type": "string",
-                    "description": "De endpoint-URL om aan te roepen wanneer het schema wordt uitgevoerd. Voor POST-verzoeken met Olostep-eindpunten kun je korte vormen gebruiken (bijv. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') die automatisch worden geprefixed met 'https://api.olostep.com/'. Voor andere eindpunten geef je de volledige URL op."
+                    "description": "De endpoint-URL om aan te roepen wanneer het schema wordt uitgevoerd. Voor POST-verzoeken met Olostep-eindpunten kun je korte vorm gebruiken (bijv. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') die automatisch worden geprefixed met 'https://api.olostep.com/'. Voor andere eindpunten, geef de volledige URL op."
                   },
                   "payload": {
                     "type": "object",
-                    "description": "De payload om mee te sturen met de API-aanroep. Kan elke JSON-structuur bevatten die je nodig hebt. Voor GET-verzoeken is dit meestal leeg. Voor POST-verzoeken moet dit de gegevens bevatten die je naar het eindpunt wilt sturen.",
+                    "description": "De payload om mee te sturen met de API-aanroep. Kan elke JSON-structuur bevatten die je nodig hebt. Voor GET-verzoeken is dit meestal leeg. Voor POST-verzoeken moet dit de gegevens bevatten die je naar het eindpunt wilt verzenden.",
                     "default": {}
                   },
                   "cron_expression": {
                     "type": "string",
-                    "description": "Cron-expressie in 6-velden formaat (minuut uur dag maand dag-van-de-week jaar) voor terugkerende schema's. Vereist voor terugkerende schema's. Wederzijds exclusief met execute_at en text."
+                    "description": "Cron-expressie in 6 velden formaat (minuut uur dag maand dag-van-de-week jaar) voor terugkerende schema's. Vereist voor terugkerende schema's. Wederzijds exclusief met execute_at en text."
                   },
                   "execute_at": {
                     "type": "string",
@@ -140,13 +140,13 @@
             "description": "Ongeldige API-sleutel. Controleer deze nog eens of neem contact op met info@olostep.com als je problemen ondervindt."
           },
           "500": {
-            "description": "Interne serverfout bij het maken van schema."
+            "description": "Interne serverfout bij het aanmaken van schema."
           }
         }
       },
       "get": {
         "summary": "Lijst Schema's",
-        "description": "Haalt alle schema's voor jouw team op. Geeft een lijst van schema's terug met hun configuratie, status en metadata. Standaard worden verwijderde schema's eruit gefilterd.",
+        "description": "Haalt alle schema's voor je team op. Geeft een lijst van schema's terug met hun configuratie, status en metadata. Standaard worden verwijderde schema's eruit gefilterd.",
         "security": [
           {
             "Authorization": []
@@ -402,7 +402,7 @@
             "description": "Schema niet gevonden voor de opgegeven ID."
           },
           "500": {
-            "description": "Interne serverfout bij het ophalen van het schema."
+            "description": "Interne serverfout bij het ophalen van schema."
           }
         }
       },
@@ -457,7 +457,7 @@
             "description": "Schema niet gevonden voor de opgegeven ID."
           },
           "500": {
-            "description": "Interne serverfout bij het verwijderen van het schema."
+            "description": "Interne serverfout bij het verwijderen van schema."
           }
         }
       }

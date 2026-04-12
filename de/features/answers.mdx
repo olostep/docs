@@ -1,29 +1,29 @@
 ---
 sidebarTitle: "Antworten"
-title: "Antworten API"
+title: "Antworten-API"
 icon: "globe-pointer"
 ---
 
-Über den Olostep `/v1/answers` Endpunkt können Sie das Web mit natürlicher Sprache durchsuchen und KI-gestützte Antworten und Daten in der gewünschten JSON-Form zurückgeben. Dies ermöglicht es Ihnen, Ihre Produkte auf reale Daten und Quellen zu stützen, Datenpunkte oder Tabellen zu bereichern.
+Über den Olostep-Endpunkt `/v1/answers` kannst du das Web mit natürlicher Sprache durchsuchen und KI-gestützte Antworten und Daten in der gewünschten JSON-Struktur zurückgeben. Dies ermöglicht es dir, deine Produkte auf reale Daten und Quellen zu stützen, Datenpunkte oder Tabellen zu bereichern.
 
-- Stellen Sie eine Frage oder geben Sie der KI einen Datenpunkt, den Sie anreichern möchten
-- Optional: Geben Sie die gewünschte JSON-Struktur an
+- Stelle eine Frage oder gib der KI einen Datenpunkt, den du anreichern möchtest
+- Optional: Gib die gewünschte JSON-Struktur an, die du zurückhaben möchtest
 
 Es wird:
-- Daten im Web suchen, bereinigen, validieren und zurückgeben
-- Quellen zurückgeben, die zur Generierung der Antwort verwendet wurden
-- Unsicherheiten mit `NOT_FOUND` Werten behandeln, wenn Daten nicht verifiziert werden können
+- Die Daten im Web suchen, bereinigen, validieren und zurückgeben
+- Die verwendeten Quellen zur Generierung der Antwort zurückgeben
+- Unsicherheiten mit `NOT_FOUND`-Werten behandeln, wenn Daten nicht verifiziert werden können
 
-Für API-Details siehe die [Antworten Endpunkt API Referenz](/api-reference/answers/create).
+Für API-Details siehe die [Antworten-Endpunkt-API-Referenz](/api-reference/answers/create).
 
 Standardmäßig verwenden wir einen generischen Webindex und einen kosteneffizienten LLM-Validator.
 
-Enterprise-Kunden haben Zugang zu proprietären branchenspezifischen Webindizes, exklusiven privaten Daten (einschließlich Telefonnummern und E-Mails) und benutzerdefinierten LLM-Modellen, die am besten für ihren Anwendungsfall geeignet sind. Kontaktieren Sie uns für den Zugang: info@olostep.com
+Unternehmenskunden haben Zugang zu proprietären branchenspezifischen Webindizes, exklusiven privaten Daten (einschließlich Telefonnummern und E-Mails) und benutzerdefinierten LLM-Modellen, die am besten für ihren Anwendungsfall geeignet sind. Kontaktiere uns für den Zugang: info@olostep.com
 
 
 
 ## Anwendungsfälle
-Der Antworten-Endpunkt kann verwendet werden, um:
+Der Antworten-Endpunkt kann genutzt werden, um:
  - KI-Anwendungen auf reale Daten und Fakten zu stützen
  - Tabellen und Datenpunkte für Recruiting, Finanzen, Beratung und Vertrieb zu bereichern
 
@@ -45,7 +45,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl ist standardmäßig auf macOS, Linux und Windows verfügbar
 ```
 
 ```javascript Node (API)
@@ -58,9 +58,9 @@ pip install requests
 
 </CodeGroup>
 
-## Nutzung
+## Verwendung
 
-Stellen Sie eine Frage und übergeben Sie ein JSON-Schema, um die Ausgabe zu leiten. Sie können auch auf den `json` Parameter verzichten, und die API gibt ein JSON-Objekt mit dem Antworttext im `result` Feld zurück.
+Stelle eine Frage und übergib ein JSON-Schema, um die Ausgabe zu leiten. Du kannst auch den `json`-Parameter weglassen und die API wird ein JSON-Objekt mit dem Antworttext im `result`-Feld zurückgeben.
 
 <CodeGroup>
 
@@ -132,7 +132,7 @@ print(json.dumps(response.json(), indent=2))
 
 ## Antwort
 
-Wie bei anderen Olostep-Endpunkten erhalten Sie ein `answer` Objekt als Antwort. Das `answer` Objekt hat einige Eigenschaften wie `id` und `result`.
+Wie bei anderen Olostep-Endpunkten erhältst du ein `answer`-Objekt als Antwort. Das `answer`-Objekt hat einige Eigenschaften wie `id` und `result`.
 
 ```json
 {
@@ -140,7 +140,7 @@ Wie bei anderen Olostep-Endpunkten erhalten Sie ein `answer` Objekt als Antwort.
   "object": "answer",
   "created": 1760327323,
   "metadata": {},
-  "task": "Was ist das neueste Buch von J.K. Rowling?",
+  "task": "What is the latest book by J.K. Rowling?",
   "result": {
     "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
     "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
@@ -160,13 +160,13 @@ Wie bei anderen Olostep-Endpunkten erhalten Sie ein `answer` Objekt als Antwort.
 }
 ```
 
-Ihre angeforderte Antwort, formatiert gemäß dem `json` Parameter, befindet sich in `response.result.json_content` und die Liste der Quellen in `response.result.sources`. Sie können das stringifizierte JSON parsen, um auf die strukturierten Daten zuzugreifen.
+Deine angeforderte Antwort, formatiert gemäß dem `json`-Parameter, befindet sich in `response.result.json_content` und die Liste der Quellen in `response.result.sources`. Du kannst das stringifizierte JSON parsen, um auf die strukturierten Daten zuzugreifen.
 
 ```json
 {
   "book_title": "The Hallmarked Man",
   "author": "J.K. Rowling",
-  "release_date": "2. September 2025"
+  "release_date": "September 2, 2025"
 }
 ```
 
@@ -182,18 +182,18 @@ Beispielquellen:
 ]
 ```
 
-Wenn Sie den `json` Parameter nicht übergeben, gibt die API ein JSON-Objekt mit dem Antworttext im `result` Feld zurück.
+Wenn du den `json`-Parameter nicht übergibst, wird die API ein JSON-Objekt mit dem Antworttext im `result`-Feld zurückgeben.
 
 ```json
 {
-  "result": "Das neueste Buch von J.K. Rowling ist The Hallmarked Man."
+  "result": "The latest book by J.K. Rowling is The Hallmarked Man."
 }
 ```
 
-### Flexibler `json` Parameter
+### Flexibler `json`-Parameter
 
-- Geben Sie ein JSON-Objekt mit leeren Werten als Schema an oder eine Zeichenkette, die die gewünschten Daten beschreibt.
-- Wenn der Agent nicht sicher ist, gibt er für dieses Feld `NOT_FOUND` zurück.
+- Gib ein JSON-Objekt mit leeren Werten als Schema oder eine Zeichenkette an, die die gewünschten Daten beschreibt.
+- Wenn der Agent sich unsicher ist, gibt er `NOT_FOUND` für dieses Feld zurück.
 
 <CodeGroup>
 

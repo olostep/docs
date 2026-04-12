@@ -1,23 +1,23 @@
 ---
-sidebarTitle: 'Competenze'
-title: Competenze
-description: Installa e gestisci le competenze Olostep nei tuoi agenti di coding IA
-icon: wand-magic-sparkles
+sidebarTitle: "Competenze"
+title: "Competenze"
+description: "Installa e gestisci le competenze di Olostep nei tuoi agenti di codifica AI"
+icon: "wand-magic-sparkles"
 ---
 
-Installa le cartelle delle competenze Olostep direttamente nei tuoi agenti di coding IA dalla riga di comando.
+Installa le cartelle delle competenze di Olostep direttamente nei tuoi agenti di codifica AI dalla riga di comando.
 
-- Installs Olostep skills into agents like Cursor, Claude, Codex, Windsurf, and more
-- Skills land in a canonical store (`~/.agents/skills`) and are symlinked or copied into each agent's skills directory
-- Tracks all installs in a lockfile at `~/.agents/.skill-lock.json`
+- Installa le competenze di Olostep in agenti come Cursor, Claude, Codex, Windsurf e altri
+- Le competenze vengono inserite in un archivio canonico (`~/.agents/skills`) e sono collegate simbolicamente o copiate nella directory delle competenze di ciascun agente
+- Tiene traccia di tutte le installazioni in un file di blocco in `~/.agents/.skill-lock.json`
 
-Questa funzionalita e disponibile tramite la [CLI di Olostep](/sdks/cli).
+Questa funzionalità è disponibile tramite l’[Olostep CLI](/sdks/cli).
 
 ## `olostep add skills`
 
-Syncs skills from a source directory into the CLI, installs them into the canonical store, then deploys them into each agent's skills directory.
+Sincronizza le competenze da una directory di origine nel CLI, le installa nell'archivio canonico, quindi le distribuisce nella directory delle competenze di ciascun agente.
 
-### Installa la CLI
+### Installa il CLI
 
 ```bash
 # Installazione globale
@@ -36,13 +36,13 @@ olostep add skills
 # Autenticati prima, poi installa
 olostep add skills --login
 
-# Seleziona agenti specifici
+# Destina agenti specifici
 olostep add skills --agent cursor --agent claude
 
-# Copia sempre invece di usare symlink
+# Copia sempre invece di collegare simbolicamente
 olostep add skills --link-mode copy
 
-# Output JSON leggibile da macchina
+# Output JSON leggibile dalla macchina
 olostep add skills --json
 ```
 
@@ -50,27 +50,27 @@ olostep add skills --json
 
 | Opzione | Predefinito | Descrizione |
 | ------ | ------- | ----------- |
-| `--login` | — | Run browser login before installing |
-| `--source <path>` | CLI bundled skills dir | Skills source directory |
-| `--cli-local-dir <path>` | CLI/skills | Directory where source skills are synced for CLI-local use |
-| `--agent <name>` | — | Target a specific agent — repeatable |
-| `--all-agents` / `--no-all-agents` | `--all-agents` | If no `--agent` is set, targets all detected installed agents |
-| `--global` / `--no-global` | `--global` | Install into known agent global skill dirs |
-| `--canonical-dir <path>` | `~/.agents/skills` | Canonical storage location for Olostep skills |
-| `--agent-skills-dir <path>` | — | Custom target skills dir (requires `--no-global`) |
-| `--skill <name>` | — | Include only this skill — repeatable |
-| `--exclude <name>` | — | Exclude this skill — repeatable |
-| `--overwrite` / `--no-overwrite` | `--overwrite` | Replace existing targets |
-| `--link-mode <auto\|symlink\|copy>` | `auto` | `auto` tries symlink, falls back to copy |
-| `--json` | — | Emit machine-readable JSON output |
+| `--login` | — | Esegui il login del browser prima dell'installazione |
+| `--source <path>` | Dir delle competenze incluse nel CLI | Directory di origine delle competenze |
+| `--cli-local-dir <path>` | CLI/skills | Directory dove le competenze di origine sono sincronizzate per l'uso locale del CLI |
+| `--agent <name>` | — | Destina un agente specifico — ripetibile |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | Se non è impostato `--agent`, destina tutti gli agenti installati rilevati |
+| `--global` / `--no-global` | `--global` | Installa nelle directory globali delle competenze degli agenti conosciuti |
+| `--canonical-dir <path>` | `~/.agents/skills` | Posizione di archiviazione canonica per le competenze di Olostep |
+| `--agent-skills-dir <path>` | — | Directory delle competenze di destinazione personalizzata (richiede `--no-global`) |
+| `--skill <name>` | — | Includi solo questa competenza — ripetibile |
+| `--exclude <name>` | — | Escludi questa competenza — ripetibile |
+| `--overwrite` / `--no-overwrite` | `--overwrite` | Sostituisci i target esistenti |
+| `--link-mode <auto\|symlink\|copy>` | `auto` | `auto` prova il collegamento simbolico, ripiega sulla copia |
+| `--json` | — | Emetti output JSON leggibile dalla macchina |
 
 <Note>
 **Regole di validazione:**
-- `--link-mode` must be `auto`, `symlink`, or `copy`
-- `--agent-skills-dir` requires `--no-global`
-- `--no-global` requires `--agent-skills-dir`
-- Unknown agent names will error
-- An empty skill selection after `--skill` / `--exclude` will error
+- `--link-mode` deve essere `auto`, `symlink` o `copy`
+- `--agent-skills-dir` richiede `--no-global`
+- `--no-global` richiede `--agent-skills-dir`
+- I nomi degli agenti sconosciuti genereranno un errore
+- Una selezione di competenze vuota dopo `--skill` / `--exclude` genererà un errore
 </Note>
 
 ### Output JSON
@@ -97,19 +97,19 @@ olostep add skills --json
 }
 ```
 
-## Rilevamento e formato delle competenze
+## Scoperta e formato delle competenze
 
-Le competenze vengono rilevate analizzando le sottocartelle alla ricerca di un file `SKILL.md`. Il file deve includere un blocco frontmatter con i campi `name` e `description`. I nomi sanitizzati duplicati vengono rifiutati.
+Le competenze vengono scoperte scansionando le sottodirectory per un file `SKILL.md`. Il file deve includere un blocco di frontmatter con i campi `name` e `description`. I nomi duplicati sanitizzati vengono rifiutati.
 
 ```markdown
 ---
 name: research-agent
-description: Autonomous research agent for deep web investigation
+description: Agente di ricerca autonomo per l'indagine sul web profondo
 ---
 
-# Research Agent
+# Agente di Ricerca
 
-...skill instructions here...
+...istruzioni per la competenza qui...
 ```
 
 ## Agenti supportati
@@ -127,29 +127,29 @@ description: Autonomous research agent for deep web investigation
 | Copilot | `copilot` |
 | Factory | `factory` |
 
-Ogni chiave corrisponde a un percorso di competenze noto nella home directory. Usa `--all-agents` (predefinito) per includere tutti gli agenti installati rilevati, oppure passa `--agent <key>` per agenti specifici.
+Ogni chiave mappa a un percorso di competenze nella directory home conosciuta. Usa `--all-agents` (predefinito) per destinare tutti gli agenti installati rilevati, o passa `--agent <key>` per destinare quelli specifici.
 
 ## Convenzione di denominazione
 
-I nomi delle cartelle installate usano sempre il prefisso `olostep-`: ad esempio, `research-agent` diventa `olostep-research-agent`. I nomi vengono normalizzati in minuscolo e i caratteri non validi vengono sostituiti con `-`. Questo prefisso rende chiaramente identificabili le competenze gestite da Olostep e previene conflitti con altri strumenti.
+I nomi delle cartelle installate usano sempre il prefisso `olostep-`: ad esempio, `research-agent` diventa `olostep-research-agent`. I nomi sono sanitizzati in minuscolo con i caratteri non validi sostituiti da `-`. Questo prefisso mantiene le competenze gestite da Olostep chiaramente identificabili e previene conflitti con altri strumenti.
 
 ## `olostep remove skills`
 
-Rimuove le cartelle di competenze installate da Olostep dall'archivio canonico e dalle directory delle competenze degli agenti, e pulisce il lockfile.
+Rimuove le cartelle delle competenze installate da Olostep dall'archivio canonico e dalle directory delle competenze degli agenti, e pulisce il file di blocco.
 
 ### Utilizzo
 
 ```bash
-# Remove all Olostep skills from all agents
+# Rimuovi tutte le competenze di Olostep da tutti gli agenti
 olostep remove skills
 
-# Remove a specific skill
+# Rimuovi una competenza specifica
 olostep remove skills --skill research-agent
 
-# Remove from a specific agent only
+# Rimuovi solo da un agente specifico
 olostep remove skills --agent cursor
 
-# Output JSON leggibile da macchina
+# Output JSON leggibile dalla macchina
 olostep remove skills --json
 ```
 
@@ -157,13 +157,13 @@ olostep remove skills --json
 
 | Opzione | Predefinito | Descrizione |
 | ------ | ------- | ----------- |
-| `--agent <name>` | — | Remove only from specified agent(s) — repeatable |
-| `--all-agents` / `--no-all-agents` | `--all-agents` | If no `--agent` or custom dir, uses all detected installed agents |
-| `--canonical-dir <path>` | `~/.agents/skills` | Canonical skills directory to remove from |
-| `--agent-skills-dir <path>` | — | Custom target skills directory for removal |
-| `--skill <name>` | — | Remove only matching skill(s) — repeatable |
-| `--json` | — | Emit machine-readable JSON output |
+| `--agent <name>` | — | Rimuovi solo dagli agenti specificati — ripetibile |
+| `--all-agents` / `--no-all-agents` | `--all-agents` | Se non ci sono `--agent` o dir personalizzato, usa tutti gli agenti installati rilevati |
+| `--canonical-dir <path>` | `~/.agents/skills` | Directory canonica delle competenze da cui rimuovere |
+| `--agent-skills-dir <path>` | — | Directory delle competenze di destinazione personalizzata per la rimozione |
+| `--skill <name>` | — | Rimuovi solo le competenze corrispondenti — ripetibile |
+| `--json` | — | Emetti output JSON leggibile dalla macchina |
 
 <Note>
-**Sicurezza:** vengono toccate solo le cartelle con prefisso `olostep-`. Le cartelle degli agenti non Olostep non vengono mai modificate. La pulizia del lockfile rimuove solo chiavi con prefisso `olostep-`.
+**Sicurezza:** Vengono toccate solo le cartelle con il prefisso `olostep-`. Le cartelle degli agenti non-Olostep non vengono mai modificate. La pulizia del file di blocco rimuove solo le chiavi con prefisso `olostep-`.
 </Note>

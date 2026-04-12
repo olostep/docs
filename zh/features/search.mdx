@@ -6,8 +6,8 @@ icon: "magnifying-glass"
 
 Olostep 的 `/v1/searches` 端点允许你使用自然语言查询搜索网络，并返回去重的相关链接列表，包括标题和描述。
 
-- 用简单的英文发送查询
-- 从网络中获取结构化的链接
+- 以简单的英语发送查询
+- 从整个网络获取结构化链接
 
 它将在网络上语义搜索查询并返回结果。
 
@@ -39,7 +39,7 @@ const fetch = require('node-fetch')
 
 </CodeGroup>
 
-## 使用方法
+## 使用
 
 发送自然语言查询并接收相关链接列表。
 
@@ -97,7 +97,7 @@ curl -s -X POST "https://api.olostep.com/v1/searches" \
     "links": [
       {
         "url": "https://www.adweek.com/media/hottest-startups-shaping-the-future-of-ai-search-optimization-aeo-geo/",
-        "title": "认识塑造 AI SEO 未来的 7 大最热门初创公司",
+        "title": "认识塑造 AI SEO 未来的 7 家最热门初创公司",
         "description": "1. Profound · 2. Bluefish · 3. Scrunch · 4. Evertune · 5. Peec AI · 6. Brandlight · 7. AthenaHQ."
       },
       {
@@ -118,12 +118,12 @@ curl -s -X POST "https://api.olostep.com/v1/searches" \
 `result.links` 中的每个链接包含：
 
 | 字段         | 类型   | 描述                                      |
-|---------------|--------|------------------------------------------|
-| `url`         | string | 搜索结果的 URL                           |
-| `title`       | string | 结果页面的标题                           |
-| `description` | string | 描述结果的简短片段                       |
+|--------------|--------|-------------------------------------------|
+| `url`        | string | 搜索结果的 URL                             |
+| `title`      | string | 结果页面的标题                             |
+| `description`| string | 描述结果的简短片段                         |
 
-完整结果也可以在 `result.json_hosted_url` 作为托管 JSON 文件获取。
+完整结果也可以作为托管的 JSON 文件在 `result.json_hosted_url` 中获取。
 
 ## 价格
 

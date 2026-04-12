@@ -1,0 +1,261 @@
+---
+sidebarTitle: "クロール"
+title: "クロール"
+description: "URLをクロールしてすべてのサブページからコンテンツを取得"
+icon: "spider"
+---
+
+Olostepの`/v1/crawls`エンドポイントを通じて、ウェブサイトをクロールし、すべてのページからコンテンツを取得できます。
+
+- ウェブサイトをクロールしてすべてのサブページからコンテンツを取得（またはクロールの深さを制限）
+- 特定のページをクロールするための特別なパターンを使用（例：`/blog/**`）
+- クロールが完了したときに通知を受け取るために`webhook_url`を渡す
+- 特定のページを見つけるための検索クエリを使用し、関連性でソート
+
+APIの詳細については、[クロールエンドポイントAPIリファレンス](/api-reference/crawls/create)を参照してください。
+
+## インストール
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: 内蔵のcurlで問題ありません
+```
+
+</CodeGroup>
+
+## クロールを開始する
+
+開始URL、含める/除外するURLグロブ、`max_pages`を指定します。オプション: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`。
+
+<CodeGroup>
+
+```python Python
+import time, json
+
+API_URL = 'https://api.olostep.com'
+API_KEY = '<YOUR_API_KEY>'
+HEADERS = { 
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {API_KEY}' 
+}
+
+data = {
+  "start_url": "https://sugarbooandco.com",
+  "max_pages": 100,
+  "include_urls": ["/**"],
+  "exclude_urls": ["/collections/**"],
+  "include_external": False
+}
+
+res = requests.post(f"{API_URL}/v1/crawls", headers=HEADERS, json=data)
+crawl = res.json()
+print(json.dumps(crawl, indent=2))
+```
+
+```js Node
+const API_URL = 'https://api.olostep.com'
+const res = await fetch(`${API_URL}/v1/crawls`, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    start_url: 'https://sugarbooandco.com',
+    max_pages: 100,
+    include_urls: ['/**'],
+    exclude_urls: ['/collections/**']
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://sugarbooandco.com",
+    "max_pages": 100,
+    "include_urls": ["/**"],
+    "exclude_urls": ["/collections/**"]
+  }'
+```
+
+</CodeGroup>
+
+Olostepではすべてがオブジェクトなので、レスポンスとして`crawl`オブジェクトを受け取ります。`crawl`オブジェクトには`id`や`status`などのプロパティがあり、クロールを追跡するのに使用できます。
+
+## クロールのステータスを確認する
+
+`status`が`completed`になるまでクロールをポーリングして進行状況を追跡します。
+
+<CodeGroup>
+
+```python Python
+import time
+
+def get_crawl_info(crawl_id):
+    return requests.get(f'{API_URL}/v1/crawls/{crawl_id}', headers=HEADERS).json()
+
+crawl_id = crawl['id']
+while True:
+    info = get_crawl_info(crawl_id)
+    print(info['status'], info.get('pages_count'))
+    if info['status'] == 'completed':
+        break
+    time.sleep(5)
+```
+
+```js Node
+const crawlId = '<CRAWL_ID>'
+const status = await fetch(`${API_URL}/v1/crawls/${crawlId}`, {
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+}).then(r => r.json())
+console.log(status)
+```
+
+```bash cURL
+curl -s -X GET "https://api.olostep.com/v1/crawls/<CRAWL_ID>" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY"
+```
+
+</CodeGroup>
+
+また、クロールを開始するときに`webhook_url`を渡すことで、クロールが完了したときに通知を受け取ることができます。
+
+## ページをリストする（カーソルでページネーション/ストリーム）
+
+`cursor`と`limit`を使用してページを取得し、繰り返し処理します。クロールが`in_progress`または`completed`の間に機能します。
+
+<CodeGroup>
+
+```python Python
+def get_pages(crawl_id, cursor=None, limit=10, search_query=None):
+    params = { 
+        'cursor': cursor, 
+        'limit': limit
+    }
+    return requests.get(f'{API_URL}/v1/crawls/{crawl_id}/pages', headers=HEADERS, params=params).json()
+
+cursor = 0
+while True:
+    page_batch = get_pages(crawl_id, cursor=cursor, limit=10)
+    for page in page_batch['pages']:
+        print(page['url'], page['retrieve_id'])
+    if 'cursor' not in page_batch:
+        break
+    cursor = page_batch['cursor']
+    time.sleep(5)
+```
+
+```js Node
+let cursor = 0
+while (true) {
+  const pages = await fetch(`${API_URL}/v1/crawls/${crawlId}/pages?cursor=${cursor}&limit=10`, {
+    headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
+  }).then(r => r.json())
+  pages.pages.forEach(p => console.log(p.url, p.retrieve_id))
+  if (pages.cursor === undefined) break
+  cursor = pages.cursor
+}
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/crawls/<CRAWL_ID>/pages" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "cursor=0" \
+  --data-urlencode "limit=10"
+```
+
+</CodeGroup>
+
+## 検索クエリ（関連性の高いトップNに制限）
+
+開始時に`search_query`を使用し、オプションで`search_query`でリストをフィルタリングします。ページごとの探索を`top_n`で制限します。
+
+<CodeGroup>
+
+```python Python
+data = {
+  "start_url": "https://sugarbooandco.com",
+  "max_pages": 100,
+  "include_urls": ["/**"],
+  "search_query": "contact us",
+  "top_n": 5
+}
+crawl = requests.post(f'{API_URL}/v1/crawls', headers=HEADERS, json=data).json()
+pages = requests.get(f"{API_URL}/v1/crawls/{crawl['id']}/pages", headers=HEADERS, params={'search_query': 'contact us'}).json()
+print(len(pages['pages']))
+```
+
+```js Node
+await fetch(`${API_URL}/v1/crawls`, { method: 'POST', headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' }, body: JSON.stringify({ start_url: 'https://sugarbooandco.com', max_pages: 100, include_urls: ['/**'], search_query: 'contact us', top_n: 5 }) })
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/crawls" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_url": "https://sugarbooandco.com",
+    "max_pages": 100,
+    "include_urls": ["/**"],
+    "search_query": "contact us",
+    "top_n": 5
+  }'
+```
+
+</CodeGroup>
+
+## コンテンツを取得する
+
+各ページの`retrieve_id`を使用して`/v1/retrieve`から`html_content`や`markdown_content`を取得します。
+
+<CodeGroup>
+
+```python Python
+def retrieve_content(retrieve_id):
+    return requests.get(f"{API_URL}/v1/retrieve", headers=HEADERS, params={"retrieve_id": retrieve_id}).json()
+
+for page in get_pages(crawl['id'], limit=5)['pages']:
+    retrieved = retrieve_content(page['retrieve_id'])
+    print(retrieved.get('markdown_content'))
+```
+
+```js Node
+const retrieved = await fetch(`${API_URL}/v1/retrieve?retrieve_id=<RETRIEVE_ID>`, { headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' } }).then(r => r.json())
+console.log(retrieved.markdown_content)
+```
+
+```bash cURL
+curl -s -G "https://api.olostep.com/v1/retrieve" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  --data-urlencode "retrieve_id=<RETRIEVE_ID>"
+```
+
+</CodeGroup>
+
+## 注意事項
+
+- ページネーションはカーソルベースです。`cursor`がなくなるまでリクエストを繰り返します。
+- `/v1/crawls/{crawl_id}/pages`のコンテンツフィールドは非推奨です。`/v1/retrieve`を使用してください。
+- Webhooks: クロール完了時にPOSTを受け取るために`webhook_url`を設定します。
+
+## 料金
+
+クロールはクロールされたページごとに1クレジットかかります。

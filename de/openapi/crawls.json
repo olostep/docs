@@ -44,7 +44,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "URL-Pfadmuster, die im Crawl mit Glob-Syntax eingeschlossen werden sollen.  Standardmäßig `/**`, was alle URLs einschließt. Verwende Muster wie `/blog/**`, um spezifische Abschnitte zu crawlen (z.B. nur Blog-Seiten), `/products/*.html` für Produktseiten oder mehrere Muster für verschiedene Abschnitte. Unterstützt Standard-Glob-Funktionen wie * (beliebige Zeichen) und ** (rekursives Matching)."
+                    "description": "URL-Pfadmuster, die im Crawl mit Glob-Syntax eingeschlossen werden sollen.  Standardmäßig `/**`, was alle URLs einschließt. Verwende Muster wie `/blog/**`, um bestimmte Abschnitte zu crawlen (z.B. nur Blog-Seiten), `/products/*.html` für Produktseiten oder mehrere Muster für verschiedene Abschnitte. Unterstützt Standard-Glob-Funktionen wie * (beliebige Zeichen) und ** (rekursive Übereinstimmung)."
                   },
                   "exclude_urls": {
                     "type": "array",
@@ -59,7 +59,7 @@
                   },
                   "max_depth": {
                     "type": "number",
-                    "description": "Maximale Tiefe des Crawls. Nützlich, um nur bis zu einer n-Grad-Verlinkung zu extrahieren."
+                    "description": "Maximale Tiefe des Crawls. Nützlich, um nur bis zu einem bestimmten Grad von Links zu extrahieren."
                   },
                   "include_external": {
                     "type": "boolean",
@@ -71,7 +71,7 @@
                   },
                   "search_query": {
                     "type": "string",
-                    "description": "Eine optionale Suchanfrage, um spezifische Links zu finden und die Ergebnisse nach Relevanz zu sortieren."
+                    "description": "Eine optionale Suchanfrage, um spezifische Links zu finden und die Ergebnisse auch nach Relevanz zu sortieren."
                   },
                   "top_n": {
                     "type": "number",
@@ -107,7 +107,7 @@
                             "screenshot"
                           ]
                         },
-                        "description": "Ausgabeformate, die für jede gecrawlte Seite angefordert werden. Standardmäßig `[\"html\", \"markdown\"]`, wenn weggelassen. `html` wird immer automatisch eingeschlossen. `json` wird automatisch hinzugefügt, wenn ein `parser` bereitgestellt wird. Hinweis: `raw_pdf` wird nicht unterstützt — PDFs können nicht gecrawlt werden.",
+                        "description": "Ausgabeformate, die für jede gecrawlte Seite angefordert werden. Standardmäßig `[\"html\", \"markdown\"]`, wenn nicht angegeben. `html` wird immer automatisch eingeschlossen. `json` wird automatisch hinzugefügt, wenn ein `parser` bereitgestellt wird. Hinweis: `raw_pdf` wird nicht unterstützt — PDFs können nicht gecrawlt werden.",
                         "example": [
                           "markdown",
                           "screenshot"
@@ -359,7 +359,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Optionaler Integer, um die Anzahl der zurückgegebenen Ergebnisse zu begrenzen. Empfohlen 10-50 Ergebnisse auf einmal. Paginierung mit *cursor*. Maximal 10MB Inhalt können in einer einzigen Anfrage abgerufen werden."
+            "description": "Optionaler Integer, um die Anzahl der zurückgegebenen Ergebnisse zu begrenzen. Empfohlen 10-50 Ergebnisse auf einmal. Paginierung erfolgt mit *cursor*. Maximal 10MB Inhalt können in einer einzigen Anfrage abgerufen werden."
           },
           {
             "name": "search_query",
@@ -384,7 +384,7 @@
                 ]
               }
             },
-            "description": "**Veraltet:** Verwende den `/retrieve`-Endpunkt mit `retrieve_id`.  Array von Formaten zum Abrufen (z.B. [\"html\", \"markdown\"])."
+            "description": "**Veraltet:** Verwende den `/retrieve` Endpunkt mit `retrieve_id`.  Array von Formaten, die abgerufen werden sollen (z.B. [\"html\", \"markdown\"])."
           }
         ],
         "responses": {
@@ -423,7 +423,7 @@
                           },
                           "retrieve_id": {
                             "type": "string",
-                            "description": "Um Inhalte vom `/retrieve`-Endpunkt abzurufen."
+                            "description": "Um Inhalte vom `/retrieve` Endpunkt abzurufen."
                           },
                           "url": {
                             "type": "string"
@@ -433,11 +433,11 @@
                           },
                           "html_content": {
                             "type": "string",
-                            "description": "Veraltet: Verwende den `/retrieve`-Endpunkt mit `retrieve_id`."
+                            "description": "Veraltet: Verwende den `/retrieve` Endpunkt mit `retrieve_id`."
                           },
                           "markdown_content": {
                             "type": "string",
-                            "description": "Veraltet: Verwende den `/retrieve`-Endpunkt mit `retrieve_id`."
+                            "description": "Veraltet: Verwende den `/retrieve` Endpunkt mit `retrieve_id`."
                           }
                         }
                       }

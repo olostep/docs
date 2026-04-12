@@ -1,0 +1,176 @@
+---
+sidebarTitle: "Olostep + ViaSocket"
+title: "Olostep + ViaSocket"
+description: "ViaSocket MushroomsをMCPゲートウェイとして使用して、OlostepをClaude、Cursor、ChatGPTなどのAIクライアントに接続します。"
+---
+
+[ViaSocket Mushrooms](https://mushrooms.viasocket.com/)は、Olostepのようなアプリを単一のMCPエンドポイントURLを通じて任意のAIクライアントに接続するMCPゲートウェイです。OlostepをMushroomとして接続すると、Claude、Cursor、ChatGPT、または他のサポートされているクライアントに、ウェブサイトのスクレイピング、バッチジョブの実行、サイトのクロール、AIに基づいた回答の取得を指示できます。これらはすべて、コードを一行も書かずに、平易な言葉で行えます。
+
+## 始める前に
+
+- **APIキー付きのOlostepアカウント:** [無料で取得](https://olostep.com/dashboard)、クレジットカードは不要です。最初の500クレジットが含まれています。
+- **ViaSocketアカウント:** [viasocket.com](https://viasocket.com/)で作成してください。
+- **AIクライアント:** Claude、Cursor、ChatGPT、Windsurf、VS Code、またはMCP互換のクライアント。
+
+---
+
+## セットアップ
+
+<Steps>
+  <Step title="新しいクラスターを作成">
+    [ViaSocket Mushrooms](https://mushrooms.viasocket.com/)を開き、**+ New Cluster**をクリックします。ViaSocketは、このクラスターが接続するAIクライアントを選択するよう求めます。Claude、Cursor、ChatGPT、または使用するクライアントを選択してください。
+
+    ![ViaSocket New Clusterダイアログ — AIクライアントを選択、Claude、ChatGPT、Cursor、Windsurfなどを表示](/images/integrations/viasocket/step1.png)
+  </Step>
+
+  <Step title="統合をブラウズ">
+    クラスター内で、**+ BROWSE INTEGRATIONS**をクリックしてMushroomsライブラリを開きます。2,500以上のアプリのカタログで、AIにアクセスを提供できます。
+
+    ![ViaSocket MushroomsダッシュボードにAdd New MushroomとBrowse Integrationsボタンを表示](/images/integrations/viasocket/step2.png)
+  </Step>
+
+  <Step title="Olostepを見つける">
+    検索バーで**olostep**を検索します。結果から**Olostep**を選択します。
+
+    ![ViaSocket Mushroomsでolostepを検索 — 結果にOlostepが表示される](/images/integrations/viasocket/step3.png)
+  </Step>
+
+  <Step title="Olostepに接続">
+    Olostepの詳細ページで、**CONNECT TO OLOSTEP**をクリックしてアカウントを認証し、Olostepのアクションをクラスターに追加し始めます。
+
+    ![ViaSocketのOlostep詳細ページにConnect to get startedとCONNECT TO OLOSTEPボタンを表示](/images/integrations/viasocket/step4.png)
+  </Step>
+
+  <Step title="アクションを選択">
+    AIクライアントが使用できるOlostepアクションを選択します。デフォルトで全7つが有効になっています。必要ないものはオフにしてから、**NEXT**をクリックします。
+
+    ![ViaSocketのOlostep Select Actions画面に7つの利用可能なアクションとトグルスイッチを表示](/images/integrations/viasocket/step5.png)
+  </Step>
+
+  <Step title="Olostep APIキーを入力">
+    Olostep APIキーを**API Key**フィールドに貼り付け、**ADD CONNECTION**をクリックします。ViaSocketはキーを確認し、資格情報を保存します。
+
+    ![ViaSocketのOlostep用Add New Connection画面にAPI Key入力フィールドを表示](/images/integrations/viasocket/step6.png)
+
+    キーは[Olostepダッシュボード →](https://olostep.com/dashboard)から取得してください。
+  </Step>
+
+  <Step title="MCPエンドポイントをコピーしてAIクライアントに接続">
+    Olostepはクラスター内で有効なMushroomとして表示されます。**Cursor Configuration**パネルから**MCP Endpoint URL**（または完全なJSON構成ブロック）をコピーし、AIクライアントのMCP設定ファイルに貼り付けます。
+
+    ![ViaSocketクラスターにOlostepが有効で、MCPエンドポイントURLとJSON構成がコピー可能であることを表示](/images/integrations/viasocket/step7.png)
+
+    構成は次のようになります — AIクライアントの設定に貼り付けてください：
+
+    ```json
+    {
+      "mcpServers": {
+        "viasocket": {
+          "type": "http",
+          "url": "https://mcp.viasocket.com/mcp/<YOUR-CLUSTER-ID>"
+        }
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## アクション
+
+<CardGroup cols={2}>
+  <Card title="ウェブサイトをスクレイピング" icon="file-lines">
+    任意のURLからMarkdown、HTML、JSON、またはプレーンテキストとしてコンテンツを取得します。JSレンダリングされたページをオプションの待機時間と国ターゲティングで処理します。
+  </Card>
+
+  <Card title="AI回答を生成" icon="sparkles">
+    自然言語の質問をして、提供したページやライブウェブ検索に基づいた引用付きの回答を得ます。
+  </Card>
+
+  <Card title="バッチURLスクレイパー" icon="layer-group">
+    1つのジョブで最大100,000のURLを提出し、並行して処理します。非同期取得用の`batch_id`を返します。
+  </Card>
+
+  <Card title="バッチアイテムを取得" icon="download">
+    `batch_id`を使用して完了したバッチジョブの結果を取得します。
+  </Card>
+
+  <Card title="クロールを開始" icon="spider-web">
+    シードURLから開始し、リンクをたどり、すべてのサブページをスクレイピングします。`crawl_id`を返します。
+  </Card>
+
+  <Card title="クロール情報を取得" icon="circle-info">
+    `crawl_id`で実行中または完了したクロールのステータスを確認し、結果を取得します。
+  </Card>
+
+  <Card title="マップを作成" icon="map">
+    コンテンツをスクレイピングせずにサイト上のすべてのURLを取得します。バッチジョブの前の発見に便利です。
+  </Card>
+</CardGroup>
+
+---
+
+## 例: Claudeに競合他社を調査させる
+
+ClaudeにMCPエンドポイントを設定したら、次のような平易な指示を出せます：
+
+> *"acme.com/pricingの価格ページをスクレイピングして、プランと価格の概要を教えてください。"*
+
+ClaudeはViaSocketを通じてOlostepの**ウェブサイトをスクレイピング**アクションを呼び出し、ページのコンテンツを返し、それを要約します — ワークフロービルダーもコードも不要です。
+
+同様にアクションを連鎖させることもできます：
+
+> *"docs.example.comのすべてのページをマップし、最初の50をバッチスクレイピングして、ナレッジベースの概要を作成してください。"*
+
+---
+
+## トラブルシューティング
+
+<AccordionGroup>
+  <Accordion title="APIキーが拒否される">
+    [olostep.com/dashboard](https://olostep.com/dashboard)から直接キーをコピーし、末尾にスペースがないことを確認してください。エラーが続く場合は、ViaSocketでOlostep接続を削除して再作成してください。
+  </Accordion>
+
+  <Accordion title="AIクライアントがOlostepツールを認識しない">
+    MCPエンドポイントURL（またはJSON構成ブロック）をAIクライアントの正しい設定ファイルに貼り付けたことを確認してください。Claude Desktopの場合は`claude_desktop_config.json`です。Cursorの場合はプロジェクト内またはグローバルCursor設定の`.cursor/mcp.json`です。保存後にクライアントを再起動してください。
+  </Accordion>
+
+  <Accordion title="スクレイピングされたコンテンツが空">
+    **ウェブサイトをスクレイピング**を呼び出す際に待機時間を増やします（JSが多いページには2000–5000msを試してください）。URLがログインなしで公開アクセス可能であることを確認してください。
+  </Accordion>
+
+  <Accordion title="MCPエンドポイントURLが変わり続ける">
+    エンドポイントURLはクラスターに結びついています。クラスターを削除して再作成すると、新しいURLが生成され、AIクライアントの構成を更新する必要があります。URLはプライベートに保ってください — 接続されたアカウントのすべてのアクションを認証します。
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 関連
+
+<CardGroup cols={2}>
+  <Card title="スクレイピングAPI" icon="file-lines" href="/features/scrapes">
+    スクレイピングエンドポイントの完全なリファレンス
+  </Card>
+
+  <Card title="バッチAPI" icon="layer-group" href="/features/batches">
+    バッチジョブの仕組みと結果の取得方法
+  </Card>
+
+  <Card title="クロールAPI" icon="spider-web" href="/features/crawls">
+    クロールの設定と結果の取得
+  </Card>
+
+  <Card title="マップAPI" icon="map" href="/features/maps">
+    URLの発見とフィルタリングオプション
+  </Card>
+
+  <Card title="MCPサーバー" icon="server" href="/integrations/mcp-server">
+    OlostepのネイティブMCPサーバーを直接使用
+  </Card>
+
+  <Card title="ViaSocketウェブサイト" icon="link" href="https://viasocket.com">
+    ViaSocketプラットフォーム
+  </Card>
+</CardGroup>

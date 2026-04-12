@@ -51,11 +51,11 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Noms de chemin URL en modèle glob à exclure. Par exemple : `/careers/**`. Les URLs exclues prévaudront sur les URLs incluses."
+                    "description": "Noms de chemin URL en modèle glob à exclure. Par exemple : `/careers/**`. Les URLs exclues auront la priorité sur les URLs incluses."
                   },
                   "max_pages": {
                     "type": "number",
-                    "description": "Nombre maximum de pages à crawler. Recommandé pour la plupart des cas d'utilisation comme crawler un site web entier."
+                    "description": "Nombre maximum de pages à crawler. Recommandé pour la plupart des cas d'utilisation comme le crawl d'un site web entier."
                   },
                   "max_depth": {
                     "type": "number",
@@ -80,7 +80,7 @@
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL HTTPS pour recevoir une requête POST lorsque le crawl est terminé. Doit être une URL publiquement accessible utilisant le protocole `http://` ou `https://`. Ne peut pas pointer vers localhost ou des adresses IP privées. Voir [Webhooks](/api-reference/common/webhooks) pour le format de la charge utile et le comportement de réessai."
+                    "description": "URL HTTPS pour recevoir une requête POST lorsque le crawl est terminé. Doit être une URL publiquement accessible utilisant le protocole `http://` ou `https://`. Ne peut pas pointer vers localhost ou des adresses IP privées. Voir [Webhooks](/api-reference/common/webhooks) pour le format de charge utile et le comportement de réessai."
                   },
                   "timeout": {
                     "type": "number",
@@ -88,7 +88,7 @@
                   },
                   "follow_robots_txt": {
                     "type": "boolean",
-                    "description": "Respecter les règles de robots.txt. Si réglé sur `false`, le crawler scrutera le site web indépendamment des directives de disallow de robots.txt. `true` par défaut.",
+                    "description": "Si les règles de robots.txt doivent être respectées. Si réglé sur `false`, le crawler scrutera le site web indépendamment des directives de désapprobation de robots.txt. `true` par défaut.",
                     "default": true
                   },
                   "scrape_options": {
@@ -115,7 +115,7 @@
                       },
                       "parser": {
                         "type": "string",
-                        "description": "Nom du parser à exécuter sur chaque page et produire une sortie `json` structurée (par exemple, `\"@olostep/extract-emails\"`). Ajoute automatiquement `json` à `formats` lorsqu'il est défini.",
+                        "description": "Nom du parser à exécuter sur chaque page pour produire une sortie `json` structurée (par exemple, `\"@olostep/extract-emails\"`). Ajoute automatiquement `json` aux `formats` lorsqu'il est défini.",
                         "example": "@olostep/extract-emails"
                       }
                     }
@@ -139,11 +139,11 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "ID de Crawl"
+                      "description": "ID du Crawl"
                     },
                     "object": {
                       "type": "string",
-                      "description": "Le type d'objet. \"crawl\" pour cet endpoint."
+                      "description": "Le type d'objet. \"crawl\" pour ce point de terminaison."
                     },
                     "status": {
                       "type": "string",
@@ -218,7 +218,7 @@
     "/v1/crawls/{crawl_id}": {
       "get": {
         "summary": "Récupérer les informations de crawl",
-        "description": "Récupère les informations sur un crawl spécifique en utilisant son `crawl_id`.",
+        "description": "Récupère des informations sur un crawl spécifique en utilisant son `crawl_id`.",
         "security": [
           {
             "Authorization": []
@@ -232,7 +232,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "L'ID du crawl pour lequel récupérer les informations."
+            "description": "L'ID du crawl pour lequel récupérer des informations."
           }
         ],
         "responses": {
@@ -245,11 +245,11 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "ID de Crawl"
+                      "description": "ID du Crawl"
                     },
                     "object": {
                       "type": "string",
-                      "description": "Le type d'objet. \"crawl\" pour cet endpoint."
+                      "description": "Le type d'objet. \"crawl\" pour ce point de terminaison."
                     },
                     "status": {
                       "type": "string",
@@ -368,7 +368,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Une requête de recherche optionnelle pour trier les résultats par pertinence. Utilise la `search_query` originale par défaut si fournie."
+            "description": "Une requête de recherche optionnelle pour trier les résultats par pertinence. Utilise la search_query originale par défaut si fournie."
           },
           {
             "name": "formats",
@@ -384,7 +384,7 @@
                 ]
               }
             },
-            "description": "**Obsolète :** Utilise l'endpoint `/retrieve` avec `retrieve_id`.  Tableau de formats à récupérer (par exemple, [\"html\", \"markdown\"])."
+            "description": "**Obsolète :** Utilise le point de terminaison `/retrieve` avec `retrieve_id`.  Tableau de formats à récupérer (par exemple, [\"html\", \"markdown\"])."
           }
         ],
         "responses": {
@@ -397,11 +397,11 @@
                   "properties": {
                     "crawl_id": {
                       "type": "string",
-                      "description": "ID de Crawl"
+                      "description": "ID du Crawl"
                     },
                     "object": {
                       "type": "string",
-                      "description": "Le type d'objet. \"crawl\" pour cet endpoint."
+                      "description": "Le type d'objet. \"crawl\" pour ce point de terminaison."
                     },
                     "status": {
                       "type": "string",
@@ -423,7 +423,7 @@
                           },
                           "retrieve_id": {
                             "type": "string",
-                            "description": "Pour récupérer le contenu depuis l'endpoint `/retrieve`"
+                            "description": "Pour récupérer du contenu depuis le point de terminaison `/retrieve`"
                           },
                           "url": {
                             "type": "string"
@@ -463,7 +463,7 @@
                     },
                     "cursor": {
                       "type": "integer",
-                      "description": "À passer dans la requête suivante pour obtenir les prochains éléments."
+                      "description": "À passer dans la requête suivante pour obtenir les éléments suivants."
                     }
                   }
                 }

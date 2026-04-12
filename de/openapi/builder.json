@@ -25,7 +25,7 @@
     "/olostep-p2p-incomingAPI": {
       "get": {
         "summary": "Starte das Scraping von Webseiten mit verschiedenen Konfigurationen",
-        "description": "Dieser Endpunkt ermöglicht es dir, Webseiten mit verschiedenen Optionen zu scrapen, wie z.B. das Setzen von Timeouts, Wartezeit vor dem Scraping, Datenformatpräferenzen und mehr.",
+        "description": "Dieser Endpunkt ermöglicht es Nutzern, Webseiten mit verschiedenen Optionen zu scrapen, wie z.B. das Setzen von Timeouts, Wartezeit vor dem Scraping, Datenformatpräferenzen und mehr.",
         "servers": [
           {
             "url": "https://agent.olostep.com"
@@ -61,7 +61,7 @@
             "name": "waitBeforeScraping",
             "in": "query",
             "required": false,
-            "description": "Zeit in Sekunden, die vor dem Start des Scrapings gewartet werden soll, bis zu 500 Sekunden.",
+            "description": "Zeit in Sekunden, die gewartet werden soll, bevor das Scraping beginnt, bis zu 500 Sekunden.",
             "schema": {
               "type": "integer",
               "default": 3
@@ -194,7 +194,7 @@
                         "enum": [
                           "click"
                         ],
-                        "description": "Auf ein Element klicken"
+                        "description": "Klicke auf ein Element"
                       },
                       "selector": {
                         "type": "string",
@@ -273,7 +273,7 @@
             "description": "Schlechte Anfrage aufgrund falscher oder fehlender Parameter."
           },
           "401": {
-            "description": "Unbefugter Zugriff aufgrund eines fehlenden oder ungültigen API-Tokens."
+            "description": "Unautorisierter Zugriff aufgrund eines fehlenden oder ungültigen API-Tokens."
           },
           "500": {
             "description": "Interner Serverfehler."

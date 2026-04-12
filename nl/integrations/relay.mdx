@@ -1,553 +1,185 @@
 ---
-sidebarTitle: "Relay"
-icon: "bolt"
-title: "Relay-integratie"
-description: "Automatiseer webzoekopdrachten, scraping en crawling met Relay.app’s moderne workflowbouwer met ingebouwde AI en menselijke-in-de-lus functionaliteit"
+sidebarTitle: "Olostep + Relay"
+title: "Olostep + Relay"
+description: "Voeg web scraping, AI-gestuurde research, batch jobs, crawls en site maps toe aan elke Relay workflow, zonder code."
 ---
 
-De Olostep Relay.app-integratie brengt krachtige web scraping-mogelijkheden naar Relay's moderne automatiseringsplatform. Bouw geautomatiseerde workflows die webgegevens extraheren, monitoren en verwerken met Relay's gebruiksvriendelijke interface en geavanceerde functies zoals ingebouwde AI en menselijke-in-de-lus functionaliteit.
+De geverifieerde [Olostep app op Relay](https://www.relay.app/apps/olostep/integrations) biedt je twee acties binnen de visuele builder van Relay: een URL scrapen of alle links op een site in kaart brengen.
 
-[Begin met Olostep op Relay.app →](https://www.relay.app/apps/olostep/integrations)
+[Bekijk op Relay →](https://www.relay.app/apps/olostep/integrations)
 
-## Functies
+## Voordat je begint
 
-Relay.app biedt een moderne automatiseringservaring met diepe integraties en krachtige workflowmogelijkheden:
+- **Een Olostep-account met een API-sleutel:** [krijg er gratis een](https://olostep.com/dashboard), geen creditcard vereist. Je eerste 500 credits zijn inbegrepen.
+- **Een Relay-account:** maak er een aan op [relay.app](https://www.relay.app/).
+- **Geen codering vereist:** alles in deze gids wordt gedaan via de visuele editor van Relay.
 
-<CardGroup cols={2}>
-  <Card title="Diepe Integraties" icon="link">
-    Uitgebreide en gebruiksvriendelijke integraties met tal van applicaties voor naadloze workflowautomatisering
-  </Card>
-  
-  <Card title="Ingebouwde AI" icon="brain">
-    Ingebouwde AI-functies om besluitvorming te verbeteren en taken te automatiseren die menselijk begrip vereisen
-  </Card>
-  
-  <Card title="Menselijke-in-de-Lus" icon="users">
-    Voeg handmatige stappen toe voor taken die menselijk oordeel vereisen, wat flexibiliteit en kwaliteitscontrole garandeert
-  </Card>
-  
-  <Card title="Krachtige Workflows" icon="workflow">
-    Rijke workflow-essentials inclusief voorwaardelijke logica, foutafhandeling en parallelle verwerking
-  </Card>
-</CardGroup>
+---
 
 ## Installatie
 
-### 1. Vind Olostep in Relay.app
+<Steps>
+  <Step title="Vind Olostep in Relay">
+    Open een workflow in Relay, voeg een stap toe en zoek naar **Olostep**. Selecteer **Olostep** uit de applijst.
 
-Zoek naar "Olostep" in Relay.app bij het maken van een nieuwe workflow:
+    ![Placeholder: Zoek naar Olostep in Relay app kiezer](/images/integrations/relay/step-1.png)
+  </Step>
 
-1. Ga naar [Olostep op Relay.app](https://www.relay.app/apps/olostep/integrations)
-2. Klik op "Start gratis" of "Maak Workflow"
-3. Zoek naar "Olostep" in de app-selector
-4. Selecteer de Olostep-app
+  <Step title="Kies een actie">
+    Na het selecteren van **Olostep**, kies je een van de beschikbare Olostep-acties in de stapconfiguratie.
 
-Je kunt ook direct de [Olostep-integratiepagina](https://www.relay.app/apps/olostep/integrations) bezoeken om beschikbare acties te bekijken en je eerste workflow te maken.
+    ![Placeholder: Olostep actieselector in Relay](/images/integrations/relay/step-2.png)
+  </Step>
 
-### 2. Verbind je account
+  <Step title="Verbind je account">
+    Klik op **Account verbinden**, plak je Olostep API-sleutel en autoriseer de verbinding. Relay zal dit account opslaan voor toekomstige workflows.
 
-Wanneer je Olostep voor het eerst gebruikt in een workflow, word je gevraagd om je account te verbinden:
+    ![Placeholder: Relay account verbindingsmodal met Olostep API-sleuterveld](/images/integrations/relay/step-3.png)
 
-1. Klik op "Verbind Olostep"
-2. Voer je Olostep API-sleutel in
-3. Autoriseer de verbinding
+    Haal je sleutel van het [Olostep dashboard →](https://olostep.com/dashboard)
+  </Step>
 
-Haal je API-sleutel van het [Olostep Dashboard](https://olostep.com/dashboard).
+  <Step title="Configureer Scrape Website (URL + formaat)">
+    - **URL om te scrapen:** kaart van een vorige stap of voer handmatig in
+    - **Uitvoerformaat:** kies `Markdown`, `HTML`, `JSON`, of `Text`
 
-## Beschikbare Acties
+    ![Placeholder: Relay Olostep Scrape Website velden met URL en uitvoerformaat](/images/integrations/relay/step-4.png)
+  </Step>
 
-### URL Scrapen
+  <Step title="Test en publiceer">
+    Voer een test uit om de uitvoer te verifiëren, publiceer of schakel de workflow in zodra de resultaten correct zijn.
 
-Extraheer inhoud van een enkele URL. Ondersteunt meerdere formaten en JavaScript-rendering.
+    ![Placeholder: Relay testuitvoer en publiceer flow](/images/integrations/relay/step-5.png)
+  </Step>
+</Steps>
 
-**Gebruiksscenario's:**
-- Monitor specifieke pagina's op wijzigingen
-- Extraheer productinformatie van e-commerce sites
-- Verzamel gegevens van nieuwsartikelen of blogposts
-- Haal inhoud op voor contentaggregatie
+---
 
-**Configuratie:**
+## Acties
 
-<ParamField path="URL" type="string" required>
-  Website-URL om te scrapen (moet http:// of https:// bevatten)
-</ParamField>
+<CardGroup cols={2}>
+  <Card title="Scrape Website" icon="file-lines">
+    Haal content van elke URL als Markdown, HTML, JSON of platte tekst. Behandelt JS-gerenderde pagina's met optionele wachttijden en landgerichte targeting.
+  </Card>
 
-<ParamField path="Format" type="dropdown" default="Markdown">
-  Kies formaat: Markdown, HTML, JSON of Plain Text
-</ParamField>
+  <Card title="Maak Kaart" icon="map">
+    Verkrijg elke URL op een site zonder content te scrapen. Gebruik het voor ontdekking voorafgaand aan een batch job. Geeft een `map_id` terug.
+  </Card>
+</CardGroup>
 
-<ParamField path="Country Code" type="string">
-  Landcode voor locatie-specifieke inhoud (bijv. "US", "GB", "CA")
-</ParamField>
+<Note>
+  **Kaart is asynchroon.** Sla de geretourneerde `map_id` op en gebruik een vertraging/poll-patroon in Relay om resultaten op te halen zodra de verwerking is voltooid.
+</Note>
 
-<ParamField path="Wait Before Scraping" type="integer">
-  Wachttijd in milliseconden voor JavaScript-rendering (0-10000)
-</ParamField>
+---
 
-<ParamField path="Parser" type="string">
-  Optionele parser-ID voor gespecialiseerde extractie (bijv. "@olostep/amazon-product")
-</ParamField>
+## Voorbeeld workflow: Geplande concurrentiepagina scrape
 
-**Uitvoer Velden:**
-- Scrape ID
-- Gescrapete URL
-- Markdown Inhoud
-- HTML Inhoud
-- JSON Inhoud
-- Tekst Inhoud
-- Status
-- Tijdstempel
-- Screenshot URL (indien beschikbaar)
-- Paginametadata
+**Wat het doet:** Op een schema scrapt deze workflow een concurrentiepagina en slaat schone content op die je kunt hergebruiken in downstream Relay-stappen.
 
-**Voorbeeld Workflows:**
+**Gebruikte knooppunten:** Schema -> Olostep Scrape Website
 
-<AccordionGroup>
-  <Accordion title="Concurrentieprijs Monitoring">
-    **Trigger:** Schema (Elke dag om 9 uur)
+![Placeholder: Relay canvas met schema en Olostep scrape stappen](/images/integrations/relay/workflow-example.png)
 
-    **Actie:** Olostep - URL Scrapen
-    - URL: Concurrent productpagina
-    - Formaat: JSON
-    - Parser: @olostep/amazon-product
+---
 
-    **Actie:** Google Sheets - Rij Maken
-    - Voeg prijsgegevens toe aan volgspreadsheet
+### Stap 1: Voeg een schema-trigger toe
 
-    **Menselijke-in-de-Lus:** Beoordeel prijswijzigingen
-    - Keur significante prijsdalingen goed
+Maak een workflow en voeg een schema-trigger toe (bijvoorbeeld elke werkdag om 8 uur 's ochtends).
 
-    **Actie:** Slack - Stuur Bericht
-    - Waarschuw team over goedgekeurde prijswijzigingen
-  </Accordion>
+### Stap 2: Voeg Olostep Scrape Website toe
 
-  <Accordion title="Blogposts Extracteren en Opslaan">
-    **Trigger:** RSS Feed - Nieuw Item
+Voeg een **Olostep** stap toe en selecteer **Scrape Website**. Stel in:
+- **URL:** `https://competitor.com/blog`
+- **Uitvoerformaat:** Markdown
 
-    **Actie:** Olostep - URL Scrapen
-    - URL: \{\{Post URL\}\}
-    - Formaat: Markdown
+### Stap 3: Test en publiceer
 
-    **Actie:** Notion - Pagina Maken
-    - Sla artikelinhoud op in Notion-database
-  </Accordion>
+Voer een test uit om de uitvoer te bevestigen, publiceer of schakel de workflow in.
 
-  <Accordion title="Leadverrijking met AI">
-    **Trigger:** Google Sheets - Nieuwe Rij
-
-    **Actie:** Olostep - URL Scrapen
-    - URL: Bedrijfssite van sheet
-    - Formaat: Markdown
-
-    **AI Actie:** OpenAI - Gegevens Extraheren
-    - Extraheer: bedrijfsomvang, industrie, producten
-
-    **Actie:** Google Sheets - Rij Bijwerken
-    - Voeg verrijkte gegevens terug aan sheet
-  </Accordion>
-</AccordionGroup>
-
-## Voordelen van Relay.app
-
-Relay.app biedt verschillende voordelen ten opzichte van traditionele automatiseringsplatforms:
-
-### Menselijke-in-de-Lus Workflows
-
-Voeg handmatige beoordelingsstappen direct toe in je workflows:
-
-```
-1. Olostep scrapt website
-2. Menselijke Beoordelingsstap ← Beoordeel en keur gegevens goed
-3. Sla op in database alleen als goedgekeurd
-```
-
-Perfect voor:
-- Kwaliteitscontrole voordat gegevens worden verwerkt
-- Menselijk oordeel over geëxtraheerde inhoud
-- Goedkeuringsworkflows voor gevoelige gegevens
-- Beoordeel AI-gegenereerde samenvattingen
-
-### Ingebouwde AI-functies
-
-Gebruik AI direct in je workflows zonder externe integraties:
-
-- **AI Besluitvorming**: Laat AI workflowpaden bepalen op basis van gescrapete inhoud
-- **Slim Filteren**: Filter en categoriseer gescrapete gegevens automatisch
-- **Inhoudssamenvatting**: Vat lange artikelen samen voordat ze worden opgeslagen
-- **Gegevens Extractie**: Gebruik AI om gestructureerde gegevens uit ongestructureerde inhoud te halen
-
-### Betere UX en Testen
-
-Relay.app's gebruiksvriendelijke interface maakt het bouwen van workflows eenvoudiger:
-
-- Duidelijke testinformatie
-- Nuttige foutmeldingen
-- Visuele workflowbouwer
-- Eenvoudig debuggen en probleemoplossen
-
-## Populaire Workflow Voorbeelden
-
-### E-commerce Prijs Monitoring met Beoordeling
-
-Monitor concurrentieprijzen met menselijke goedkeuring:
-
-```
-Trigger: Schema (Elk uur)
-↓
-Actie: Olostep - URL Scrapen
-  - URL: Concurrent productpagina
-  - Formaat: JSON
-  - Parser: @olostep/amazon-product
-↓
-Menselijke Beoordelingsstap
-  - Beoordeel prijswijziging
-  - Keur goed of af
-↓
-Actie: Slack - Stuur Bericht (Indien goedgekeurd)
-  - Waarschuwing: "Prijs veranderd naar $\{\{prijs\}\}"
-```
-
-### Content Aggregatie met AI
-
-Aggregate en verbeter inhoud van meerdere bronnen:
-
-```
-Trigger: Google Sheets - Nieuwe Rij
-↓
-Actie: Olostep - URL Scrapen
-  - URL: \{\{URL van sheet\}\}
-  - Formaat: Markdown
-↓
-AI Actie: Inhoud Samenvatten
-  - Genereer samenvatting
-↓
-Actie: Airtable - Record Maken
-  - Sla artikel op met AI-samenvatting
-```
-
-### Lead Verrijking Pipeline
-
-Verrijk leadgegevens met webinformatie en AI:
-
-```
-Trigger: HubSpot - Nieuw Contact
-↓
-Actie: Olostep - URL Scrapen
-  - URL: \{\{Bedrijfssite\}\}
-  - Formaat: Markdown
-↓
-AI Actie: Bedrijfsinformatie Extraheren
-  - Extraheer: bedrijfsomvang, industrie, producten
-↓
-Menselijke Beoordelingsstap
-  - Verifieer AI-extractie nauwkeurigheid
-↓
-Actie: HubSpot - Contact Bijwerken
-  - Voeg geverifieerde verrijkte gegevens toe
-```
-
-## Integratie met Populaire Apps
-
-### Google Sheets
-
-Perfect voor gegevensverzameling en tracking:
-
-```
-1. Olostep scrapt website
-2. AI - Verwerk en formatteer gegevens
-3. Menselijke Beoordeling (optioneel)
-4. Google Sheets - Maak/Bewerk Rij
-```
-
-**Gebruiksscenario's:**
-- Prijsvolgspreadsheets
-- Leadverrijkingsdatabases
-- Inhoudsinventaris
-- Concurrentieanalysesheets
-
-### Airtable
-
-Bouw krachtige databases met gescrapete gegevens:
-
-```
-1. Olostep scrapt of crawlt
-2. AI - Extraheer gestructureerde gegevens
-3. Airtable - Maak Records
-```
-
-**Gebruiksscenario's:**
-- Productcatalogi
-- Onderzoeksdatabases
-- Inhoudskalenders
-- Linkdatabases
-
-### Slack
-
-Krijg directe meldingen met goedkeuringsworkflows:
-
-```
-1. Olostep monitort pagina
-2. Filter - Controleer op wijzigingen
-3. Menselijke Goedkeuringsstap
-4. Slack - Stuur Bericht (indien goedgekeurd)
-```
-
-**Gebruiksscenario's:**
-- Prijsdaling waarschuwingen (met goedkeuring)
-- Inhoudsupdate meldingen
-- Foutmonitoring
-- Dagelijkse samenvattingen
-
-### HubSpot / Salesforce
-
-Verrijk CRM-gegevens automatisch:
-
-```
-1. Nieuw contact toegevoegd
-2. Olostep scrapt bedrijfssite
-3. AI extraheert belangrijke info
-4. Menselijke Beoordelingsstap
-5. CRM - Update contact (indien goedgekeurd)
-```
-
-**Gebruiksscenario's:**
-- Leadverrijking met kwaliteitscontrole
-- Bedrijfsonderzoek
-- Concurrentie-intelligentie
-- Accountmapping
-
-### Notion
-
-Bouw kennisbanken met beoordeelde inhoud:
-
-```
-1. Olostep crawlt documentatie
-2. AI - Parse en structureer inhoud
-3. Menselijke Beoordelingsstap
-4. Notion - Maak Pagina's (goedgekeurde inhoud)
-```
-
-**Gebruiksscenario's:**
-- Documentatiespiegels
-- Onderzoeksarchieven
-- Inhoudsbibliotheken
-- Teamwiki's
-
-## Beste Praktijken
-
-<AccordionGroup>
-  <Accordion title="Gebruik Menselijke-in-de-Lus voor Kwaliteitscontrole">
-    Maak gebruik van Relay.app's menselijke-in-de-lus functie voor:
-    - Beoordelen van AI-gegenereerde samenvattingen
-    - Goedkeuren van gevoelige gegevens voordat ze worden opgeslagen
-    - Valideren van de nauwkeurigheid van gescrapete inhoud
-    - Het maken van oordeelsbeslissingen over workflowpaden
-  </Accordion>
-
-  <Accordion title="Combineer met Ingebouwde AI">
-    Gebruik Relay.app's ingebouwde AI-functies:
-    - Categoriseer gescrapete inhoud automatisch
-    - Genereer samenvattingen voordat ze worden opgeslagen
-    - Extraheer gestructureerde gegevens uit ongestructureerde inhoud
-    - Maak slimme beslissingen in workflows
-  </Accordion>
-
-  <Accordion title="Stel Passende Wachttijden In">
-    Voor JavaScript-zware sites, gebruik de "Wacht Voor Scrapen" parameter:
-    - Eenvoudige sites: 0-1000ms
-    - Dynamische sites: 2000-3000ms
-    - Zware JavaScript: 5000-8000ms
-    
-    Test met verschillende waarden om de optimale wachttijd te vinden.
-  </Accordion>
-
-  <Accordion title="Gebruik Gespecialiseerde Parsers">
-    Voor populaire websites (Amazon, LinkedIn, Google), gebruik vooraf gebouwde parsers:
-    - Krijg automatisch gestructureerde gegevens
-    - Betrouwbaardere extractie
-    - Geen noodzaak voor aangepaste parsing
-    - Onderhouden door Olostep
-  </Accordion>
-
-  <Accordion title="Maak Gebruik van Relay.app's Testmogelijkheden">
-    Gebruik Relay.app's uitstekende testmogelijkheden:
-    - Duidelijke testinformatie voor elke stap
-    - Nuttige foutmeldingen
-    - Eenvoudig debuggen
-    - Test workflows voordat je ze activeert
-  </Accordion>
-
-  <Accordion title="Sla Resultaten Correct Op">
-    Kies de juiste opslag op basis van je behoeften:
-    - **Google Sheets**: Eenvoudige tracking, team samenwerking
-    - **Airtable**: Relationele gegevens, rijke opmaak
-    - **Database**: Grootschalig, complexe queries
-    - **Notion**: Kennisbank, documentatie
-  </Accordion>
-</AccordionGroup>
-
-## Veelvoorkomende Gebruiksscenario's per Industrie
-
-### E-commerce
-- **Prijs Monitoring**: Volg concurrentieprijzen met menselijke goedkeuringsworkflows
-- **Productonderzoek**: Ontdek trending producten en marktkansen
-- **Voorraadvolging**: Monitor voorraadbeschikbaarheid
-- **Beoordelingsanalyse**: Verzamel en analyseer klantbeoordelingen met AI
-
-### Marketing & SEO
-- **Inhoudsontdekking**: Vind inhoudsmogelijkheden met AI-assistentie
-- **Concurrentieanalyse**: Volg concurrentiestrategieën
-- **Backlink Onderzoek**: Ontdek linkmogelijkheden
-- **Trefwoordonderzoek**: Extraheer trefwoordgegevens uit zoekresultaten
-
-### Verkoop & Leadgeneratie
-- **Leadverrijking**: Verbeter CRM-gegevens met webinformatie en menselijke beoordeling
-- **Bedrijfsonderzoek**: Verzamel bedrijfsinformatie
-- **Contactontdekking**: Vind besluitvormers
-- **Concurrentie-intelligentie**: Volg concurrentiebewegingen
-
-### Onderzoek & Analyse
-- **Gegevensverzameling**: Verzamel gegevens van meerdere bronnen
-- **Marktonderzoek**: Volg industrietrends
-- **Academisch Onderzoek**: Verzamel onderzoeksgegevens
-- **Prijsintelligentie**: Analyseer prijsstrategieën
-
-### Media & Publicatie
-- **Content Aggregatie**: Curate inhoud van meerdere sites met AI-samenvattingen
-- **Nieuwsmonitoring**: Volg nieuws en vermeldingen
-- **Social Media**: Monitor sociale platforms
-- **Trenddetectie**: Identificeer trending onderwerpen
-
-## Problemen Oplossen
-
-<AccordionGroup>
-  <Accordion title="Authenticatie Mislukt">
-    **Fout**: "Ongeldige API-sleutel"
-    
-    **Oplossingen**:
-    - Controleer API-sleutel van [dashboard](https://olostep.com/dashboard)
-    - Zorg ervoor dat er geen extra spaties in de API-sleutel staan
-    - Verbind je Olostep-account opnieuw in Relay.app
-    - Verifieer dat de API-sleutel actief is
-  </Accordion>
-
-  <Accordion title="Scrape Geeft Lege Inhoud Terug">
-    **Fout**: Inhoudsvelden zijn leeg
-    
-    **Oplossingen**:
-    - Verhoog de "Wacht Voor Scrapen" tijd
-    - Controleer of de website inloggen vereist
-    - Probeer een ander formaat (HTML vs Markdown)
-    - Verifieer dat de URL toegankelijk is
-    - Controleer of de site geautomatiseerde toegang blokkeert
-  </Accordion>
-
-  <Accordion title="Limiet Overschreden">
-    **Fout**: "Limiet overschreden"
-    
-    **Oplossingen**:
-    - Spreid workflowuitvoeringen met vertragingen
-    - Gebruik batchverwerking in plaats van individuele scrapes
-    - Upgrade je Olostep-plan
-    - Controleer limiet in dashboard
-  </Accordion>
-
-  <Accordion title="URL Niet Gescrapet">
-    **Fout**: Specifieke URL's falen bij scrapen
-    
-    **Oplossingen**:
-    - Verifieer URL-formaat (inclusief http:// of https://)
-    - Controleer of URL authenticatie vereist
-    - Test URL eerst in browser
-    - Probeer met landparameter
-    - Neem contact op met ondersteuning voor geblokkeerde domeinen
-  </Accordion>
-</AccordionGroup>
+### Wat je krijgt
+
+Elke run produceert schone pagina-inhoud klaar voor analyse of routering:
+
+> **Scrape Resultaat**
+> - Bron-URL
+> - Opgehaalde inhoud in je geselecteerde formaat
+> - Tijdsbestempelde run-uitvoer in Relay
+
+---
+
+## Parsers
+
+Voeg een parser-ID toe aan het **Parser** veld op de Scrape-actie om gestructureerde data te krijgen in plaats van ruwe inhoud:
+
+| Parser | Extraheert |
+|--------|------------|
+| `@olostep/amazon-product` | Titel, prijs, beoordeling, reviews, afbeeldingen, varianten |
+| `@olostep/google-search` | Resultaten titels, URL's, snippets |
+| `@olostep/google-maps` | Bedrijfsnaam, adres, beoordeling, reviews |
+| `@olostep/extract-emails` | E-mailadressen van elke pagina |
+| `@olostep/extract-socials` | Social profiel links (X, GitHub, LinkedIn, etc.) |
+| `@olostep/extract-calendars` | Google Calendar en ICS links |
+
+Bekijk de volledige lijst in de [Olostep parser store →](https://www.olostep.com/store)
+
+---
 
 ## Relay.app vs Zapier
 
-Relay.app is een modern alternatief voor Zapier met verschillende voordelen:
+Relay.app is een sterk alternatief voor Zapier voor workflows die ingebouwde beoordeling en AI-eerste orkestratie nodig hebben.
 
 **Voordelen van Relay.app:**
-- **Menselijke-in-de-Lus**: Ingebouwde handmatige beoordelingsstappen
-- **Ingebouwde AI**: AI-functies geïntegreerd in workflows
-- **Betere UX**: Meer intuïtieve interface en duidelijkere foutmeldingen
-- **Betere Prijsstelling**: Kosteneffectiever voor veel gebruiksscenario's
-- **Diepere Integraties**: Meer uitgebreide integraties met populaire apps
+- **Mens-in-de-lus:** native goedkeurings- en beoordelingsstappen in de workflow
+- **AI-eerste workflowontwerp:** gemakkelijker om AI-beslissingen en samenvattingen toe te voegen als eersteklas stappen
+- **Workflow duidelijkheid:** schone visuele builder met duidelijke runcontext en stapuitvoeren
 
-**Wanneer te kiezen voor Zapier:**
-- Nodig integratie met minder vaak gebruikte apps
-- Geef de voorkeur aan een meer gevestigd platform
-- Vereist specifieke Zapier-only functies
+**Wanneer Zapier beter kan zijn:**
+- Je hebt dekking nodig voor een niche-app die alleen op Zapier beschikbaar is
+- Je team heeft al veel bestaande Zaps en operationele tooling rond Zapier
 
-Voor gedetailleerde vergelijkingen, zie [Relay.app's Zapier vergelijking](https://www.relay.app/blog/zapier-alternatives).
+Als beide platforms je stack ondersteunen, kies dan Relay wanneer beoordeling + AI-samenwerking centraal staan in je proces.
 
-## Prijsstelling
+---
 
-Olostep rekent op basis van API-gebruik, onafhankelijk van Relay.app:
+## Probleemoplossing
 
-- **Scrapes**: Betaal per scrape
-- **Batches**: Betaal per URL in batch
-- **Crawls**: Betaal per gecrawlde pagina
-- **Maps**: Betaal per mapoperatie
+<AccordionGroup>
+  <Accordion title="API-sleutel afgewezen">
+    Kopieer de sleutel direct van [olostep.com/dashboard](https://olostep.com/dashboard) zonder spaties aan het einde. Verbind het Olostep-account opnieuw in Relay als de fout aanhoudt.
+  </Accordion>
 
-Bekijk de huidige prijsstelling op [olostep.com/pricing](https://olostep.com/pricing).
+  <Accordion title="Gescraapte inhoud is leeg">
+    Verhoog **Wacht Voor Scrapen** (probeer 2000–5000ms voor JS-zware pagina's). Bevestig dat de URL openbaar toegankelijk is zonder inloggen. Als één domein consequent faalt, neem contact op met [info@olostep.com](mailto:info@olostep.com).
+  </Accordion>
 
-**Relay.app Plan**: Je hebt ook een actief Relay.app-plan nodig om workflows uit te voeren.
+  <Accordion title="Limiet bereikt">
+    Voeg vertragingen toe tussen scrape-intensieve runs en probeer opnieuw met backoff voor grote workflows. Controleer het huidige gebruik in het [dashboard](https://olostep.com/dashboard).
+  </Accordion>
 
-## Ondersteuning
+  <Accordion title="Kaartstap duurt langer dan verwacht">
+    Kaarten zijn asynchroon. Sla eerst de geretourneerde `map_id` op, en haal resultaten op in een latere stap/run zodra de verwerking is voltooid.
+  </Accordion>
+</AccordionGroup>
 
-Hulp nodig met de Relay.app-integratie?
+---
 
-<CardGroup cols={2}>
-  <Card title="Documentatie" icon="book" href="https://docs.olostep.com">
-    Blader door de volledige API-documentatie
-  </Card>
-  
-  <Card title="Ondersteuning Email" icon="envelope" href="mailto:info@olostep.com">
-    Email: info@olostep.com
-  </Card>
-  
-  <Card title="Relay.app Helpcentrum" icon="help-circle" href="https://help.relay.app">
-    Bezoek Relay.app's helpcentrum
-  </Card>
-  
-</CardGroup>
-
-## Gerelateerde Bronnen
+## Gerelateerd
 
 <CardGroup cols={2}>
   <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    Leer meer over de Scrapes endpoint
+    Volledige referentie voor het scrape-eindpunt
   </Card>
-  
+
   <Card title="Batches API" icon="layer-group" href="/features/batches">
-    Leer meer over de Batches endpoint
+    Hoe batch jobs werken en hoe resultaten op te halen
   </Card>
-  
+
   <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    Leer meer over de Crawls endpoint
+    Crawlconfiguratie en resultaatophaling
   </Card>
-  
+
   <Card title="Maps API" icon="map" href="/features/maps">
-    Leer meer over de Maps endpoint
-  </Card>
-  
-  <Card title="Python SDK" icon="python" href="/sdks/python">
-    Gebruik Olostep met Python
-  </Card>
-  
-  <Card title="Zapier Integratie" icon="bolt" href="/integrations/zapier">
-    Vergelijk met Zapier-integratie
+    URL-ontdekking en filteropties
   </Card>
 </CardGroup>
-
-## Aan de Slag
-
-Klaar om je web scraping-workflows te automatiseren met Relay.app?
-
-<Card title="Maak Je Eerste Workflow" icon="bolt" href="https://www.relay.app/apps/olostep/integrations">
-  Begin met het bouwen van geautomatiseerde workflows met Olostep en Relay.app
-</Card>
-
-Verbind Olostep met Relay.app's moderne automatiseringsplatform en automatiseer vandaag nog je webgegevens-extractie!

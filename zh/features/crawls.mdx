@@ -5,14 +5,14 @@ description: "抓取一个URL并获取所有子页面的内容"
 icon: "spider"
 ---
 
-通过 Olostep 的 `/v1/crawls` 端点，你可以抓取一个网站，并获取所有页面的内容。
+通过 Olostep 的 `/v1/crawls` 端点，你可以抓取一个网站并获取所有页面的内容。
 
-- 抓取一个网站并获取所有子页面的内容（或限制抓取深度）
+- 抓取一个网站并获取所有子页面的内容（或限制抓取的深度）
 - 使用特殊模式抓取特定页面（例如 `/blog/**`）
 - 传递一个 `webhook_url` 以在抓取完成时收到通知
-- 搜索查询以仅找到特定页面并按相关性排序
+- 搜索查询以仅查找特定页面并按相关性排序
 
-有关 API 详细信息，请参阅 [抓取端点 API 参考](/api-reference/crawls/create)。
+有关API详细信息，请参阅 [抓取端点API参考](/api-reference/crawls/create)。
 
 ## 安装
 
@@ -27,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl 在 macOS、Linux 和 Windows 上默认可用
 ```
 
 ```javascript Node (API)
@@ -42,7 +42,7 @@ pip install requests
 
 ## 开始抓取
 
-提供起始 URL，包含/排除 URL 模式，以及 `max_pages`。可选项：`max_depth`、`include_external`、`include_subdomain`、`search_query`、`top_n`、`webhook_url`、`timeout`。
+提供起始URL，包含/排除URL通配符，以及 `max_pages`。可选：`max_depth`、`include_external`、`include_subdomain`、`search_query`、`top_n`、`webhook_url`、`timeout`。
 
 <CodeGroup>
 
@@ -130,7 +130,7 @@ print(json.dumps(crawl, indent=2))
 
 </CodeGroup>
 
-由于 Olostep 中的所有内容都是对象，你将收到一个 `crawl` 对象作为响应。`crawl` 对象有一些属性，比如 `id` 和 `status`，你可以用来跟踪抓取。
+由于 Olostep 中的所有内容都是对象，你将收到一个 `crawl` 对象作为响应。`crawl` 对象有一些属性，如 `id` 和 `status`，你可以用来跟踪抓取。
 
 ## 检查抓取状态
 
@@ -139,20 +139,20 @@ print(json.dumps(crawl, indent=2))
 <CodeGroup>
 
 ```python Python
-# Using the crawl object from the previous step
+# 使用上一步的 crawl 对象
 info = crawl.info()
 print(info.status, info.pages_count)
 
-# Or wait until completed
+# 或等待直到完成
 crawl.wait_till_done(check_every_n_secs=5)
 ```
 
 ```js Node
-// Using the crawl object from the previous step
+// 使用上一步的 crawl 对象
 const info = await crawl.info()
 console.log(info.status, info.pages_count)
 
-// Or wait until completed
+// 或等待直到完成
 await crawl.waitTillDone({ checkEveryNSecs: 5 })
 ```
 
@@ -186,22 +186,22 @@ while True:
 
 </CodeGroup>
 
-或者，你可以在开始抓取时传递一个 `webhook_url`，以便在抓取完成时收到通知。
+或者，你可以在开始抓取时传递一个 `webhook_url`，以在抓取完成时收到通知。
 
 ## 列出页面（使用游标分页/流式处理）
 
-获取页面并使用 `cursor` 和 `limit` 迭代。在抓取 `in_progress` 或 `completed` 时工作。
+获取页面并使用 `cursor` 和 `limit` 进行迭代。适用于抓取 `in_progress` 或 `completed` 状态。
 
 <CodeGroup>
 
 ```python Python
-# Iterate all pages (auto-waits for crawl completion, handles pagination)
+# 迭代所有页面（自动等待抓取完成，处理分页）
 for page in crawl.pages():
     print(page.url, page.retrieve_id)
 ```
 
 ```js Node
-// Iterate all pages (auto-waits for crawl completion, handles pagination)
+// 迭代所有页面（自动等待抓取完成，处理分页）
 for await (const page of crawl.pages()) {
   console.log(page.url, page.retrieve_id)
 }
@@ -247,7 +247,7 @@ while True:
 
 </CodeGroup>
 
-## 搜索查询（限制到前 N 个相关）
+## 搜索查询（限制为前 N 个相关）
 
 在开始时使用 `search_query`，并可选择使用 `search_query` 过滤列表。使用 `top_n` 限制每页探索。
 
@@ -327,14 +327,14 @@ print(len(pages['pages']))
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each crawled page
+# 获取每个抓取页面的内容
 for page in crawl.pages():
     content = page.retrieve(["markdown"])
     print(content.markdown_content)
 ```
 
 ```js Node
-// Retrieve content for each crawled page
+// 获取每个抓取页面的内容
 for await (const page of crawl.pages()) {
   const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
   console.log(content.markdown_content)
@@ -366,9 +366,9 @@ for page in get_pages(crawl['id'], limit=5)['pages']:
 ## 注意事项
 
 - 分页是基于游标的；重复请求直到 `cursor` 不存在。
-- `/v1/crawls/{crawl_id}/pages` 上的内容字段已弃用；请使用 `/v1/retrieve`。
-- Webhooks：设置 `webhook_url` 以在抓取完成时接收 POST。
+- `/v1/crawls/{crawl_id}/pages` 上的内容字段已弃用；建议使用 `/v1/retrieve`。
+- Webhooks：设置 `webhook_url` 以在抓取完成时接收POST。
 
 ## 价格
 
-每抓取一页费用为 1 个积分。
+抓取每个页面消耗1个信用点。

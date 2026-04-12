@@ -1,21 +1,21 @@
 ---
-sidebarTitle: "Programar"
-title: "Programar"
-description: "Programa llamadas a la API para que se ejecuten automáticamente en momentos específicos"
+sidebarTitle: "Horarios"
+title: "Horarios"
+description: "Programa llamadas a la API para que se ejecuten automáticamente en momentos especificados"
 icon: "clock"
 ---
 
-A través del endpoint de Olostep `/v1/schedules`, puedes programar llamadas a la API para que se ejecuten automáticamente en momentos específicos. Programa ejecuciones únicas o tareas recurrentes usando expresiones cron o lenguaje natural.
+A través del endpoint de Olostep `/v1/schedules`, puedes programar llamadas a la API para que se ejecuten automáticamente en momentos especificados. Programa ejecuciones únicas o tareas recurrentes usando expresiones cron o lenguaje natural.
 
 - Programa ejecuciones únicas en una fecha y hora específicas
-- Crea programaciones recurrentes usando expresiones cron
+- Crea horarios recurrentes usando expresiones cron
 - Usa texto en lenguaje natural para generar automáticamente expresiones cron
 - Programa endpoints HTTP (GET o POST)
 - Para solicitudes POST, usa endpoints de Olostep en forma corta (prefijados automáticamente) o URLs completas
-- Envía cualquier payload que desees - el payload se envía exactamente como lo especifiques
-- Gestiona automáticamente el ciclo de vida de la programación
+- Pasa cualquier payload que desees - el payload se envía exactamente como lo especifiques
+- Gestiona automáticamente el ciclo de vida del horario
 
-Para detalles de la API, consulta la [Referencia de la API del Endpoint de Programación](/api-reference/schedules/create).
+Para detalles de la API, consulta la [Referencia de la API del Endpoint de Horarios](/api-reference/schedules/create).
 
 ## Instalación
 
@@ -43,11 +43,11 @@ const fetch = require('node-fetch')
 
 </CodeGroup>
 
-## Crear una programación
+## Crear un horario
 
-Crea una programación para ejecutar llamadas a la API automáticamente. Puedes crear programaciones únicas o recurrentes usando expresiones cron. El `endpoint` puede ser cualquier URL (no limitado a endpoints de Olostep), y el `payload` puede contener cualquier dato que desees enviar.
+Crea un horario para ejecutar llamadas a la API automáticamente. Puedes crear horarios únicos o recurrentes usando expresiones cron. El `endpoint` puede ser cualquier URL (no está limitado a endpoints de Olostep), y el `payload` puede contener cualquier dato que desees enviar.
 
-### Programación única
+### Horario único
 
 Programa una llamada a la API para que se ejecute una vez en una fecha y hora específicas.
 
@@ -123,9 +123,9 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-### Programación recurrente con expresión cron
+### Horario recurrente con expresión cron
 
-Crea una programación recurrente usando una expresión cron. Las expresiones cron usan un formato de 6 campos: minuto hora día mes día-de-la-semana año.
+Crea un horario recurrente usando una expresión cron. Las expresiones cron usan un formato de 6 campos: minuto hora día mes día-de-la-semana año.
 
 <CodeGroup>
 
@@ -195,7 +195,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-### Programación con lenguaje natural
+### Programación en lenguaje natural
 
 Usa texto en lenguaje natural para generar automáticamente expresiones cron. El sistema convertirá tu texto en una expresión cron válida.
 
@@ -216,7 +216,7 @@ payload = {
         "url_to_scrape": "https://example.com",
         "formats": ["markdown"]
     },
-    "text": "every 3 minutes",
+    "text": "cada 3 minutos",
     "expression_timezone": "UTC"
 }
 
@@ -242,7 +242,7 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    text: 'every Monday at 9am',
+    text: 'cada lunes a las 9am',
     expression_timezone: 'UTC'
   })
 })
@@ -260,7 +260,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "url_to_scrape": "https://example.com",
       "formats": ["markdown"]
     },
-    "text": "every day at 10am",
+    "text": "cada día a las 10am",
     "expression_timezone": "UTC"
   }'
 ```
@@ -269,7 +269,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ## Formato de respuesta
 
-Cuando creas una programación, recibirás un objeto de programación con las siguientes propiedades:
+Cuando creas un horario, recibirás un objeto de horario con las siguientes propiedades:
 
 ```json
 {
@@ -284,7 +284,7 @@ Cuando creas una programación, recibirás un objeto de programación con las si
 }
 ```
 
-Para programaciones únicas, la respuesta incluye `execute_at` en lugar de `cron_expression`:
+Para horarios únicos, la respuesta incluye `execute_at` en lugar de `cron_expression`:
 
 ```json
 {
@@ -299,9 +299,9 @@ Para programaciones únicas, la respuesta incluye `execute_at` en lugar de `cron
 }
 ```
 
-## Listar programaciones
+## Listar horarios
 
-Recupera todas las programaciones para tu equipo. Por defecto, las programaciones eliminadas están filtradas. Usa el parámetro de consulta `include_deleted` para incluirlas.
+Recupera todos los horarios para tu equipo. Por defecto, los horarios eliminados están filtrados. Usa el parámetro de consulta `include_deleted` para incluirlos.
 
 <CodeGroup>
 
@@ -318,11 +318,11 @@ headers = {
 
 response = requests.get(f"{API_URL}/schedules", headers=headers)
 result = response.json()
-print(f"Total de programaciones: {result['count']}")
+print(f"Total de horarios: {result['count']}")
 for schedule in result['schedules']:
     print(json.dumps(schedule, indent=2))
 
-# Para incluir programaciones eliminadas:
+# Para incluir horarios eliminados:
 # response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
 ```
 
@@ -333,10 +333,10 @@ const res = await fetch(`${API_URL}/schedules`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
 const result = await res.json()
-console.log(`Total de programaciones: ${result.count}`)
+console.log(`Total de horarios: ${result.count}`)
 result.schedules.forEach(s => console.log(s))
 
-// Para incluir programaciones eliminadas:
+// Para incluir horarios eliminados:
 // const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
 ```
 
@@ -344,16 +344,16 @@ result.schedules.forEach(s => console.log(s))
 curl -s -X GET "https://api.olostep.com/v1/schedules" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# Para incluir programaciones eliminadas:
+# Para incluir horarios eliminados:
 # curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
 #   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
 
 </CodeGroup>
 
-## Obtener una programación
+## Obtener un horario
 
-Recupera una sola programación por su ID.
+Recupera un solo horario por su ID.
 
 <CodeGroup>
 
@@ -390,9 +390,9 @@ curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 </CodeGroup>
 
-## Eliminar una programación
+## Eliminar un horario
 
-Elimina una programación por su ID. Esto detendrá cualquier ejecución futura.
+Elimina un horario por su ID. Esto detendrá cualquier ejecución futura.
 
 <CodeGroup>
 
@@ -434,7 +434,7 @@ curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ### Endpoints de Olostep (forma corta)
 
-Para solicitudes POST, puedes usar formas cortas para los endpoints de Olostep. El sistema automáticamente añadirá `https://api.olostep.com/` a estos:
+Para solicitudes POST, puedes usar formas cortas para los endpoints de Olostep. El sistema automáticamente antepondrá `https://api.olostep.com/` para estos:
 
 - `v1/scrapes` - Programa tareas de scraping web
 - `v1/batches` - Programa trabajos de procesamiento por lotes
@@ -461,8 +461,8 @@ payload = {
     "method": "POST",
     "endpoint": "https://api.example.com/webhook",
     "payload": {
-        "custom_field": "any value",
-        "data": {"nested": "structure"},
+        "custom_field": "cualquier valor",
+        "data": {"nested": "estructura"},
         "timestamp": datetime.now().isoformat()
     },
     "execute_at": (datetime.now() + timedelta(hours=1)).isoformat(),
@@ -489,8 +489,8 @@ const res = await fetch(`${API_URL}/schedules`, {
     method: 'POST',
     endpoint: 'https://api.example.com/webhook',
     payload: {
-      custom_field: 'any value',
-      data: { nested: 'structure' },
+      custom_field: 'cualquier valor',
+      data: { nested: 'estructura' },
       timestamp: new Date().toISOString()
     },
     execute_at: execute_at,
@@ -508,8 +508,8 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
     "method": "POST",
     "endpoint": "https://api.example.com/webhook",
     "payload": {
-      "custom_field": "any value",
-      "data": {"nested": "structure"}
+      "custom_field": "cualquier valor",
+      "data": {"nested": "estructura"}
     },
     "execute_at": "2025-01-15T10:00:00Z",
     "expression_timezone": "UTC"
@@ -538,28 +538,28 @@ Usa `?` para día-del-mes o día-de-la-semana cuando no esté especificado.
 
 ## Ejemplos de lenguaje natural
 
-Puedes usar lenguaje natural para describir programaciones. El sistema las convertirá automáticamente en expresiones cron:
+Puedes usar lenguaje natural para describir horarios. El sistema los convertirá automáticamente en expresiones cron:
 
 - "cada 3 minutos" → `0/3 * * * ? *`
-- "todos los días a las 10am" → `0 10 * * ? *`
-- "todos los lunes a las 9am" → `0 9 ? * MON *`
+- "cada día a las 10am" → `0 10 * * ? *`
+- "cada lunes a las 9am" → `0 9 ? * MON *`
 - "cada hora" → `0 * * * ? *`
 - "cada semana el lunes" → `0 0 ? * MON *`
 
 ## Notas importantes
 
-- Las programaciones únicas se eliminan automáticamente después de la ejecución
-- Las programaciones recurrentes continúan hasta que se eliminen manualmente
+- Los horarios únicos se eliminan automáticamente después de la ejecución
+- Los horarios recurrentes continúan hasta que se eliminen manualmente
 - La zona horaria debe ser un identificador de zona horaria IANA válido (por ejemplo, "UTC", "America/New_York", "Europe/London")
-- La fecha y hora de `execute_at` debe estar en el futuro
+- La fecha y hora `execute_at` debe estar en el futuro
 - La conversión de lenguaje natural puede requerir reintentos; el sistema intentará hasta 3 veces
-- Al usar texto en lenguaje natural (parámetro `text`), la zona horaria predeterminada es "UTC"
-- Las programaciones ejecutan la llamada a la API con el payload proporcionado exactamente como se especifica - puedes pasar cualquier estructura JSON que necesites
+- Al usar texto en lenguaje natural (parámetro `text`), la zona horaria por defecto es "UTC"
+- Los horarios ejecutan la llamada a la API con el payload proporcionado exactamente como se especifica - puedes pasar cualquier estructura JSON que necesites
 - Para solicitudes POST, los endpoints de Olostep en forma corta (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) se prefijan automáticamente con `https://api.olostep.com/`
 - Para otros endpoints, proporciona la URL completa
 - El `payload` puede contener cualquier estructura de datos - se envía tal cual a tu endpoint objetivo
-- Eliminar una programación ya eliminada devolverá un error 400
+- Eliminar un horario ya eliminado devolverá un error 400
 
 ## Precios
 
-Las programaciones en sí son gratuitas. Solo pagas por las llamadas a la API que se ejecutan cuando la programación se ejecuta. Por ejemplo, si programas un scrape, se te cobrará 1 crédito por ejecución (o más si usas parsers o extracción LLM).
+Los horarios en sí son gratuitos. Solo pagas por las llamadas a la API que se ejecutan cuando el horario se ejecuta. Por ejemplo, si programas un scrape, se te cobrará 1 crédito por ejecución (o más si usas parsers o extracción LLM).

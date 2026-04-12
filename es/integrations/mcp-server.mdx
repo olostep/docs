@@ -2,16 +2,16 @@
 sidebarTitle: "Servidor MCP"
 icon: "hammer"
 title: "Servidor MCP"
-description: "Usa Olostep a través del Protocolo de Contexto de Modelo para datos web rápidos y eficientes"
+description: "Usa Olostep a través del Protocolo de Contexto de Modelo para obtener datos web rápidos y eficientes"
 ---
 
 El Servidor MCP de Olostep ofrece herramientas de acceso web para tus aplicaciones de IA. Permite que tu IA:
 1. Busque en la web para basar la IA en datos del mundo real (hechos, documentos, eventos)
-2. Obtenga el contenido markdown de cualquier página web
+2. Obtenga el contenido en markdown de cualquier página web
 3. Descubra y filtre URLs relevantes dentro de un sitio web.
 
 ## Instalación
-Necesitas tener una clave API. Obtén la clave API desde https://www.olostep.com/dashboard/api-keys.
+Necesitas tener una clave API. Obtén la clave API en https://www.olostep.com/dashboard/api-keys.
 
 Puedes usar nuestra URL alojada remotamente o ejecutar el servidor localmente.
 
@@ -21,19 +21,19 @@ Puedes usar nuestra URL alojada remotamente o ejecutar el servidor localmente.
 https://mcp.olostep.com/mcp
 ```
 
-### Ejecutando con npx
+### Ejecutar con npx
 
 ```bash
 env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp
 ```
 
-### Instalación manual
+### Instalación Manual
 
 ```bash
 npm install -g olostep-mcp
 ```
 
-### Ejecutando en Claude Desktop
+### Ejecutar en Claude Desktop
 
 Añade esto a tu claude_desktop_config.json:
 
@@ -55,7 +55,7 @@ Añade esto a tu claude_desktop_config.json:
 npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
 ```
 
-### Ejecutando en Claude Code
+### Ejecutar en Claude Code
 
 Ejecuta esto en tu terminal
 
@@ -70,20 +70,20 @@ claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
   -- npx -y olostep-mcp
 ```
 
-### Ejecutando en Cursor
+### Ejecutar en Cursor
 
 <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=olostep-web&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIm9sb3N0ZXAtbWNwIl0sImVudiI6eyJPTE9TVEVQX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D">
-  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Añadir servidor Olostep MCP a Cursor" style={{ maxHeight: 32 }} />
+  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Añadir servidor MCP de Olostep a Cursor" style={{ maxHeight: 32 }} />
 </a>
 
 #### Configuración manual
 
 Para configurar Olostep MCP en Cursor:
 
-- Abre Configuración de Cursor (haz clic en el icono de configuración en la parte superior derecha del IDE)
+- Abre Configuración de Cursor (haz clic en el icono de configuración en la esquina superior derecha del IDE)
 - Haz clic en MCP
 - Haz clic en "+ Añadir nuevo servidor MCP global"
-- Ingresa lo siguiente en el archivo mcp.json:
+- Introduce lo siguiente en el archivo mcp.json:
 ```bash
 {
   "mcpServers": {
@@ -111,14 +111,14 @@ Alternativa (local / stdio)
   }
 }
 ```
-- Recuerda reemplazar `YOUR_API_KEY` con tu clave API real que puedes obtener del [tablero de Olostep](https://www.olostep.com/dashboard)
+- Recuerda reemplazar `YOUR_API_KEY` con tu clave API real que puedes obtener del [panel de Olostep](https://www.olostep.com/dashboard)
 - Ahora puedes cerrar la pestaña de configuración. Si es necesario, actualiza la lista de servidores MCP para ver las nuevas herramientas.
 
 > Si estás usando Windows y tienes problemas, intenta `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
 
-La próxima vez que uses Cursor, usará automáticamente el Olostep MCP cuando sea necesario. También puedes solicitar explícitamente usar el Olostep MCP cuando necesites información actualizada de la web.
+La próxima vez que uses Cursor, automáticamente utilizará el MCP de Olostep cuando sea necesario. También puedes solicitar explícitamente usar el MCP de Olostep cuando necesites información actualizada de la web.
 
-### Ejecutando en Windsurf
+### Ejecutar en Windsurf
 Añade esto a tu ./codeium/windsurf/model_config.json:
 
 ```bash
@@ -150,16 +150,15 @@ Alternativa (local / stdio)
 ```
 
 ## Herramientas Disponibles
-- **scrape_website**: Extrae contenido de una sola URL. Soporta múltiples formatos y renderizado de JavaScript.
+- **scrape_website**: Extrae contenido de una URL única. Soporta múltiples formatos y renderizado de JavaScript.
 - **search_web**: Busca en la web una consulta dada y devuelve resultados estructurados (no IA, basado en parser).
-- **answers**: Busca en la web y devuelve respuestas potenciadas por IA en la estructura JSON que desees, con fuentes y citas.
+- **answers**: Busca en la web y devuelve respuestas impulsadas por IA en la estructura JSON que desees, con fuentes y citas.
 - **batch_scrape_urls**: Extrae hasta 10k URLs al mismo tiempo. Perfecto para extracción de datos a gran escala.
-- **get_batch_results**: Recupera el estado y contenido extraído para un trabajo por lotes. Si está completo, obtiene elementos y recupera contenido para cada URL.
-- **create_crawl**: Descubre y extrae autónomamente sitios web completos siguiendo enlaces desde una URL de inicio.
-- **create_map**: Obtén todas las URLs de un sitio web. Extrae URLs para descubrimiento y análisis del sitio.
+- **get_batch_results**: Recupera el estado y el contenido extraído para un trabajo por lotes. Si está completo, obtiene los elementos y recupera el contenido para cada URL.
+- **create_crawl**: Descubre y extrae de forma autónoma sitios web enteros siguiendo enlaces desde una URL de inicio.
+- **create_map**: Obtén todas las URLs en un sitio web. Extrae URLs para descubrimiento y análisis del sitio.
 - **get_webpage_content**: Recupera el contenido de una página web en formato markdown.
 - **get_website_urls**: Busca y recupera URLs relevantes de un sitio web.
-- **google_search**: Recupera datos estructurados de los resultados de búsqueda de Google.
 
 ## Conclusión
 Puedes encontrar detalles completos sobre Olostep MCP [aquí](https://github.com/olostep/olostep-mcp-server).

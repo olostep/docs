@@ -2,13 +2,13 @@
 sidebarTitle: "MCPサーバー"
 icon: "hammer"
 title: "MCPサーバー"
-description: "モデルコンテキストプロトコルを通じてOlostepを使用し、高速で効率的なウェブデータを取得"
+description: "モデルコンテキストプロトコルを通じてOlostepを使用し、迅速で効率的なウェブデータを取得"
 ---
 
-Olostep MCPサーバーは、AIアプリにウェブアクセスツールを提供します。これにより、AIは以下のことが可能になります：
-1. 現実世界のデータ（事実、文書、イベント）に基づいてAIを強化するためにウェブを検索
+Olostep MCPサーバーは、AIアプリにウェブアクセスツールを提供します。これにより、AIは以下を行うことができます：
+1. 現実世界のデータ（事実、文書、イベント）に基づいてAIをウェブ検索で補強
 2. 任意のウェブページのMarkdownコンテンツを取得
-3. ウェブサイト内の関連するURLを発見しフィルタリング
+3. ウェブサイト内の関連するURLを発見し、フィルタリング
 
 ## インストール
 APIキーが必要です。APIキーは https://www.olostep.com/dashboard/api-keys から取得してください。
@@ -21,7 +21,7 @@ APIキーが必要です。APIキーは https://www.olostep.com/dashboard/api-ke
 https://mcp.olostep.com/mcp
 ```
 
-### npxでの実行
+### npxを使用して実行
 
 ```bash
 env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp
@@ -64,7 +64,7 @@ claude mcp add --transport http secure-api https://mcp.olostep.com/mcp \
   --header "Authorization: Bearer YOUR_API_KEY"
 ```
 
-別の方法（ローカル / stdio）
+代替案（ローカル / stdio）
 ```bash
 claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
   -- npx -y olostep-mcp
@@ -97,7 +97,7 @@ CursorでOlostep MCPを設定するには：
 }
 ```
 
-別の方法（ローカル / stdio）
+代替案（ローカル / stdio）
 ```bash
 {
   "mcpServers": {
@@ -112,11 +112,11 @@ CursorでOlostep MCPを設定するには：
 }
 ```
 - `YOUR_API_KEY`を[Olostepダッシュボード](https://www.olostep.com/dashboard)から取得した実際のAPIキーに置き換えることを忘れないでください
-- 設定タブを閉じることができます。必要に応じてMCPサーバーリストをリフレッシュして新しいツールを確認してください
+- 設定タブを閉じることができます。必要に応じてMCPサーバーリストを更新して新しいツールを確認してください
 
-> Windowsを使用していて問題が発生している場合は、`cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`を試してください
+> Windowsを使用していて問題がある場合は、`cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`を試してください
 
-次回Cursorを使用する際に必要に応じて自動的にOlostep MCPを使用します。また、最新のウェブ情報が必要なときにOlostep MCPを明示的に使用することもできます
+次回Cursorを使用する際には、必要に応じて自動的にOlostep MCPを使用します。また、ウェブからの最新情報が必要なときに明示的にOlostep MCPを使用するようリクエストすることもできます
 
 ### Windsurfでの実行
 ./codeium/windsurf/model_config.jsonに以下を追加：
@@ -134,7 +134,7 @@ CursorでOlostep MCPを設定するには：
 }
 ```
 
-別の方法（ローカル / stdio）
+代替案（ローカル / stdio）
 ```bash
 {
   "mcpServers": {
@@ -152,14 +152,13 @@ CursorでOlostep MCPを設定するには：
 ## 利用可能なツール
 - **scrape_website**: 単一のURLからコンテンツを抽出。複数のフォーマットとJavaScriptレンダリングをサポート。
 - **search_web**: 指定されたクエリでウェブを検索し、構造化された結果を返す（非AI、パーサーベース）。
-- **answers**: ウェブを検索し、ソースと引用を含むJSON構造でAI駆動の回答を返す。
-- **batch_scrape_urls**: 最大10,000のURLを同時にスクレイピング。大規模データ抽出に最適。
-- **get_batch_results**: バッチジョブのステータスとスクレイピングされたコンテンツを取得。完了した場合、アイテムを取得し各URLのコンテンツを取得。
-- **create_crawl**: 開始URLからリンクをたどって自動的にウェブサイト全体を発見しスクレイピング。
+- **answers**: ウェブを検索し、ソースと引用を含むAI駆動の回答をJSON構造で返す。
+- **batch_scrape_urls**: 最大10,000のURLを同時にスクレイプ。大規模なデータ抽出に最適。
+- **get_batch_results**: バッチジョブのステータスとスクレイプされたコンテンツを取得。完了した場合、各URLのアイテムとコンテンツを取得。
+- **create_crawl**: 開始URLからリンクをたどってウェブサイト全体を自動的に発見し、スクレイプ。
 - **create_map**: ウェブサイト上のすべてのURLを取得。発見とサイト分析のためのURLを抽出。
 - **get_webpage_content**: ウェブページのコンテンツをMarkdown形式で取得。
-- **get_website_urls**: ウェブサイトから関連するURLを検索し取得。
-- **google_search**: Google検索結果から構造化データを取得。
+- **get_website_urls**: ウェブサイトから関連するURLを検索して取得。
 
 ## 結論
 Olostep MCPの詳細は[こちら](https://github.com/olostep/olostep-mcp-server)で確認できます。

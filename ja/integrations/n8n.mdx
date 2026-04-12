@@ -1,970 +1,270 @@
 ---
-sidebarTitle: "n8n"
-icon: "code"
-title: "n8n インテグレーション"
-description: "n8nのセルフホスト型ワークフロー自動化プラットフォームでウェブ検索、スクレイピング、クローリングを自動化"
+sidebarTitle: "Olostep + n8n"
+title: "Olostep + n8n"
+description: "コード不要で、n8nワークフローにウェブスクレイピング、検索、バッチジョブ、クロール、サイトマップを追加。"
 ---
 
-Olostepのn8nインテグレーションは、強力なウェブ検索、スクレイピング、クローリング機能をn8nワークフローに提供します。コードを書くことなく、任意のウェブサイトからデータを検索、抽出、構造化する自動化されたワークフローを構築できます。
+認証済みの[Olostep Web Scraperノード](https://n8n.io/integrations/olostep-web-scraper/)は、n8nのビジュアルビルダー内で6つの操作を提供します：URLをスクレイプ、ウェブを検索、AI回答を取得、数千のURLをバッチスクレイプ、サイトをクロール、またはすべてのリンクをマップ。
 
-[Olostepをn8nで始める →](https://www.npmjs.com/package/n8n-nodes-olostep)
+[n8nで見る →](https://n8n.io/integrations/olostep-web-scraper/)
 
-## 特徴
+## 始める前に
 
-このインテグレーションは、ウェブデータの自動抽出のための6つの強力な操作を提供します：
+- **APIキー付きのOlostepアカウント：** [無料で取得](https://olostep.com/dashboard)、クレジットカードは不要です。最初の500クレジットが含まれています。
+- **n8nの実行：** [n8n Cloud](https://n8n.io/cloud/)またはセルフホストされたインスタンス。コミュニティノードが有効である必要があります（ほとんどのセットアップではデフォルトで有効です）。
+- **コード不要：** このガイドのすべてはn8nのビジュアルエディタを通じて行われます。
+
+---
+
+## セットアップ
+
+<Steps>
+  <Step title="Olostepノードを検索">
+    任意のワークフローを開き、**+**をクリックして**Olostep**を検索します。結果から**Olostep Web Scraper**を選択します。
+
+    ![n8nノードピッカーでOlostepを検索](/images/integrations/n8n/step-1.png)
+  </Step>
+
+  <Step title="ノードをインストール">
+    結果をクリックしてノード詳細パネルを開き、次に**ノードをインストール**をクリックします。n8nは`n8n-nodes-olostep`をインストールし、再起動を促します。続行する前にそれを行ってください。
+
+    ![インストールノードボタン付きのOlostep Web Scraperノード詳細](/images/integrations/n8n/step-2.png)
+
+    <Note>
+      ワークスペースで**コミュニティノード**が無効になっている場合、管理者が最初にそれを有効にする必要があります。[n8nコミュニティノードガイド](https://docs.n8n.io/integrations/community-nodes/installation/)を参照してください。
+    </Note>
+  </Step>
+
+  <Step title="APIキーを追加">
+  ワークフロー内のOlostepノードを開き、**クレデンシャルを設定**（パラメータタブ内）をクリックし、APIキーを追加して**保存**をクリックします。
+
+    ![APIキー欄付きのn8n内のOlostepクレデンシャルフォーム](/images/integrations/n8n/step-3.png)
+
+    [Olostepダッシュボードからキーを取得 →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="接続して実行">
+    Olostepノードをトリガーおよび任意の下流ステップに接続し、ワークフローを実行します。
+
+    ![スケジュールトリガーがOlostepノードに接続されたn8nワークフローキャンバス](/images/integrations/n8n/step-4.png)
+  </Step>
+</Steps>
+
+---
+
+## アクション
 
 <CardGroup cols={2}>
   <Card title="ウェブサイトをスクレイプ" icon="file-lines">
-    複数の形式（Markdown、HTML、JSON、テキスト）で任意の単一URLからコンテンツを抽出
+    任意のURLからMarkdown、HTML、JSON、またはプレーンテキストとしてコンテンツを取得します。オプションの待機時間と国ターゲティングでJSレンダリングされたページを処理します。
   </Card>
-  
-  <Card title="検索" icon="search">
-    ウェブを検索し、構造化された結果を取得
+
+  <Card title="検索" icon="magnifying-glass">
+    ウェブ検索を実行し、構造化された結果（タイトル、URL、スニペット）をJSONとして取得します。
   </Card>
-  
-  <Card title="回答 (AI)" icon="globe-pointer">
-    AIを使ってウェブを検索し、出典と引用付きの構造化された回答を取得
+
+  <Card title="回答（AI）" icon="sparkles">
+    自然言語の質問をして、引用元付きの回答を取得します。LLMノードの前に、根拠のある応答が必要な場合に便利です。
   </Card>
-  
+
   <Card title="URLをバッチスクレイプ" icon="layer-group">
-    最大10,000のURLを同時にスクレイプ。大規模なデータ抽出に最適
+    1つのジョブで最大10,000のURLを提出し、並行して処理します。`batch_id`を返し、結果を非同期で取得します。
   </Card>
-  
-  <Card title="クローリングを作成" icon="spider-web">
-    URLのサブページのコンテンツを取得。自律的にウェブサイト全体を発見しスクレイプ
+
+  <Card title="クロールを作成" icon="spider-web">
+    URLから始めてリンクをたどり、すべてのサブページをスクレイプします。ドキュメントサイト、ブログ、またはサイト全体の取り込みに適しています。`crawl_id`を返します。
   </Card>
-  
+
   <Card title="マップを作成" icon="map">
-    サイト構造分析とコンテンツ発見のためにウェブサイト上のすべてのURLを取得
+    コンテンツをスクレイプせずにサイト上のすべてのURLを取得します。バッチジョブの前に発見に使用します。`map_id`を返します。
   </Card>
 </CardGroup>
 
-## インストール
+<Note>
+  **バッチ、クロール、マップは非同期です。** 返されたIDを保存し、処理が完了したら結果を取得するためにWaitノードまたは2つ目のワークフローを使用します。
+</Note>
 
-### 1. ノードをインストール
+---
 
-npmを通じてOlostepノードパッケージをインストール：
+## 例のワークフロー：Google Sheetsからのリード強化
 
-```bash
-npm install n8n-nodes-olostep
-```
+**何をするか：** Google Sheetに会社のURLを貼り付けると、このワークフローが自動的に会社のウェブサイトをスクレイプし、AIノードで主要情報を抽出し、結果を同じ行に書き戻し、空白のスプレッドシートを充実したリードデータベースに変えます。
 
-その後、n8nを再起動して新しいノードを読み込みます。
+**使用ノード：** Google Sheetsトリガー → Olostep Scrape Website → OpenAI → Code → Google Sheets更新
 
-または、詳細な手順については[n8nコミュニティノードのインストールガイド](https://docs.n8n.io/integrations/community-nodes/installation/)を参照してください。
+![Google SheetsトリガーがOlostep、OpenAI、Code、Google Sheets更新ノードに接続されたn8nのリード強化ワークフロー](/images/integrations/n8n/workflow-example.png)
 
-### 2. アカウントを接続
+---
 
-ワークフローで初めてOlostepノードを使用する際には、資格情報を設定する必要があります：
+### ステップ1：Google Sheetを設定
 
-1. ワークフローに「Olostep Scrape」ノードを追加
-2. ノードをクリックして設定を開く
-3. 「新しい資格情報を作成」または既存の資格情報を選択
-4. Olostep APIキーを入力
-5. 「保存」をクリックして資格情報を保存
+次の列を持つシートを作成します：`Company URL`、`Industry`、`Description`、`Company Size`、`Enriched`。ワークフローは`Company URL`から読み取り、残りを埋めます。
 
-APIキーは[Olostepダッシュボード](https://olostep.com/dashboard)から取得できます。
+### ステップ2：Google Sheetsトリガーを追加
 
-## 利用可能なアクション
+n8nで、**Google Sheets**トリガーノードを追加します。イベントを**Row Added**に設定し、シートを指定し、`Company URL`列を監視するように設定します。これで、新しいURLをシートに貼り付けるたびに、このワークフローが発火します。
 
-### ウェブサイトをスクレイプ
+### ステップ3：Olostep Scrape Websiteを追加
 
-単一のURLからコンテンツを抽出。複数の形式とJavaScriptレンダリングをサポート。
+トリガーの後に**Olostep Web Scraper**ノードを接続します。設定：
+- **アクション：** ウェブサイトをスクレイプ
+- **URL：** `{{ $json["Company URL"] }}`（新しい行からURLを取得）
+- **出力形式：** Markdown
 
-**ユースケース:**
-- 特定のページの変更を監視
-- ECサイトから商品情報を抽出
-- ニュース記事やブログ投稿からデータを収集
-- コンテンツ集約のためのコンテンツを取得
+Markdownはナビゲーション、広告、定型文を取り除くため、ここでは最適です。次のステップのAIノードは、会社についてのクリーンな文章を取得し、生のHTMLノイズを避けます。
 
-**設定:**
+### ステップ4：OpenAIノードを追加
 
-<ParamField path="スクレイプするURL" type="string" required>
-  スクレイプするウェブサイトのURL（http://またはhttps://を含める必要があります）
-</ParamField>
-
-<ParamField path="出力形式" type="dropdown" default="Markdown">
-  形式を選択：Markdown、HTML、JSON、またはプレーンテキスト
-</ParamField>
-
-<ParamField path="国コード" type="string">
-  ロケーション特定のコンテンツのための国コード（例："US"、"GB"、"CA"）
-</ParamField>
-
-<ParamField path="スクレイプ前の待機時間" type="integer">
-  JavaScriptレンダリングのための待機時間（0-10000ミリ秒）
-</ParamField>
-
-<ParamField path="パーサー" type="string">
-  特殊な抽出のためのオプションのパーサーID（例："@olostep/amazon-product"）
-</ParamField>
-
-**出力フィールド:**
-- スクレイプID
-- スクレイプされたURL
-- Markdownコンテンツ
-- HTMLコンテンツ
-- JSONコンテンツ
-- テキストコンテンツ
-- ステータス
-- タイムスタンプ
-- スクリーンショットURL（利用可能な場合）
-- ページメタデータ
-
-**例ワークフロー:**
-
-<AccordionGroup>
-  <Accordion title="競合価格の監視">
-    **トリガー:** スケジュール（毎日午前9時）
-    
-    **アクション:** Olostep - ウェブサイトをスクレイプ
-    - URL: 競合製品ページ
-    - 形式: JSON
-    - パーサー: @olostep/amazon-product
-    
-    **アクション:** Google Sheets - 行を追加
-    - 価格データを追跡スプレッドシートに追加
-    
-    **アクション:** メール - メール送信（価格が下がった場合）
-    - 価格変動をチームに通知
-  </Accordion>
-
-  <Accordion title="ブログ投稿の抽出と保存">
-    **トリガー:** RSSフィード - 新しいアイテム
-    
-    **アクション:** Olostep - ウェブサイトをスクレイプ
-    - URL: \{\{$json.link\}\}
-    - 形式: Markdown
-    
-    **アクション:** Notion - ページを作成
-    - 記事コンテンツをNotionデータベースに保存
-  </Accordion>
-
-  <Accordion title="リードエンリッチメント">
-    **トリガー:** Google Sheets - 新しい行
-    
-    **アクション:** Olostep - ウェブサイトをスクレイプ
-    - URL: シートからの会社ウェブサイト
-    - 形式: Markdown
-    
-    **アクション:** OpenAI - テキストを完了
-    - AIを使用して会社情報を抽出
-    
-    **アクション:** Google Sheets - 行を更新
-    - エンリッチされたデータをシートに追加
-  </Accordion>
-</AccordionGroup>
-
-### 検索
-
-指定されたクエリでウェブを検索し、構造化された結果を取得（非AI、パーサーベースの検索結果）。
-
-**ユースケース:**
-- 自動化されたリサーチワークフロー
-- リードの発見とエンリッチメント
-- 競合分析
-- コンテンツリサーチ
-
-**設定:**
-
-<ParamField path="クエリ" type="string" required>
-  検索クエリ
-</ParamField>
-
-**出力:** タイトル、URL、スニペット、メタデータを含むJSON形式の構造化された検索結果を返します。
-
-**例ワークフロー:**
-
-<AccordionGroup>
-  <Accordion title="自動化されたリサーチ">
-    **トリガー:** スケジュール（毎日午前8時）
-    
-    **アクション:** Olostep - 検索
-    - クエリ: "最新のAI開発"
-    
-    **アクション:** コード - 結果を処理
-    - 主要情報を抽出しフォーマット
-    
-    **アクション:** Notion - ページを作成
-    - リサーチ結果を保存
-  </Accordion>
-
-  <Accordion title="リード発見">
-    **トリガー:** 手動（ボタン）
-    
-    **アクション:** Olostep - 検索
-    - クエリ: "\{\{$json.searchTerm\}\}"
-    
-    **アクション:** Airtable - レコードを作成
-    - 連絡先情報と共にリードを保存
-  </Accordion>
-</AccordionGroup>
-
-### URLをバッチスクレイプ
-
-最大10,000のURLを同時にスクレイプ。大規模なデータ抽出に最適。
-
-**ユースケース:**
-- 製品カタログ全体をスクレイプ
-- 複数の検索結果からデータを抽出
-- スプレッドシートからURLリストを処理
-- バルクコンテンツ抽出
-
-**設定:**
-
-<ParamField path="スクレイプするURL" type="text" required>
-  urlとcustom_idフィールドを持つオブジェクトのJSON配列。 
-  
-  例: `[{"url":"https://example.com","custom_id":"site1"}]`
-</ParamField>
-
-<ParamField path="出力形式" type="dropdown" default="Markdown">
-  すべてのURLの形式を選択：Markdown、HTML、JSON、またはプレーンテキスト
-</ParamField>
-
-<ParamField path="国コード" type="string">
-  ロケーション特定のスクレイピングのための国コード
-</ParamField>
-
-<ParamField path="スクレイプ前の待機時間" type="integer">
-  JavaScriptレンダリングのための待機時間
-</ParamField>
-
-<ParamField path="パーサー" type="string">
-  特殊な抽出のためのオプションのパーサーID
-</ParamField>
-
-**出力フィールド:**
-- バッチID（後で結果を取得するために使用）
-- ステータス
-- 合計URL
-- 作成日時
-- リクエストされた形式
-- 国コード
-- 使用されたパーサー
-
-**例ワークフロー:**
-
-<AccordionGroup>
-  <Accordion title="製品カタログをスクレイプ">
-    **トリガー:** Webhook - POSTリクエストを受信
-    
-    **アクション:** コード - URLをフォーマット
-    - CSV/リストをJSON配列形式に変換
-    
-    **アクション:** Olostep - URLをバッチスクレイプ
-    - URL: \{\{$json.urlArray\}\}
-    - 形式: JSON
-    - パーサー: @olostep/amazon-product
-    
-    **アクション:** Webhook - POST
-    - バッチIDをシステムに送信して取得
-  </Accordion>
-
-  <Accordion title="毎日のコンテンツ監視">
-    **トリガー:** スケジュール - 毎日午前6時
-    
-    **アクション:** Google Sheets - 行を読み込む
-    - 監視するURLを取得
-    
-    **アクション:** コード - URLをフォーマット
-    - バッチ配列形式に変換
-    
-    **アクション:** Olostep - URLをバッチスクレイプ
-    - すべてのURLを一度に処理
-    
-    **アクション:** Slack - メッセージを送信
-    - スクレイピングが完了したことをチームに通知
-  </Accordion>
-</AccordionGroup>
-
-### クローリングを作成
-
-URLのサブページのコンテンツを取得。リンクをたどってウェブサイト全体を自律的に発見しスクレイプ。ドキュメントサイト、ブログ、コンテンツリポジトリに最適。
-
-**ユースケース:**
-- ドキュメントサイト全体をクロールしてアーカイブ
-- ウェブサイトからすべてのブログ投稿を抽出
-- ウェブコンテンツからナレッジベースを構築
-- ウェブサイト構造の変更を監視
-
-**設定:**
-
-<ParamField path="開始URL" type="string" required>
-  クローリングの開始URL（http://またはhttps://を含める必要があります）
-</ParamField>
-
-<ParamField path="最大ページ数" type="integer" default="10">
-  クロールする最大ページ数
-</ParamField>
-
-<ParamField path="リンクをたどる" type="boolean" default="true">
-  ページで見つかったリンクをたどるかどうか
-</ParamField>
-
-<ParamField path="出力形式" type="dropdown" default="Markdown">
-  スクレイプされたコンテンツの形式
-</ParamField>
-
-<ParamField path="国コード" type="string">
-  ロケーション特定のクロールのためのオプションの国コード
-</ParamField>
-
-<ParamField path="パーサー" type="string">
-  特殊なコンテンツ抽出のためのオプションのパーサーID
-</ParamField>
-
-**出力フィールド:**
-- クローリングID（後で結果を取得するために使用）
-- オブジェクトタイプ
-- ステータス
-- 開始URL
-- 最大ページ数
-- リンクをたどる
-- 作成タイムスタンプ
-- 形式
-
-**例ワークフロー:**
-
-<AccordionGroup>
-  <Accordion title="ドキュメントサイトをアーカイブ">
-    **トリガー:** スケジュール - 毎月1日の午前0時
-    
-    **アクション:** Olostep - クローリングを作成
-    - 開始URL: https://docs.example.com
-    - 最大ページ数: 500
-    - リンクをたどる: true
-    - 形式: Markdown
-    
-    **アクション:** Webhook - POST
-    - クローリングIDをアーカイブシステムに送信
-    
-    **アクション:** Slack - メッセージを送信
-    - クローリングが進行中であることをチームに通知
-  </Accordion>
-
-  <Accordion title="競合コンテンツ分析">
-    **トリガー:** スケジュール - 毎週月曜日の午前9時
-    
-    **アクション:** Olostep - クローリングを作成
-    - 開始URL: 競合ブログURL
-    - 最大ページ数: 100
-    - 形式: Markdown
-    
-    **アクション:** 待機 - 10分間待機
-    - クローリングが完了するのを待つ
-    
-    **アクション:** Airtable - レコードを作成
-    - 分析のためにクローリングデータを保存
-  </Accordion>
-</AccordionGroup>
-
-### マップを作成
-
-ウェブサイト上のすべてのURLを取得。コンテンツ発見とサイト構造分析のためにウェブサイトからすべてのURLを抽出。
-
-**ユースケース:**
-- サイトマップとサイト構造図を作成
-- バッチスクレイピング前にすべてのページを発見
-- 壊れたページや欠落したページを見つける
-- SEO監査と分析
-
-**設定:**
-
-<ParamField path="ウェブサイトURL" type="string" required>
-  リンクを抽出するウェブサイトのURL（http://またはhttps://を含める必要があります）
-</ParamField>
-
-<ParamField path="検索クエリ" type="string">
-  URLをフィルタリングするためのオプションの検索クエリ（例："blog"）
-</ParamField>
-
-<ParamField path="上位N URL" type="integer">
-  返されるURLの数を制限
-</ParamField>
-
-<ParamField path="含めるURLパターン" type="string">
-  特定のパスを含めるためのグロブパターン（例："/blog/**"）
-</ParamField>
-
-<ParamField path="除外するURLパターン" type="string">
-  特定のパスを除外するためのグロブパターン（例："/admin/**"）
-</ParamField>
-
-**出力フィールド:**
-- マップID
-- オブジェクトタイプ
-- ウェブサイトURL
-- 見つかったURLの合計
-- URL（JSON配列）
-- 検索クエリ
-- 上位N制限
-
-**例ワークフロー:**
-
-<AccordionGroup>
-  <Accordion title="発見とスクレイプ">
-    **トリガー:** 手動（ボタン）
-    
-    **アクション:** Olostep - マップを作成
-    - URL: https://example.com
-    - 含めるパターン: /products/**
-    - 上位N: 500
-    
-    **アクション:** コード - URLを抽出
-    - マップ結果からURLを解析
-    
-    **アクション:** Olostep - URLをバッチスクレイプ
-    - URL: \{\{$json.urls\}\}
-    - 形式: JSON
-    
-    **アクション:** Google Sheets - 行を追加
-    - すべての製品データをスプレッドシートに追加
-  </Accordion>
-
-  <Accordion title="SEOサイト監査">
-    **トリガー:** スケジュール - 毎月
-    
-    **アクション:** Olostep - マップを作成
-    - URL: あなたのウェブサイト
-    - 上位N: 1000
-    
-    **アクション:** Airtable - レコードを作成
-    - すべてのURLを追跡用に保存
-    
-    **アクション:** Slack - メッセージを送信
-    - 見つかったページの合計を報告
-  </Accordion>
-</AccordionGroup>
-
-## 人気のワークフロー例
-
-### Eコマース価格監視
-
-競合価格を監視し、即時アラートを受け取る：
+**OpenAI**ノードを接続します。モデルを`gpt-4o-mini`に設定し（抽出タスクに速くて安価）、次のプロンプトを使用します：
 
 ```
-トリガー: スケジュール（毎時）
-↓
-アクション: Olostep - ウェブサイトをスクレイプ
-  - URL: 競合製品ページ
-  - 形式: JSON
-  - パーサー: @olostep/amazon-product
-↓
-アクション: IF - 価格が変わったか確認
-↓
-アクション: Slack - メッセージを送信
-  - アラート: "価格が$\{\{price\}\}に変更されました"
+あなたは営業リサーチャーです。以下の会社ウェブサイトのコンテンツに基づいて、次を抽出してください：
+1. 業界（1フレーズ、例："B2B SaaS"、"E-commerce"、"Healthcare"）
+2. 1文の会社説明（最大20語）
+3. 推定会社規模（Startup / SMB / Mid-market / Enterprise）
+
+キー：industry、description、company_sizeを持つJSONオブジェクトのみを返してください。
+
+ウェブサイトコンテンツ：
+{{ $json.markdownContent }}
 ```
 
-### コンテンツ集約
+`markdownContent`フィールドは、Olostepがスクレイプから返すクリーンなプレーンテキストです。
 
-複数のソースからコンテンツを集約：
+### ステップ5：AIの応答を解析して書き戻す
 
-```
-トリガー: Google Sheets - 新しい行
-↓
-アクション: Olostep - ウェブサイトをスクレイプ
-  - URL: \{\{$json.url\}\}
-  - 形式: Markdown
-↓
-アクション: OpenAI - 要約
-  - コンテンツを要約
-↓
-アクション: Airtable - レコードを作成
-  - 要約付きの記事を保存
+**Code**ノードを追加して、OpenAIからのJSONを解析します：
+
+```js
+const parsed = JSON.parse($input.first().json.message.content);
+return [{ json: parsed }];
 ```
 
-### リードエンリッチメントパイプライン
+次に、**Google Sheets**ノードを接続して**行を更新**に設定します。列をマップ：
+- `Industry` → `{{ $json.industry }}`
+- `Description` → `{{ $json.description }}`
+- `Company Size` → `{{ $json.company_size }}`
+- `Enriched` → `Yes`
 
-ウェブ情報でリードデータをエンリッチ：
+### 得られるもの
 
-```
-トリガー: HubSpot - 新しいコンタクト
-↓
-アクション: Olostep - ウェブサイトをスクレイプ
-  - URL: \{\{$json.companyWebsite\}\}
-  - 形式: Markdown
-↓
-アクション: OpenAI - データを抽出
-  - 抽出: 会社規模、業界、製品
-↓
-アクション: HubSpot - コンタクトを更新
-  - エンリッチされたデータをコンタクトに追加
-```
+`https://notion.so`のようなURLをシートに貼り付けると、約10秒以内に行が埋まります：
 
-### リサーチ自動化
+| Company URL | Industry | Description | Company Size | Enriched |
+|---|---|---|---|---|
+| https://notion.so | Productivity SaaS | All-in-one workspace for notes, docs, and databases | Mid-market | Yes |
 
-複数のソースからリサーチを自動化：
+ここからこのワークフローを拡張できます：強化が完了したときにSlack通知を追加したり、書き戻す前に業界でフィルタリングしたり、Google SheetsをHubSpotに置き換えて連絡先を直接更新したりできます。
 
-```
-トリガー: Airtable - 新しいレコード
-↓
-アクション: Olostep - マップを作成
-  - URL: リサーチ対象ウェブサイト
-  - 含める: /research/**
-↓
-アクション: コード - URLを解析
-↓
-アクション: Olostep - URLをバッチスクレイプ
-  - URL: \{\{$json.discoveredUrls\}\}
-  - 形式: Markdown
-↓
-アクション: Notion - ページを作成
-  - リサーチデータベースを作成
-```
+---
 
-### ソーシャルメディア監視
+## テンプレート
 
-言及とコンテンツを追跡：
-
-```
-トリガー: スケジュール（6時間ごと）
-↓
-アクション: Olostep - ウェブサイトをスクレイプ
-  - URL: ニュースサイトの検索ページ
-  - 形式: HTML
-↓
-アクション: コード - 言及を抽出
-  - ブランドの言及を見つける
-↓
-アクション: Google Sheets - 行を追加
-  - タイムスタンプ付きで言及を記録
-```
-
-## マルチステップワークフロー
-
-### 完全な製品スクレイピングパイプライン
-
-包括的な製品データパイプラインを構築：
-
-<Steps>
-  <Step title="製品URLを発見">
-    **マップを作成**を使用して、ターゲットウェブサイト上のすべての製品ページを見つける
-    - 含めるパターン: `/products/**`
-    - 除外するパターン: `/cart/**`, `/checkout/**`
-  </Step>
-  
-  <Step title="製品をバッチ処理">
-    **URLをバッチスクレイプ**を使用して、すべての製品データを抽出
-    - 形式: JSON
-    - パーサー: 製品特化のパーサーがあれば使用
-  </Step>
-  
-  <Step title="データベースに保存">
-    バッチIDをシステムに送信するか、待機して結果を取得
-    - Airtable、Google Sheets、またはデータベースを使用
-  </Step>
-  
-  <Step title="変更を監視">
-    毎日のスクレイプをスケジュールして、価格/在庫の変更を追跡
-    - 既存データと比較
-    - 重要な変更をアラート
-  </Step>
-</Steps>
-
-### SEOコンテンツ戦略
-
-競合を分析し、コンテンツを計画：
-
-<Steps>
-  <Step title="競合サイトをマップ">
-    **マップを作成**を使用して競合ウェブサイトをマップ
-    - すべてのブログ投稿とコンテンツページを抽出
-  </Step>
-  
-  <Step title="コンテンツをスクレイプ">
-    **URLをバッチスクレイプ**を使用して完全なコンテンツを取得
-    - 形式: Markdownで簡単に分析
-  </Step>
-  
-  <Step title="AI分析">
-    OpenAIを使用してトピックとキーワードを分析
-    - コンテンツギャップを特定
-    - トレンドトピックを見つける
-  </Step>
-  
-  <Step title="コンテンツカレンダーを作成">
-    NotionまたはAirtableにインサイトを追加
-    - コンテンツ戦略を計画
-  </Step>
-</Steps>
-
-## 特殊なパーサー
-
-Olostepは人気のあるウェブサイトのための事前構築されたパーサーを提供します。`Parser`フィールドで使用：
+Olostepで構築されたインポート可能なn8nワークフロー：
 
 <CardGroup cols={2}>
-  <Card title="Amazon製品" icon="amazon">
-    `@olostep/amazon-product`
-    
-    抽出: タイトル、価格、評価、レビュー、画像、バリエーション
-  </Card>
-  
-  <Card title="Google検索" icon="google">
-    `@olostep/google-search`
-    
-    抽出: 検索結果、タイトル、スニペット、URL
-  </Card>
-  
-  <Card title="Googleマップ" icon="map">
-    `@olostep/google-maps`
-    
-    抽出: ビジネス情報、レビュー、評価、場所
+  <Card title="ドキュメントをクロール → AIナレッジベース" icon="book" href="https://www.n8n.io/workflows/13436-crawl-documentation-sites-and-build-an-ai-knowledge-base-with-olostep/">
+    Olostepでドキュメントサイトをクロールし、AI対応のナレッジベースに構造化します。
   </Card>
 
-  <Card title="メールを抽出" icon="envelope">
-    `@olostep/extract-emails`
-    
-    抽出: ページ、連絡先リスト、フッターからのメール
+  <Card title="Google Mapsリード → 意思決定者の強化" icon="map-location-dot" href="https://n8n.io/workflows/11086-scrape-business-leads-from-google-maps-and-extract-decision-maker-info-with-olostep/">
+    Google Mapsからビジネスリードをスクレイプし、意思決定者の詳細で強化します。
   </Card>
 
-  <Card title="ソーシャルを抽出" icon="users">
-    `@olostep/extract-socials`
-    
-    抽出: ソーシャルプロファイルリンク（X/Twitter、GitHubなど）
+  <Card title="ユーザーの苦情をマイニング → インサイトレポート" icon="chart-line" href="https://www.n8n.io/workflows/13435-mine-user-complaints-and-generate-insight-reports-with-olostep-gemini-and-google-docs/">
+    Olostep + Geminiで苦情を分析し、Google Docsで構造化されたインサイトレポートを生成します。
   </Card>
 
-  <Card title="カレンダーを抽出" icon="calendar">
-    `@olostep/extract-calendars`
-    
-    抽出: ページからのカレンダーリンク（Googleカレンダー、ICS）
+  <Card title="Amazon製品の抽出 → Google Sheets" icon="table" href="https://n8n.io/workflows/11158-extract-amazon-product-data-to-sheets-with-olostep-api/">
+    OlostepでAmazon製品のURLとメタデータを抽出し、結果をSheetsに同期します。
   </Card>
 </CardGroup>
 
-### パーサーの使用
+[n8n.ioでのすべてのOlostepワークフローを閲覧 →](https://n8n.io/workflows/?q=olostep)
 
-単にパーサーIDをParserフィールドに追加します。二つの例：
+---
 
-```
-アクション: Olostep - ウェブサイトをスクレイプ
-  - URL: https://www.amazon.com/dp/PRODUCT_ID
-  - 形式: JSON
-  - パーサー: @olostep/amazon-product
-```
+## パーサー
 
-```
-アクション: Olostep - ウェブサイトをスクレイプ
-  - URL: https://example.com/contact
-  - 形式: JSON
-  - パーサー: @olostep/extract-emails
-```
+**Parser**フィールドにパーサーIDを追加して、スクレイプまたはバッチアクションで構造化データを取得します：
 
-パーサーは自動的にタスクに特化した構造化データを抽出します。
+| Parser | 抽出内容 |
+|--------|----------|
+| `@olostep/amazon-product` | タイトル、価格、評価、レビュー、画像、バリエーション |
+| `@olostep/google-search` | 結果のタイトル、URL、スニペット |
+| `@olostep/google-maps` | ビジネス名、住所、評価、レビュー |
+| `@olostep/extract-emails` | 任意のページからのメールアドレス |
+| `@olostep/extract-socials` | ソーシャルプロファイルリンク（X、GitHub、LinkedInなど） |
+| `@olostep/extract-calendars` | Google CalendarとICSリンク |
 
-## 人気アプリとのインテグレーション
+[Olostepパーサーストアで完全なリストを見る →](https://www.olostep.com/store)
 
-### Google Sheets
-
-データ収集と追跡に最適：
-
-```
-1. Olostepがウェブサイトをスクレイプ
-2. データをフィルタリングまたは変換
-3. Google Sheets - 行を追加
-```
-
-**ユースケース:**
-- 価格追跡スプレッドシート
-- リードエンリッチメントデータベース
-- コンテンツインベントリ
-- 競合分析シート
-
-### Airtable
-
-スクレイプされたデータで強力なデータベースを構築：
-
-```
-1. Olostepがスクレイプまたはクロール
-2. コード - データをフォーマット
-3. Airtable - レコードを作成
-```
-
-**ユースケース:**
-- 製品カタログ
-- リサーチデータベース
-- コンテンツカレンダー
-- リンクデータベース
-
-### Slack
-
-即時通知を受け取る：
-
-```
-1. Olostepがページを監視
-2. IF - 変更を確認
-3. Slack - メッセージを送信
-```
-
-**ユースケース:**
-- 価格低下アラート
-- コンテンツ更新通知
-- エラーモニタリング
-- 日次ダイジェスト
-
-### HubSpot / Salesforce
-
-CRMデータを自動的にエンリッチ：
-
-```
-1. 新しいコンタクトが追加
-2. Olostepが会社ウェブサイトをスクレイプ
-3. OpenAIが主要情報を抽出
-4. CRM - コンタクトを更新
-```
-
-**ユースケース:**
-- リードエンリッチメント
-- 会社リサーチ
-- 競合インテリジェンス
-- アカウントマッピング
-
-### Notion
-
-ナレッジベースを構築：
-
-```
-1. Olostepがドキュメントをクロール
-2. コード - コンテンツを解析
-3. Notion - ページを作成
-```
-
-**ユースケース:**
-- ドキュメントミラー
-- リサーチリポジトリ
-- コンテンツライブラリ
-- チームウィキ
-
-## ベストプラクティス
-
-<AccordionGroup>
-  <Accordion title="複数のURLにはバッチ処理を使用">
-    3-5以上のURLをスクレイプする場合は、複数の**ウェブサイトをスクレイプ**アクションの代わりに**URLをバッチスクレイプ**を使用してください。バッチ処理は：
-    - はるかに高速（並列処理）
-    - よりコスト効果が高い
-    - 管理が容易
-    - レート制限に優しい
-  </Accordion>
-
-  <Accordion title="適切な待機時間を設定">
-    JavaScriptが多用されているサイトには、「スクレイプ前の待機時間」パラメータを使用：
-    - シンプルなサイト: 0-1000ms
-    - 動的サイト: 2000-3000ms
-    - 重いJavaScript: 5000-8000ms
-    
-    最適な待機時間を見つけるために異なる値でテストしてください。
-  </Accordion>
-
-  <Accordion title="特殊なパーサーを使用">
-    事前構築されたパーサー（例：Amazon、Google、およびOlostepストアからのタスク特化のパーサー）を使用：
-    - 構造化データを自動的に取得
-    - より信頼性の高い抽出
-    - カスタム解析の必要なし
-    - Olostepによって維持
-  </Accordion>
-
-  <Accordion title="スクレイプ前にフィルタリング">
-    不要なスクレイプを避けるためにn8nのIFノードを使用：
-    - URLが変更されたか確認
-    - データが最近スクレイプされていないか確認
-    - スクレイプ前にビジネスロジックを適用
-    
-    これによりAPIクレジットと実行時間を節約できます。
-  </Accordion>
-
-  <Accordion title="非同期操作を処理">
-    バッチ、クローリング、マップ操作は非同期です：
-    - 返されたID（batch_id、crawl_id、map_id）を保存
-    - 即時取得する場合はWaitノードを使用
-    - 完了のためのWebhookコールバックを検討
-    - 取得のための別のワークフローを設定
-  </Accordion>
-
-  <Accordion title="結果を適切に保存">
-    ニーズに応じて適切なストレージを選択：
-    - **Google Sheets**: シンプルな追跡、チームコラボレーション
-    - **Airtable**: リレーショナルデータ、リッチフォーマット
-    - **データベース**: 大規模、複雑なクエリ
-    - **Notion**: ナレッジベース、ドキュメント
-  </Accordion>
-
-  <Accordion title="監視とアラート">
-    スクレイピングワークフローの監視を設定：
-    - n8nのエラーワークフローを使用
-    - 失敗時にSlack/Emailにアラートを送信
-    - OlostepダッシュボードでAPI使用量を追跡
-    - 重要なメトリクスをログ
-  </Accordion>
-</AccordionGroup>
-
-## 業界別の一般的なユースケース
-
-### Eコマース
-- **価格監視**: リアルタイムで競合価格を追跡
-- **製品リサーチ**: トレンド製品と市場のギャップを発見
-- **在庫追跡**: 在庫の可用性を監視
-- **レビュー分析**: 顧客レビューを集約して分析
-
-### マーケティング & SEO
-- **コンテンツ発見**: コンテンツの機会を見つける
-- **競合分析**: 競合戦略を追跡
-- **バックリンクリサーチ**: リンクの機会を発見
-- **キーワードリサーチ**: 検索結果からキーワードデータを抽出
-
-### セールス & リードジェネレーション
-- **リードエンリッチメント**: CRMデータをウェブ情報で強化
-- **会社リサーチ**: 会社のインテリジェンスを収集
-- **コンタクト発見**: 意思決定者を見つける
-- **競合インテリジェンス**: 競合の動きを追跡
-
-### リサーチ & アナリティクス
-- **データ収集**: 複数のソースからデータを収集
-- **市場調査**: 業界トレンドを追跡
-- **学術研究**: 研究データを収集
-- **価格インテリジェンス**: 価格戦略を分析
-
-### メディア & 出版
-- **コンテンツ集約**: 複数のサイトからコンテンツをキュレーション
-- **ニュース監視**: ニュースと言及を追跡
-- **ソーシャルメディア**: ソーシャルプラットフォームを監視
-- **トレンド検出**: トレンドトピックを特定
+---
 
 ## トラブルシューティング
 
 <AccordionGroup>
-  <Accordion title="認証失敗">
-    **エラー**: "無効なAPIキー"
-    
-    **解決策**:
-    - [ダッシュボード](https://olostep.com/dashboard)からAPIキーを確認
-    - APIキーに余分なスペースがないことを確認
-    - n8nで資格情報を再作成
-    - APIキーがアクティブであることを確認
+  <Accordion title="APIキーが拒否される">
+    [olostep.com/dashboard](https://olostep.com/dashboard)からキーを直接コピーし、末尾にスペースがないことを確認します。エラーが続く場合は、n8nでクレデンシャルを削除して再作成してください。
   </Accordion>
 
-  <Accordion title="スクレイプが空のコンテンツを返す">
-    **エラー**: コンテンツフィールドが空
-    
-    **解決策**:
-    - 「スクレイプ前の待機時間」を増やす
-    - ウェブサイトがログインを必要としているか確認
-    - 異なる形式を試す（HTML対Markdown）
-    - URLがアクセス可能であることを確認
-    - サイトが自動アクセスをブロックしていないか確認
+  <Accordion title="スクレイプされたコンテンツが空">
+    **スクレイプ前の待機**を増やします（JSが多いページには2000–5000msを試してください）。URLがログインなしで公開アクセス可能であることを確認します。特定のドメインが一貫して失敗する場合は、[info@olostep.com](mailto:info@olostep.com)に連絡してください。
   </Accordion>
 
-  <Accordion title="バッチ配列形式エラー">
-    **エラー**: "バッチ配列のJSON形式が無効"
-    
-    **解決策**:
-    - 形式を使用: `[{"url":"https://example.com","custom_id":"id1"}]`
-    - 正しいJSON構文を確認
-    - コードノードを使用してURLを正しくフォーマット
-    - オンラインバリデーターでJSONをテスト
+  <Accordion title="バッチURL形式エラー">
+    **スクレイプするURL**フィールドはJSON配列を期待しています：
+    ```json
+    [
+      { "url": "https://example.com/page-1", "custom_id": "p1" },
+      { "url": "https://example.com/page-2", "custom_id": "p2" }
+    ]
+    ```
+    必要に応じて、上流でCodeノードを使用してこの配列をデータから構築します。
   </Accordion>
 
-  <Accordion title="レート制限超過">
-    **エラー**: "レート制限超過"
-    
-    **解決策**:
-    - Waitノードでワークフローの実行を間隔を空ける
-    - 個別のスクレイプの代わりにバッチ処理を使用
-    - Olostepプランをアップグレード
-    - ダッシュボードでレート制限を確認
+  <Accordion title="レート制限に達した">
+    スクレイプステップ間に**Wait**ノードを追加するか、単一スクレイプをループする代わりに**Batch Scrape URLs**に切り替えます。[ダッシュボード](https://olostep.com/dashboard)で現在の使用状況を確認してください。
   </Accordion>
 
-  <Accordion title="URLがスクレイプされない">
-    **エラー**: 特定のURLがスクレイプに失敗
-    
-    **解決策**:
-    - URL形式を確認（http://またはhttps://を含める）
-    - URLが認証を必要としているか確認
-    - まずブラウザでURLをテスト
-    - 国パラメータを試す
-    - ブロックされたドメインについてサポートに連絡
+  <Accordion title="設定でコミュニティノードが表示されない">
+    n8n Cloudでは、コミュニティノードはワークスペースオーナーによって有効にされる必要があります。セルフホストでは、`N8N_COMMUNITY_PACKAGES_ENABLED=true`が環境に設定されていることを確認します。[n8nのインストールガイド](https://docs.n8n.io/integrations/community-nodes/installation/)を参照してください。
   </Accordion>
 </AccordionGroup>
 
-## n8nの利点
+---
 
-### セルフホスト
-n8nはセルフホスト型で、ワークフローとデータを完全にコントロールできます。ベンダーロックインなし、データがインフラストラクチャを離れることはありません。
-
-### タスク制限なし
-クラウドベースの自動化プラットフォームとは異なり、n8nはタスク制限を課しません。追加コストなしで必要なだけワークフローを実行できます。
-
-### オープンソース
-n8nはオープンソースであり、特定のニーズに合わせてカスタマイズおよび拡張できます。
-
-### コスト効果
-セルフホスト型のn8nは無料で、オプションでクラウドホスティングが利用可能です。Olostep APIの使用料のみを支払います。
-
-## 料金
-
-Olostepはn8nとは独立してAPI使用量に基づいて課金します：
-
-- **スクレイプ**: スクレイプごとに支払い
-- **バッチ**: バッチ内のURLごとに支払い
-- **クローリング**: クロールされたページごとに支払い
-- **マップ**: マップ操作ごとに支払い
-
-最新の料金は[olostep.com/pricing](https://olostep.com/pricing)で確認できます。
-
-**n8n**: セルフホスト型のn8nは無料です。クラウドホスティングはオプションの有料プランで利用可能です。
-
-## サポート
-
-n8nインテグレーションに関するヘルプが必要ですか？
+## 関連
 
 <CardGroup cols={2}>
-  <Card title="ドキュメント" icon="book" href="https://docs.olostep.com">
-    完全なAPIドキュメントを閲覧
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
+    スクレイプエンドポイントの完全なリファレンス
   </Card>
-  
-  <Card title="サポートメール" icon="envelope" href="mailto:info@olostep.com">
-    メール: info@olostep.com
-  </Card>
-  
-  <Card title="n8nコミュニティ" icon="users" href="https://community.n8n.io">
-    n8nコミュニティで質問
-  </Card>
-  
-</CardGroup>
 
-## 関連リソース
+  <Card title="Batches API" icon="layer-group" href="/features/batches">
+    バッチジョブの仕組みと結果の取得方法
+  </Card>
 
-<CardGroup cols={2}>
-  <Card title="スクレイプAPI" icon="file-lines" href="/features/scrapes">
-    スクレイプエンドポイントについて学ぶ
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls">
+    クロールの設定と結果の取得
   </Card>
-  
-  <Card title="バッチAPI" icon="layer-group" href="/features/batches">
-    バッチエンドポイントについて学ぶ
-  </Card>
-  
-  <Card title="クローリングAPI" icon="spider-web" href="/features/crawls">
-    クローリングエンドポイントについて学ぶ
-  </Card>
-  
-  <Card title="マップAPI" icon="map" href="/features/maps">
-    マップエンドポイントについて学ぶ
-  </Card>
-  
-  <Card title="Python SDK" icon="python" href="/sdks/python">
-    OlostepをPythonで使用
-  </Card>
-  
-  <Card title="LangChainインテグレーション" icon="link" href="/integrations/langchain">
-    LangChainでAIエージェントを構築
+
+  <Card title="Maps API" icon="map" href="/features/maps">
+    URLの発見とフィルタリングオプション
   </Card>
 </CardGroup>
 
-## 始める
+## 始めましょう
 
-ウェブ検索、スクレイピング、クローリングワークフローを自動化する準備はできましたか？
+ウェブ検索、スクレイピング、クロールワークフローを自動化する準備はできましたか？
 
-<Card title="ノードをインストール" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
-  n8n-nodes-olostepをインストールして自動化ワークフローを構築開始
-</Card>
+<CardGroup cols={2}>
+  <Card title="n8nウェブサイト" icon="link" href="https://n8n.io">
+    n8nプラットフォーム
+  </Card>
+  <Card title="ノードをインストール" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
+    n8n-nodes-olostepをインストールして、自動化ワークフローの構築を開始
+  </Card>
+</CardGroup>
 
-Olostepをn8nと接続し、今日からウェブデータ抽出を自動化しましょう！
+Olostepをn8nと接続して、今日からウェブデータ抽出を自動化しましょう！

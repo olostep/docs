@@ -75,7 +75,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Marca de tiempo de época creada"
+                      "description": "Timestamp de época creado"
                     },
                     "upload_url": {
                       "type": "string",
@@ -152,7 +152,7 @@
                           },
                           "created": {
                             "type": "integer",
-                            "description": "Marca de tiempo de época creada"
+                            "description": "Timestamp de época creado"
                           },
                           "filename": {
                             "type": "string",
@@ -225,7 +225,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Marca de tiempo de época creada"
+                      "description": "Timestamp de época creado"
                     },
                     "filename": {
                       "type": "string",
@@ -249,7 +249,7 @@
             }
           },
           "400": {
-            "description": "Solicitud incorrecta. Archivo ya completado, estado inválido, archivo demasiado grande (máximo 200MB) o formato JSON inválido."
+            "description": "Solicitud incorrecta. Archivo ya completado, estado inválido, archivo demasiado grande (máximo 200MB), o formato JSON inválido."
           },
           "401": {
             "description": "Clave de API inválida"
@@ -266,7 +266,7 @@
     "/v1/files/{file_id}": {
       "get": {
         "summary": "Obtener metadatos del archivo por ID",
-        "description": "Recupera los metadatos de un archivo por su ID.",
+        "description": "Recuperar metadatos de un archivo por su ID.",
         "security": [
           {
             "Authorization": []
@@ -301,7 +301,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Marca de tiempo de época creada"
+                      "description": "Timestamp de época creado"
                     },
                     "filename": {
                       "type": "string",
@@ -337,7 +337,7 @@
       },
       "delete": {
         "summary": "Eliminar archivo",
-        "description": "Elimina un archivo y sus datos asociados del almacenamiento.",
+        "description": "Eliminar un archivo y sus datos asociados del almacenamiento.",
         "security": [
           {
             "Authorization": []
@@ -356,7 +356,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Archivo eliminado exitosamente.",
+            "description": "Archivo eliminado con éxito.",
             "content": {
               "application/json": {
                 "schema": {
@@ -372,7 +372,7 @@
                     },
                     "deleted": {
                       "type": "boolean",
-                      "description": "Indica que el archivo fue eliminado exitosamente."
+                      "description": "Indica que el archivo fue eliminado con éxito."
                     }
                   }
                 }
@@ -394,7 +394,7 @@
     "/v1/files/{file_id}/content": {
       "get": {
         "summary": "Obtener objeto de archivo por ID.",
-        "description": "Obtén un URL pre-firmado para descargar el contenido de un archivo \"completed\". Opcionalmente, especifica el tiempo de expiración para el URL de descarga usando el parámetro de consulta expires_in (por defecto es 600 segundos / 10 minutos).",
+        "description": "Obtén una URL pre-firmada para descargar el contenido de un archivo \"completed\". Opcionalmente, especifica el tiempo de expiración para la URL de descarga usando el parámetro de consulta expires_in (por defecto es 600 segundos / 10 minutos).",
         "security": [
           {
             "Authorization": []
@@ -414,7 +414,7 @@
             "name": "expires_in",
             "in": "query",
             "required": false,
-            "description": "Número de segundos hasta que el URL de descarga expire. Por defecto es 600 segundos (10 minutos).",
+            "description": "Número de segundos hasta que la URL de descarga expire. Por defecto es 600 segundos (10 minutos).",
             "schema": {
               "type": "integer",
               "default": 600
@@ -439,7 +439,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Marca de tiempo de época creada"
+                      "description": "Timestamp de época creado"
                     },
                     "filename": {
                       "type": "string",
@@ -452,11 +452,11 @@
                     "download_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "URL pre-firmado para descargar el archivo. Expira después del tiempo especificado en expires_in."
+                      "description": "URL pre-firmada para descargar el archivo. Expira después del tiempo especificado en expires_in."
                     },
                     "expires_in": {
                       "type": "integer",
-                      "description": "Número de segundos hasta que el URL de descarga expire."
+                      "description": "Número de segundos hasta que la URL de descarga expire."
                     }
                   }
                 }

@@ -1,553 +1,185 @@
 ---
-sidebarTitle: "Relay"
-icon: "bolt"
-title: "Relay 集成"
-description: "使用 Relay.app 的现代工作流构建器，通过嵌入式 AI 和人工参与功能自动化网络搜索、抓取和爬取"
+sidebarTitle: "Olostep + Relay"
+title: "Olostep + Relay"
+description: "在任何 Relay 工作流中添加网页抓取、AI 驱动的研究、批处理作业、爬虫和网站地图，无需编码。"
 ---
 
-Olostep Relay.app 集成将强大的网络抓取功能带入 Relay 的现代自动化平台。通过 Relay 的用户友好界面和高级功能（如嵌入式 AI 和人工参与功能）构建自动化工作流，以提取、监控和处理网络数据。
+在 Relay 的可视化构建器中，经过验证的 [Olostep 应用](https://www.relay.app/apps/olostep/integrations)为你提供了两个操作：抓取一个 URL 或映射网站上的所有链接。
 
-[开始使用 Olostep on Relay.app →](https://www.relay.app/apps/olostep/integrations)
+[在 Relay 上查看 →](https://www.relay.app/apps/olostep/integrations)
 
-## 功能
+## 开始之前
 
-Relay.app 提供现代化的自动化体验，具有深度集成和强大的工作流功能：
+- **一个带有 API 密钥的 Olostep 账户：** [免费获取](https://olostep.com/dashboard)，无需信用卡。你将获得前 500 个积分。
+- **一个 Relay 账户：** 在 [relay.app](https://www.relay.app/) 创建。
+- **无需编码：** 本指南中的所有操作都通过 Relay 的可视化编辑器完成。
+
+---
+
+## 设置
+
+<Steps>
+  <Step title="在 Relay 中找到 Olostep">
+    在 Relay 中打开一个工作流，添加一个步骤，并搜索 **Olostep**。从应用列表中选择 **Olostep**。
+
+    ![占位符：在 Relay 应用选择器中搜索 Olostep](/images/integrations/relay/step-1.png)
+  </Step>
+
+  <Step title="选择一个操作">
+    选择 **Olostep** 后，在步骤配置中选择一个可用的 Olostep 操作。
+
+    ![占位符：Relay 中的 Olostep 操作选择器](/images/integrations/relay/step-2.png)
+  </Step>
+
+  <Step title="连接你的账户">
+    点击 **连接账户**，粘贴你的 Olostep API 密钥，并授权连接。Relay 将保存此账户以供将来的工作流使用。
+
+    ![占位符：Relay 账户连接模式，带有 Olostep API 密钥字段](/images/integrations/relay/step-3.png)
+
+    从 [Olostep 仪表板获取你的密钥 →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="配置抓取网站（URL + 格式）">
+    - **要抓取的 URL：** 从上一步映射或手动输入
+    - **输出格式：** 选择 `Markdown`、`HTML`、`JSON` 或 `Text`
+
+    ![占位符：Relay Olostep 抓取网站字段，带有 URL 和输出格式](/images/integrations/relay/step-4.png)
+  </Step>
+
+  <Step title="测试并发布">
+    运行测试以验证输出，然后在结果正确时发布或开启工作流。
+
+    ![占位符：Relay 测试输出和发布流程](/images/integrations/relay/step-5.png)
+  </Step>
+</Steps>
+
+---
+
+## 操作
 
 <CardGroup cols={2}>
-  <Card title="深度集成" icon="link">
-    与众多应用程序的全面且易于使用的集成，实现无缝的工作流自动化
+  <Card title="抓取网站" icon="file-lines">
+    从任何 URL 提取内容为 Markdown、HTML、JSON 或纯文本。处理 JS 渲染的页面，支持可选的等待时间和国家/地区目标。
   </Card>
-  
-  <Card title="嵌入式 AI" icon="brain">
-    内置 AI 功能，以增强决策能力并自动化需要类似人类理解的任务
-  </Card>
-  
-  <Card title="人工参与" icon="users">
-    为需要人工判断的任务添加手动步骤，确保灵活性和质量控制
-  </Card>
-  
-  <Card title="强大的工作流" icon="workflow">
-    丰富的工作流基本功能，包括条件逻辑、错误处理和并行处理
+
+  <Card title="创建地图" icon="map">
+    获取网站上的每个 URL，而不抓取内容。在批处理作业之前用于发现。返回一个 `map_id`。
   </Card>
 </CardGroup>
 
-## 安装
-
-### 1. 在 Relay.app 中找到 Olostep
-
-在创建新工作流时，在 Relay.app 中搜索“Olostep”：
-
-1. 前往 [Olostep on Relay.app](https://www.relay.app/apps/olostep/integrations)
-2. 点击“免费开始”或“创建工作流”
-3. 在应用选择器中搜索“Olostep”
-4. 选择 Olostep 应用
-
-或者，直接访问 [Olostep 集成页面](https://www.relay.app/apps/olostep/integrations) 浏览可用操作并创建您的第一个工作流。
-
-### 2. 连接您的账户
-
-首次在工作流中使用 Olostep 时，系统会提示您连接账户：
-
-1. 点击“连接 Olostep”
-2. 输入您的 Olostep API 密钥
-3. 授权连接
-
-从 [Olostep Dashboard](https://olostep.com/dashboard) 获取您的 API 密钥。
-
-## 可用操作
-
-### 抓取 URL
-
-从单个 URL 提取内容。支持多种格式和 JavaScript 渲染。
-
-**使用案例：**
-- 监控特定页面的更改
-- 从电商网站提取产品信息
-- 从新闻文章或博客文章中收集数据
-- 为内容聚合拉取内容
-
-**配置：**
-
-<ParamField path="URL" type="string" required>
-  要抓取的网站 URL（必须包含 http:// 或 https://）
-</ParamField>
-
-<ParamField path="Format" type="dropdown" default="Markdown">
-  选择格式：Markdown、HTML、JSON 或纯文本
-</ParamField>
-
-<ParamField path="Country Code" type="string">
-  用于特定位置内容的国家代码（例如，“US”、“GB”、“CA”）
-</ParamField>
-
-<ParamField path="Wait Before Scraping" type="integer">
-  JavaScript 渲染的等待时间（0-10000 毫秒）
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  用于专门提取的可选解析器 ID（例如，“@olostep/amazon-product”）
-</ParamField>
-
-**输出字段：**
-- 抓取 ID
-- 抓取的 URL
-- Markdown 内容
-- HTML 内容
-- JSON 内容
-- 文本内容
-- 状态
-- 时间戳
-- 截图 URL（如果可用）
-- 页面元数据
-
-**示例工作流：**
-
-<AccordionGroup>
-  <Accordion title="监控竞争对手定价">
-    **触发器：** 计划（每天上午 9 点）
-    
-    **操作：** Olostep - 抓取 URL
-    - URL：竞争对手产品页面
-    - 格式：JSON
-    - 解析器：@olostep/amazon-product
-    
-    **操作：** Google Sheets - 创建行
-    - 将价格数据添加到跟踪电子表格
-    
-    **人工参与：** 审核价格变动
-    - 批准显著的价格下降
-    
-    **操作：** Slack - 发送消息
-    - 通知团队已批准的价格变动
-  </Accordion>
-
-  <Accordion title="提取并保存博客文章">
-    **触发器：** RSS Feed - 新项目
-    
-    **操作：** Olostep - 抓取 URL
-    - URL：\{\{Post URL\}\}
-    - 格式：Markdown
-    
-    **操作：** Notion - 创建页面
-    - 将文章内容保存到 Notion 数据库
-  </Accordion>
-
-  <Accordion title="使用 AI 进行线索丰富">
-    **触发器：** Google Sheets - 新行
-    
-    **操作：** Olostep - 抓取 URL
-    - URL：来自表格的公司网站
-    - 格式：Markdown
-    
-    **AI 操作：** OpenAI - 提取数据
-    - 提取：公司规模、行业、产品
-    
-    **操作：** Google Sheets - 更新行
-    - 将丰富的数据添加回表格
-  </Accordion>
-</AccordionGroup>
-
-## Relay.app 优势
-
-Relay.app 相较于传统自动化平台具有多项优势：
-
-### 人工参与工作流
-
-在您的工作流中直接添加手动审核步骤：
-
-```
-1. Olostep 抓取网站
-2. 人工审核步骤 ← 审核并批准数据
-3. 仅在批准后保存到数据库
-```
-
-非常适合：
-- 数据处理前的质量控制
-- 对提取内容进行人工判断
-- 敏感数据的审批工作流
-- 审核 AI 生成的摘要
-
-### 嵌入式 AI 功能
-
-在您的工作流中直接使用 AI，无需外部集成：
-
-- **AI 决策**：让 AI 根据抓取的内容决定工作流路径
-- **智能过滤**：自动过滤和分类抓取的数据
-- **内容摘要**：在存储前总结长篇文章
-- **数据提取**：使用 AI 从非结构化内容中提取结构化数据
-
-### 更好的用户体验和测试
-
-Relay.app 的用户友好界面使工作流构建更容易：
-
-- 清晰的测试信息
-- 有用的错误消息
-- 可视化工作流构建器
-- 简单的调试和故障排除
-
-## 流行的工作流示例
-
-### 带审核的电商价格监控
-
-通过人工审批监控竞争对手价格：
-
-```
-触发器：计划（每小时）
-↓
-操作：Olostep - 抓取 URL
-  - URL：竞争对手产品页面
-  - 格式：JSON
-  - 解析器：@olostep/amazon-product
-↓
-人工审核步骤
-  - 审核价格变动
-  - 批准或拒绝
-↓
-操作：Slack - 发送消息（如果批准）
-  - 警报：“价格变为 $\{\{price\}\}”
-```
-
-### 使用 AI 的内容聚合
-
-从多个来源聚合和增强内容：
-
-```
-触发器：Google Sheets - 新行
-↓
-操作：Olostep - 抓取 URL
-  - URL：\{\{URL from sheet\}\}
-  - 格式：Markdown
-↓
-AI 操作：总结内容
-  - 生成摘要
-↓
-操作：Airtable - 创建记录
-  - 存储带有 AI 摘要的文章
-```
-
-### 线索丰富管道
-
-通过网络信息和 AI 丰富线索数据：
-
-```
-触发器：HubSpot - 新联系人
-↓
-操作：Olostep - 抓取 URL
-  - URL：\{\{Company website\}\}
-  - 格式：Markdown
-↓
-AI 操作：提取公司信息
-  - 提取：公司规模、行业、产品
-↓
-人工审核步骤
-  - 验证 AI 提取的准确性
-↓
-操作：HubSpot - 更新联系人
-  - 添加经过验证的丰富数据
-```
-
-## 与流行应用的集成
-
-### Google Sheets
-
-适合数据收集和跟踪：
-
-```
-1. Olostep 抓取网站
-2. AI - 处理和格式化数据
-3. 人工审核（可选）
-4. Google Sheets - 创建/更新行
-```
-
-**使用案例：**
-- 价格跟踪电子表格
-- 线索丰富数据库
-- 内容库存
-- 竞争对手分析表
-
-### Airtable
-
-使用抓取的数据构建强大的数据库：
-
-```
-1. Olostep 抓取或爬取
-2. AI - 提取结构化数据
-3. Airtable - 创建记录
-```
-
-**使用案例：**
-- 产品目录
-- 研究数据库
-- 内容日历
-- 链接数据库
-
-### Slack
-
-通过审批工作流获得即时通知：
-
-```
-1. Olostep 监控页面
-2. 过滤 - 检查更改
-3. 人工审批步骤
-4. Slack - 发送消息（如果批准）
-```
-
-**使用案例：**
-- 价格下降警报（带审批）
-- 内容更新通知
-- 错误监控
-- 每日摘要
-
-### HubSpot / Salesforce
-
-自动丰富 CRM 数据：
-
-```
-1. 新联系人添加
-2. Olostep 抓取公司网站
-3. AI 提取关键信息
-4. 人工审核步骤
-5. CRM - 更新联系人（如果批准）
-```
-
-**使用案例：**
-- 带质量控制的线索丰富
-- 公司研究
-- 竞争情报
-- 账户映射
-
-### Notion
-
-使用审核过的内容构建知识库：
-
-```
-1. Olostep 爬取文档
-2. AI - 解析和结构化内容
-3. 人工审核步骤
-4. Notion - 创建页面（已批准内容）
-```
-
-**使用案例：**
-- 文档镜像
-- 研究存储库
-- 内容库
-- 团队维基
-
-## 最佳实践
-
-<AccordionGroup>
-  <Accordion title="使用人工参与进行质量控制">
-    利用 Relay.app 的人工参与功能：
-    - 审核 AI 生成的摘要
-    - 在存储前批准敏感数据
-    - 验证抓取内容的准确性
-    - 对工作流路径进行判断
-  </Accordion>
-
-  <Accordion title="结合嵌入式 AI">
-    使用 Relay.app 的内置 AI 功能：
-    - 自动分类抓取的内容
-    - 在存储前生成摘要
-    - 从非结构化内容中提取结构化数据
-    - 在工作流中做出智能决策
-  </Accordion>
-
-  <Accordion title="设置适当的等待时间">
-    对于 JavaScript 密集型网站，使用“抓取前等待”参数：
-    - 简单网站：0-1000ms
-    - 动态网站：2000-3000ms
-    - 重 JavaScript：5000-8000ms
-    
-    测试不同的值以找到最佳等待时间。
-  </Accordion>
-
-  <Accordion title="使用专门的解析器">
-    对于流行网站（如亚马逊、LinkedIn、Google），使用预构建的解析器：
-    - 自动获取结构化数据
-    - 更可靠的提取
-    - 无需自定义解析
-    - 由 Olostep 维护
-  </Accordion>
-
-  <Accordion title="利用 Relay.app 的测试功能">
-    使用 Relay.app 的优秀测试能力：
-    - 每个步骤的清晰测试信息
-    - 有用的错误消息
-    - 简单的调试
-    - 在激活前测试工作流
-  </Accordion>
-
-  <Accordion title="正确存储结果">
-    根据您的需求选择合适的存储：
-    - **Google Sheets**：简单跟踪，团队协作
-    - **Airtable**：关系数据，丰富格式
-    - **数据库**：大规模，复杂查询
-    - **Notion**：知识库，文档
-  </Accordion>
-</AccordionGroup>
-
-## 各行业常见使用案例
-
-### 电商
-- **价格监控**：通过人工审批工作流跟踪竞争对手定价
-- **产品研究**：发现趋势产品和市场空白
-- **库存跟踪**：监控库存可用性
-- **评论分析**：使用 AI 聚合和分析客户评论
-
-### 营销与 SEO
-- **内容发现**：在 AI 协助下寻找内容机会
-- **竞争对手分析**：跟踪竞争对手策略
-- **反向链接研究**：发现链接机会
-- **关键词研究**：从搜索结果中提取关键词数据
-
-### 销售与线索生成
-- **线索丰富**：通过网络信息和人工审核增强 CRM 数据
-- **公司研究**：收集公司情报
-- **联系人发现**：寻找决策者
-- **竞争情报**：跟踪竞争对手动向
-
-### 研究与分析
-- **数据收集**：从多个来源收集数据
-- **市场研究**：跟踪行业趋势
-- **学术研究**：收集研究数据
-- **价格情报**：分析定价策略
-
-### 媒体与出版
-- **内容聚合**：从多个网站策划内容，并附 AI 摘要
-- **新闻监控**：跟踪新闻和提及
-- **社交媒体**：监控社交平台
-- **趋势检测**：识别热门话题
+<Note>
+  **地图是异步的。** 存储返回的 `map_id`，并在 Relay 中使用延迟/轮询模式在处理完成后检索结果。
+</Note>
+
+---
+
+## 示例工作流：定期抓取竞争对手页面
+
+**功能说明：** 按计划抓取竞争对手页面，并存储可在下游 Relay 步骤中重用的干净内容。
+
+**使用节点：** Schedule -> Olostep Scrape Website
+
+![占位符：Relay 画布，显示计划和 Olostep 抓取步骤](/images/integrations/relay/workflow-example.png)
+
+---
+
+### 步骤 1：添加计划触发器
+
+创建一个工作流并添加一个计划触发器（例如，每个工作日早上 8 点）。
+
+### 步骤 2：添加 Olostep 抓取网站
+
+添加一个 **Olostep** 步骤并选择 **抓取网站**。设置：
+- **URL：** `https://competitor.com/blog`
+- **输出格式：** Markdown
+
+### 步骤 3：测试并发布
+
+运行测试以确认输出，然后发布或开启工作流。
+
+### 你将获得
+
+每次运行都会生成准备好进行分析或路由的干净页面内容：
+
+> **抓取结果**
+> - 来源 URL
+> - 以你选择的格式检索的内容
+> - 在 Relay 中带有时间戳的运行输出
+
+---
+
+## 解析器
+
+在抓取操作的 **解析器** 字段中添加解析器 ID，以获取结构化数据而不是原始内容：
+
+| 解析器 | 提取内容 |
+|--------|----------|
+| `@olostep/amazon-product` | 标题、价格、评分、评论、图片、变体 |
+| `@olostep/google-search` | 结果标题、URL、摘要 |
+| `@olostep/google-maps` | 商家名称、地址、评分、评论 |
+| `@olostep/extract-emails` | 从任何页面提取电子邮件地址 |
+| `@olostep/extract-socials` | 社交资料链接（X、GitHub、LinkedIn 等） |
+| `@olostep/extract-calendars` | Google 日历和 ICS 链接 |
+
+在 [Olostep 解析器商店](https://www.olostep.com/store) 查看完整列表 →
+
+---
+
+## Relay.app 与 Zapier
+
+对于需要内置审查和 AI 优先编排的工作流，Relay.app 是 Zapier 的强大替代方案。
+
+**Relay.app 的优势：**
+- **人机协作：** 工作流中的本地审批和审查步骤
+- **AI 优先的工作流设计：** 更容易将 AI 决策和摘要作为一流步骤添加
+- **工作流清晰度：** 干净的可视化构建器，具有清晰的运行上下文和步骤输出
+
+**何时 Zapier 可能更好：**
+- 你需要仅在 Zapier 上可用的小众应用的支持
+- 你的团队已经有许多现有的 Zaps 和围绕 Zapier 的操作工具
+
+如果两个平台都支持你的技术栈，当审查和 AI 协作是你流程的核心时，选择 Relay。
+
+---
 
 ## 故障排除
 
 <AccordionGroup>
-  <Accordion title="身份验证失败">
-    **错误**：“无效的 API 密钥”
-    
-    **解决方案**：
-    - 从 [dashboard](https://olostep.com/dashboard) 检查 API 密钥
-    - 确保 API 密钥中没有多余的空格
-    - 在 Relay.app 中重新连接您的 Olostep 账户
-    - 验证 API 密钥是否有效
+  <Accordion title="API 密钥被拒绝">
+    直接从 [olostep.com/dashboard](https://olostep.com/dashboard) 复制密钥，确保没有尾随空格。如果错误仍然存在，请在 Relay 中重新连接 Olostep 账户。
   </Accordion>
 
-  <Accordion title="抓取返回空内容">
-    **错误**：内容字段为空
-    
-    **解决方案**：
-    - 增加“抓取前等待”时间
-    - 检查网站是否需要登录
-    - 尝试不同的格式（HTML 与 Markdown）
-    - 验证 URL 是否可访问
-    - 检查网站是否阻止自动访问
+  <Accordion title="抓取的内容为空">
+    增加 **抓取前等待时间**（对于 JS 密集型页面，尝试 2000–5000ms）。确认 URL 可以在不登录的情况下公开访问。如果一个域名持续失败，请联系 [info@olostep.com](mailto:info@olostep.com)。
   </Accordion>
 
-  <Accordion title="超出速率限制">
-    **错误**：“超出速率限制”
-    
-    **解决方案**：
-    - 通过延迟间隔工作流运行
-    - 使用批量处理而非单个抓取
-    - 升级您的 Olostep 计划
-    - 在仪表板中检查速率限制
+  <Accordion title="达到速率限制">
+    在抓取密集型运行之间添加延迟，并在大型工作流中使用退避重试。检查 [仪表板](https://olostep.com/dashboard) 中的当前使用情况。
   </Accordion>
 
-  <Accordion title="URL 未抓取">
-    **错误**：特定 URL 抓取失败
-    
-    **解决方案**：
-    - 验证 URL 格式（包括 http:// 或 https://）
-    - 检查 URL 是否需要身份验证
-    - 先在浏览器中测试 URL
-    - 尝试使用国家参数
-    - 对于被阻止的域联系支持
+  <Accordion title="地图步骤耗时超出预期">
+    地图是异步的。首先存储返回的 `map_id`，然后在处理完成后在后续步骤/运行中获取结果。
   </Accordion>
 </AccordionGroup>
 
-## Relay.app 与 Zapier 对比
+---
 
-Relay.app 是 Zapier 的现代替代方案，具有多项优势：
-
-**Relay.app 优势：**
-- **人工参与**：内置手动审核步骤
-- **嵌入式 AI**：AI 功能集成到工作流中
-- **更好的用户体验**：更直观的界面和更清晰的错误消息
-- **更好的定价**：对许多使用案例更具成本效益
-- **更深入的集成**：与流行应用的更全面集成
-
-**何时选择 Zapier：**
-- 需要与不常用的应用集成
-- 偏好更成熟的平台
-- 需要特定的 Zapier 专属功能
-
-有关详细比较，请参见 [Relay.app 的 Zapier 比较](https://www.relay.app/blog/zapier-alternatives)。
-
-## 定价
-
-Olostep 根据 API 使用收费，与 Relay.app 独立：
-
-- **抓取**：按每次抓取收费
-- **批次**：按批次中的每个 URL 收费
-- **爬取**：按每个爬取的页面收费
-- **地图**：按每次地图操作收费
-
-查看当前定价在 [olostep.com/pricing](https://olostep.com/pricing)。
-
-**Relay.app 计划**：您还需要一个有效的 Relay.app 计划来运行工作流。
-
-## 支持
-
-需要帮助使用 Relay.app 集成？
+## 相关内容
 
 <CardGroup cols={2}>
-  <Card title="文档" icon="book" href="https://docs.olostep.com">
-    浏览完整的 API 文档
+  <Card title="抓取 API" icon="file-lines" href="/features/scrapes">
+    抓取端点的完整参考
   </Card>
-  
-  <Card title="支持邮箱" icon="envelope" href="mailto:info@olostep.com">
-    邮箱：info@olostep.com
-  </Card>
-  
-  <Card title="Relay.app 帮助中心" icon="help-circle" href="https://help.relay.app">
-    访问 Relay.app 的帮助中心
-  </Card>
-  
-</CardGroup>
 
-## 相关资源
+  <Card title="批处理 API" icon="layer-group" href="/features/batches">
+    批处理作业的工作原理以及如何检索结果
+  </Card>
 
-<CardGroup cols={2}>
-  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    了解 Scrapes 端点
+  <Card title="爬虫 API" icon="spider-web" href="/features/crawls">
+    爬虫配置和结果检索
   </Card>
-  
-  <Card title="Batches API" icon="layer-group" href="/features/batches">
-    了解 Batches 端点
-  </Card>
-  
-  <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    了解 Crawls 端点
-  </Card>
-  
-  <Card title="Maps API" icon="map" href="/features/maps">
-    了解 Maps 端点
-  </Card>
-  
-  <Card title="Python SDK" icon="python" href="/sdks/python">
-    使用 Olostep 与 Python
-  </Card>
-  
-  <Card title="Zapier 集成" icon="bolt" href="/integrations/zapier">
-    与 Zapier 集成比较
+
+  <Card title="地图 API" icon="map" href="/features/maps">
+    URL 发现和过滤选项
   </Card>
 </CardGroup>
-
-## 开始
-
-准备好使用 Relay.app 自动化您的网络抓取工作流了吗？
-
-<Card title="创建您的第一个工作流" icon="bolt" href="https://www.relay.app/apps/olostep/integrations">
-  开始使用 Olostep 和 Relay.app 构建自动化工作流
-</Card>
-
-将 Olostep 连接到 Relay.app 的现代自动化平台，今天就开始自动化您的网络数据提取！

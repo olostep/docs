@@ -1,0 +1,176 @@
+---
+sidebarTitle: "Olostep + ViaSocket"
+title: "Olostep + ViaSocket"
+description: "Connectez Olostep à n’importe quel client IA — Claude, Cursor, ChatGPT, et plus — en utilisant ViaSocket Mushrooms comme passerelle MCP."
+---
+
+[ViaSocket Mushrooms](https://mushrooms.viasocket.com/) est une passerelle MCP qui relie des applications comme Olostep à n’importe quel client IA via une seule URL de point de terminaison MCP. Une fois que vous connectez Olostep en tant que Mushroom, vous pouvez instruire Claude, Cursor, ChatGPT, ou tout autre client pris en charge pour extraire des sites web, exécuter des tâches par lots, explorer des sites et obtenir des réponses fondées sur l'IA — tout cela en langage clair, sans écrire une seule ligne de code.
+
+## Avant de commencer
+
+- **Un compte Olostep avec une clé API :** [obtenez-en une gratuitement](https://olostep.com/dashboard), aucune carte de crédit requise. Vos 500 premiers crédits sont inclus.
+- **Un compte ViaSocket :** créez-en un sur [viasocket.com](https://viasocket.com/).
+- **Un client IA :** Claude, Cursor, ChatGPT, Windsurf, VS Code, ou tout client compatible MCP.
+
+---
+
+## Configuration
+
+<Steps>
+  <Step title="Créer un nouveau Cluster">
+    Ouvrez [ViaSocket Mushrooms](https://mushrooms.viasocket.com/) et cliquez sur **+ New Cluster**. ViaSocket vous demandera de choisir le client IA auquel ce Cluster se connectera — sélectionnez Claude, Cursor, ChatGPT, ou le client que vous utilisez.
+
+    ![Dialogue Nouveau Cluster ViaSocket — Choisissez votre client IA, montrant Claude, ChatGPT, Cursor, Windsurf et plus](/images/integrations/viasocket/step1.png)
+  </Step>
+
+  <Step title="Parcourir les intégrations">
+    À l'intérieur de votre Cluster, cliquez sur **+ BROWSE INTEGRATIONS** pour ouvrir la bibliothèque Mushrooms — un catalogue de plus de 2 500 applications auxquelles vous pouvez donner accès à votre IA.
+
+    ![Tableau de bord ViaSocket Mushrooms montrant le bouton Add New Mushroom et Browse Integrations](/images/integrations/viasocket/step2.png)
+  </Step>
+
+  <Step title="Trouver Olostep">
+    Recherchez **olostep** dans la barre de recherche. Sélectionnez **Olostep** parmi les résultats.
+
+    ![Recherche d'olostep dans ViaSocket Mushrooms — Olostep apparaît dans les résultats](/images/integrations/viasocket/step3.png)
+  </Step>
+
+  <Step title="Connecter à Olostep">
+    Sur la page de détail d'Olostep, cliquez sur **CONNECT TO OLOSTEP** pour autoriser votre compte et commencer à ajouter des actions Olostep à votre Cluster.
+
+    ![Page de détail d'Olostep dans ViaSocket montrant Connect to get started et le bouton CONNECT TO OLOSTEP](/images/integrations/viasocket/step4.png)
+  </Step>
+
+  <Step title="Sélectionner des actions">
+    Choisissez quelles actions Olostep votre client IA peut utiliser. Les sept sont activées par défaut — désactivez celles dont vous n'avez pas besoin, puis cliquez sur **NEXT**.
+
+    ![Écran Sélectionner des Actions Olostep dans ViaSocket montrant 7 actions disponibles avec des interrupteurs](/images/integrations/viasocket/step5.png)
+  </Step>
+
+  <Step title="Entrer votre clé API Olostep">
+    Collez votre clé API Olostep dans le champ **API Key** et cliquez sur **ADD CONNECTION**. ViaSocket vérifiera la clé et enregistrera l'identifiant.
+
+    ![Écran Ajouter une Nouvelle Connexion pour Olostep dans ViaSocket avec le champ de saisie de la clé API](/images/integrations/viasocket/step6.png)
+
+    Obtenez votre clé depuis le [tableau de bord Olostep →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="Copier votre point de terminaison MCP et connecter votre client IA">
+    Olostep apparaît maintenant comme un Mushroom activé dans votre Cluster. Copiez l'**URL du point de terminaison MCP** (ou le bloc de configuration JSON complet) depuis le panneau **Cursor Configuration** et collez-le dans le fichier de paramètres MCP de votre client IA.
+
+    ![Cluster ViaSocket montrant Olostep activé et l'URL du point de terminaison MCP avec la configuration JSON prête à copier](/images/integrations/viasocket/step7.png)
+
+    La configuration ressemble à ceci — collez-la dans les paramètres de votre client IA :
+
+    ```json
+    {
+      "mcpServers": {
+        "viasocket": {
+          "type": "http",
+          "url": "https://mcp.viasocket.com/mcp/<YOUR-CLUSTER-ID>"
+        }
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Actions
+
+<CardGroup cols={2}>
+  <Card title="Extraire un site web" icon="file-lines">
+    Récupérez le contenu de n'importe quelle URL sous forme de Markdown, HTML, JSON ou texte brut. Gère les pages rendues par JS avec des temps d'attente optionnels et un ciblage par pays.
+  </Card>
+
+  <Card title="Générer une réponse IA" icon="sparkles">
+    Posez une question en langage naturel et obtenez une réponse citée fondée sur les pages que vous fournissez ou une recherche web en direct.
+  </Card>
+
+  <Card title="Scraper d'URL par lot" icon="layer-group">
+    Soumettez jusqu'à 100 000 URLs en une seule tâche, traitées en parallèle. Retourne un `batch_id` pour une récupération asynchrone.
+  </Card>
+
+  <Card title="Récupérer les éléments de lot" icon="download">
+    Récupérez les résultats d'une tâche par lot terminée en utilisant son `batch_id`.
+  </Card>
+
+  <Card title="Démarrer une exploration" icon="spider-web">
+    Commencez à partir d'une URL de départ, suivez les liens, et extrayez toutes les sous-pages. Retourne un `crawl_id`.
+  </Card>
+
+  <Card title="Obtenir des informations sur l'exploration" icon="circle-info">
+    Vérifiez le statut et récupérez les résultats pour une exploration en cours ou terminée par `crawl_id`.
+  </Card>
+
+  <Card title="Créer une carte" icon="map">
+    Obtenez chaque URL sur un site sans extraire le contenu. Utile pour la découverte avant une tâche par lot.
+  </Card>
+</CardGroup>
+
+---
+
+## Exemple : Demander à Claude de rechercher un concurrent
+
+Une fois que votre point de terminaison MCP est configuré dans Claude, vous pouvez émettre des instructions en langage clair comme :
+
+> *"Extrait la page des prix sur acme.com/pricing et donne-moi un résumé de leurs plans et prix."*
+
+Claude appellera l'action **Extraire un site web** d'Olostep via ViaSocket, retournera le contenu de la page et le résumera — pas de constructeur de flux de travail, pas de code.
+
+Vous pouvez enchaîner les actions de la même manière :
+
+> *"Cartographiez toutes les pages sur docs.example.com, puis extrayez par lot les 50 premières et construisez un résumé de base de connaissances."*
+
+---
+
+## Dépannage
+
+<AccordionGroup>
+  <Accordion title="Clé API rejetée">
+    Copiez la clé directement depuis [olostep.com/dashboard](https://olostep.com/dashboard) sans espaces de fin. Supprimez et recréez la connexion Olostep dans ViaSocket si l'erreur persiste.
+  </Accordion>
+
+  <Accordion title="Le client IA ne voit pas les outils Olostep">
+    Assurez-vous d'avoir collé l'URL du point de terminaison MCP (ou le bloc de configuration JSON) dans le bon fichier de paramètres pour votre client IA. Pour Claude Desktop, c'est `claude_desktop_config.json`. Pour Cursor, c'est `.cursor/mcp.json` dans votre projet ou les paramètres globaux de Cursor. Redémarrez le client après avoir enregistré.
+  </Accordion>
+
+  <Accordion title="Le contenu extrait est vide">
+    Augmentez le temps d'attente lors de l'appel à **Extraire un site web** (essayez 2000–5000ms pour les pages lourdes en JS). Confirmez que l'URL est publiquement accessible sans connexion.
+  </Accordion>
+
+  <Accordion title="L'URL du point de terminaison MCP change constamment">
+    L'URL du point de terminaison est liée à votre Cluster. Si vous supprimez et recréez le Cluster, vous obtiendrez une nouvelle URL et devrez mettre à jour la configuration de votre client IA. Gardez l'URL privée — elle autorise toutes les actions sur vos comptes connectés.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Liens connexes
+
+<CardGroup cols={2}>
+  <Card title="API de Scrapes" icon="file-lines" href="/features/scrapes">
+    Référence complète pour le point de terminaison d'extraction
+  </Card>
+
+  <Card title="API de Batches" icon="layer-group" href="/features/batches">
+    Comment fonctionnent les tâches par lot et comment récupérer les résultats
+  </Card>
+
+  <Card title="API de Crawls" icon="spider-web" href="/features/crawls">
+    Configuration des explorations et récupération des résultats
+  </Card>
+
+  <Card title="API de Maps" icon="map" href="/features/maps">
+    Options de découverte et de filtrage des URL
+  </Card>
+
+  <Card title="Serveur MCP" icon="server" href="/integrations/mcp-server">
+    Utilisez directement le serveur MCP natif d'Olostep
+  </Card>
+
+  <Card title="Site Web ViaSocket" icon="link" href="https://viasocket.com">
+    Plateforme ViaSocket
+  </Card>
+</CardGroup>

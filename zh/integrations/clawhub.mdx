@@ -1,0 +1,183 @@
+---
+sidebarTitle: "Olostep + OpenClaw"
+title: "Olostep + OpenClaw 集成"
+description: "为你的 OpenClaw 代理提供实时网页访问，拥有 13 项技能和 9 工具的 MCP 服务器"
+---
+
+你的 OpenClaw 代理可以阅读文档，但无法阅读网页。[Olostep Web Agent 插件](https://clawhub.ai/plugins/olostep-web-agent)解决了这个问题——在你的代理工作流程中直接搜索、抓取、爬取和提取任何网站的结构化数据。
+
+一次安装即可为你提供 **13 项技能** 用于高级任务（从实时 StackOverflow 线程调试错误，从当前文档编写集成代码，使用结构化比较研究工具）和一个 **9 工具 MCP 服务器** 用于直接的编程访问。JS 密集型 SPA、CAPTCHA、Cloudflare、住宅代理——自动处理。
+
+## 安装
+
+```bash
+clawhub install olostep
+```
+
+就是这样。如果你更喜欢手动连接 MCP 服务器，请将以下内容添加到你的 OpenClaw 配置中：
+
+```json
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+在 [olostep.com/auth](https://olostep.com/auth) 获取免费 API 密钥——每月 500 次请求，无需信用卡。
+
+## 技能
+
+### 核心数据技能
+
+这六项技能是构建模块。每项技能都能很好地完成一件事，你的代理可以将它们组合用于复杂的工作流程。
+
+<CardGroup cols={2}>
+  <Card title="scrape" icon="file-lines">
+    将任何 URL 转换为干净的 markdown、HTML、JSON 或文本。完整的浏览器渲染、反机器人绕过、地理定位、浏览器操作（点击、滚动、输入），以及常见网站类型的预构建解析器。
+  </Card>
+
+  <Card title="search" icon="magnifying-glass">
+    三种模式：带有引用的 AI 合成答案、原始 Google SERP 数据（自然结果、PAA、知识图谱），以及域范围内的 URL 发现。
+  </Card>
+
+  <Card title="crawl" icon="spider-web">
+    从一个 URL 开始，跟随链接，抓取发现的每个页面。设置最大页面数，包含/排除 URL 模式，并控制爬取深度。
+  </Card>
+
+  <Card title="batch" icon="layer-group">
+    并行抓取多达 10,000 个 URL，具有完整渲染。用 `custom_id` 标记每个 URL，以将结果映射回你的来源。
+  </Card>
+
+  <Card title="map" icon="map">
+    发现网站上的每个 URL，而不抓取它们。通过 glob 模式过滤，按搜索查询相关性排名，用 `top_n` 限制。
+  </Card>
+
+  <Card title="answers" icon="question">
+    提出一个简单语言的问题，获得基于实时网络来源的 AI 合成答案。传递一个 `json` 参数以获得匹配你定义的任何架构的结构化输出。
+  </Card>
+</CardGroup>
+
+### 工作流程技能
+
+这七项技能将多个核心操作串联在一起。它们负责思考——你的代理只需为工作选择正确的技能。
+
+<CardGroup cols={2}>
+  <Card title="research" icon="microscope">
+    “比较 Node.js 的前 3 个 ORM”——代理搜索多个来源，抓取定价和功能页面，并返回带有引用和建议的结构化比较。
+  </Card>
+
+  <Card title="debug-error" icon="bug">
+    粘贴一个堆栈跟踪或错误消息。代理搜索 GitHub 问题和 StackOverflow 上的确切错误，抓取相关线程，并返回一个基于其他开发者实际解决方案的修复。
+  </Card>
+
+  <Card title="docs-to-code" icon="code">
+    指向一个文档 URL。代理抓取当前的 API 参考并从实际发布的内容中编写工作集成代码——而不是从可能引用已弃用方法的过时训练数据中。
+  </Card>
+
+  <Card title="migrate-code" icon="code-branch">
+    提供你的当前版本和目标版本。代理抓取迁移指南，提取每个重大更改的前后模式，并重写你的代码以匹配。
+  </Card>
+
+  <Card title="extract-schema" icon="table">
+    将任何非结构化网页——产品列表、职位发布、文章——转换为匹配你提供的 TypeScript 接口、JSON 架构或数据库模型的类型化 JSON。
+  </Card>
+
+  <Card title="integrate" icon="plug">
+    自动检测你的技术栈（语言、框架、AI 工具包）并编写完整的 Olostep SDK 集成：安装命令、客户端设置、工具连接和验证步骤。
+  </Card>
+
+  <Card title="setup" icon="key">
+    配置 Olostep API 密钥并验证连接。包括常见设置问题的故障排除。
+  </Card>
+</CardGroup>
+
+## MCP 工具
+
+捆绑的 MCP 服务器 (`olostep-mcp`) 为你的代理提供 9 个可以直接调用的工具。当你需要超出工作流程技能提供的精细控制时使用这些工具。
+
+| 工具 | 功能 |
+|------|-------------|
+| `scrape_website` | 抓取单个 URL 到 markdown、HTML、JSON 或文本 |
+| `get_webpage_content` | 将网页获取为干净的、适合 LLM 的 markdown |
+| `search_web` | 搜索实时网络，获取 AI 合成答案 |
+| `google_search` | 结构化的 Google SERP 数据——自然结果、PAA、知识图谱 |
+| `answers` | 提出问题，获得带有引用的答案，并可选结构化 JSON 输出 |
+| `batch_scrape_urls` | 并行抓取多达 10,000 个 URL，具有完整渲染 |
+| `create_crawl` | 通过从起始 URL 跟随链接来爬取网站 |
+| `create_map` | 发现网站上的所有 URL，可按模式和查询过滤 |
+| `get_website_urls` | 从特定域查找并检索相关 URL |
+
+## 实际应用示例
+
+### “为什么会失败？”——从实时网络调试
+
+你将 `ECONNRESET when calling Stripe webhook endpoint` 粘贴到你的代理中。它搜索 GitHub 问题和 StackOverflow 上的确切错误，抓取最相关的三个线程，并返回一个具体的修复——不是“检查你的网络设置”，而是其他开发者遇到同样问题时解决的实际超时配置。
+
+### “编写集成”——从当前文档中编写代码，而不是过时的训练数据
+
+你需要集成一个支付 API。`docs-to-code` 技能抓取当前的 API 参考——今天发布的版本，而不是六个月前你的模型训练的版本——并使用实际存在的参数和端点编写工作代码。
+
+### “我应该使用哪一个？”——结构化工具比较
+
+评估 ORM？比较认证提供商？`research` 技能搜索多个来源，抓取真实的定价页面和功能矩阵，并返回带有引用的结构化比较表。你得到的是基于每个产品网站上实际内容的推荐，而不是基于训练数据的流行度。
+
+### 从任何文档网站构建 RAG 管道
+
+```
+map   → 发现文档网站上的每个 URL
+batch → 并行抓取所有页面为干净的 markdown
+      → 输入到你的向量存储中
+```
+
+两个技能，一个管道。适用于拥有数百或数千页的文档网站。
+
+### 大规模提取结构化数据
+
+```
+map   → 找到所有产品、列表或职位 URL
+batch → 使用预构建解析器抓取每个页面 → 类型化 JSON
+      → 输入到你的数据库、API 或种子文件中
+```
+
+### 迁移到新框架版本
+
+你正在将 Next.js 从 13 升级到 15。`migrate-code` 技能抓取官方迁移指南，提取每个重大更改的前后代码模式，并重写你的文件以匹配——基于真实文档，而不是模型的最佳猜测。
+
+## 预构建解析器
+
+将 `parser` 参数传递给任何抓取调用，并获得类型化 JSON 而不是原始内容。无需定义架构——这些解析器为你处理提取。
+
+| 解析器 | 返回 |
+|--------|---------|
+| `@olostep/google-search` | 自然结果、知识图谱、People Also Ask |
+| `@olostep/amazon-it-product` | 价格、评分、功能、可用性 |
+| `@olostep/extract-emails` | 页面上找到的每个电子邮件地址 |
+| `@olostep/extract-calendars` | 结构化日历事件 |
+| `@olostep/extract-socials` | 社交媒体个人资料链接 |
+
+## 链接
+
+<CardGroup cols={2}>
+  <Card title="在 ClawHub 上安装" icon="store" href="https://clawhub.ai/plugins/olostep-web-agent">
+    插件列表、版本历史和一键安装
+  </Card>
+
+  <Card title="获取 API 密钥" icon="key" href="https://olostep.com/auth">
+    每月 500 次免费请求，无需信用卡
+  </Card>
+
+  <Card title="MCP 服务器文档" icon="server" href="/integrations/mcp-server">
+    完整的 MCP 服务器设置，用于 Cursor、Claude Desktop 和其他客户端
+  </Card>
+
+  <Card title="API 参考" icon="book" href="https://docs.olostep.com">
+    完整的端点文档和示例
+  </Card>
+</CardGroup>

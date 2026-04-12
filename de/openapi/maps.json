@@ -65,7 +65,7 @@
                     "cursor": {
                       "type": "string",
                       "nullable": true,
-                      "description": "Paginierungscursor, um das nächste Set von URLs abzurufen. Wenn null, wurden alle URLs abgerufen."
+                      "description": "Paginierungscursor, um den nächsten Satz von URLs abzurufen. Wenn null, wurden alle URLs abgerufen."
                     }
                   }
                 }
@@ -87,7 +87,7 @@
     "/v1/maps": {
       "post": {
         "summary": "Alle URLs auf einer bestimmten Website abrufen",
-        "description": "Dieser Endpunkt ermöglicht es Benutzern, alle URLs auf einer bestimmten Website abzurufen. Bei komplexen Websites kann es bis zu 120 Sekunden dauern. Bei großen Websites werden die Ergebnisse mit cursor-basierter Paginierung aufgeteilt.",
+        "description": "Dieser Endpunkt ermöglicht es Benutzern, alle URLs auf einer bestimmten Website abzurufen. Bei komplexen Websites kann dies bis zu 120 Sekunden dauern. Bei großen Websites werden die Ergebnisse mit cursor-basierter Paginierung paginiert.",
         "security": [
           {
             "Authorization": []
@@ -111,7 +111,7 @@
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "Eine optionale Zahl, um die Ergebnisse auf die obersten n Links für eine Suchanfrage zu begrenzen."
+                    "description": "Eine optionale Zahl, um die Suche auf nur die obersten n Links zu beschränken."
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -243,7 +243,7 @@
             "description": "Ungültige Anfrage aufgrund falscher oder fehlender Parameter."
           },
           "401": {
-            "description": "Unbefugter Zugriff aufgrund eines fehlenden oder ungültigen API-Tokens."
+            "description": "Unautorisierter Zugriff aufgrund eines fehlenden oder ungültigen API-Tokens."
           },
           "500": {
             "description": "Interner Serverfehler."

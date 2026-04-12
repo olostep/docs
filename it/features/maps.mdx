@@ -4,14 +4,14 @@ icon: "map"
 title: "Mappe"
 description: "Ottieni tutti gli URL su un sito web."
 ---
-Attraverso l'endpoint Olostep `/v1/maps` puoi ottenere tutti gli URL su un sito web. Questo è utile per la scoperta di contenuti, l'analisi della struttura del sito (ad esempio, SEO) o per decidere quali URL vuoi estrarre successivamente.
+Attraverso l'endpoint `/v1/maps` di Olostep puoi ottenere tutti gli URL su un sito web. Questo è utile per la scoperta di contenuti, l'analisi della struttura del sito (ad esempio, SEO) o per decidere quali URL vuoi estrarre successivamente.
 
 - Ottieni tutti gli URL su un sito web (inclusi sitemaps e link scoperti)
-- Usa modelli speciali per includere/escludere percorsi (ad es. `/blog/**`)
+- Usa pattern speciali per includere/escludere percorsi (ad esempio `/blog/**`)
 - Pagina risposte grandi con `cursor` (fino a 10MB per risposta)
 - Limita il volume con `top_n`
 
-Per i dettagli dell'API vedi la [Riferimento API Endpoint Mappa](/api-reference/maps/create).
+Per i dettagli sull'API vedi la [Riferimento API dell'Endpoint Mappa](/api-reference/maps/create).
 
 ## Installazione
 
@@ -26,7 +26,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl è disponibile di default su macOS, Linux e Windows
 ```
 
 ```javascript Node (API)
@@ -41,7 +41,7 @@ pip install requests
 
 ## Utilizzo
 
-Invia una richiesta POST con l'`url` del sito web. Facoltativamente passa `include_urls`, `exclude_urls` (modelli glob), e `top_n`.
+Invia una richiesta POST con l'`url` del sito web. Opzionalmente passa `include_urls`, `exclude_urls` (pattern glob), e `top_n`.
 
 <CodeGroup>
 
@@ -109,21 +109,21 @@ print(json.dumps(response.json(), indent=2))
 
 </CodeGroup>
 
-Il tempo di risposta è tipicamente entro pochi secondi ma può richiedere fino a 120 secondi per siti web più complessi. Può estrarre tutti gli URL da un sito web, inclusi backlink e quelli non presenti nei Sitemaps. Puoi anche decidere i percorsi degli URL che vuoi includere o escludere dalla risposta.
+Il tempo di risposta è tipicamente di pochi secondi ma può richiedere fino a 120 secondi per siti web più complessi. Può estrarre tutti gli URL da un sito web, inclusi i backlink e quelli non presenti nei Sitemaps. Puoi anche decidere i percorsi degli URL che vuoi includere o escludere dalla risposta.
 
-Di default l'endpoint restituisce circa 100k URL in una singola chiamata (massimo 10MB). Se la risposta include più dati, l'API restituisce un parametro `cursor` che può essere utilizzato per la paginazione e ottenere gli URL successivi. Per maggiori dettagli consulta il [Riferimento API](/api-reference/maps/create#body-cursor)
+Per impostazione predefinita l'endpoint restituisce circa 100k URL in una singola chiamata (max 10MB). Se la risposta include più dati, l'API restituisce un parametro `cursor` che può essere utilizzato per la paginazione e ottenere gli URL successivi. Per maggiori dettagli fai riferimento alla [Riferimento API](/api-reference/maps/create#body-cursor)
 
 Questo endpoint è particolarmente utile quando hai bisogno di:
 - Scoprire tutte le pagine di contenuto su un sito web
 - Analizzare la struttura e la gerarchia del sito
-- Preparare URL per l'elaborazione in batch
+- Preparare gli URL per l'elaborazione in batch
 - Decidere quali URL specifici estrarre
 
-Per un controllo più dettagliato sugli URL restituiti puoi usare i parametri `include_urls` e `exclude_urls`.
+Per un controllo più dettagliato sugli URL restituiti puoi utilizzare i parametri `include_urls` e `exclude_urls`.
 
 ### Esempio
 
-Supponiamo che da www.brex.com tu voglia estrarre tutti gli URL che hanno i percorsi dopo `/product/` ad es. `https://www.brex.com/product/api/no-code` ma anche includere `www.brex.com/product`.
+Supponiamo che da www.brex.com tu voglia estrarre tutti gli URL che hanno i percorsi dopo `/product/` ad esempio `https://www.brex.com/product/api/no-code` ma anche includere `www.brex.com/product`.
 Puoi usare il seguente codice:
 
 <CodeGroup>
@@ -213,8 +213,8 @@ print(response.text)
 
 ## Conclusione
 
-L'endpoint delle mappe è uno strumento potente per la scoperta di contenuti e l'analisi del sito. Fornisce un elenco completo di URL su un sito web, permettendoti di estrarre contenuti da pagine specifiche o analizzare la struttura del sito. Questo endpoint è particolarmente utile per professionisti SEO, content marketer, agenti AI che devono analizzare il contenuto o la struttura del sito web.
+L'endpoint mappe è uno strumento potente per la scoperta di contenuti e l'analisi del sito. Fornisce un elenco completo di URL su un sito web, permettendoti di estrarre contenuti da pagine specifiche o analizzare la struttura del sito. Questo endpoint è particolarmente utile per i professionisti SEO, i content marketer, gli agenti AI che devono analizzare il contenuto o la struttura del sito web.
 
 ## Prezzi
 
-La mappa costa 1 credito. Poi per ogni 1000 URL extra restituiti nella risposta, viene addebitato un credito aggiuntivo.
+La mappa costa 1 credito. Poi, per ogni 1000 URL extra restituiti nella risposta, viene addebitato un credito aggiuntivo.

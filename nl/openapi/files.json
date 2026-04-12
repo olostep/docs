@@ -21,7 +21,7 @@
   "paths": {
     "/v1/files": {
       "post": {
-        "summary": "Bestand Uploaden Aanmaken",
+        "summary": "Maak Bestand Upload",
         "description": "Genereer een vooraf ondertekende URL voor het uploaden van een JSON-bestand. Na het uploaden moet je de complete endpoint aanroepen om de upload te voltooien. De upload-URL verloopt na 10 minuten.",
         "security": [
           {
@@ -75,7 +75,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Aangemaakte epoch-tijdstempel"
+                      "description": "Gemaakt epoch-tijdstempel"
                     },
                     "upload_url": {
                       "type": "string",
@@ -103,7 +103,7 @@
         }
       },
       "get": {
-        "summary": "Bestanden Lijst",
+        "summary": "Lijst Bestanden",
         "description": "Lijst van alle voltooide bestanden voor jouw team. Optioneel filteren op doel. Geeft alleen bestanden terug met status 'completed'.",
         "security": [
           {
@@ -152,7 +152,7 @@
                           },
                           "created": {
                             "type": "integer",
-                            "description": "Aangemaakte epoch-tijdstempel"
+                            "description": "Gemaakt epoch-tijdstempel"
                           },
                           "filename": {
                             "type": "string",
@@ -225,7 +225,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Aangemaakte epoch-tijdstempel"
+                      "description": "Gemaakt epoch-tijdstempel"
                     },
                     "filename": {
                       "type": "string",
@@ -265,7 +265,7 @@
     },
     "/v1/files/{file_id}": {
       "get": {
-        "summary": "Verkrijg Bestandsmetadata op ID",
+        "summary": "Haal Bestandsmetadata op via ID",
         "description": "Haal metadata op voor een bestand via zijn ID.",
         "security": [
           {
@@ -285,7 +285,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle reactie met bestandsmetadata.",
+            "description": "Succesvolle respons met bestandsmetadata.",
             "content": {
               "application/json": {
                 "schema": {
@@ -301,7 +301,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Aangemaakte epoch-tijdstempel"
+                      "description": "Gemaakt epoch-tijdstempel"
                     },
                     "filename": {
                       "type": "string",
@@ -393,8 +393,8 @@
     },
     "/v1/files/{file_id}/content": {
       "get": {
-        "summary": "Haal Bestandsobject op via ID",
-        "description": "Verkrijg een vooraf ondertekende URL om de inhoud van een \"completed\" bestand te downloaden. Optioneel kun je de vervaltijd voor de download-URL specificeren met de expires_in queryparameter (standaard is 600 seconden / 10 minuten).",
+        "summary": "Haal Bestand Object op via ID",
+        "description": "Haal een vooraf ondertekende URL op om de inhoud van een voltooid bestand te downloaden. Geef optioneel de vervaltijd voor de download-URL op met behulp van de expires_in queryparameter (standaard is 600 seconden / 10 minuten).",
         "security": [
           {
             "Authorization": []
@@ -439,7 +439,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "description": "Aangemaakte epoch-tijdstempel"
+                      "description": "Gemaakt epoch-tijdstempel"
                     },
                     "filename": {
                       "type": "string",
@@ -452,11 +452,11 @@
                     "download_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "Vooraf ondertekende URL voor het downloaden van het bestand. Verloopt na de gespecificeerde expires_in tijd."
+                      "description": "Vooraf ondertekende URL voor het downloaden van het bestand. Verloopt na de opgegeven expires_in tijd."
                     },
                     "expires_in": {
                       "type": "integer",
-                      "description": "Aantal seconden totdat de download-URL verloopt."
+                      "description": "Aantal seconden totdat de download-URL verloopt"
                     }
                   }
                 }
@@ -464,7 +464,7 @@
             }
           },
           "400": {
-            "description": "Foute aanvraag. Bestand niet \"completed\"."
+            "description": "Foute aanvraag. Bestand niet voltooid."
           },
           "401": {
             "description": "Ongeldige API-sleutel"

@@ -1,35 +1,34 @@
 ---
-sidebarTitle: "Apify"
-icon: "robot"
-title: "Integración con Apify"
+sidebarTitle: "Olostep + Apify"
+title: "Integración de Olostep + Apify"
 description: "Automatiza la búsqueda web, scraping y crawling con Apify Actors usando Olostep — la API para buscar, extraer y estructurar datos web."
 ---
 
-Olostep es una API de búsqueda web, scraping y crawling — una API para buscar, extraer y estructurar datos web. Esta guía muestra cómo usar Olostep con Apify Actors para construir pipelines de datos web confiables de extremo a extremo.
+Olostep es una API de búsqueda, scraping y crawling web — una API para buscar, extraer y estructurar datos web. Esta guía muestra cómo usar Olostep con Apify Actors para construir pipelines de datos web confiables de extremo a extremo.
 
 ## Lo que puedes construir
 
 <CardGroup cols={2}>
-  <Card title="Extraer Sitio Web" icon="file-lines">
+  <Card title="Scrapear Sitio Web" icon="file-lines">
     Extrae contenido de cualquier URL en Markdown, HTML, JSON o Texto
   </Card>
-  <Card title="Extraer URLs en Lote" icon="layer-group">
+  <Card title="Scrapear URLs en Lote" icon="layer-group">
     Procesa grandes listas de URLs en paralelo con salidas estructuradas
   </Card>
-  <Card title="Crear Rastreo" icon="spider-web">
-    Descubre y extrae páginas enlazadas para construir conjuntos de datos completos
+  <Card title="Crear Crawl" icon="spider-web">
+    Descubre y scrapea páginas enlazadas para construir conjuntos de datos completos
   </Card>
   <Card title="Crear Mapa" icon="map">
     Extrae todas las URLs de un sitio web (descubrimiento tipo sitemap)
   </Card>
   <Card title="Respuestas impulsadas por IA" icon="robot">
-    Haz preguntas y obtén respuestas estructuradas en JSON con fuentes
+    Haz preguntas y obtén respuestas JSON estructuradas con fuentes
   </Card>
 </CardGroup>
 
-## Inicio rápido
+## Comienzo rápido
 
-### 1) Instalar Apify CLI
+### 1) Instala Apify CLI
 
 ```bash
 npm install -g apify-cli
@@ -60,7 +59,7 @@ Ejemplo de entrada:
 }
 ```
 
-### 4) Desplegar en Apify (nube)
+### 4) Despliega en Apify (nube)
 
 ```bash
 apify login
@@ -72,19 +71,19 @@ Luego abre la Consola de Apify → Actores → ejecuta el actor con tu entrada d
 ### Ejecutar en la Consola de Apify (paso a paso)
 
 1. Abre tu Actor en la Consola de Apify → Fuente → Entrada.  
-2. En la pestaña Manual verás un campo visible "Olostep API Key". Pega tu clave desde el Dashboard de Olostep.  
-3. Elige una operación (por defecto es "scrape").  
-4. Completa los campos relevantes (para "scrape", establece "URL to Scrape").  
+2. En la pestaña Manual verás un campo visible “Clave API de Olostep”. Pega tu clave desde el Dashboard de Olostep.  
+3. Elige una operación (por defecto es “scrape”).  
+4. Llena los campos relevantes (para “scrape”, establece “URL para Scrapear”).  
 5. Haz clic en Guardar → Iniciar.  
 6. Cuando la ejecución termine, abre la pestaña Dataset para descargar los resultados (JSON/CSV/Excel).
 
 Notas:
-- Para "URL to Scrape", puedes pegar con o sin esquema. Si falta, el actor automáticamente antepone `https://`.  
-- Si un sitio es pesado en JavaScript y ves un tiempo de espera, establece "Wait Before Scraping" a 2000–5000 ms y ejecuta de nuevo.
+- Para “URL para Scrapear”, puedes pegar con o sin esquema. Si falta, el actor automáticamente antepone `https://`.  
+- Si un sitio es pesado en JavaScript y ves un tiempo de espera agotado, establece “Esperar Antes de Scrapear” a 2000–5000 ms y ejecuta de nuevo.
 
 ## Operaciones disponibles
 
-### Extraer Sitio Web
+### Scrapear Sitio Web
 Extrae contenido de una sola URL. Ideal para automatización a nivel de página.
 
 <ParamField path="operation" type="constant" default="scrape">
@@ -94,19 +93,19 @@ Extrae contenido de una sola URL. Ideal para automatización a nivel de página.
   Tu clave API de Olostep (Bearer)
 </ParamField>
 <ParamField path="url_to_scrape" type="string" required>
-  La URL a extraer (debe incluir http:// o https://)
+  La URL para scrapear (debe incluir http:// o https://)
 </ParamField>
 <ParamField path="formats" type="dropdown" default="markdown">
   Uno de: Markdown, HTML, JSON, Texto
 </ParamField>
 <ParamField path="country" type="string">
-  Código de país opcional (por ejemplo, "US", "GB", "CA")
+  Código de país opcional (ej., "US", "GB", "CA")
 </ParamField>
 <ParamField path="wait_before_scraping" type="integer">
   Tiempo de espera opcional en ms para renderizado de JavaScript (0–10000)
 </ParamField>
 <ParamField path="parser" type="string">
-  ID de parser opcional (por ejemplo, "@olostep/amazon-product")
+  ID de parser opcional (ej., "@olostep/amazon-product")
 </ParamField>
 
 Campos de salida:
@@ -114,7 +113,7 @@ Campos de salida:
 - markdown_content / html_content / json_content / text_content
 - URLs alojadas (si están disponibles), metadatos de la página
 
-### Extraer URLs en Lote
+### Scrapear URLs en Lote
 Procesa muchas URLs a la vez con formato y estructura consistentes.
 
 <ParamField path="operation" type="constant" default="batch">
@@ -143,8 +142,8 @@ Procesa muchas URLs a la vez con formato y estructura consistentes.
 Campos de salida:
 - batch_id, status, total_urls, created_at, formats, country, parser, urls[]
 
-### Crear Rastreo
-Sigue enlaces y extrae múltiples páginas desde una URL de inicio.
+### Crear Crawl
+Sigue enlaces y scrapea múltiples páginas desde una URL de inicio.
 
 <ParamField path="operation" type="constant" default="crawl">
   Debe ser "crawl"
@@ -153,10 +152,10 @@ Sigue enlaces y extrae múltiples páginas desde una URL de inicio.
   Tu clave API de Olostep
 </ParamField>
 <ParamField path="start_url" type="string" required>
-  URL de inicio para el rastreo
+  URL de inicio para el crawl
 </ParamField>
 <ParamField path="max_pages" type="integer" default="10">
-  Máximo de páginas a rastrear
+  Máximo de páginas para scrapear
 </ParamField>
 <ParamField path="follow_links" type="boolean" default="true">
   Seguir enlaces en la página
@@ -175,7 +174,7 @@ Campos de salida:
 - crawl_id, object, status, start_url, max_pages, follow_links, created, formats
 
 ### Crear Mapa
-Descubre todas las URLs en un sitio web y prepáralas para scraping en lote posterior.
+Descubre todas las URLs en un sitio web y prepárate para scrapear en lote más tarde.
 
 <ParamField path="operation" type="constant" default="map">
   Debe ser "map"
@@ -184,7 +183,7 @@ Descubre todas las URLs en un sitio web y prepáralas para scraping en lote post
   Tu clave API de Olostep
 </ParamField>
 <ParamField path="website_url" type="string" required>
-  El sitio web a mapear
+  El sitio web para mapear
 </ParamField>
 <ParamField path="search_query" type="string">
   Filtro de consulta opcional
@@ -193,10 +192,10 @@ Descubre todas las URLs en un sitio web y prepáralas para scraping en lote post
   Limitar número de URLs
 </ParamField>
 <ParamField path="include_patterns" type="string">
-  Incluir glob(s), por ejemplo, "/products/**"
+  Incluir glob(s), ej. "/products/**"
 </ParamField>
 <ParamField path="exclude_patterns" type="string">
-  Excluir glob(s), por ejemplo, "/admin/**"
+  Excluir glob(s), ej. "/admin/**"
 </ParamField>
 
 Campos de salida:
@@ -204,7 +203,7 @@ Campos de salida:
 
 ## Ejemplos de JSON para copiar y pegar (Consola → Entrada → JSON)
 
-### Extraer
+### Scrape
 ```json
 {
   "operation": "scrape",
@@ -215,7 +214,7 @@ Campos de salida:
 }
 ```
 
-### Lote
+### Batch
 ```json
 {
   "operation": "batch",
@@ -225,7 +224,7 @@ Campos de salida:
 }
 ```
 
-### Rastreo
+### Crawl
 ```json
 {
   "operation": "crawl",
@@ -237,7 +236,7 @@ Campos de salida:
 }
 ```
 
-### Mapa
+### Map
 ```json
 {
   "operation": "map",
@@ -248,7 +247,7 @@ Campos de salida:
 }
 ```
 
-### Respuestas
+### Answers
 ```json
 {
   "operation": "answers",
@@ -261,20 +260,20 @@ Campos de salida:
 ## Ejemplos de flujos de trabajo
 
 <AccordionGroup>
-  <Accordion title="Descubrir y Extraer Productos">
+  <Accordion title="Descubrir y Scrapear Productos">
     1) Crear Mapa → incluir "/products/**"  
     2) Analizar URLs → construir arreglo de lote  
-    3) Extraer URLs en Lote → formatos: JSON  
+    3) Scrapear URLs en Lote → formatos: JSON  
     4) Enviar a Google Sheets / Airtable
   </Accordion>
   <Accordion title="Monitoreo de Contenido Diario">
     1) Programar actor (diario)  
-    2) Extraer Sitio Web → formatos: Markdown  
+    2) Scrapear Sitio Web → formatos: Markdown  
     3) Resumir con LLM  
     4) Notificar en Slack
   </Accordion>
-  <Accordion title="Base de Conocimiento de Competidores">
-    1) Crear Rastreo (blog/docs)  
+  <Accordion title="Base de Conocimiento de Competencia">
+    1) Crear Crawl (blog/docs)  
     2) Almacenar salidas en Notion  
     3) Refrescar semanalmente con Programación
   </Accordion>
@@ -288,7 +287,7 @@ Olostep soporta parsers para estructurar datos de sitios populares.
   <Card title="Producto de Amazon" icon="amazon">
     `@olostep/amazon-product` → título, precio, calificación, reseñas, imágenes, variantes
   </Card>
-  <Card title="Búsqueda en Google" icon="google">
+  <Card title="Búsqueda de Google" icon="google">
     `@olostep/google-search` → resultados, títulos, fragmentos, URLs
   </Card>
   <Card title="Google Maps" icon="map">
@@ -303,23 +302,23 @@ Olostep soporta parsers para estructurar datos de sitios populares.
 
 <AccordionGroup>
   <Accordion title="Prefiere lote para 3+ URLs">
-    Más rápido, más barato, más fácil de monitorear y respetar límites de tasa.
+    Más rápido, más barato, más fácil de monitorear y respetar los límites de tasa.
   </Accordion>
   <Accordion title="Usa tiempos de espera apropiados">
-    Sitios pesados en JS: incrementa `wait_before_scraping` (por ejemplo, 2000–5000ms).
+    Sitios pesados en JS: aumenta `wait_before_scraping` (ej., 2000–5000ms).
   </Accordion>
-  <Accordion title="Filtra antes de extraer">
+  <Accordion title="Filtra antes de scrapear">
     Evita tareas innecesarias — verifica cambios primero, mantén el estado de desduplicación.
   </Accordion>
-  <Accordion title="Almacena contenido grande a través de URLs alojadas">
+  <Accordion title="Almacena contenido grande vía URLs alojadas">
     Usa salidas alojadas para evitar límites de tamaño de carga en flujos de Apify.
   </Accordion>
-  <Accordion title="Trata operaciones asincrónicas como de larga duración">
-    Lote/Rastreo/Mapa devuelven IDs; recupéralos más tarde o encadénalos con un retraso.
+  <Accordion title="Trata operaciones asíncronas como de larga duración">
+    Batch/Crawl/Map devuelven IDs; recupéralos más tarde o encadénalos con un retraso.
   </Accordion>
   <Accordion title="Maneja tiempos de espera transitorios limpiamente">
     Si ves un 504 o un tiempo de espera transitorio, el actor automáticamente reintenta una vez con un corto tiempo de espera.  
-    También puedes establecer “Wait Before Scraping” a 2000–5000 ms para páginas pesadas en JS.
+    También puedes establecer “Esperar Antes de Scrapear” a 2000–5000 ms para páginas pesadas en JS.
   </Accordion>
 </AccordionGroup>
 
@@ -329,7 +328,7 @@ Olostep soporta parsers para estructurar datos de sitios populares.
   <Accordion title="Autenticación fallida">
     - Verifica la clave API desde el dashboard  
     - Elimina espacios finales  
-    - Reingresa en el formulario de entrada de Apify
+    - Vuelve a ingresar en el formulario de entrada de Apify
   </Accordion>
   <Accordion title="Contenido vacío">
     - Aumenta el tiempo de espera  
@@ -337,24 +336,24 @@ Olostep soporta parsers para estructurar datos de sitios populares.
     - Prueba un formato de salida diferente
   </Accordion>
   <Accordion title="Límite de tasa excedido">
-    - Espacia ejecuciones mediante programación  
+    - Espacia las ejecuciones mediante programación  
     - Prefiere lote para muchas URLs  
     - Actualiza el plan de Olostep si es necesario
   </Accordion>
   <Accordion title="Sitios bloqueados o dinámicos">
     - Prueba el parámetro de país  
-    - Ajusta espera y parser  
-    - Contacta soporte para orientación
+    - Ajusta la espera y el parser  
+    - Contacta al soporte para orientación
   </Accordion>
 </AccordionGroup>
 
 ## Precios
 
-Olostep cobra por uso de API (independientemente de Apify):
+Olostep cobra por uso de API (independiente de Apify):
 - Scrapes → por scrape
-- Lotes → por URL
-- Rastreo → por página
-- Mapas → por operación
+- Batches → por URL
+- Crawls → por página
+- Maps → por operación
 
 Consulta `https://olostep.com/pricing`.
 
@@ -368,15 +367,15 @@ Consulta `https://olostep.com/pricing`.
 
 <CardGroup cols={2}>
   <Card title="API de Scrapes" icon="file-lines" href="/features/scrapes">
-    Extrae Markdown, HTML, texto o JSON estructurado amigable con LLM de cualquier URL.
+    Extrae Markdown, HTML, texto o JSON estructurado compatible con LLM de cualquier URL.
   </Card>
-  <Card title="API de Lotes" icon="layer-group" href="/features/batches">
-    Procesa hasta 10k URLs concurrentemente y recupera resultados más tarde.
+  <Card title="API de Batches" icon="layer-group" href="/features/batches">
+    Procesa hasta 10k URLs simultáneamente y recupera resultados más tarde.
   </Card>
-  <Card title="API de Rastreo" icon="spider-web" href="/features/crawls">
-    Descubre y extrae recursivamente el contenido de un sitio.
+  <Card title="API de Crawls" icon="spider-web" href="/features/crawls">
+    Descubre y scrapea recursivamente el contenido de un sitio.
   </Card>
-  <Card title="API de Mapas" icon="map" href="/features/maps">
+  <Card title="API de Maps" icon="map" href="/features/maps">
     Obtén todas las URLs en un sitio web para preparar scrapes en lote.
   </Card>
 </CardGroup>
@@ -384,13 +383,16 @@ Consulta `https://olostep.com/pricing`.
 ## Soporte
 
 <CardGroup cols={2}>
+  <Card title="Sitio Web de Apify" icon="link" href="https://apify.com">
+    Plataforma Apify
+  </Card>
+  <Card title="Documentación de Apify" icon="book" href="https://docs.apify.com">
+    Documentación de la plataforma y SDK de Apify
+  </Card>
   <Card title="Documentación" icon="book" href="https://docs.olostep.com">
     Documentación completa de la API
   </Card>
   <Card title="Correo de Soporte" icon="envelope" href="mailto:info@olostep.com">
     info@olostep.com
-  </Card>
-  <Card title="Documentación de Apify" icon="link" href="https://docs.apify.com">
-    Documentación de la plataforma y SDK de Apify
   </Card>
 </CardGroup>

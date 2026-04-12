@@ -1,0 +1,183 @@
+---
+sidebarTitle: "Olostep + OpenClaw"
+title: "Olostep + OpenClaw インテグレーション"
+description: "13のスキルと9つのツールを備えたMCPサーバーでOpenClawエージェントにライブウェブアクセスを提供"
+---
+
+あなたのOpenClawエージェントはドキュメントを読むことができますが、ウェブを読むことはできません。[Olostep Web Agentプラグイン](https://clawhub.ai/plugins/olostep-web-agent)がその問題を解決します。エージェントのワークフロー内で直接、任意のウェブサイトから検索、スクレイプ、クロール、構造化データの抽出が可能です。
+
+1回のインストールで、高レベルのタスクを実行するための**13のスキル**（ライブのStackOverflowスレッドからエラーをデバッグ、現在のドキュメントからインテグレーションコードを書く、構造化比較でツールを調査）と、直接プログラム的にアクセスするための**9つのツールを備えたMCPサーバー**を提供します。JSが多用されたSPA、CAPTCHA、Cloudflare、住宅プロキシなども自動的に処理されます。
+
+## インストール
+
+```bash
+clawhub install olostep
+```
+
+これで完了です。MCPサーバーを手動で接続したい場合は、次の内容をOpenClawの設定に追加してください：
+
+```json
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+[olostep.com/auth](https://olostep.com/auth)で無料のAPIキーを取得できます — 月500リクエスト、クレジットカード不要。
+
+## スキル
+
+### コアデータスキル
+
+これらの6つのスキルは基礎となるものです。それぞれが1つのことをうまく行い、エージェントはこれらを組み合わせて複雑なワークフローを作成できます。
+
+<CardGroup cols={2}>
+  <Card title="scrape" icon="file-lines">
+    任意のURLをクリーンなMarkdown、HTML、JSON、またはテキストに変換します。フルブラウザレンダリング、アンチボットバイパス、ジオターゲティング、ブラウザアクション（クリック、スクロール、入力）、一般的なサイトタイプ用の事前構築されたパーサーを備えています。
+  </Card>
+
+  <Card title="search" icon="magnifying-glass">
+    3つのモード：引用付きのAI合成回答、生のGoogle SERPデータ（オーガニック結果、PAA、ナレッジグラフ）、ドメインスコープのURL発見。
+  </Card>
+
+  <Card title="crawl" icon="spider-web">
+    1つのURLから開始し、リンクをたどり、発見されたすべてのページをスクレイプします。最大ページ数を設定し、URLパターンを含める/除外し、クロールの深さを制御します。
+  </Card>
+
+  <Card title="batch" icon="layer-group">
+    フルレンダリングで最大10,000のURLを並行してスクレイプします。各URLに`custom_id`をタグ付けして、結果を元のソースにマッピングします。
+  </Card>
+
+  <Card title="map" icon="map">
+    いずれのURLもスクレイプせずに、ウェブサイト上のすべてのURLを発見します。グロブパターンでフィルタリングし、検索クエリの関連性でランク付けし、`top_n`で制限します。
+  </Card>
+
+  <Card title="answers" icon="question">
+    平易な言葉で質問し、ライブウェブソースに基づいたAI合成回答を得ます。`json`パラメータを渡して、任意のスキーマに一致する構造化出力を取得します。
+  </Card>
+</CardGroup>
+
+### ワークフロースキル
+
+これらの7つのスキルは、複数のコア操作を連鎖させます。思考を処理し、エージェントは仕事に適したスキルを選ぶだけです。
+
+<CardGroup cols={2}>
+  <Card title="research" icon="microscope">
+    "Node.jsのトップ3 ORMを比較" — エージェントは複数のソースを検索し、価格と機能ページをスクレイプし、引用付きの構造化比較と推奨を返します。
+  </Card>
+
+  <Card title="debug-error" icon="bug">
+    スタックトレースまたはエラーメッセージを貼り付けます。エージェントはGitHubの問題とStackOverflowを検索し、その正確なエラーを探し、関連するスレッドをスクレイプし、同じ問題に直面した開発者が実際に行った修正を返します。
+  </Card>
+
+  <Card title="docs-to-code" icon="code">
+    ドキュメントのURLを指定します。エージェントは現在のAPIリファレンスをスクレイプし、実際に公開されているものから動作するインテグレーションコードを書きます — 廃止されたメソッドを参照する可能性のある古いトレーニングデータからではありません。
+  </Card>
+
+  <Card title="migrate-code" icon="code-branch">
+    現在のバージョンとターゲットバージョンを指定します。エージェントは移行ガイドをスクレイプし、すべての破壊的変更を抽出し、コードを一致するように書き換えます。
+  </Card>
+
+  <Card title="extract-schema" icon="table">
+    任意の非構造化ウェブページ — 商品リスト、求人情報、記事 — を、提供されたTypeScriptインターフェース、JSONスキーマ、またはデータベースモデルに一致する型付きJSONに変換します。
+  </Card>
+
+  <Card title="integrate" icon="plug">
+    スタック（言語、フレームワーク、AIツールキット）を自動検出し、完全なOlostep SDKインテグレーションを書きます：インストールコマンド、クライアントセットアップ、ツールの接続、検証ステップを含みます。
+  </Card>
+
+  <Card title="setup" icon="key">
+    Olostep APIキーを設定し、接続を確認します。一般的なセットアップ問題のトラブルシューティングを含みます。
+  </Card>
+</CardGroup>
+
+## MCPツール
+
+バンドルされたMCPサーバー（`olostep-mcp`）は、エージェントに直接呼び出せる9つのツールを提供します。ワークフロースキルが提供する以上の詳細な制御が必要な場合に使用します。
+
+| ツール | 機能 |
+|------|-------------|
+| `scrape_website` | 単一のURLをMarkdown、HTML、JSON、またはテキストにスクレイプ |
+| `get_webpage_content` | ウェブページをクリーンでLLM対応のMarkdownとして取得 |
+| `search_web` | ライブウェブを検索し、AI合成回答を取得 |
+| `google_search` | 構造化されたGoogle SERPデータ — オーガニック結果、PAA、ナレッジグラフ |
+| `answers` | 質問をし、引用付きの回答を取得し、オプションで構造化されたJSON出力を得る |
+| `batch_scrape_urls` | フルレンダリングで最大10,000のURLを並行してスクレイプ |
+| `create_crawl` | 開始URLからリンクをたどり、ウェブサイトをクロール |
+| `create_map` | ウェブサイト上のすべてのURLを発見し、パターンとクエリでフィルタリング可能 |
+| `get_website_urls` | 特定のドメインから関連するURLを見つけて取得 |
+
+## 実際の使用例
+
+### 「なぜ失敗しているのか？」 — ライブウェブからデバッグ
+
+`ECONNRESET when calling Stripe webhook endpoint`をエージェントに貼り付けます。エージェントはGitHubの問題とStackOverflowを検索し、その正確なエラーを探し、最も関連性の高い3つのスレッドをスクレイプし、具体的な修正を返します — 「ネットワーク設定を確認してください」ではなく、同じ問題に直面した他の開発者が実際に解決したタイムアウト設定です。
+
+### 「インテグレーションを書いて」 — 古いトレーニングデータではなく、最新のドキュメントからコードを生成
+
+支払いAPIを統合する必要があります。`docs-to-code`スキルは、今日公開された最新のAPIリファレンスをスクレイプし、実際に存在するパラメータとエンドポイントを使用して動作するコードを書きます。
+
+### 「どれを使うべきか？」 — 構造化されたツール比較
+
+ORMを評価していますか？認証プロバイダーを比較していますか？`research`スキルは複数のソースを検索し、実際の価格ページと機能マトリックスをスクレイプし、引用付きの構造化比較表を返します。製品のウェブサイトに実際にある情報に基づいた推奨を得ることができます。
+
+### 任意のドキュメントサイトからRAGパイプラインを構築
+
+```
+map   → ドキュメントサイト上のすべてのURLを発見
+batch → すべてのページをクリーンなMarkdownとして並行してスクレイプ
+      → ベクトルストアにフィード
+```
+
+2つのスキル、1つのパイプライン。数百または数千のページを持つドキュメントサイトで機能します。
+
+### 大規模に構造化データを抽出
+
+```
+map   → すべての商品、リスト、または求人URLを発見
+batch → 事前構築されたパーサーで各ページをスクレイプ → 型付きJSON
+      → データベース、API、またはシードファイルにパイプ
+```
+
+### 新しいフレームワークバージョンに移行
+
+Next.js 13から15にアップグレードしています。`migrate-code`スキルは公式の移行ガイドをスクレイプし、すべての破壊的変更を抽出し、コードパターンを前後にしてファイルを書き換えます — モデルの推測ではなく、実際のドキュメントに基づいています。
+
+## 事前構築されたパーサー
+
+任意のスクレイプ呼び出しに`parser`パラメータを渡すと、生のコンテンツではなく型付きJSONが返されます。スキーマ定義は不要 — これらが抽出を処理します。
+
+| パーサー | 返される内容 |
+|--------|---------|
+| `@olostep/google-search` | オーガニック結果、ナレッジグラフ、People Also Ask |
+| `@olostep/amazon-it-product` | 価格、評価、機能、在庫状況 |
+| `@olostep/extract-emails` | ページ上で見つかったすべてのメールアドレス |
+| `@olostep/extract-calendars` | 構造化されたカレンダーイベント |
+| `@olostep/extract-socials` | ソーシャルメディアのプロフィールリンク |
+
+## リンク
+
+<CardGroup cols={2}>
+  <Card title="ClawHubにインストール" icon="store" href="https://clawhub.ai/plugins/olostep-web-agent">
+    プラグインリスト、バージョン履歴、ワンコマンドインストール
+  </Card>
+
+  <Card title="APIキーを取得" icon="key" href="https://olostep.com/auth">
+    月500回の無料リクエスト、クレジットカード不要
+  </Card>
+
+  <Card title="MCPサーバードキュメント" icon="server" href="/integrations/mcp-server">
+    Cursor、Claude Desktop、その他のクライアント向けの完全なMCPサーバーセットアップ
+  </Card>
+
+  <Card title="APIリファレンス" icon="book" href="https://docs.olostep.com">
+    例を含む完全なエンドポイントドキュメント
+  </Card>
+</CardGroup>

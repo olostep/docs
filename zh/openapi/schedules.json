@@ -22,7 +22,7 @@
     "/v1/schedules": {
       "post": {
         "summary": "创建调度",
-        "description": "创建一个新的调度以在指定时间执行 API 调用。支持一次性执行和使用 cron 表达式的重复调度。你也可以使用自然语言文本自动生成 cron 表达式。对于 POST 请求，你可以使用简写的 Olostep 端点（例如，'v1/scrapes'），它们会被自动加上前缀，或者提供完整的 URL。有效负载可以包含你想发送的任何 JSON 结构。",
+        "description": "创建一个新的调度以在指定时间执行 API 调用。支持一次性执行和使用 cron 表达式的重复调度。你也可以使用自然语言文本自动生成 cron 表达式。对于 POST 请求，你可以使用简短的 Olostep 端点（例如，'v1/scrapes'），这些将被自动添加前缀，或者提供完整的 URL。有效负载可以包含你想发送的任何 JSON 结构。",
         "security": [
           {
             "Authorization": []
@@ -45,7 +45,7 @@
                   },
                   "endpoint": {
                     "type": "string",
-                    "description": "调度执行时要调用的端点 URL。对于带有 Olostep 端点的 POST 请求，你可以使用简写形式（例如，'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers'），它们会被自动加上 'https://api.olostep.com/' 前缀。对于其他端点，请提供完整的 URL。"
+                    "description": "调度执行时要调用的端点 URL。对于带有 Olostep 端点的 POST 请求，你可以使用简短形式（例如，'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers'），这些将被自动添加前缀 'https://api.olostep.com/'。对于其他端点，请提供完整的 URL。"
                   },
                   "payload": {
                     "type": "object",
@@ -67,7 +67,7 @@
                   },
                   "text": {
                     "type": "string",
-                    "description": "自动生成 cron 表达式的自然语言文本。系统会将你的文本转换为有效的 cron 表达式。示例：'every 3 minutes', 'every day at 10am', 'every Monday at 9am'。与 cron_expression 和 execute_at 互斥。使用时，expression_timezone 默认为 'UTC'。"
+                    "description": "自动生成 cron 表达式的自然语言文本。系统将把你的文本转换为有效的 cron 表达式。示例：'every 3 minutes', 'every day at 10am', 'every Monday at 9am'。与 cron_expression 和 execute_at 互斥。使用时，expression_timezone 默认值为 'UTC'。"
                   }
                 },
                 "required": [
@@ -146,7 +146,7 @@
       },
       "get": {
         "summary": "列出计划",
-        "description": "检索你团队的所有计划。返回包含其配置、状态和元数据的计划列表。默认情况下，已删除的计划会被过滤掉。",
+        "description": "检索团队的所有计划。返回包含其配置、状态和元数据的计划列表。默认情况下，已删除的计划会被过滤掉。",
         "security": [
           {
             "Authorization": []
@@ -448,7 +448,7 @@
             }
           },
           "400": {
-            "description": "由于无效的schedule_id格式或计划已删除导致的错误请求。计划ID必须以'schedule_'开头。"
+            "description": "由于无效的schedule_id格式或计划已被删除导致的错误请求。计划ID必须以'schedule_'开头。"
           },
           "401": {
             "description": "API 密钥无效。"

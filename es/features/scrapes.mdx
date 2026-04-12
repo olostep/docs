@@ -1,21 +1,21 @@
 ---
-sidebarTitle: "Scrape"
-title: "Scrape"
+sidebarTitle: "Raspar"
+title: "Raspar"
 description: "Convierte cualquier URL en datos limpios"
 icon: "file-lines"
 ---
 
-A través del endpoint de Olostep `/v1/scrapes` puedes extraer Markdown, HTML, texto, capturas de pantalla o JSON estructurado amigable para LLM desde cualquier URL en tiempo real.
+A través del endpoint de Olostep `/v1/scrapes` puedes extraer Markdown, HTML, texto, capturas de pantalla o JSON estructurado compatible con LLM de cualquier URL en tiempo real.
 
-- Genera markdown limpio, datos estructurados, capturas de pantalla o html
+- Genera markdown limpio, datos estructurados, capturas de pantalla o HTML
 - Extrae JSON a través de [Parsers](/features/structured-content/parsers) o [extracción LLM](/features/structured-content/llm-extraction)
 - Maneja contenido dinámico: sitios renderizados con js, flujos de inicio de sesión mediante acciones, PDFs
 
-Para detalles del API, consulta la [Referencia del API del Endpoint Scrape](/api-reference/scrapes/create).
+Para detalles del API, consulta la [Referencia del API del Endpoint de Raspar](/api-reference/scrapes/create).
 
-## Scraping de una URL
+## Raspando una URL
 
-Usa el endpoint `/v1/scrapes` para hacer scraping de una sola URL y elegir formatos de salida.
+Usa el endpoint `/v1/scrapes` para raspar una sola URL y elegir formatos de salida.
 
 ### Instalación
 
@@ -30,7 +30,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl está disponible por defecto en macOS, Linux y Windows
 ```
 
 ```javascript Node (API)
@@ -45,7 +45,7 @@ pip install requests
 
 ### Uso
 
-Puedes usar el endpoint para hacer scraping de una sola URL y elegir formatos de salida. Los parámetros obligatorios son `url_to_scrape` y `formats`.
+Puedes usar el endpoint para raspar una sola URL y elegir formatos de salida. Los parámetros obligatorios son `url_to_scrape` y `formats`.
 
 Algunos otros parámetros comunes son `wait_before_scraping` (en milisegundos), `remove_css_selectors` (por defecto, ninguno, o un array de selectores), y `country`.
 
@@ -170,16 +170,16 @@ El objeto `result` tiene los siguientes campos (según el parámetro `formats`, 
 }
 ```
 
-## Formatos de Scrape
+## Formatos de Raspar
 
 Elige uno o más formatos de salida a través de `formats`:
 
-- `markdown`: markdown amigable para LLM
+- `markdown`: markdown compatible con LLM
 - `html`: HTML limpio
 - `text`: texto plano
-- `json`: salida estructurada (a través de parser o llm_extract)
+- `json`: salida estructurada (vía parser o llm_extract)
 - `raw_pdf`: bytes de PDF sin procesar extraídos a URL alojada
-- `screenshot`: configurado mediante acciones para capturar una captura de pantalla y devolver una URL alojada
+- `screenshot`: configurado a través de acciones para capturar una captura de pantalla y devolver una URL alojada
 
 Las claves de salida se devuelven dentro de `result` como campos `*_content` y también como `*_hosted_url`.
 
@@ -187,7 +187,7 @@ Las claves de salida se devuelven dentro de `result` como campos `*_content` y t
 
 Puedes extraer JSON estructurado de dos maneras: usando Parsers o extracción LLM.
 
-### Usando un Parser (recomendado para escala)
+### Usando un Parser (recomendado para escalabilidad)
 
 Define `formats: ["json"]` y proporciona un `id` de parser.
 
@@ -267,7 +267,7 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Olostep tiene algunos parsers preconstruidos para [sitios web populares](https://www.olostep.com/store) pero también puedes crear tus propios parsers a través del panel de control o pedirle a nuestro equipo que lo haga por ti.
+Olostep tiene algunos parsers preconstruidos para [sitios web populares](https://www.olostep.com/store) pero también puedes crear tus propios parsers a través del panel de control o pedir a nuestro equipo que lo haga por ti.
 
 Los parsers son auto-reparables y se actualizarán a la última versión del sitio web.
 
@@ -275,7 +275,7 @@ Los parsers son auto-reparables y se actualizarán a la última versión del sit
 
 Proporciona `llm_extract` con un esquema JSON (`schema`) y/o una instrucción en lenguaje natural (`prompt`). Puedes pasar ambos parámetros, pero si se proporcionan ambos, `schema` tiene prioridad.
 
-En cambio, si solo pasas un `prompt`, el LLM extraerá los datos basándose en el prompt y decidirá la estructura de datos por sí mismo.
+En cambio, si solo pasas un `prompt`, el LLM extraerá los datos basado en el prompt y decidirá la estructura de los datos por sí mismo.
 
 <CodeGroup>
 
@@ -396,11 +396,11 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Nota: `result.json_content` devuelve un JSON en forma de cadena. Analízalo en tu código si necesitas un objeto.
+Nota: `result.json_content` devuelve un JSON en formato de cadena. Analízalo en tu código si necesitas un objeto.
 
-## Interactuar con la página con Acciones
+## Interactuando con la página con Acciones
 
-Realiza acciones antes de hacer scraping para interactuar con sitios dinámicos. Acciones soportadas:
+Realiza acciones antes de raspar para interactuar con sitios dinámicos. Acciones soportadas:
 
 - `wait` con `milliseconds`
 - `click` con `selector`
@@ -518,63 +518,63 @@ La respuesta incluirá cualquier formato solicitado (por ejemplo, `markdown_cont
 
 ## Casos de Uso
 
-A continuación se presentan algunas aplicaciones prácticas de clientes que utilizan el endpoint `/scrapes`.
+A continuación, se presentan algunas aplicaciones prácticas de clientes que usan el endpoint `/scrapes`.
 ### Análisis de Contenido e Investigación
 - **Análisis Competitivo**: Extrae detalles de productos, precios y características de sitios web de competidores
 - **Investigación de Mercado**: Analiza páginas de aterrizaje, descripciones de productos y testimonios de clientes
-- **Investigación Académica**: Recopila datos específicos de publicaciones científicas o portales de investigación
-- **Documentación Legal**: Extrae estudios de casos, regulaciones o precedentes legales de sitios web oficiales
+- **Investigación Académica**: Recolecta datos específicos de publicaciones científicas o portales de investigación
+- **Documentación Legal**: Extrae estudios de caso, regulaciones o precedentes legales de sitios web oficiales
 
-### E-commerce y Retail
+### Comercio Electrónico y Retail
 - **Estrategias de Precios Dinámicos**: Obtén precios de productos en tiempo real de tiendas competidoras
-- **Gestión de Información de Productos**: Extrae especificaciones detalladas y descripciones
+- **Gestión de Información de Productos**: Extrae especificaciones y descripciones detalladas
 - **Monitoreo de Stock/Inventario**: Verifica la disponibilidad de productos en otros minoristas
-- **Análisis de Reseñas**: Recopila comentarios y sentimientos de consumidores para productos específicos
+- **Análisis de Reseñas**: Recolecta retroalimentación del consumidor y sentimiento para productos específicos
 
 ### Marketing y Creación de Contenido
-- **Curación de Contenidos**: Extrae artículos relevantes y publicaciones de blogs para boletines
+- **Curación de Contenido**: Extrae artículos y publicaciones de blog relevantes para boletines
 - **Análisis SEO**: Examina el uso de palabras clave, descripciones meta y estructura de página de competidores
 - **Generación de Leads**: Extrae información de contacto de directorios de negocios o páginas de empresas
-- **Investigación de Influencers**: Recopila métricas de compromiso y estilos de contenido de perfiles de influencers
+- **Investigación de Influencers**: Recolecta métricas de compromiso y estilos de contenido de perfiles de influencers
 - **Generación Personalizada de Redes Sociales**: Crea marketing en redes sociales impulsado por IA analizando sitios web de clientes
 
 ### Aplicaciones de Datos
-- **Recolección de Datos de Entrenamiento de IA**: Recopila ejemplos específicos para modelos de aprendizaje automático
-- **Construcción de Bases de Conocimiento Personalizadas**: Extrae documentación o instrucciones de sitios de software
-- **Archivos de Datos Históricos**: Preserva el contenido de sitios web en momentos específicos
+- **Recolección de Datos de Entrenamiento de IA**: Recolecta ejemplos específicos para modelos de aprendizaje automático
+- **Construcción de Base de Conocimiento Personalizada**: Extrae documentación o instrucciones de sitios de software
+- **Archivos de Datos Históricos**: Preserva contenido de sitios web en puntos específicos en el tiempo
 - **Extracción de Datos Estructurados**: Transforma contenido web en conjuntos de datos formateados para análisis
 
 ### Monitoreo y Alertas
 - **Monitoreo de Cumplimiento Regulatorio**: Rastrea cambios en sitios web legales o regulatorios
-- **Gestión de Crisis**: Monitorea sitios de noticias para menciones de eventos u organizaciones específicas
+- **Gestión de Crisis**: Monitorea sitios de noticias para menciones de eventos o organizaciones específicas
 - **Seguimiento de Eventos**: Extrae detalles sobre eventos próximos de sitios de lugares u organizadores
-- **Monitoreo del Estado del Servicio**: Verifica páginas de estado del servicio para plataformas o herramientas específicas
+- **Monitoreo de Estado de Servicios**: Verifica páginas de estado de servicios para plataformas o herramientas específicas
 
 ### Publicación y Medios
 - **Agregación de Noticias**: Extrae noticias de última hora de fuentes oficiales
-- **Monitoreo de Medios**: Rastrea temas específicos en sitios de noticias
-- **Verificación de Contenidos**: Extrae información para verificar hechos o declaraciones
-- **Extracción Multimedia**: Recopila videos, imágenes o audio incrustados para bibliotecas de medios
+- **Monitoreo de Medios**: Rastrea temas específicos a través de sitios de noticias
+- **Verificación de Contenido**: Extrae información para verificar afirmaciones o declaraciones
+- **Extracción Multimedia**: Recolecta videos, imágenes o audio incrustados para bibliotecas de medios
 
 ### Aplicaciones Financieras
 - **Investigación de Inversiones**: Extrae estados financieros o informes anuales de sitios web de empresas
-- **Indicadores Económicos**: Recopila datos económicos de sitios web gubernamentales o de instituciones financieras
+- **Indicadores Económicos**: Recolecta datos económicos de sitios web gubernamentales o de instituciones financieras
 - **Datos de Criptomonedas**: Extrae información de precios en tiempo real y capitalización de mercado
 - **Análisis de Noticias Financieras**: Monitorea sitios de noticias financieras para señales de mercado específicas
 
 ### Aplicaciones Técnicas
-- **Extracción de Documentación de API**: Recopila documentación técnica para referencia
+- **Extracción de Documentación de API**: Recolecta documentación técnica para referencia
 - **Pruebas de Integración**: Extrae elementos de sitios web para verificar integraciones de terceros
-- **Pruebas de Accesibilidad**: Analiza la estructura del sitio web para el cumplimiento de estándares de accesibilidad
+- **Pruebas de Accesibilidad**: Analiza la estructura de sitios web para cumplimiento con estándares de accesibilidad
 - **Creación de Archivos Web**: Captura contenido completo de sitios web para preservación histórica
 
 ### Escenarios de Integración
-- **Sistemas CRM**: Mejora los perfiles de clientes con datos de sitios web de empresas o Linkedin
-- **Sistemas de Gestión de Contenidos**: Importa contenido externo relevante
+- **Sistemas CRM**: Mejora perfiles de clientes con datos de sitios web de empresas o Linkedin
+- **Sistemas de Gestión de Contenido**: Importa contenido externo relevante
 - **Herramientas de Inteligencia de Negocios**: Complementa datos internos con información de mercado externa
 - **Software de Gestión de Proyectos**: Extrae especificaciones o requisitos de sitios web de clientes
-- **Paneles Personalizados**: Muestra datos extraídos junto a métricas internas
+- **Tableros Personalizados**: Muestra datos extraídos junto a métricas internas
 
 ## Precios
 
-Scrape cuesta 1 crédito por defecto. Si también pasas [parsers](/features/structured-content/parsers), los costos varían por parser (1-5 créditos). Si usas [LLM extract](/features/structured-content/llm-extraction), cuesta 20 créditos.
+Raspar cuesta 1 crédito por defecto. Si también pasas [parsers](/features/structured-content/parsers), los costos varían por parser (1-5 créditos). Si usas [extracción LLM](/features/structured-content/llm-extraction), cuesta 20 créditos.

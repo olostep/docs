@@ -2,40 +2,40 @@
 sidebarTitle: "CLI"
 title: "Olostep CLI"
 icon: "terminal"
-description: "用于地图、抓取、爬取、批处理与答案的命令行界面: 面向脚本、CI 与智能体的 JSON 输出"
+description: "用于地图、抓取、爬取、批处理和答案的命令行界面：脚本、CI 和代理的 JSON 输出"
 ---
 
-**NPM 包：** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
+**NPM 包:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
 
-面向 [Olostep API](https://www.olostep.com/) 的命令行工具：**map**、**answer**、**scrape**、**scrape-get**、**crawl**、**batch-scrape**、**batch-update**。返回 **JSON**（格式化），适合脚本、CI 与智能体。
+[Olostep API](https://www.olostep.com/) 的 CLI：**map**、**answer**、**scrape**、**scrape-get**、**crawl**、**batch-scrape** 和 **batch-update**。响应为用于脚本、CI 和代理的 **JSON**（美化打印）。
 
-安装本包会为当前系统下载**独立二进制**。运行 `olostep` **不需要** Python。
+安装此包会为你的操作系统下载一个**独立的二进制文件**。你不需要 Python 来运行 `olostep`。
 
 <Note>
-  安装时，postinstall 会从包的 [GitHub Releases](https://github.com/olostep-api/CLI/releases) 下载对应二进制。若失败，请确认该包版本与您的平台已有可用 release，然后重新安装。
+  在安装时，postinstall 步骤会从包的 [GitHub releases](https://github.com/olostep-api/CLI/releases) 下载匹配的二进制文件。如果失败，请确认该包版本和你的平台是否存在发布版本，然后重新安装。
 </Note>
 
 ## 安装
 
-**要求：** Node.js **16+**（仅用于 `npm` / `npx`；CLI 本身为原生二进制）。
+**要求：** Node.js **16+**（仅用于 `npm` / `npx`; CLI 本身是一个本地二进制文件）。
 
 ```bash
 npm install -g olostep-cli
 ```
 
-无需全局安装时：
+无需全局安装即可运行：
 
 ```bash
 npx -y olostep-cli@latest --help
 ```
 
-**平台：** macOS（Apple Silicon 与 Intel）、Linux x64、Windows x64。
+**平台：** macOS（Apple Silicon 和 Intel）、Linux x64、Windows x64。
 
 ## API 密钥
 
-在环境变量中设置 **`OLOSTEP_API_KEY`**，或在运行 `olostep` 的目录下的 `.env` 文件中配置。
+在你的环境中设置 **`OLOSTEP_API_KEY`**，或在运行 `olostep` 的目录中设置 `.env` 文件。
 
-创建密钥：[Olostep API Keys](https://www.olostep.com/dashboard/api-keys)。
+创建密钥：[Olostep API 密钥](https://www.olostep.com/dashboard/api-keys)。
 
 ```bash
 export OLOSTEP_API_KEY=your_key_here
@@ -44,52 +44,52 @@ olostep --help
 
 ## 输出
 
-| 参数 | 行为 |
+| 标志 | 行为 |
 | ---- | ---- |
-| `--out <path>` | 将 JSON 写入文件（必要时创建父目录）。 |
-| `--out -` | 仅将 JSON 写到 **stdout**（UTF-8，缩进）。便于管道与子进程读取。 |
+| `--out <path>` | 将 JSON 写入文件（如有需要，创建父目录）。 |
+| `--out -` | 仅将 JSON 写入 **stdout**（UTF-8，缩进）。适用于管道和子进程捕获。 |
 
-进度与日志输出到 **stderr**，便于解析 stdout。
+进度和日志行发送到 **stderr**，因此 stdout 保持可解析。
 
 ```bash
 olostep map "https://example.com" --top-n 20 --out - | jq '.urls[:10]'
 olostep scrape "https://example.com" --out - | jq .result.markdown_content
 ```
 
-省略 `--out` 时，文件写入 `output/`（见 [默认 `--out` 路径](#default-out-paths)）。
+如果省略 `--out`，文件将放在 `output/` 下（参见 [默认 `--out` 路径](#default-out-paths)）。
 
 ## 命令
 
-使用 `olostep <命令> --help` 查看全部选项。多数命令支持 `--timeout`（HTTP，单位：秒）。
+使用 `olostep <command> --help` 查看每个选项。大多数命令接受 `--timeout`（HTTP，秒）。
 
 ### `map`: 发现 URL
 
-| 选项 | 说明 |
+| 选项 | 描述 |
 | ---- | ---- |
 | `--out` | 文件路径或 `-` |
 | `--top-n` | 最大 URL 数 |
 | `--search-query` | 引导发现 |
-| `--include-subdomain` / `--no-include-subdomain` | 子域 |
+| `--include-subdomain` / `--no-include-subdomain` | 子域名 |
 | `--include-url` / `--exclude-url` | 可重复的模式 |
 | `--cursor` | 分页 |
 
-请使用 `--top-n`，不要使用已移除的 `--limit`。
+使用 `--top-n`，而不是 `--limit`（已移除）。
 
 ```bash
 olostep map "https://example.com" --top-n 100 --search-query "blog"
 ```
 
-### `answer`: 检索式回答
+### `answer`: 研究答案
 
-轮询直至回答就绪。
+轮询直到答案准备好。
 
-| 选项 | 说明 |
+| 选项 | 描述 |
 | ---- | ---- |
 | `--out` | 文件或 `-` |
 | `--json-format` | 可选的结构化输出提示（JSON 对象字符串） |
 | `--poll-interval` / `--poll-timeout` | 轮询（秒） |
 
-请使用 `--json-format`，不要使用已移除的 `--model`。
+使用 `--json-format`，而不是 `--model`（已移除）。
 
 ```bash
 olostep answer "What does this company build?" --out answer.json
@@ -100,30 +100,30 @@ olostep answer "Extract facts" --json-format '{"company":"","year":""}' --out -
 
 **格式：** `html`、`markdown`、`text`、`json`、`raw_pdf`、`screenshot`（逗号分隔；默认 `markdown`）。
 
-| 选项 | 说明 |
+| 选项 | 描述 |
 | ---- | ---- |
 | `--formats` | 逗号分隔 |
 | `--country` | 国家代码 |
-| `--wait-before-scraping` | 抓取前等待（毫秒） |
-| `--payload-json` | 高级选项（JSON 对象字符串） |
-| `--payload-file` | 从文件读取同上（勿与 `--payload-json` 同时使用） |
+| `--wait-before-scraping` | 抓取前等待的毫秒数 |
+| `--payload-json` | 高级选项作为 JSON 对象字符串 |
+| `--payload-file` | 同上，从文件中读取（不能与 `--payload-json` 一起使用） |
 
 ```bash
 olostep scrape "https://example.com" --formats markdown,html
 olostep scrape "https://example.com" --payload-file scrape-options.json --out -
 ```
 
-### `scrape-get`: 按抓取 ID
+### `scrape-get`: 通过抓取 ID
 
 ```bash
 olostep scrape-get "scrape_abc123" --out -
 ```
 
-### `crawl`: 站点爬取
+### `crawl`: 网站爬取
 
-**取回格式：** `markdown`、`html`、`json`。
+**检索格式：** `markdown`、`html`、`json`。
 
-常用参数：`--max-pages`、`--max-depth`、`--include-subdomain`、`--include-external`、`--include-url`、`--exclude-url`、`--search-query`、`--top-n`、`--webhook`、`--crawl-timeout`、`--follow-robots-txt` / `--ignore-robots-txt`、`--formats`、`--pages-limit`、`--pages-search-query`、`--poll-seconds`、`--poll-timeout`、`--dry-run`（仅打印负载，不发起请求）。
+重要标志：`--max-pages`、`--max-depth`、`--include-subdomain`、`--include-external`、`--include-url`、`--exclude-url`、`--search-query`、`--top-n`、`--webhook`、`--crawl-timeout`、`--follow-robots-txt` / `--ignore-robots-txt`、`--formats`、`--pages-limit`、`--pages-search-query`、`--poll-seconds`、`--poll-timeout`、`--dry-run`（打印负载，无请求）。
 
 ```bash
 olostep crawl "https://docs.example.com" --max-pages 50 --formats markdown,html
@@ -134,11 +134,11 @@ olostep crawl "https://example.com" --max-pages 10 --dry-run
 
 CSV 列：**`custom_id` 或 `id`**，以及 **`url`**。
 
-| 选项 | 说明 |
+| 选项 | 描述 |
 | ---- | ---- |
 | `--formats` | `markdown`、`html`、`json` |
 | `--country` | 可选 |
-| `--parser-id` | 结构化抽取解析器 |
+| `--parser-id` | 结构化提取解析器 |
 | `--poll-seconds`、`--log-every`、`--items-limit` | 轮询 / 分页 |
 | `--dry-run` | 仅打印负载 |
 
@@ -146,9 +146,9 @@ CSV 列：**`custom_id` 或 `id`**，以及 **`url`**。
 olostep batch-scrape urls.csv --formats markdown,html
 ```
 
-### `batch-update`: 批次元数据
+### `batch-update`: 批量元数据
 
-需要 **`--metadata-json` 或 `--metadata-file` 之一**（JSON 对象）。
+需要 **以下之一** `--metadata-json` 或 `--metadata-file`（JSON 对象）。
 
 ```bash
 olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
@@ -156,10 +156,10 @@ olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
 
 ## 默认 `--out` 路径 {#default-out-paths}
 
-省略 `--out` 时：
+当省略 `--out` 时：
 
-| 命令 | 默认路径 |
-| ---- | -------- |
+| 命令 | 默认 |
+| ---- | ---- |
 | `map` | `output/map.json` |
 | `answer` | `output/answer.json` |
 | `scrape` | `output/scrape.json` |
@@ -168,19 +168,19 @@ olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
 | `batch-scrape` | `output/batch_results.json` |
 | `batch-update` | `output/batch_update.json` |
 
-## 全局参数
+## 全局标志
 
-| 参数 | 说明 |
+| 标志 | 描述 |
 | ---- | ---- |
-| `-V`、`--version` | 版本 |
-| `-h`、`--help` | 帮助 |
+| `-V`, `--version` | 版本 |
+| `-h`, `--help` | 帮助 |
 
 ## 相关文档
 
-- [Maps](/features/maps) · [Batches](/features/batches) · [Parsers](/features/structured-content/parsers)
+- [地图](/features/maps) · [批处理](/features/batches) · [解析器](/features/structured-content/parsers)
 
 **仓库：** [github.com/olostep-api/CLI](https://github.com/olostep-api/CLI)
 
 ## 安全
 
-勿将 API 密钥提交到源码管理；若泄露请轮换。
+将 API 密钥保留在源代码控制之外；如果泄露，请旋转密钥。

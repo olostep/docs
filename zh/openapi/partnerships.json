@@ -1,0 +1,430 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "用户 API — 合作伙伴",
+    "version": "1.0.0",
+    "description": "**users.olostep.com** 上的联盟合作伙伴端点。每个请求需要 **`Content-Type: application/json`** 以及 **`X-Partner-Key`** 和 **`Idempotency-Key`**。**`X-Partner-Key`** 是由 Olostep 通过非公开渠道发放的，用于验证**你的集成**—而不是你客户的 Olostep API 密钥。**`Idempotency-Key`** 是由你选择的（1–255 个字符，每个逻辑入驻一个）；在成功响应后，Olostep 会存储它以便安全重放（约 **24 小时**，DynamoDB TTL，与批处理窗口相同）。查看每个操作的 **Authentication** 和 **Parameters** 以获取完整语义。"
+  },
+  "servers": [
+    {
+      "url": "https://users.olostep.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Partnerships",
+      "description": "合作伙伴提供的用户入驻和促销积分。"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "PartnerKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Partner-Key",
+        "description": "Olostep 在入驻期间通过非公开渠道发放此**合作伙伴 API 密钥**。在每个请求中发送，例如 `X-Partner-Key: <your_partnership_api_key>`。它验证**你的集成**—而不是你客户的 Olostep API 密钥。错误或缺失的值会返回 **401** 和 `invalid_partner_key`。"
+      }
+    },
+    "schemas": {
+      "PartnerQuickConnectRequestBody": {
+        "type": "object",
+        "required": [
+          "verified_email"
+        ],
+        "properties": {
+          "verified_email": {
+            "type": "string",
+            "format": "email",
+            "description": "终端用户电子邮件（已由合作伙伴验证）。在服务器端标准化为小写修剪形式。"
+          }
+        }
+      },
+      "PartnerQuickConnectUserApiKey": {
+        "type": "object",
+        "required": [
+          "has_existing_api_key"
+        ],
+        "properties": {
+          "has_existing_api_key": {
+            "type": "boolean",
+            "description": "用户在此请求完成之前是否已经至少有一个令牌。"
+          },
+          "auto_generated_api_key": {
+            "type": "string",
+            "nullable": true,
+            "description": "在此请求期间生成的新默认 API 密钥（如果有）。如果在此调用中未创建或积分已被领取，则省略/为空。"
+          }
+        }
+      },
+      "PartnerQuickConnectUser": {
+        "type": "object",
+        "required": [
+          "object",
+          "id",
+          "email",
+          "is_new_user",
+          "api_key"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "user"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Olostep 用户 ID（Cognito `sub`）。"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "is_new_user": {
+            "type": "boolean",
+            "description": "如果创建了新的 Cognito 用户则为 `true`；如果电子邮件已存在于用户池中则为 `false`。"
+          },
+          "api_key": {
+            "$ref": "#/components/schemas/PartnerQuickConnectUserApiKey"
+          }
+        }
+      },
+      "PartnerQuickConnectResult": {
+        "type": "object",
+        "required": [
+          "object",
+          "partner_name",
+          "applied_quick_connect_credits",
+          "user_message",
+          "user"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "partner_quick_connect_result"
+            ]
+          },
+          "partner_name": {
+            "type": "string",
+            "description": "你的合作伙伴集成的显示名称，从你的 `X-Partner-Key` 在服务器端解析。"
+          },
+          "applied_quick_connect_credits": {
+            "type": "integer",
+            "description": "在此响应中授予的促销积分。如果账户已领取合作伙伴快速连接积分，则为 `0`。"
+          },
+          "user_message": {
+            "type": "string",
+            "description": "合作伙伴 UI 的人类可读结果摘要。"
+          },
+          "user": {
+            "$ref": "#/components/schemas/PartnerQuickConnectUser"
+          }
+        }
+      },
+      "ProblemJsonErrorItem": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "description": "无效字段的位置（例如 `[\"header\",\"Idempotency-Key\"]` 或 `[\"body\",\"verified_email\"]`）。"
+          },
+          "msg": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "机器问题代码（例如 Zod `code`）。"
+          }
+        }
+      },
+      "ProblemJson": {
+        "type": "object",
+        "required": [
+          "object",
+          "id",
+          "code",
+          "type",
+          "status",
+          "title",
+          "detail",
+          "created",
+          "metadata"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "error"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "唯一错误实例 ID（`error_` + 十六进制）。"
+          },
+          "code": {
+            "type": "string",
+            "description": "稳定的机器代码，例如 `validation_error`、`invalid_partner_key`、`idempotency_key_reuse`、`internal_server_error`。"
+          },
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "问题类型 URI（RFC 7807）。"
+          },
+          "status": {
+            "type": "integer",
+            "description": "在正文中重复的 HTTP 状态码。"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string",
+            "description": "安全的、面向客户端的解释。"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix 时间戳（秒）。"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemJsonErrorItem"
+            },
+            "description": "`validation_error` (400) 出现。"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/partnerships/quick-connect/user": {
+      "post": {
+        "operationId": "partnerQuickConnectUser",
+        "tags": [
+          "Partnerships"
+        ],
+        "summary": "合作伙伴用户快速连接",
+        "description": "## Headers & authentication  每个请求必须包含 `Content-Type: application/json`，以及 **`X-Partner-Key`**（认证）和 **`Idempotency-Key`**（参数）。  ### `X-Partner-Key`  Olostep 在入驻期间通过非公开渠道发放此 **合作伙伴 API 密钥**。在每个请求中发送，例如 `X-Partner-Key: <your_partnership_api_key>`。它认证的是**你的集成**，而不是你客户的 Olostep API 密钥。错误或缺失将返回 **401** 和 `invalid_partner_key`。  ### `Idempotency-Key`  **必需。** 此逻辑操作的唯一密钥（最多 **255** 个字符）。**你**选择它 - Olostep 不会分配它。每个逻辑入驻使用一个字符串（例如 UUID 或你内部用户 ID 的稳定哈希）。  **重放：** 相同密钥 + 相同 `verified_email` 重放 **已完成响应**（存储的 JSON），只要幂等记录存在 - 不会再次授予信用。相同密钥 + **不同** `verified_email` 被拒绝（**422**）。  **保留：** 大约 **24 小时**（DynamoDB TTL，与批次相同的窗口）。过期后，重放可能不会返回保存的主体 - **如果你需要更长时间，请在你这边持久化 Olostep 的成功 JSON**。  **客户 API 密钥：** 当 Olostep 在首次成功授予时生成默认的 `olostep_...` 密钥时，它会出现在 `user.api_key.auto_generated_api_key` 中。该值仅通过 **存储重放**（相同幂等密钥 + 相同电子邮件）再次返回。如果在授予已记录后使用 **新** 幂等密钥再次调用，**200** 是已声明的形状 **不含** 负载中的 API 密钥。客户仍然可以在 **Olostep 仪表板**中管理密钥。  **推荐：** 每次注册使用稳定的幂等密钥，成功时持久化 Olostep 的 JSON，超时时使用 **相同** 密钥重试。  ---  ## Endpoint behavior  通过验证的电子邮件创建或解析用户，强制每个 Cognito 用户进行一次性附属声明，在首次成功时授予合作伙伴促销积分，并返回账户元数据。  **幂等：** 使用相同的 `Idempotency-Key` 和相同的 `verified_email` 重复以检索存储的成功主体。使用不同的电子邮件重用密钥返回 **422**。  相同的头和幂等详细信息在 **Authentication** 和 **Parameters** 中重复。",
+        "security": [
+          {
+            "PartnerKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "description": "必需。此逻辑操作的唯一密钥（最多 255 个字符）。相同密钥 + 相同 verified_email 重放已完成响应，只要幂等记录存在（~24 小时，DynamoDB TTL）；相同密钥 + 不同电子邮件被拒绝。完整语义（API 密钥重放、持久化、重试）在 Headers & authentication 和此端点描述中。"
+            },
+            "description": "必需。此逻辑操作的唯一密钥（最多 255 个字符）。相同密钥 + 相同 `verified_email` 重放已完成响应，只要幂等记录存在（~24 小时，DynamoDB TTL，与批次相同）；相同密钥 + 不同电子邮件被拒绝（**422**）。  **你**选择此值（1-255 个字符），每个逻辑入驻一个（例如 UUID 或你内部用户 ID 的稳定哈希）。  在 **200** 之后，Olostep 在你的合作伙伴范围和此密钥下持久化响应以供重放 - **存储的 JSON 原样**，无重复副作用。  **客户 API 密钥：** `user.api_key.auto_generated_api_key` 仅在首次生成时加上相同密钥 + 电子邮件的重放；声明后使用新幂等密钥会产生已声明的 **200**，但不含密钥。**推荐：** 每次注册使用稳定的密钥，持久化 JSON，超时时使用相同密钥重试。"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerQuickConnectRequestBody"
+              },
+              "examples": {
+                "default": {
+                  "summary": "已验证的电子邮件",
+                  "value": {
+                    "verified_email": "customer@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功 — 用户已解析或创建；查看 `applied_quick_connect_credits` 以了解此次调用中授予的积分（如果已声明可能为 `0`）。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerQuickConnectResult"
+                },
+                "examples": {
+                  "newUserWithCredits": {
+                    "summary": "新用户，授予积分",
+                    "value": {
+                      "object": "partner_quick_connect_result",
+                      "partner_name": "acme_partner",
+                      "applied_quick_connect_credits": 200000,
+                      "user_message": "Account created and partner credits added.",
+                      "user": {
+                        "object": "user",
+                        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "email": "customer@example.com",
+                        "is_new_user": true,
+                        "api_key": {
+                          "has_existing_api_key": false,
+                          "auto_generated_api_key": "olostep_ExampleKeyReplaceMe"
+                        }
+                      }
+                    }
+                  },
+                  "alreadyClaimed": {
+                    "summary": "积分已在之前声明",
+                    "value": {
+                      "object": "partner_quick_connect_result",
+                      "partner_name": "acme_partner",
+                      "applied_quick_connect_credits": 0,
+                      "user_message": "Partner quick-connect credits were already claimed for this account.",
+                      "user": {
+                        "object": "user",
+                        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "email": "customer@example.com",
+                        "is_new_user": false,
+                        "api_key": {
+                          "has_existing_api_key": true,
+                          "auto_generated_api_key": null
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "验证失败（缺失/无效的 `Idempotency-Key`，无效的电子邮件，格式错误的 JSON 等）。`Content-Type: application/problem+json`。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "validation_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 400,
+                  "title": "错误请求",
+                  "detail": "Request validation failed",
+                  "created": 1710000000,
+                  "metadata": {},
+                  "errors": [
+                    {
+                      "loc": [
+                        "header",
+                        "Idempotency-Key"
+                      ],
+                      "msg": "Idempotency-Key header is required.",
+                      "type": "too_small"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "缺失或未知的 `X-Partner-Key`。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "invalid_partner_key",
+                  "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
+                  "status": 401,
+                  "title": "未授权",
+                  "detail": "The partner key is missing or invalid.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "相同的 `Idempotency-Key` 仍在处理中；稍后重试。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "idempotency_key_in_progress",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 409,
+                  "title": "冲突",
+                  "detail": "A request with this idempotency key is currently being processed. Please retry.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`Idempotency-Key` 与第一次请求的 `verified_email` 不同而被重用。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "idempotency_key_reuse",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 422,
+                  "title": "无法处理的实体",
+                  "detail": "A request with this idempotency key was already made with different parameters.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "信用授予或意外失败。公共 `code` 是 `internal_server_error`；对于临时错误，重试可能是合适的。",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                },
+                "example": {
+                  "object": "error",
+                  "id": "error_0123456789abcdef",
+                  "code": "internal_server_error",
+                  "type": "https://docs.olostep.com/api-reference/errors/bad_request",
+                  "status": 500,
+                  "title": "内部服务器错误",
+                  "detail": "Could not complete credit grant. Please retry.",
+                  "created": 1710000000,
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

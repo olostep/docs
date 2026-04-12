@@ -2,13 +2,13 @@
 sidebarTitle: "MCP 服务器"
 icon: "hammer"
 title: "MCP 服务器"
-description: "通过模型上下文协议使用 Olostep 以实现快速、高效的网络数据"
+description: "通过模型上下文协议使用 Olostep 实现快速高效的网络数据"
 ---
 
 Olostep MCP 服务器为你的 AI 应用提供网络访问工具。它允许你的 AI：
-1. 搜索网络以将 AI 基于现实世界的数据（事实、文档、事件）
+1. 搜索网络以基于真实世界数据（事实、文档、事件）进行 AI 推理
 2. 获取任何网页的 markdown 内容
-3. 发现并过滤网站内的相关 URL。
+3. 发现并筛选网站内的相关 URL。
 
 ## 安装
 你需要拥有一个 API 密钥。可以从 https://www.olostep.com/dashboard/api-keys 获取 API 密钥。
@@ -35,7 +35,7 @@ npm install -g olostep-mcp
 
 ### 在 Claude Desktop 上运行
 
-将此添加到你的 claude_desktop_config.json：
+将以下内容添加到你的 claude_desktop_config.json：
 
 ```bash
 {
@@ -57,7 +57,7 @@ npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
 
 ### 在 Claude Code 上运行
 
-在你的终端中运行此命令
+在终端中运行以下命令
 
 ```bash
 claude mcp add --transport http secure-api https://mcp.olostep.com/mcp \
@@ -111,7 +111,7 @@ claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
   }
 }
 ```
-- 记得将 `YOUR_API_KEY` 替换为你从 [Olostep dashboard](https://www.olostep.com/dashboard) 获取的实际 API 密钥
+- 记得将 `YOUR_API_KEY` 替换为你从 [Olostep 仪表板](https://www.olostep.com/dashboard) 获取的实际 API 密钥
 - 现在可以关闭设置标签。如果需要，刷新 MCP 服务器列表以查看新工具
 
 > 如果你使用的是 Windows 并遇到问题，尝试 `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
@@ -119,7 +119,7 @@ claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
 下次使用 Cursor 时，它会在需要时自动使用 Olostep MCP。你也可以在需要从网络获取最新信息时明确请求使用 Olostep MCP
 
 ### 在 Windsurf 上运行
-将此添加到你的 ./codeium/windsurf/model_config.json：
+将以下内容添加到你的 ./codeium/windsurf/model_config.json：
 
 ```bash
 {
@@ -151,15 +151,14 @@ claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
 
 ## 可用工具
 - **scrape_website**: 从单个 URL 提取内容。支持多种格式和 JavaScript 渲染。
-- **search_web**: 搜索网络以获取给定查询的结构化结果（非 AI，基于解析器）。
-- **answers**: 搜索网络并返回你想要的 JSON 结构的 AI 驱动答案，附带来源和引用。
-- **batch_scrape_urls**: 同时抓取多达 10k 个 URL。适合大规模数据提取。
+- **search_web**: 在网络中搜索给定查询并返回结构化结果（非 AI，基于解析器）。
+- **answers**: 搜索网络并以你想要的 JSON 结构返回 AI 驱动的答案，附带来源和引用。
+- **batch_scrape_urls**: 同时抓取多达 10k 个 URL。非常适合大规模数据提取。
 - **get_batch_results**: 检索批处理作业的状态和抓取内容。如果完成，获取项目并检索每个 URL 的内容。
-- **create_crawl**: 通过从起始 URL 跟随链接自主发现并抓取整个网站。
+- **create_crawl**: 自动发现并抓取整个网站，通过从起始 URL 跟随链接。
 - **create_map**: 获取网站上的所有 URL。提取 URL 以进行发现和网站分析。
 - **get_webpage_content**: 以 markdown 格式检索网页内容。
 - **get_website_urls**: 搜索并检索网站中的相关 URL。
-- **google_search**: 从 Google 搜索结果中检索结构化数据。
 
 ## 结论
 你可以在 [这里](https://github.com/olostep/olostep-mcp-server) 找到关于 Olostep MCP 的完整详细信息。

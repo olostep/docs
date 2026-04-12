@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Bearer authenticatieheader van de vorm Bearer <token>, waarbij <token> jouw auth token is."
+        "description": "Bearer authenticatieheader in de vorm Bearer <token>, waar <token> jouw auth token is."
       }
     },
     "schemas": {
@@ -342,13 +342,13 @@
           "country": {
             "type": "string",
             "default": "RANDOM",
-            "description": "Land voor geo-gerichte scraping. Gebruik ISO 3166-1 alpha-2 codes (US, GB, DE, etc.) of 'RANDOM' voor automatische selectie."
+            "description": "Land voor geo-gerichte scraping. Gebruik ISO 3166-1 alpha-2 codes (US, GB, DE, enz.) of 'RANDOM' voor automatische selectie."
           },
           "webhook": {
             "type": "string",
             "format": "uri",
             "nullable": true,
-            "description": "URL om webhook notificaties te ontvangen voor batch levenscyclus evenementen."
+            "description": "URL om webhook-meldingen te ontvangen voor batchlevenscyclusgebeurtenissen."
           },
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
@@ -371,7 +371,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 255,
-            "description": "Jouw unieke identificatie voor dit item."
+            "description": "Jouw unieke identificator voor dit item."
           }
         }
       },
@@ -380,18 +380,18 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Unieke batch identificatie."
+            "description": "Unieke batch-identificator."
           },
           "object": {
             "type": "string",
             "enum": [
               "batch_airops"
             ],
-            "description": "Object type identificatie."
+            "description": "Objecttype-identificator."
           },
           "created": {
             "type": "integer",
-            "description": "Unix timestamp (milliseconden) wanneer de batch is aangemaakt."
+            "description": "Unix-timestamp (milliseconden) wanneer de batch is aangemaakt."
           },
           "total_urls": {
             "type": "integer",
@@ -416,7 +416,7 @@
           },
           "created_at": {
             "type": "integer",
-            "description": "Unix timestamp (ms)"
+            "description": "Unix-timestamp (ms)"
           },
           "total_urls": {
             "type": "integer"
@@ -429,11 +429,11 @@
               "completed",
               "failed"
             ],
-            "description": "Algemene workflow status."
+            "description": "Algemene workflowstatus."
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Of async LLM batch modus is ingeschakeld."
+            "description": "Of async LLM batchmodus is ingeschakeld."
           },
           "scraping": {
             "$ref": "#/components/schemas/ScrapingStatus"
@@ -451,11 +451,11 @@
         "properties": {
           "batch_id": {
             "type": "string",
-            "description": "De batch identificatie."
+            "description": "De batch-identificator."
           },
           "completed_at": {
             "type": "string",
-            "description": "ISO 8601 timestamp wanneer batch voltooid is."
+            "description": "ISO 8601-timestamp wanneer batch voltooid is."
           },
           "status": {
             "type": "string",
@@ -463,14 +463,14 @@
               "completed",
               "in_progress"
             ],
-            "description": "Batch status."
+            "description": "Batchstatus."
           },
           "counts": {
             "type": "object",
             "properties": {
               "total": {
                 "type": "integer",
-                "description": "Totaal aantal items in batch."
+                "description": "Totaal aantal items in de batch."
               },
               "succeeded": {
                 "type": "integer",
@@ -490,7 +490,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Statusbericht (aanwezig wanneer batch nog steeds verwerkt wordt)."
+            "description": "Statusbericht (aanwezig wanneer batch nog wordt verwerkt)."
           }
         }
       },
@@ -500,7 +500,7 @@
         "properties": {
           "custom_id": {
             "type": "string",
-            "description": "Jouw identificatie van het verzoek."
+            "description": "Jouw identificator van het verzoek."
           },
           "url": {
             "type": "string",
@@ -512,7 +512,7 @@
               "completed",
               "failed"
             ],
-            "description": "Status van itemverwerking."
+            "description": "Verwerkingsstatus van het item."
           },
           "page_type": {
             "type": "string",

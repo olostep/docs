@@ -1,0 +1,323 @@
+---
+title: "Comparaison pratique"
+icon: "bolt-lightning"
+---
+
+Une comparaison pratique des processeurs actuels Lite, Base et Core dans le nœud [AI Web Research de Gumloop](https://docs.gumloop.com/nodes/using_ai/ai_web_research) avec l’[API Answers](/features/answers) d’Olostep pour les clients de Gumloop.
+
+### TL;DR
+- **Latence** : `/answers` en moyenne ~5-15s ; processeur existant en moyenne 60-120s+
+- **Actualité** : `/answers` utilise le scraping/crawling en direct (pas d'index obsolète) - plus à jour.
+- **Précision** : `/answers` tend à être plus précis et exact que les processeurs existants, surtout pour les requêtes factuelles.
+- **Portée** : Convient parfaitement pour les recherches factuelles `lite`/`base`/`core` (pas de recherche approfondie - `pro`/`ultra`).
+- **Sortie** : JSON structuré avec sources citées ; facile à post-traiter.
+- **Idée d'intégration** : Ajouter un nouveau processeur (par exemple, `core-fast`) qui redirige vers `/answers`.
+
+### Comment nous avons testé
+- Réutilisation des invites d'exemple des documents Gumloop dans trois catégories : Lite, Base, Core.
+- Mesure du temps jusqu'à la première réponse complète et capture des exemples de sorties et de sources.
+- Vérification que les réponses sont basées sur des données réelles du web.
+- Comparaison de la sortie avec les processeurs existants dans le nœud [AI Web Research de Gumloop](https://docs.gumloop.com/nodes/using_ai/ai_web_research).
+
+---
+
+## Docs Gumloop
+
+<AccordionGroup>
+  <Accordion title="Lite">
+  
+  Cas d'utilisation :
+  - Adresses et numéros de téléphone des entreprises
+  - URLs de sites web et identifiants de réseaux sociaux
+  - Informations commerciales de base (date de fondation, nom du PDG)
+  - Vérifications simples oui/non
+  
+  Exemples d'invites :
+  - “Étant donné un nom d'entreprise, trouver l'adresse de leur siège social”
+  - “Étant donné un site web, extraire l'email de contact”
+  - “Étant donné un nom commercial, vérifier s'ils ont une application mobile”
+  
+  </Accordion>
+  
+  <Accordion title="Base">
+  
+  Cas d'utilisation :
+  - Offres de produits et descriptions de services
+  - Taille de l'équipe et emplacements des bureaux
+  - Classification de l'industrie et modèle d'affaires
+  - Annonces ou mises à jour récentes
+  
+  Exemples d'invites :
+  - “Étant donné un site web d'entreprise, extraire leurs principaux produits et niveaux de tarification”
+  - “Étant donné un nom de startup, trouver leur marché cible et proposition de valeur”
+  - “Étant donné un domaine commercial, identifier leurs partenariats clés”
+  
+  </Accordion>
+  
+  <Accordion title="Core">
+  
+  Cas d'utilisation :
+  - Historique de financement, investisseurs, valorisation
+  - Stratégies de tarification des concurrents et différenciateurs
+  - Principaux acteurs de l'industrie et dynamiques du marché
+  
+  Exemples d'invites :
+  - “Étant donné une entreprise, rechercher leur historique de financement, investisseurs et valorisation”
+  - “Étant donné une liste de concurrents, analyser leurs stratégies de tarification et différenciateurs”
+  - “Étant donné une industrie, identifier les principaux acteurs et dynamiques du marché”
+  
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Exemple détaillé (Lite)
+
+Invite :
+```
+Étant donné un nom d'entreprise (Zecento), trouver l'adresse de leur siège social
+```
+
+**Processeur existant** :
+- **Latence** : 34,57 secondes
+- **Sortie** :
+```json
+{
+  "Headquarters Address": {
+    "Value #1": "Sassuolo, Emilia-Romagna, Italy"
+  }
+}
+```
+<img 
+  src="/images/gmlp_lite.png" 
+  alt="Sortie du processeur Lite de Gumloop"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/> 
+- **Essayez-le** : [Lien vers le Workbook Gumloop](https://www.gumloop.com/pipeline?workbook_id=w5WiM7rdqw88JtDGBxu5X3)
+
+**Résultat Olosep `/answers`** :
+- **Latence** : 2,12-15 secondes
+- **Sortie** :
+
+```json
+{
+  "headquarters_address": "Viale San Carlo n.28 Primo Piano, 41049 Sassuolo, Modena, Italy"
+}
+```
+<img 
+  src="/images/olstp_lite_answer.png" 
+  alt="Sortie du processeur Lite d'Olostep"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+**Essayez-le** : [Lien vers le Playground Olostep](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20name%20%28Zecento%29,%20find%20their%20headquarters%20address&schema=%7B"headquarters_address":"The%20full,%20official%20street%20address%20of%20the%20company's%20primary%20headquarters,%20including%20street%20number,%20street%20name,%20city,%20state/province,%20postal%20code,%20and%20country.%20If%20the%20exact%20address%20cannot%20be%20determined,%20provide%20the%20most%20specific%20location%20available%20%28e.g.,%20city,%20state,%20country%29.%20If%20unavailable,%20return%20'Address%20unavailable'."%7D)
+
+### Qu'est-ce qui s'est amélioré pour les utilisateurs de Gumloop ?
+
+- **Précision** : La réponse inclut également l'adresse de la rue, la ville, l'état et le pays.
+- **Latence**
+
+---
+
+## Exemple détaillé (Base)
+
+Invite :
+```
+Étant donné un site web d'entreprise (https://zecento.com/), extraire leurs principaux produits et niveaux de tarification
+```
+
+**Processeur existant** :
+- **Latence** : 44,22 secondes
+- **Sortie** :
+```json
+{
+  "Main Product Descriptions": {
+    "Value #1": "Zecento est une extension Chrome alimentée par l'IA conçue pour aider les acheteurs Amazon à prendre de meilleures décisions d'achat. Elle analyse les données historiques des produits pour conseiller les utilisateurs sur l'opportunité d'acheter maintenant ou d'attendre un meilleur prix, et envoie des notifications de baisse de prix par email ou WhatsApp. L'extension vise à garantir aux utilisateurs les meilleures offres possibles en suivant les prix et en fournissant des alertes en temps opportun."
+  },
+  "Main Product Names": {
+    "Value #1": "Extension Chrome Zecento"
+  },
+  "Pricing Tier Details": {
+    "Value #1": "Ce niveau offre probablement un suivi de prix de base et des alertes pour les produits, permettant aux utilisateurs de surveiller les prix sans frais.",
+    "Value #2": "Ce niveau payant améliore l'expérience utilisateur avec un suivi de produit plus rapide (toutes les 4 heures), l'importation automatique des listes de souhaits Amazon, des capacités de filtrage avancées dans la liste de suivi, et des notifications envoyées via WhatsApp en plus de l'email."
+  },
+  "Pricing Tier Names": {
+    "Value #1": "Gratuit",
+    "Value #2": "Zecento Premium"
+  },    
+}
+```
+<img 
+  src="/images/gmlp_base_node.png" 
+  alt="Sortie du processeur Base de Gumloop"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**Essayez-le** : [Lien vers le Workbook Gumloop](https://www.gumloop.com/pipeline?workbook_id=fcaRfMfZQt7ityXHPR1cNT)
+
+**Résultat Olosep `/answers`** :
+- **Latence** : 11,37 secondes
+- **Sortie** :
+
+```json
+{
+  "main_product_names": [
+    "Zecento"
+  ],
+  "main_product_descriptions": [
+    "Zecento est une extension Chrome alimentée par l'IA qui aide les acheteurs en ligne à prendre de meilleures décisions d'achat en révélant le bon moment pour acheter sur Amazon, en suivant les prix et en alertant sur les baisses. Elle inclut également un plugin ChatGPT offrant des recommandations Amazon en temps réel."
+  ],
+  "pricing_tier_names": [
+    "Gratuito",
+    "Basic",
+    "Standard"
+  ],
+  "pricing_tier_details": [
+    "Gratuito est le plan gratuit offrant le commentaire IA de Zecento sur des millions de produits, jusqu'à 2 notifications WhatsApp par mois, suivi des articles toutes les 8 heures, notifications e-mail illimitées, et produits illimités dans votre liste de suivi.",
+    "Basic coûte 3,99 € par mois ou 23,88 € par an après un essai gratuit de 30 jours et ajoute des notifications WhatsApp, un suivi plus rapide toutes les 4 heures, et l'importation automatique des listes de souhaits Amazon.",
+    "Standard coûte 6,99 € par mois ou 59,88 € par an après un essai gratuit de 30 jours, avec des mises à jour de suivi toutes les 2 heures, une liste prioritaire et un accès anticipé aux fonctionnalités à venir (expéditions/alertes avec coupons, rappels sur produits récurrents, outils de rassemblement de groupe)."
+  ]
+}
+```
+<img 
+  src="/images/olostep_base_answer.png" 
+  alt="Sortie du processeur Base d'Olostep"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **Essayez-le** : [Lien vers le Playground Olostep](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20website%20%28https://zecento.com/%29,%20extract%20their%20main%20products%20and%20pricing%20tiers&schema=%7B"main_product_names":"A%20list%20of%20the%20names%20of%20the%20primary%20products%20offered%20by%20the%20company.%20If%20no%20products%20are%20found,%20return%20an%20empty%20array.","main_product_descriptions":"A%20list%20of%201-3%20sentence%20descriptions%20for%20each%20corresponding%20product%20listed%20in%20'main_product_names'.%20The%20order%20of%20descriptions%20must%20match%20the%20order%20of%20product%20names.%20If%20a%20description%20is%20unavailable%20for%20a%20product,%20return%20'Description%20unavailable'%20for%20that%20specific%20index.","pricing_tier_names":"A%20list%20of%20the%20names%20of%20the%20pricing%20tiers%20or%20plans%20offered%20for%20the%20company's%20products%20or%20services.%20If%20no%20pricing%20tiers%20are%20found,%20return%20an%20empty%20array.","pricing_tier_details":"A%20list%20of%201-3%20sentence%20summaries%20of%20the%20key%20features,%20pricing,%20or%20benefits%20for%20each%20corresponding%20pricing%20tier%20listed%20in%20'pricing_tier_names'.%20The%20order%20of%20details%20must%20match%20the%20order%20of%20pricing%20tier%20names.%20If%20details%20are%20unavailable%20for%20a%20tier,%20return%20'Details%20unavailable'%20for%20that%20specific%20index."%7D)
+
+### Qu'est-ce qui s'est amélioré pour les utilisateurs de Gumloop ?
+
+- **Précision** : La réponse reflète les niveaux de tarification réels de Zecento Premium (zecento.com/zecento-premium), en incluant les noms et détails corrects des niveaux de tarification.
+- **Latence**
+
+---
+
+## Exemple détaillé (Core)
+
+Invite :
+```
+Étant donné une liste de concurrents (Gumloop, Make, N8N, Zapier), analyser leurs stratégies de tarification et différenciateurs
+```
+
+**Processeur existant** :
+- **Latence** : 2 minutes 47 secondes
+- **Sortie** :
+```json
+{
+  "Competitor Differentiators": {
+    "Value #1": "Gumloop se différencie en tant qu'automatisation native de l'IA se concentrant sur les nœuds AI-first (résumer/extraire/catégoriser) et un canevas de flux visuel ; il met l'accent sur un modèle de crédit qui facture principalement pour les appels tiers/IA plutôt que pour chaque étape interne. Il cible les équipes qui souhaitent des flux de travail AI intégrés avec support BYO-model, contrôles de modèle natifs, et fonctionnalités de sécurité d'entreprise.",
+    "Value #2": "Les forces de Make sont un puissant constructeur de scénarios visuels et de solides capacités de transformation de données, offrant un bon rapport coût-fonctionnalité pour les flux de travail de complexité moyenne. Il équilibre accessibilité et fonctionnalités avancées et se positionne comme une alternative axée sur la valeur aux concurrents basés sur les tâches.",
+    "Value #3": "Les principaux différenciateurs de n8n sont la licence source-ouverte et l'auto-hébergement (contrôle total), une personnalisation/codage étendu (nœuds de code JS/Python), et un modèle de tarification qui facture par exécution de flux de travail—le rendant rentable pour les flux de travail complexes et à haut volume lorsqu'il est auto-hébergé. Il s'adresse aux équipes techniques et aux organisations qui ont besoin de souveraineté des données et de personnalisation approfondie.",
+    "Value #4": "Les avantages de Zapier sont la simplicité, la largeur des intégrations (plus grand catalogue d'applications), et une intégration rapide pour les utilisateurs non techniques ; il est bien adapté aux automatisations simples d'application à application et aux équipes qui privilégient la facilité d'utilisation à la personnalisation approfondie. Sa tarification basée sur les tâches et son énorme écosystème de connecteurs en font le choix par défaut pour une couverture SaaS étendue.",
+  },
+  "Competitor Pricing Strategies": {
+    "Value #1": "Gumloop utilise un modèle d'abonnement basé sur les crédits avec un niveau d'entrée freemium et des plans payants par paliers (Solo, Team, Enterprise). Les crédits sont consommés lorsque les flux de travail s'exécutent et pour les appels IA/tiers, tandis que de nombreux nœuds natifs sont gratuits ; les clients d'entreprise peuvent acheter des crédits personnalisés et des options VPC/SSO.",
+    "Value #2": "Make opère un modèle d'abonnement de type opérations/crédits (niveau gratuit avec opérations limitées, puis blocs d'opérations payants). La tarification est échelonnée par allocations mensuelles d'opérations et fonctionnalités d'équipe/entreprise ; des dépassements ou des blocs supplémentaires peuvent être achetés à mesure que l'utilisation augmente.",
+    "Value #3": "n8n propose un modèle hybride : une option open-source auto-hébergée (gratuite) et un niveau d'abonnement hébergé facturé par exécution de flux de travail pour l'offre cloud. Le principal différenciateur de tarification est que les utilisateurs auto-hébergés peuvent exécuter des exécutions illimitées (sous réserve des coûts d'infrastructure), tandis que le cloud n8n facture par exécutions et offre des plans d'entreprise hébergés avec des SLA et des fonctionnalités de sécurité supplémentaires.",
+    "Value #4": "Zapier utilise un modèle d'abonnement par paliers basé sur les tâches avec un niveau gratuit modeste (tâches limitées et Zaps simples) et des plans payants facturant par tâche ; les plans d'entreprise offrent un volume personnalisé, SSO, et un support avancé. Les coûts augmentent avec le nombre de tâches/étapes traitées, rendant Zapier prévisible pour les automatisations simples et à faible volume mais potentiellement coûteux à grande échelle.",
+  }
+}
+```
+<img 
+  src="/images/gmlp_core.png" 
+  alt="Sortie du processeur Core de Gumloop"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**Essayez-le** : [Lien vers le Workbook Gumloop](https://www.gumloop.com/pipeline?workbook_id=mZ16mVvuqSgtLQNaKq55oF)
+
+**Résultat Olosep `/answers`** :
+- **Latence** : 26,83 secondes
+- **Sortie** :
+
+```json
+{
+  "competitor_pricing_strategies": [
+    "Gumloop utilise un modèle freemium basé sur les crédits : le niveau gratuit offre 2 000 crédits mensuels, Solo à 37 $/mois débloque 10k+ crédits et des flux de travail actifs illimités, et Team à 244 $/mois s'étend à 60k+ crédits avec 10 sièges—se positionnant comme une option abordable et évolutive pour les petites et moyennes équipes.",
+    "Make emploie un abonnement freemium avec facturation par crédit : 1 000 crédits gratuits, Core à 9 $/mois pour 10k crédits, Pro à 16 $/mois pour 10k crédits avec exécution prioritaire et variables, et Teams à 29 $/mois pour 10k crédits avec rôles d'équipe et modèles—concurrent sur le bas prix d'entrée et l'échelonnement progressif pay-as-you-grow.",
+    "N8N offre à la fois l'auto-hébergement open-source et des niveaux cloud : Starter cloud à 20 €/mois pour 2,5k exécutions, Pro à 50 €/mois pour 10k exécutions (étapes illimitées), Business à 667 €/mois pour 40k exécutions avec SSO/Git/versioning, et Enterprise personnalisé—tirant parti de la facturation par exécution plutôt que par étape pour attirer les équipes techniques cherchant transparence et contrôle.",
+    "Zapier utilise un modèle d'abonnement freemium classique : 100 tâches gratuites, Professional à 19,99 $/mois pour des flux de travail multi-étapes, Team à 69 $/mois pour 25 utilisateurs et dossiers partagés, et Enterprise personnalisé avec SSO et contrôles administratifs—mettant l'accent sur un large écosystème d'applications, une tarification prévisible des tâches, et un support premium pour maintenir le leadership du marché."
+  ],
+  "competitor_differentiators": [
+    "Gumloop se différencie en combinant des agents IA sans code avec un constructeur visuel intuitif et l'option d'apporter vos propres clés API, séduisant les marketeurs et petites équipes qui veulent des flux de travail alimentés par l'IA sans coût élevé ni verrouillage.",
+    "Make se distingue avec plus de 3 000 intégrations d'applications, une logique de scénario multi-étapes robuste, et des options de planification granulaires, plus une forte présence d'hébergement de données dans l'UE et un prix d'entrée abordable qui attire les freelances et PME européennes.",
+    "Le principal différenciateur de N8N est son ADN open-source : les utilisateurs peuvent auto-héberger gratuitement, inspecter/étendre le code, utiliser le contrôle de version basé sur Git, et ne payer que pour les exécutions de bout en bout—idéal pour les développeurs et les organisations soucieuses de la confidentialité.",
+    "Le principal différenciateur de Zapier est l'échelle et l'écosystème : plus de 8 000 intégrations d'applications, le plus grand marché de Zaps pré-construits, des outils de gouvernance de niveau entreprise, et une couche d'orchestration IA (Tables, Interfaces, Agents, MCP) qui permet aux utilisateurs non techniques de construire rapidement des solutions de bout en bout."
+  ]
+}
+```
+<img 
+  src="/images/olstp_core_answer.png" 
+  alt="Sortie du processeur Core d'Olostep"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **Essayez-le** : [Lien vers le Playground Olostep](https://www.olostep.com/playground?q=answer&text=Given%20a%20competitor%20list%20%28Gumloop,%20Make,%20N8N,%20Zapier%29,%20analyze%20their%20pricing%20strategies%20and%20Differentiators&schema=%7B"competitor_pricing_strategies":"A%20list%20of%20pricing%20strategies%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20primary%20pricing%20strategy%20%28e.g.,%20premium,%20competitive,%20value-based,%20freemium,%20subscription%29.%20If%20a%20pricing%20strategy%20cannot%20be%20determined,%20return%20'Pricing%20strategy%20unavailable'.","competitor_differentiators":"A%20list%20of%20key%20differentiators%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20main%20competitive%20advantages%20or%20unique%20selling%20propositions.%20If%20differentiators%20cannot%20be%20determined,%20return%20'Differentiators%20unavailable'."%7D)
+
+### Qu'est-ce qui s'est amélioré pour les utilisateurs de Gumloop ?
+
+- **Précision** : La réponse inclut les numéros des niveaux de tarification (par exemple "100 tâches gratuites ; Starter 750 à 19,99 $...") et est plus précise (par exemple "8000+ applications" vs "plus grand catalogue d'applications")
+- **Latence**
+---
+
+## Essayez-le vous-même
+- Playground : [`https://www.olostep.com/playground?q=answer`](https://www.olostep.com/playground?q=answer)
+
+
+## Quelle est la raison derrière cela ?
+L'API Answers d'Olostep, au lieu d'utiliser simplement un index web et de s'y référer, utilise l'infrastructure d'Olostep qui a été optimisée pour rechercher, explorer et extraire les données en temps réel, ce qui la rend plus précise et exacte pour ce type de tâches.
+
+Elle n'est pas bien adaptée pour des tâches de recherche approfondie mais elle surpasse souvent les processeurs existants dans les catégories Lite, Base et Core.
+
+
+## Prochaines étapes suggérées
+
+Si cela est pertinent pour Gumloop et vos clients, envisagez d'ajouter un nouveau processeur pour Gumloop : **`core-fast`** soutenu par `/answers` pour les requêtes factuelles, basées sur des sources, où la latence est importante.
+
+Si nous pouvons vous être d'une quelconque aide, faites-le nous savoir. Merci !

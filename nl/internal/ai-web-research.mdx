@@ -1,0 +1,323 @@
+---
+title: "Praktische vergelijking"
+icon: "bolt-lightning"
+---
+
+Een praktische vergelijking van de huidige Lite, Base en Core processors in de Gumloop [AI Web Research node](https://docs.gumloop.com/nodes/using_ai/ai_web_research) met Olostep’s [Answers API](/features/answers) voor Gumloop klanten.
+
+### TL;DR
+- **Latentie**: `/answers` gemiddeld ~5-15s; bestaande processor gemiddeld 60-120s+
+- **Versheid**: `/answers` gebruikt live scraping/crawling (geen verouderde index) - meer up-to-date.
+- **Nauwkeurigheid**: `/answers` is meestal nauwkeuriger en preciezer dan de bestaande processors, vooral voor feitelijke vragen.
+- **Reikwijdte**: Geschikt voor `lite`/`base`/`core` feitelijke opzoekingen (niet voor diepgaand onderzoek - `pro`/`ultra`).
+- **Uitvoer**: Gestructureerde JSON met vermelde bronnen; eenvoudig na te bewerken.
+- **Integratie-idee**: Voeg een nieuwe processor toe (bijv. `core-fast`) die naar `/answers` leidt.
+
+### Hoe we hebben getest
+- Hergebruikte voorbeeldprompts uit de Gumloop documentatie in drie categorieën: Lite, Base, Core.
+- Tijd tot eerste volledige antwoord gemeten en voorbeelduitvoeren en bronnen vastgelegd.
+- Bevestigd dat antwoorden gebaseerd zijn op echte webgegevens.
+- De uitvoer vergeleken met de bestaande processors in de Gumloop [AI Web Research node](https://docs.gumloop.com/nodes/using_ai/ai_web_research).
+
+---
+
+## Gumloop Documentatie
+
+<AccordionGroup>
+  <Accordion title="Lite">
+  
+  Gebruiksscenario's:
+  - Bedrijfsadressen en telefoonnummers
+  - Website-URL's en sociale media-accounts
+  - Basis bedrijfsinformatie (oprichtingsdatum, naam CEO)
+  - Eenvoudige ja/nee verificaties
+  
+  Voorbeeldprompts:
+  - “Gegeven een bedrijfsnaam, vind hun hoofdkantooradres”
+  - “Gegeven een website, haal het contact-e-mailadres op”
+  - “Gegeven een bedrijfsnaam, kijk of ze een mobiele app hebben”
+  
+  </Accordion>
+  
+  <Accordion title="Base">
+  
+  Gebruiksscenario's:
+  - Productaanbiedingen en servicebeschrijvingen
+  - Teamgrootte en kantoorlocaties
+  - Industrieclassificatie en bedrijfsmodel
+  - Recente aankondigingen of updates
+  
+  Voorbeeldprompts:
+  - “Gegeven een bedrijfswebsite, haal hun belangrijkste producten en prijscategorieën op”
+  - “Gegeven een start-up naam, vind hun doelmarkt en waardepropositie”
+  - “Gegeven een bedrijfsdomein, identificeer hun belangrijkste partnerschappen”
+  
+  </Accordion>
+  
+  <Accordion title="Core">
+  
+  Gebruiksscenario's:
+  - Financieringsgeschiedenis, investeerders, waardering
+  - Prijsstrategieën van concurrenten en onderscheidende factoren
+  - Topspelers in de industrie en marktdynamiek
+  
+  Voorbeeldprompts:
+  - “Gegeven een bedrijf, onderzoek hun financieringsgeschiedenis, investeerders en waardering”
+  - “Gegeven een concurrentielijst, analyseer hun prijsstrategieën en onderscheidende factoren”
+  - “Gegeven een industrie, identificeer topspelers en marktdynamiek”
+  
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Gedetailleerd voorbeeld (Lite)
+
+Prompt:
+```
+Gegeven een bedrijfsnaam (Zecento), vind hun hoofdkantooradres
+```
+
+**Bestaande processor**:
+- **Latentie**: 34.57 seconden
+- **Uitvoer**:
+```json
+{
+  "Headquarters Address": {
+    "Value #1": "Sassuolo, Emilia-Romagna, Italië"
+  }
+}
+```
+<img 
+  src="/images/gmlp_lite.png" 
+  alt="Gumloop Lite processor uitvoer"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/> 
+- **Probeer het**: [Gumloop Werkboek Link](https://www.gumloop.com/pipeline?workbook_id=w5WiM7rdqw88JtDGBxu5X3)
+
+**Olosep `/answers` resultaat**:
+- **Latentie**: 2.12-15 seconden
+- **Uitvoer**:
+
+```json
+{
+  "headquarters_address": "Viale San Carlo n.28 Primo Piano, 41049 Sassuolo, Modena, Italië"
+}
+```
+<img 
+  src="/images/olstp_lite_answer.png" 
+  alt="Olostep Lite processor uitvoer"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+**Probeer het**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20name%20%28Zecento%29,%20find%20their%20headquarters%20address&schema=%7B"headquarters_address":"The%20full,%20official%20street%20address%20of%20the%20company's%20primary%20headquarters,%20including%20street%20number,%20street%20name,%20city,%20state/province,%20postal%20code,%20and%20country.%20If%20the%20exact%20address%20cannot%20be%20determined,%20provide%20the%20most%20specific%20location%20available%20%28e.g.,%20city,%20state,%20country%29.%20If%20unavailable,%20return%20'Address%20unavailable'."%7D)
+
+### Wat verbeterde voor Gumloop gebruikers?
+
+- **Nauwkeurigheid**: Het antwoord bevat ook het straatadres, de stad, de staat en het land.
+- **Latentie**
+
+---
+
+## Gedetailleerd voorbeeld (Base)
+
+Prompt:
+```
+Gegeven een bedrijfswebsite (https://zecento.com/), haal hun belangrijkste producten en prijscategorieën op
+```
+
+**Bestaande processor**:
+- **Latentie**: 44.22 seconden
+- **Uitvoer**:
+```json
+{
+  "Main Product Descriptions": {
+    "Value #1": "Zecento is een AI-aangedreven Chrome-extensie ontworpen om Amazon-shoppers te helpen betere aankoopbeslissingen te nemen. Het analyseert historische productgegevens om gebruikers te adviseren of ze nu moeten kopen of moeten wachten op een betere prijs, en het stuurt prijsdalingmeldingen via e-mail of WhatsApp. De extensie is bedoeld om ervoor te zorgen dat gebruikers de best mogelijke deals krijgen door prijzen te volgen en tijdige waarschuwingen te geven."
+  },
+  "Main Product Names": {
+    "Value #1": "Zecento Chrome Extensie"
+  },
+  "Pricing Tier Details": {
+    "Value #1": "Deze categorie biedt waarschijnlijk basisprijsbewaking en waarschuwingen voor producten, zodat gebruikers prijzen kunnen volgen zonder kosten.",
+    "Value #2": "Deze betaalde categorie verbetert de gebruikerservaring met snellere productbewaking (elke 4 uur), automatische import van Amazon-wenslijsten, geavanceerde filtermogelijkheden binnen de Droplist, en meldingen die naast e-mail ook via WhatsApp worden geleverd."
+  },
+  "Pricing Tier Names": {
+    "Value #1": "Gratis",
+    "Value #2": "Zecento Premium"
+  },    
+}
+```
+<img 
+  src="/images/gmlp_base_node.png" 
+  alt="Gumloop Base processor uitvoer"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**Probeer het**: [Gumloop Werkboek Link](https://www.gumloop.com/pipeline?workbook_id=fcaRfMfZQt7ityXHPR1cNT)
+
+**Olosep `/answers` resultaat**:
+- **Latentie**: 11.37 seconden
+- **Uitvoer**:
+
+```json
+{
+  "main_product_names": [
+    "Zecento"
+  ],
+  "main_product_descriptions": [
+    "Zecento is een AI-aangedreven Chrome-extensie die e-commerce shoppers helpt betere aankoopbeslissingen te nemen door het juiste moment om te kopen op Amazon te onthullen, prijzen te volgen en te waarschuwen voor dalingen. Het bevat ook een ChatGPT-plug-in die realtime Amazon-aanbevelingen biedt."
+  ],
+  "pricing_tier_names": [
+    "Gratuito",
+    "Basic",
+    "Standard"
+  ],
+  "pricing_tier_details": [
+    "Gratuito is het gratis plan dat Zecento's AI-commentaar biedt op miljoenen producten, tot 2 WhatsApp-meldingen per maand, items elke 8 uur volgen, onbeperkte e-mailmeldingen, en onbeperkte producten in je Droplist.",
+    "Basic kost €3,99 per maand of €23,88 per jaar na een gratis proefperiode van 30 dagen en voegt WhatsApp-meldingen toe, snellere tracking elke 4 uur, en automatische Amazon-wenslijstimport.",
+    "Standard kost €6,99 per maand of €59,88 per jaar na een gratis proefperiode van 30 dagen, met trackingupdates elke 2 uur, Prioriteitenlijst en vroege toegang tot aankomende functies (verzonden/waarschuwingen met coupons, herinneringen op terugkerende producten, groepsverzamelingstools)."
+  ]
+}
+```
+<img 
+  src="/images/olostep_base_answer.png" 
+  alt="Olostep Base processor uitvoer"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **Probeer het**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20website%20%28https://zecento.com/%29,%20extract%20their%20main%20products%20and%20pricing%20tiers&schema=%7B"main_product_names":"A%20list%20of%20the%20names%20of%20the%20primary%20products%20offered%20by%20the%20company.%20If%20no%20products%20are%20found,%20return%20an%20empty%20array.","main_product_descriptions":"A%20list%20of%201-3%20sentence%20descriptions%20for%20each%20corresponding%20product%20listed%20in%20'main_product_names'.%20The%20order%20of%20descriptions%20must%20match%20the%20order%20of%20product%20names.%20If%20a%20description%20is%20unavailable%20for%20a%20product,%20return%20'Description%20unavailable'%20for%20that%20specific%20index.","pricing_tier_names":"A%20list%20of%20the%20names%20of%20the%20pricing%20tiers%20or%20plans%20offered%20for%20the%20company's%20products%20or%20services.%20If%20no%20pricing%20tiers%20are%20found,%20return%20an%20empty%20array.","pricing_tier_details":"A%20list%20of%201-3%20sentence%20summaries%20of%20the%20key%20features,%20pricing,%20or%20benefits%20for%20each%20corresponding%20pricing%20tier%20listed%20in%20'pricing_tier_names'.%20The%20order%20of%20details%20must%20match%20the%20order%20of%20pricing%20tier%20names.%20If%20details%20are%20unavailable%20for%20a%20tier,%20return%20'Details%20unavailable'%20for%20that%20specific%20index."%7D)
+
+### Wat verbeterde voor Gumloop gebruikers?
+
+- **Nauwkeurigheid**: Het antwoord weerspiegelt de daadwerkelijke Zecento Premium prijscategorieën (zecento.com/zecento-premium), door de juiste prijscategorie namen en details op te nemen.
+- **Latentie**
+
+---
+
+## Gedetailleerd voorbeeld (Core)
+
+Prompt:
+```
+Gegeven een concurrentielijst (Gumloop, Make, N8N, Zapier), analyseer hun prijsstrategieën en onderscheidende factoren
+```
+
+**Bestaande processor**:
+- **Latentie**: 2 minuten 47 seconden
+- **Uitvoer**:
+```json
+{
+  "Competitor Differentiators": {
+    "Value #1": "Gumloop onderscheidt zich als AI-native automatisering met focus op AI-first nodes (samenvatten/extraheren/categoriseren) en een visuele flow canvas; het benadrukt een creditmodel dat voornamelijk kosten in rekening brengt voor externe/AI-oproepen in plaats van voor elke interne stap. Het richt zich op teams die geïntegreerde AI-workflows willen met BYO-modelondersteuning, native modelcontroles en enterprise-beveiligingsfuncties.",
+    "Value #2": "Make’s sterke punten zijn een krachtige visuele scenariobouwer en sterke datatransformatiecapaciteiten, met een goede kosten-naar-functionaliteit verhouding voor middel-complexe workflows. Het balanceert toegankelijkheid en geavanceerde functies en positioneert zichzelf als een waarde-georiënteerd alternatief voor taak-gebaseerde concurrenten.",
+    "Value #3": "n8n’s belangrijkste onderscheidende factoren zijn bron-beschikbare licenties en zelf-hosting (volledige controle), uitgebreide codering/aanpassing (JS/Python code nodes), en een prijsmodel dat per workflow-uitvoering rekent—waardoor het kostenefficiënt is voor complexe, hoge-volume workflows wanneer zelf-gehost. Het is gericht op technische teams en organisaties die gegevenssoevereiniteit en diepe aanpassing nodig hebben.",
+    "Value #4": "Zapier's voordelen zijn eenvoud, breedte van integraties (grootste appcatalogus), en snelle onboarding voor niet-technische gebruikers; het is goed geschikt voor snelle, eenvoudige app-naar-app automatiseringen en teams die gebruiksgemak boven diepe aanpassing prioriteren. Zijn taak-gebaseerde prijsstelling en enorme connector-ecosysteem maken het de standaard voor brede SaaS-dekking.",
+  },
+  "Competitor Pricing Strategies": {
+    "Value #1": "Gumloop gebruikt een credit-gebaseerd, abonnementsmodel met een freemium instapniveau en gelaagde betaalde plannen (Solo, Team, Enterprise). Credits worden verbruikt wanneer workflows draaien en voor AI/externe oproepen, terwijl veel native nodes gratis zijn; enterprise-klanten kunnen aangepaste credits en VPC/SSO-opties aanschaffen.",
+    "Value #2": "Make opereert een operaties/credits-stijl abonnementsmodel (gratis niveau met beperkte operaties, daarna betaalde blokken van operaties). Prijsstelling is gelaagd op basis van maandelijkse operatie-toewijzingen en team/enterprise-functies; overschrijdingen of add-on blokken kunnen worden gekocht naarmate het gebruik toeneemt.",
+    "Value #3": "n8n biedt een hybride model: een open-source zelf-gehoste optie (gratis) en een gehost abonnementsniveau dat per workflow-uitvoering rekent voor de cloud-aanbieding. De primaire prijsdifferentiator is dat zelf-gehoste gebruikers onbeperkte uitvoeringen kunnen draaien (onder voorbehoud van infra-kosten), terwijl de n8n cloud rekent per uitvoeringen en enterprise gehoste plannen biedt met toegevoegde SLA's en beveiligingsfuncties.",
+    "Value #4": "Zapier gebruikt een taak-gebaseerd, gelaagd abonnementsmodel met een bescheiden gratis niveau (beperkte taken en eenvoudige Zaps) en betaalde plannen die per taak rekenen; enterprise plannen bieden aangepaste volume, SSO, en geavanceerde ondersteuning. Kosten groeien met het aantal verwerkte taken/stappen, waardoor Zapier voorspelbaar is voor laag-volume, eenvoudige automatiseringen maar potentieel duur op schaal.",
+  }
+}
+```
+<img 
+  src="/images/gmlp_core.png" 
+  alt="Gumloop Core processor uitvoer"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**Probeer het**: [Gumloop Werkboek Link](https://www.gumloop.com/pipeline?workbook_id=mZ16mVvuqSgtLQNaKq55oF)
+
+**Olosep `/answers` resultaat**:
+- **Latentie**: 26.83 seconden
+- **Uitvoer**:
+
+```json
+{
+  "competitor_pricing_strategies": [
+    "Gumloop gebruikt een credit-gebaseerd freemium model: gratis niveau biedt 2.000 maandelijkse credits, Solo voor $37/maand ontgrendelt 10k+ credits en onbeperkte actieve workflows, en Team voor $244/maand schaalt naar 60k+ credits met 10 stoelen—zich positionerend als een betaalbare, schaalbare optie voor kleine tot middelgrote teams.",
+    "Make hanteert een freemium abonnement met per-credit facturering: 1.000 credits gratis, Core voor $9/maand voor 10k credits, Pro voor $16/maand voor 10k credits met prioritaire uitvoering en variabelen, en Teams voor $29/maand voor 10k credits met teamrollen en sjablonen—concurrerend op lage instapprijs en geleidelijke pay-as-you-grow schaalvergroting.",
+    "N8N biedt zowel open-source zelf-hosting als cloud-niveaus: Starter cloud voor €20/maand voor 2.5k uitvoeringen, Pro voor €50/maand voor 10k uitvoeringen (onbeperkte stappen), Business voor €667/maand voor 40k uitvoeringen met SSO/Git/versiebeheer, en Enterprise op maat—gebruikmakend van uitvoering-gebaseerde in plaats van stap-gebaseerde facturering om technische teams aan te trekken die transparantie en controle zoeken.",
+    "Zapier hanteert een klassiek freemium abonnementsmodel: 100 taken gratis, Professional voor $19.99/maand voor multi-step workflows, Team voor $69/maand voor 25 gebruikers en gedeelde mappen, en Enterprise op maat met SSO en beheertools—de nadruk leggend op een groot app-ecosysteem, voorspelbare taakprijsstelling, en premium ondersteuning om markleiderschap te behouden."
+  ],
+  "competitor_differentiators": [
+    "Gumloop onderscheidt zich door no-code AI-agenten te combineren met een intuïtieve visuele bouwer en de optie om je eigen API-sleutels mee te brengen, aantrekkelijk voor marketeers en kleine teams die AI-aangedreven workflows willen zonder hoge kosten of lock-in.",
+    "Make valt op met 3.000+ app-integraties, robuuste multi-step scenario-logica, en gedetailleerde planningsopties, plus een sterke EU-data-hosting aanwezigheid en betaalbare instapprijzen die freelancers en Europese mkb's aantrekken.",
+    "N8N’s belangrijkste onderscheidende factor is zijn open-source DNA: gebruikers kunnen gratis zelf-hosten, code inspecteren/uitbreiden, Git-gebaseerd versiebeheer gebruiken, en alleen betalen voor end-to-end uitvoeringen—ideaal voor ontwikkelaars en privacy-bewuste organisaties.",
+    "Zapier’s primaire onderscheidende factor is schaal en ecosysteem: 8.000+ app-integraties, de grootste marktplaats van pre-built Zaps, enterprise-grade governance tools, en een AI-orkestratielaag (Tables, Interfaces, Agents, MCP) die niet-technische gebruikers in staat stelt snel end-to-end oplossingen te bouwen."
+  ]
+}
+```
+<img 
+  src="/images/olstp_core_answer.png" 
+  alt="Olostep Core processor uitvoer"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **Probeer het**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20competitor%20list%20%28Gumloop,%20Make,%20N8N,%20Zapier%29,%20analyze%20their%20pricing%20strategies%20and%20Differentiators&schema=%7B"competitor_pricing_strategies":"A%20list%20of%20pricing%20strategies%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20primary%20pricing%20strategy%20%28e.g.,%20premium,%20competitive,%20value-based,%20freemium,%20subscription%29.%20If%20a%20pricing%20strategy%20cannot%20be%20determined,%20return%20'Pricing%20strategy%20unavailable'.","competitor_differentiators":"A%20list%20of%20key%20differentiators%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20main%20competitive%20advantages%20or%20unique%20selling%20propositions.%20If%20differentiators%20cannot%20be%20determined,%20return%20'Differentiators%20unavailable'."%7D)
+
+### Wat verbeterde voor Gumloop gebruikers?
+
+- **Nauwkeurigheid**: Het antwoord bevat de prijscategorie nummers (bijv. "Gratis 100 taken; Starter 750 voor $19.99...") en is nauwkeuriger (bijv. "8000+ apps" vs "grootste appcatalogus")
+- **Latentie**
+---
+
+## Probeer het zelf
+- Playground: [`https://www.olostep.com/playground?q=answer`](https://www.olostep.com/playground?q=answer)
+
+
+## Wat is de reden hierachter?
+De Olostep Answers API maakt gebruik van de Olostep infrastructuur die is geoptimaliseerd om te zoeken, crawlen en gegevens in realtime te extraheren, in plaats van alleen een webindex te gebruiken en daarop te refereren, waardoor het nauwkeuriger en preciezer is voor dit soort taken.
+
+Het is niet goed geschikt voor diepgaande onderzoekstaken, maar het presteert vaak beter dan de bestaande processors in de Lite, Base en Core categorieën.
+
+
+## Voorgestelde volgende stappen 
+
+Als dit relevant is voor Gumloop en je klanten, overweeg dan om een nieuwe processor toe te voegen voor Gumloop: **`core-fast`** ondersteund door `/answers` voor feitelijke, bron-gebaseerde vragen waarbij latentie belangrijk is.
+
+Als we ergens mee kunnen helpen, laat het ons weten. Bedankt!

@@ -5,17 +5,17 @@ description: "Transformez n’importe quelle URL en données propres"
 icon: "file-lines"
 ---
 
-Grâce à l'endpoint Olostep `/v1/scrapes`, tu peux extraire du Markdown, HTML, texte, captures d'écran ou JSON structuré compatible avec LLM à partir de n'importe quelle URL en temps réel.
+Grâce à l'endpoint `/v1/scrapes` d'Olostep, vous pouvez extraire en temps réel du Markdown, HTML, texte, captures d'écran ou JSON structuré, adaptés aux LLM, à partir de n'importe quelle URL.
 
-- Génère du markdown propre, des données structurées, des captures d'écran ou du html
-- Extrait du JSON via [Parsers](/features/structured-content/parsers) ou [extraction LLM](/features/structured-content/llm-extraction)
-- Gère le contenu dynamique : sites rendus en js, flux de connexion via actions, PDFs
+- Produit du markdown propre, des données structurées, des captures d'écran ou du html
+- Extraire du JSON via [Parsers](/features/structured-content/parsers) ou [extraction LLM](/features/structured-content/llm-extraction)
+- Gère le contenu dynamique : sites rendus par js, flux de connexion via actions, PDF
 
-Pour les détails de l'API, consulte la [Référence de l'API Scrape Endpoint](/api-reference/scrapes/create).
+Pour les détails de l'API, consultez la [Référence de l'API Scrape Endpoint](/api-reference/scrapes/create).
 
 ## Scraper une URL
 
-Utilise l'endpoint `/v1/scrapes` pour scraper une seule URL et choisir les formats de sortie.
+Utilisez l'endpoint `/v1/scrapes` pour scraper une seule URL et choisir les formats de sortie.
 
 ### Installation
 
@@ -30,7 +30,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl est disponible par défaut sur macOS, Linux et Windows
 ```
 
 ```javascript Node (API)
@@ -45,9 +45,9 @@ pip install requests
 
 ### Utilisation
 
-Tu peux utiliser l'endpoint pour scraper une seule URL et choisir les formats de sortie. Les paramètres obligatoires sont `url_to_scrape` et `formats`.
+Vous pouvez utiliser l'endpoint pour scraper une seule URL et choisir les formats de sortie. Les paramètres obligatoires sont `url_to_scrape` et `formats`.
 
-D'autres paramètres courants sont `wait_before_scraping` (en millisecondes), `remove_css_selectors` (par défaut, aucun, ou un tableau de sélecteurs), et `country`.
+Parmi les autres paramètres courants, on trouve `wait_before_scraping` (en millisecondes), `remove_css_selectors` (par défaut, aucun, ou un tableau de sélecteurs), et `country`.
 
 <CodeGroup>
 
@@ -134,10 +134,10 @@ L'API renvoie un objet `scrape` en réponse.
 Le `scrape` possède quelques propriétés comme `id` et `result`.
 
 L'objet `result` a les champs suivants (selon le paramètre `formats`, certains peuvent être nuls) :
-- `html_content` : le contenu HTML de la page. Passe `formats: ["html"]` pour obtenir ceci.
-- `markdown_content` : le contenu MD de la page. Passe `formats: ["markdown"]` pour obtenir ceci.
-- `text_content` : le contenu texte de la page. Passe `formats: ["text"]` pour obtenir ceci.
-- `json_content` : le contenu JSON de la page. Passe `formats: ["json"]` pour obtenir ceci et fournis également un paramètre `parser` ou `llm_extract`.
+- `html_content` : le contenu HTML de la page. Passez `formats: ["html"]` pour obtenir cela.
+- `markdown_content` : le contenu MD de la page. Passez `formats: ["markdown"]` pour obtenir cela.
+- `text_content` : le contenu texte de la page. Passez `formats: ["text"]` pour obtenir cela.
+- `json_content` : le contenu JSON de la page. Passez `formats: ["json"]` pour obtenir cela et fournissez également un paramètre `parser` ou `llm_extract`.
 - `screenshot_hosted_url` : l'URL hébergée de la capture d'écran.
 - `html_hosted_url` : l'URL hébergée du contenu HTML
 - `markdown_hosted_url` : l'URL hébergée du contenu Markdown
@@ -172,24 +172,24 @@ L'objet `result` a les champs suivants (selon le paramètre `formats`, certains 
 
 ## Formats de Scrape
 
-Choisis un ou plusieurs formats de sortie via `formats` :
+Choisissez un ou plusieurs formats de sortie via `formats` :
 
-- `markdown` : markdown compatible LLM
+- `markdown` : markdown adapté aux LLM
 - `html` : HTML nettoyé
 - `text` : texte brut
 - `json` : sortie structurée (via parser ou llm_extract)
 - `raw_pdf` : octets PDF bruts extraits vers une URL hébergée
-- `screenshot` : défini via des actions pour capturer une capture d'écran et retourner une URL hébergée
+- `screenshot` : défini via actions pour capturer une capture d'écran et retourner une URL hébergée
 
-Les clés de sortie sont retournées à l'intérieur de `result` en tant que champs `*_content` et une `*_hosted_url` également.
+Les clés de sortie sont retournées à l'intérieur de `result` en tant que champs `*_content` et également une `*_hosted_url`.
 
 ## Extraire des données structurées
 
-Tu peux extraire du JSON structuré de deux manières : en utilisant des Parsers ou l'extraction LLM.
+Vous pouvez extraire du JSON structuré de deux manières : en utilisant des Parsers ou l'extraction LLM.
 
 ### Utiliser un Parser (recommandé pour l'échelle)
 
-Définis `formats: ["json"]` et fournis un `id` de parser.
+Définissez `formats: ["json"]` et fournissez un `id` de parser.
 
 <CodeGroup>
 
@@ -267,15 +267,15 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Olostep dispose de quelques parsers pré-construits pour [sites populaires](https://www.olostep.com/store) mais tu peux aussi créer tes propres parsers via le tableau de bord ou demander à notre équipe de le faire pour toi.
+Olostep propose quelques parsers préconstruits pour [sites populaires](https://www.olostep.com/store) mais vous pouvez également créer vos propres parsers via le tableau de bord ou demander à notre équipe de le faire pour vous.
 
-Les parsers sont auto-réparateurs et se mettront à jour vers la dernière version du site web.
+Les parsers sont auto-réparants et se mettront à jour eux-mêmes à la dernière version du site web.
 
 ### Utiliser l'extraction LLM (schéma et/ou prompt)
 
-Fournis `llm_extract` avec un schéma JSON (`schema`) et/ou une instruction en langage naturel (`prompt`). Tu peux passer les deux paramètres, mais si les deux sont fournis, `schema` a la priorité.
+Fournissez `llm_extract` avec un schéma JSON (`schema`) et/ou une instruction en langage naturel (`prompt`). Vous pouvez passer les deux paramètres, mais si les deux sont fournis, `schema` prend la priorité.
 
-Sinon, si tu passes juste un `prompt`, le LLM extraira les données en fonction du prompt et décidera de la structure des données par lui-même.
+Sinon, si vous passez juste un `prompt`, le LLM extraira les données en fonction du prompt et décidera de la structure des données par lui-même.
 
 <CodeGroup>
 
@@ -396,11 +396,11 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Note : `result.json_content` renvoie un JSON sous forme de chaîne. Analyse-le dans ton code si tu as besoin d'un objet.
+Note : `result.json_content` renvoie un JSON sous forme de chaîne de caractères. Analysez-le dans votre code si vous avez besoin d'un objet.
 
-## Interagir avec la page avec Actions
+## Interagir avec la page avec des Actions
 
-Effectue des actions avant de scraper pour interagir avec des sites dynamiques. Actions prises en charge :
+Effectuez des actions avant de scraper pour interagir avec des sites dynamiques. Actions prises en charge :
 
 - `wait` avec `milliseconds`
 - `click` avec `selector`
@@ -520,61 +520,61 @@ La réponse inclura tous les formats demandés (par exemple, `markdown_content`)
 
 Voici quelques applications pratiques de clients utilisant l'endpoint `/scrapes`.
 ### Analyse de contenu & Recherche
-- **Analyse concurrentielle** : Extraire les détails des produits, les prix et les caractéristiques des sites concurrents
-- **Étude de marché** : Analyser les pages de destination, les descriptions de produits et les témoignages clients
+- **Analyse concurrentielle** : Extraire des détails de produits, prix et caractéristiques des sites concurrents
+- **Étude de marché** : Analyser les pages d'atterrissage, descriptions de produits et témoignages clients
 - **Recherche académique** : Rassembler des données spécifiques à partir de publications scientifiques ou de portails de recherche
-- **Documentation légale** : Extraire des études de cas, des réglementations ou des précédents juridiques à partir de sites officiels
+- **Documentation légale** : Extraire des études de cas, réglementations ou précédents juridiques à partir de sites officiels
 
 ### E-commerce & Vente au détail
-- **Stratégies de tarification dynamique** : Obtenir les prix des produits en temps réel des magasins concurrents
-- **Gestion de l'information produit** : Extraire des spécifications détaillées et des descriptions
-- **Surveillance des stocks/inventaires** : Vérifier la disponibilité des produits chez d'autres détaillants
+- **Stratégies de tarification dynamique** : Obtenez les prix des produits en temps réel des magasins concurrents
+- **Gestion de l'information produit** : Extraire des spécifications détaillées et descriptions
+- **Suivi des stocks/inventaires** : Vérifiez la disponibilité des produits chez d'autres détaillants
 - **Analyse des avis** : Recueillir les retours et sentiments des consommateurs pour des produits spécifiques
 
 ### Marketing & Création de contenu
 - **Curation de contenu** : Extraire des articles et billets de blog pertinents pour des newsletters
-- **Analyse SEO** : Examiner l'utilisation des mots-clés, les méta-descriptions et la structure des pages des concurrents
-- **Génération de leads** : Extraire des informations de contact à partir d'annuaires d'entreprises ou de pages d'entreprises
-- **Recherche d'influenceurs** : Recueillir des métriques d'engagement et des styles de contenu à partir de profils d'influenceurs
-- **Génération de médias sociaux personnalisés** : Créer des campagnes marketing sur les réseaux sociaux alimentées par l'IA en analysant les sites web des clients
+- **Analyse SEO** : Examiner l'utilisation des mots-clés, descriptions méta et structure de page des concurrents
+- **Génération de leads** : Extraire des informations de contact à partir d'annuaires d'entreprises ou de pages d'entreprise
+- **Recherche d'influenceurs** : Recueillir des métriques d'engagement et styles de contenu à partir de profils d'influenceurs
+- **Génération de médias sociaux personnalisée** : Créer du marketing sur les réseaux sociaux alimenté par l'IA en analysant les sites web des clients
 
 ### Applications de données
-- **Collecte de données d'entraînement IA** : Rassembler des exemples spécifiques pour des modèles d'apprentissage automatique
-- **Construction de bases de connaissances personnalisées** : Extraire de la documentation ou des instructions à partir de sites logiciels
+- **Collecte de données d'entraînement IA** : Recueillir des exemples spécifiques pour les modèles d'apprentissage automatique
+- **Construction de base de connaissances personnalisée** : Extraire de la documentation ou des instructions à partir de sites logiciels
 - **Archives de données historiques** : Préserver le contenu des sites web à des moments spécifiques
-- **Extraction de données structurées** : Transformer le contenu web en ensembles de données formatés pour l'analyse
+- **Extraction de données structurées** : Transformer le contenu web en ensembles de données formatés pour analyse
 
 ### Surveillance & Alertes
-- **Surveillance de la conformité réglementaire** : Suivre les modifications des sites web légaux ou réglementaires
-- **Gestion de crise** : Surveiller les sites d'actualités pour des mentions d'événements ou d'organisations spécifiques
+- **Surveillance de la conformité réglementaire** : Suivre les changements sur les sites web légaux ou réglementaires
+- **Gestion de crise** : Surveiller les sites d'actualités pour des mentions d'événements ou organisations spécifiques
 - **Suivi d'événements** : Extraire des détails sur les événements à venir à partir de sites de lieux ou d'organisateurs
-- **Surveillance du statut des services** : Vérifier les pages de statut des services pour des plateformes ou outils spécifiques
+- **Surveillance de l'état des services** : Vérifiez les pages d'état des services pour des plateformes ou outils spécifiques
 
 ### Publication & Médias
-- **Agrégation de nouvelles** : Extraire des nouvelles de dernière minute à partir de sources officielles
-- **Surveillance des médias** : Suivre des sujets spécifiques sur les sites d'actualités
-- **Vérification de contenu** : Extraire des informations pour vérifier les affirmations ou déclarations
-- **Extraction multimédia** : Rassembler des vidéos, images ou audios intégrés pour des bibliothèques de médias
+- **Agrégation d'actualités** : Extraire des nouvelles de dernière minute à partir de sources officielles
+- **Surveillance des médias** : Suivre des sujets spécifiques à travers les sites d'actualités
+- **Vérification de contenu** : Extraire des informations pour vérifier des affirmations ou déclarations
+- **Extraction multimédia** : Recueillir des vidéos, images ou audio intégrés pour des bibliothèques multimédias
 
 ### Applications financières
-- **Recherche d'investissement** : Extraire des états financiers ou des rapports annuels à partir de sites d'entreprises
-- **Indicateurs économiques** : Rassembler des données économiques à partir de sites gouvernementaux ou d'institutions financières
-- **Données sur les cryptomonnaies** : Extraire des informations en temps réel sur les prix et la capitalisation boursière
-- **Analyse des nouvelles financières** : Surveiller les sites d'actualités financières pour des signaux de marché spécifiques
+- **Recherche d'investissement** : Extraire des états financiers ou rapports annuels à partir de sites d'entreprises
+- **Indicateurs économiques** : Recueillir des données économiques à partir de sites gouvernementaux ou d'institutions financières
+- **Données sur les cryptomonnaies** : Extraire des informations de prix en temps réel et de capitalisation boursière
+- **Analyse des actualités financières** : Surveiller les sites d'actualités financières pour des signaux de marché spécifiques
 
 ### Applications techniques
-- **Extraction de documentation API** : Rassembler de la documentation technique pour référence
-- **Tests d'intégration** : Extraire des éléments de sites web pour vérifier les intégrations tierces
+- **Extraction de documentation API** : Recueillir de la documentation technique pour référence
+- **Tests d'intégration** : Extraire des éléments de site web pour vérifier les intégrations tierces
 - **Tests d'accessibilité** : Analyser la structure des sites web pour la conformité aux normes d'accessibilité
-- **Création d'archives web** : Capturer le contenu complet des sites web pour une préservation historique
+- **Création d'archives web** : Capturer le contenu complet des sites web pour la préservation historique
 
 ### Scénarios d'intégration
-- **Systèmes CRM** : Améliorer les profils clients avec des données provenant de sites web d'entreprises ou de Linkedin
+- **Systèmes CRM** : Améliorer les profils clients avec des données de sites d'entreprises ou Linkedin
 - **Systèmes de gestion de contenu** : Importer du contenu externe pertinent
-- **Outils de Business Intelligence** : Compléter les données internes avec des informations de marché externes
-- **Logiciels de gestion de projet** : Extraire des spécifications ou des exigences à partir de sites web de clients
+- **Outils de business intelligence** : Compléter les données internes avec des informations de marché externes
+- **Logiciels de gestion de projet** : Extraire des spécifications ou exigences à partir de sites de clients
 - **Tableaux de bord personnalisés** : Afficher les données extraites aux côtés des métriques internes
 
 ## Tarification
 
-Scrape coûte 1 crédit par défaut. Si tu utilises également des [parsers](/features/structured-content/parsers), les coûts varient selon le parser (1-5 crédits). Si tu utilises [LLM extract](/features/structured-content/llm-extraction), cela coûte 20 crédits.
+Le coût d'un scrape est de 1 crédit par défaut. Si vous passez également des [parsers](/features/structured-content/parsers), les coûts varient selon le parser (1-5 crédits). Si vous utilisez [LLM extract](/features/structured-content/llm-extraction), cela coûte 20 crédits.

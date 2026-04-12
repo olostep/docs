@@ -1,0 +1,241 @@
+---
+sidebarTitle: "Olostep + Kilo"
+title: "Integración de Olostep + Kilo"
+description: "Usa el Servidor MCP de Olostep como una herramienta externa en Kilo para búsqueda web, scraping y extracción de contenido"
+---
+
+Kilo es la plataforma de ingeniería agéntica todo en uno con soporte para servidores MCP (Model Context Protocol). El Servidor MCP de Olostep se integra perfectamente con Kilo, otorgando a tu agente de IA potentes capacidades de datos web.
+
+## Características
+
+El Servidor MCP de Olostep proporciona acceso a 5 capacidades principales de Olostep:
+
+<CardGroup cols={2}>
+  <Card title="Raspar Sitio Web" icon="file-lines">
+    Extrae contenido de cualquier URL única en múltiples formatos (Markdown, HTML, JSON, texto)
+  </Card>
+  
+  <Card title="Buscar en la Web" icon="search">
+    Busca en la web y obtén resultados estructurados basados en parsers
+  </Card>
+  
+  <Card title="Respuestas (IA)" icon="brain">
+    Obtén respuestas impulsadas por IA con consultas en lenguaje natural y citas
+  </Card>
+  
+  <Card title="Raspar URLs en Lote" icon="layer-group">
+    Procesa hasta 10,000 URLs en paralelo. Perfecto para extracción de datos a gran escala
+  </Card>
+  
+  <Card title="Rastrear Sitios Web" icon="spider-web">
+    Descubre y raspa sitios web enteros de manera autónoma siguiendo enlaces
+  </Card>
+</CardGroup>
+
+## Instalación
+
+### 1. Obtén tu Clave API
+
+Obtén tu clave API de Olostep desde el [Panel de Control de Olostep](https://olostep.com/dashboard/api-keys).
+
+### 2. Configura Kilo
+
+En tu directorio de proyecto, crea o edita `.kilocode/mcp.json` para agregar el Servidor MCP de Olostep:
+
+<CodeGroup>
+```json Remote Hosted MCP (Recomendado)
+{
+  "mcpServers": {
+    "olostep": {
+      "url": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+```json Local/Stdio MCP
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+Reemplaza `YOUR_OLOSTEP_API_KEY` con tu clave API real del Panel de Control de Olostep.
+
+### 3. Verifica la Instalación
+
+Ejecuta Kilo y las herramientas de Olostep deberían estar disponibles automáticamente:
+
+```bash
+kilo
+```
+
+## Herramientas Disponibles
+
+Una vez configurado, las siguientes herramientas de Olostep están disponibles para tu agente Kilo:
+
+### scrape_website
+
+Extrae contenido de una URL única. Soporta múltiples formatos y renderizado de JavaScript.
+
+**Ejemplo de solicitud:**
+```
+Raspa el contenido de https://example.com y dame la versión en markdown
+```
+
+**Parámetros:**
+- `url` - URL del sitio web a raspar (requerido)
+- `format` - Formato de salida: `markdown`, `html`, `json`, o `text` (por defecto: markdown)
+- `country` - Código de país para contenido específico de ubicación (ej., "US", "GB")
+- `wait_before_scraping` - Tiempo de espera en milisegundos para el renderizado de JavaScript (0-10000)
+- `parser` - ID de parser opcional para extracción especializada (ej., "@olostep/amazon-product")
+
+### search_web
+
+Busca en la web y devuelve resultados estructurados basados en parsers.
+
+**Ejemplo de solicitud:**
+```
+Busca las últimas noticias sobre regulaciones de IA en la UE
+```
+
+**Parámetros:**
+- `query` - Consulta de búsqueda (requerido)
+- `country` - Código de país para resultados específicos de ubicación
+
+### answers
+
+Obtén respuestas impulsadas por IA de búsquedas web con fuentes y citas.
+
+**Ejemplo de solicitud:**
+```
+¿Cuáles son las 5 principales tendencias emergentes de IA en 2026? Dame respuestas estructuradas con fuentes.
+```
+
+**Parámetros:**
+- `query` - Pregunta en lenguaje natural (requerido)
+- `format` - Formato de salida para respuestas (estructura JSON de tu elección)
+- `country` - Código de país para búsquedas específicas de ubicación
+
+### batch_scrape_urls
+
+Procesa múltiples URLs en paralelo. Perfecto para extracción de datos a gran escala.
+
+**Ejemplo de solicitud:**
+```
+Raspa estas 50 URLs de productos y extrae título, precio y descripción en formato JSON
+```
+
+**Parámetros:**
+- `urls` - Arreglo de URLs a raspar (requerido)
+- `format` - Formato de salida para todas las URLs
+- `country` - Código de país para contenido específico de ubicación
+- `parser` - ID de parser opcional para todas las URLs
+
+### create_crawl
+
+Descubre y raspa sitios web enteros de manera autónoma siguiendo enlaces desde una URL inicial.
+
+**Ejemplo de solicitud:**
+```
+Rastrea el sitio web comenzando desde https://example.com y extrae todas las páginas de productos
+```
+
+**Parámetros:**
+- `start_url` - URL inicial para el rastreo (requerido)
+- `max_pages` - Número máximo de páginas a rastrear (por defecto: 10)
+- `follow_links` - Si se deben seguir enlaces (por defecto: true)
+
+### create_map
+
+Extrae todas las URLs de un sitio web para análisis de estructura del sitio y descubrimiento de contenido.
+
+**Ejemplo de solicitud:**
+```
+Mapea todas las URLs en https://example.com para entender la estructura del sitio
+```
+
+**Parámetros:**
+- `website_url` - Sitio web a mapear (requerido)
+- `search_query` - Consulta opcional para filtrar resultados
+- `top_n` - Limitar el número de URLs devueltas
+
+## Ejemplos de Flujos de Trabajo
+
+### Tarea de Investigación con Búsqueda Web
+
+Deja que el agente Kilo reúna información de la web:
+
+```
+Usa la herramienta search_web para encontrar artículos recientes sobre la seguridad de LLM,
+luego usa la herramienta answers para sintetizar los hallazgos clave con fuentes.
+Dame un resumen completo.
+```
+
+### Extracción de Datos de Productos
+
+Raspa múltiples páginas de productos:
+
+```
+Tengo 100 URLs de productos de un sitio de comercio electrónico. Usa batch_scrape_urls
+para extraer título, precio, descripción y disponibilidad de cada uno.
+Da formato a los resultados como JSON.
+```
+
+### Descubrimiento y Análisis de Sitios Web
+
+Rastrea y analiza la estructura de un sitio web:
+
+```
+Quiero entender la estructura de https://example.com.
+Primero, usa create_map para obtener todas las URLs, luego rastrea las secciones principales
+y dame un resumen de la organización del contenido del sitio.
+```
+
+## Variables de Entorno
+
+Al usar la configuración local/stdio, asegúrate de que tu entorno tenga configurada la clave API:
+
+```bash
+export OLOSTEP_API_KEY="your_api_key_here"
+kilo
+```
+
+O en tu archivo `.env`:
+```
+OLOSTEP_API_KEY=your_api_key_here
+```
+
+## Solución de Problemas
+
+**Las herramientas no aparecen en Kilo:**
+- Verifica que el `.kilocode/mcp.json` esté correctamente formateado (JSON válido)
+- Asegúrate de que tu clave API sea correcta en la configuración
+- Intenta reiniciar Kilo después de los cambios de configuración
+
+**Errores de autenticación de clave API:**
+- Verifica tu clave API desde el [Panel de Control de Olostep](https://olostep.com/dashboard/api-keys)
+- Asegúrate de que no haya espacios adicionales o caracteres especiales en la clave
+
+**MCP alojado remotamente no se conecta:**
+- Verifica tu conexión a internet
+- Comprueba que `https://mcp.olostep.com/mcp` sea accesible
+- Asegúrate de que el formato del encabezado de autorización sea correcto: `Bearer YOUR_KEY`
+
+## Más Información
+
+- [Sitio Web de Kilo](https://kilo.ai/)
+- [Documentación de Kilo](https://docs.kilo.ai/)
+- [Repositorio del Servidor MCP de Olostep](https://github.com/olostep/olostep-mcp-server)
+- [Especificación del Protocolo de Contexto de Modelo (MCP)](https://modelcontextprotocol.io/)

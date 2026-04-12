@@ -1,18 +1,18 @@
 ---
 sidebarTitle: "Crawl"
 title: "Crawl"
-description: "Effettua il crawl di un URL e ottieni il contenuto da tutte le sottopagine"
+description: "Esegui un crawl di un URL e ottieni il contenuto di tutte le sottopagine"
 icon: "spider"
 ---
 
-Attraverso l'endpoint Olostep `/v1/crawls` puoi effettuare il crawl di un sito web e ottenere il contenuto di tutte le pagine.
+Attraverso l'endpoint `/v1/crawls` di Olostep puoi eseguire un crawl di un sito web e ottenere il contenuto di tutte le pagine.
 
-- Effettua il crawl di un sito web e ottieni il contenuto di tutte le sottopagine (o limita la profondità del crawl)
-- Usa pattern speciali per effettuare il crawl di pagine specifiche (es. `/blog/**`)
+- Esegui un crawl di un sito web e ottieni il contenuto di tutte le sottopagine (o limita la profondità del crawl)
+- Usa pattern speciali per eseguire un crawl di pagine specifiche (es. `/blog/**`)
 - Passa un `webhook_url` per ricevere una notifica quando il crawl è completato
 - Query di ricerca per trovare solo pagine specifiche e ordinarle per rilevanza
 
-Per i dettagli sull'API, consulta la [Riferimento API dell'Endpoint Crawl](/api-reference/crawls/create).
+Per i dettagli sull'API, vedi la [Riferimento API dell'Endpoint Crawl](/api-reference/crawls/create).
 
 ## Installazione
 
@@ -27,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl è disponibile di default su macOS, Linux e Windows
 ```
 
 ```javascript Node (API)
@@ -42,7 +42,7 @@ pip install requests
 
 ## Avvia un crawl
 
-Fornisci l'URL di partenza, includi/escludi glob di URL e `max_pages`. Opzionale: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`.
+Fornisci l'URL di partenza, includi/escludi i glob URL e `max_pages`. Opzionale: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`.
 
 <CodeGroup>
 
@@ -134,25 +134,25 @@ Poiché tutto in Olostep è un oggetto, riceverai un oggetto `crawl` in risposta
 
 ## Controlla lo stato del crawl
 
-Interroga il crawl per tracciare i progressi fino a quando lo `status` è `completed`.
+Interroga il crawl per monitorare i progressi fino a quando `status` è `completed`.
 
 <CodeGroup>
 
 ```python Python
-# Using the crawl object from the previous step
+# Usando l'oggetto crawl dal passaggio precedente
 info = crawl.info()
 print(info.status, info.pages_count)
 
-# Or wait until completed
+# Oppure aspetta fino al completamento
 crawl.wait_till_done(check_every_n_secs=5)
 ```
 
 ```js Node
-// Using the crawl object from the previous step
+// Usando l'oggetto crawl dal passaggio precedente
 const info = await crawl.info()
 console.log(info.status, info.pages_count)
 
-// Or wait until completed
+// Oppure aspetta fino al completamento
 await crawl.waitTillDone({ checkEveryNSecs: 5 })
 ```
 
@@ -190,18 +190,18 @@ In alternativa, puoi passare un `webhook_url` quando avvii il crawl per essere n
 
 ## Elenca le pagine (paginazione/stream con cursore)
 
-Recupera le pagine e iterale usando `cursor` e `limit`. Funziona mentre il crawl è `in_progress` o `completed`.
+Recupera le pagine e itera usando `cursor` e `limit`. Funziona mentre il crawl è `in_progress` o `completed`.
 
 <CodeGroup>
 
 ```python Python
-# Iterate all pages (auto-waits for crawl completion, handles pagination)
+# Itera tutte le pagine (attende automaticamente il completamento del crawl, gestisce la paginazione)
 for page in crawl.pages():
     print(page.url, page.retrieve_id)
 ```
 
 ```js Node
-// Iterate all pages (auto-waits for crawl completion, handles pagination)
+// Itera tutte le pagine (attende automaticamente il completamento del crawl, gestisce la paginazione)
 for await (const page of crawl.pages()) {
   console.log(page.url, page.retrieve_id)
 }
@@ -322,19 +322,19 @@ print(len(pages['pages']))
 
 ## Recupera contenuto
 
-Usa il `retrieve_id` di ciascuna pagina con `/v1/retrieve` per ottenere `html_content` e/o `markdown_content`.
+Usa `retrieve_id` di ogni pagina con `/v1/retrieve` per ottenere `html_content` e/o `markdown_content`.
 
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each crawled page
+# Recupera il contenuto per ogni pagina esaminata
 for page in crawl.pages():
     content = page.retrieve(["markdown"])
     print(content.markdown_content)
 ```
 
 ```js Node
-// Retrieve content for each crawled page
+// Recupera il contenuto per ogni pagina esaminata
 for await (const page of crawl.pages()) {
   const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
   console.log(content.markdown_content)
@@ -367,8 +367,8 @@ for page in get_pages(crawl['id'], limit=5)['pages']:
 
 - La paginazione è basata su cursore; ripeti le richieste fino a quando il `cursor` è assente.
 - I campi di contenuto su `/v1/crawls/{crawl_id}/pages` sono deprecati; preferisci `/v1/retrieve`.
-- Webhook: imposta `webhook_url` per ricevere un POST quando il crawl è completato.
+- Webhooks: imposta `webhook_url` per ricevere un POST quando il crawl è completato.
 
 ## Prezzi
 
-Il crawl costa 1 credito per pagina effettuata.
+Il crawl costa 1 credito per ogni pagina esaminata.

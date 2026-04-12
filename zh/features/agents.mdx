@@ -7,10 +7,10 @@ icon: "robot"
 通过 Olostep 代理 API，你可以创建自主研究代理，这些代理可以按计划自动化数据管道和搜索任务，并提供结构化结果。
 
 - 跨网站的网络研究与自动提取
-- 多步骤工作流，支持计划执行和通知
+- 多步骤工作流，具有计划执行和通知功能
 - 输出到 JSON/CSV/Sheets/DB
 
-如需了解可用性和详细信息，请通过 [info@olostep.com](mailto:info@olostep.com) 联系我们或 [联系销售](https://www.olostep.com/contact-sales)。
+如需了解可用性和详细信息，请通过 [info@olostep.com](mailto:info@olostep.com) 或 [联系销售](https://www.olostep.com/contact-sales) 与我们联系。
 
 ## 安装
 
@@ -33,7 +33,7 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: 内置的 curl 就可以
+# macOS: 内置 curl 已经足够
 ```
 
 </CodeGroup>
@@ -45,7 +45,7 @@ const fetch = require('node-fetch')
 <CodeGroup>
 
 ```python Python
-API_URL = 'https://api.olostep.com/v1/agents' # 仅限选定客户使用的端点
+API_URL = 'https://api.olostep.com/v1/agents' # 仅供选择的客户使用的端点
 API_KEY = '<YOUR_API_KEY>'
 
 headers = {
@@ -55,7 +55,7 @@ headers = {
 
 data = {
   "prompt": """
-    从 https://www.vcsheet.com/funds 找到投资组合公司，并写入 Google 表格，列包括（基金名称、基金网站 URL、基金 LinkedIn URL、投资组合公司名称、投资组合公司 URL、投资组合公司 LinkedIn URL）。每周一上午 9:00 运行，当有新公司添加时，发送邮件到 steve@example.com。
+    从 https://www.vcsheet.com/funds 找到投资组合公司，并写入 Google 表格，包含列（基金名称、基金网站 URL、基金 LinkedIn URL、投资组合公司名称、投资组合公司 URL、投资组合公司 LinkedIn URL）。每周一上午 9:00 运行，并在添加新公司时发送邮件至 steve@example.com。
   """,
   "model": "gpt-4.1"
 }
@@ -93,20 +93,20 @@ curl -s -X POST "https://api.olostep.com/v1/agents" \
 
 Olostep 代理可以：
 
-- **网络研究**：自动搜索并从网站提取数据
+- **网络研究**：自动搜索和从网站提取数据
 - **数据组织**：将信息结构化为电子表格、数据库或其他格式
-- **计划执行**：按周期性计划运行任务（每日、每周、在预定时间）
+- **计划执行**：按固定计划（每日、每周、预定时间）运行任务
 - **多步骤工作流**：自主执行复杂的多部分研究任务
 - **通知**：在发现新数据或任务完成时发送电子邮件提醒
 - **自定义输出**：以 CSV、JSON、Google 表格或直接在你的数据库中返回数据
 
 ## 访问
 
-代理 API 目前仅对选定客户开放。获取访问权限：
+代理 API 目前仅供选择的客户使用。要获取访问权限：
 
-- 发送电子邮件至 [info@olostep.com](mailto:info@olostep.com)
+- 给我们发送电子邮件 [info@olostep.com](mailto:info@olostep.com)
 - 或 [联系我们的销售团队](https://www.olostep.com/contact-sales)
 
 ## 定价
 
-代理定价是可变的。按结果计费。价格由客户和代理协商。请联系 info@olostep.com 了解更多详情。
+代理的定价是可变的。按结果计费。价格由客户和代理之间协商决定。请联系 info@olostep.com 了解更多详情。

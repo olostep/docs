@@ -1,13 +1,12 @@
 ---
-sidebarTitle: "LangChain"
-icon: "link"
-title: "LangChain-integratie"
-description: "Bouw intelligente AI-agenten met webscraping- en zoekmogelijkheden met behulp van LangChain"
+sidebarTitle: "Olostep + LangChain"
+title: "Olostep + LangChain Integratie"
+description: "Bouw intelligente AI-agenten met webscraping en zoekmogelijkheden met behulp van LangChain"
 ---
 
 De Olostep LangChain-integratie biedt uitgebreide tools om AI-agenten te bouwen die data van elke website kunnen doorzoeken, scrapen, analyseren en structureren. Perfect voor LangChain- en LangGraph-toepassingen.
 
-## Kenmerken
+## Functies
 
 De integratie biedt toegang tot alle 5 Olostep API-mogelijkheden:
 
@@ -17,7 +16,7 @@ De integratie biedt toegang tot alle 5 Olostep API-mogelijkheden:
   </Card>
   
   <Card title="Batches" icon="layer-group">
-    Verwerk tot 10.000 URL's parallel. Batchtaken zijn voltooid in 5-8 minuten
+    Verwerk tot 10.000 URL's parallel. Batchtaken worden voltooid in 5-8 minuten
   </Card>
   
   <Card title="Answers" icon="question">
@@ -66,7 +65,7 @@ Haal inhoud op van een enkele URL. Ondersteunt meerdere formaten en JavaScript-r
 </ParamField>
 
 <ParamField path="format" type="string" default="markdown">
-  Uitvoerformaat: `markdown`, `html`, `json`, of `text`
+  Outputformaat: `markdown`, `html`, `json`, of `text`
 </ParamField>
 
 <ParamField path="country" type="string">
@@ -123,7 +122,7 @@ Verwerk meerdere URL's parallel (tot 10.000 tegelijk).
 </ParamField>
 
 <ParamField path="format" type="string" default="markdown">
-  Uitvoerformaat voor alle URL's: `markdown`, `html`, `json`, of `text`
+  Outputformaat voor alle URL's: `markdown`, `html`, `json`, of `text`
 </ParamField>
 
 <ParamField path="country" type="string">
@@ -167,7 +166,7 @@ Doorzoek het web en krijg AI-gestuurde antwoorden met bronnen. Perfect voor data
 </ParamField>
 
 <ParamField path="json_schema" type="object">
-  Optioneel JSON-schema dict/string dat het gewenste uitvoerformaat beschrijft
+  Optioneel JSON-schema dict/string dat het gewenste outputformaat beschrijft
 </ParamField>
 
 <CodeGroup>
@@ -347,7 +346,7 @@ agent = initialize_agent(
 # Gebruik de agent
 result = agent.run("""
 Onderzoek het bedrijf op https://company.com:
-1. Scrape hun over ons pagina
+1. Scrape hun over-pagina
 2. Zoek naar hun laatste financieringsronde
 3. Haal al hun productpagina's op
 """)
@@ -358,7 +357,7 @@ print(result)
 
 ## LangGraph Integratie
 
-Bouw complexe meerstapsworkflows met LangGraph:
+Bouw complexe multi-step workflows met LangGraph:
 
 <CodeGroup>
 ```python Research Agent
@@ -435,11 +434,11 @@ Verrijk spreadsheetgegevens met webinformatie:
 ```python
 from langchain_olostep import answer_question
 
-bedrijven = ["Stripe", "Shopify", "Square"]
+companies = ["Stripe", "Shopify", "Square"]
 
-for bedrijf in bedrijven:
+for company in companies:
     result = answer_question.invoke({
-        "task": f"Vind informatie over {bedrijf}",
+        "task": f"Vind informatie over {company}",
         "json_schema": {
             "ceo": "",
             "headquarters": "",
@@ -447,7 +446,7 @@ for bedrijf in bedrijven:
             "latest_funding": ""
         }
     })
-    print(f"{bedrijf}: {result}")
+    print(f"{company}: {result}")
 ```
 
 ### E-commerce Product Scraping
@@ -463,7 +462,7 @@ result = scrape_website.invoke({
     "parser": "@olostep/amazon-product",
     "format": "json"
 })
-# Geeft gestructureerde productgegevens terug: prijs, titel, beoordeling, enz.
+# Geeft gestructureerde productgegevens terug: prijs, titel, beoordeling, etc.
 ```
 
 ### SEO Audit
@@ -495,7 +494,7 @@ Crawl en haal documentatie op:
 ```python
 from langchain_olostep import crawl_website
 
-# Crawl volledige documentatiesite
+# Crawl volledige docs site
 result = crawl_website.invoke({
     "start_url": "https://docs.example.com",
     "max_pages": 500,
@@ -532,15 +531,15 @@ except LangChainException as e:
     print(f"Scraping mislukt: {e}")
 ```
 
-## Best Practices
+## Beste Praktijken
 
 <AccordionGroup>
   <Accordion title="Gebruik Batchverwerking voor Meerdere URL's">
     Wanneer je meer dan 3-5 URL's scrapt, gebruik `scrape_batch` in plaats van meerdere `scrape_website` oproepen. Batchverwerking is veel sneller en kosteneffectiever.
   </Accordion>
 
-  <Accordion title="Stel Passende Time-outs In">
-    Voor JavaScript-intensieve sites, gebruik de `wait_before_scraping` parameter (2000-5000ms is typisch). Dit zorgt ervoor dat dynamische inhoud volledig is geladen.
+  <Accordion title="Stel Geschikte Time-outs in">
+    Voor JavaScript-rijke sites, gebruik de `wait_before_scraping` parameter (2000-5000ms is typisch). Dit zorgt ervoor dat dynamische inhoud volledig is geladen.
   </Accordion>
 
   <Accordion title="Gebruik Gespecialiseerde Parsers">
@@ -548,17 +547,17 @@ except LangChainException as e:
   </Accordion>
 
   <Accordion title="Filter URL's Efficiënt">
-    Bij het gebruik van `extract_urls` of `crawl_website`, gebruik glob-patronen om je te richten op relevante pagina's en onnodige verwerking te vermijden.
+    Wanneer je `extract_urls` of `crawl_website` gebruikt, gebruik glob-patronen om je te concentreren op relevante pagina's en onnodige verwerking te vermijden.
   </Accordion>
 
-  <Accordion title="Behandel Snelheidslimieten">
-    Implementeer exponentiële backoff voor snelheidslimietfouten. De API behandelt de meeste snelheidslimieten intern automatisch.
+  <Accordion title="Behandel Rate Limits">
+    Implementeer exponentiële backoff voor rate limit fouten. De API behandelt de meeste rate limiting intern automatisch.
   </Accordion>
 </AccordionGroup>
 
 ## Ondersteuning
 
-- **PyPI Package**: [langchain-olostep](https://pypi.org/project/langchain-olostep/)
+- **PyPI Pakket**: [langchain-olostep](https://pypi.org/project/langchain-olostep/)
 - **Documentatie**: [docs.olostep.com](https://docs.olostep.com)
 - **Problemen**: [GitHub Issues](https://github.com/olostep/langchain-olostep/issues)
 - **E-mail**: info@olostep.com
@@ -567,26 +566,30 @@ except LangChainException as e:
 
 <CardGroup cols={2}>
   <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    Leer meer over het Scrapes eindpunt
+    Leer over de Scrapes endpoint
   </Card>
   
   <Card title="Batches API" icon="layer-group" href="/features/batches">
-    Leer meer over het Batches eindpunt
+    Leer over de Batches endpoint
   </Card>
   
   <Card title="Answers API" icon="question" href="/features/answers">
-    Leer meer over het Answers eindpunt
+    Leer over de Answers endpoint
   </Card>
   
   <Card title="Maps API" icon="map" href="/features/maps">
-    Leer meer over het Maps eindpunt
+    Leer over de Maps endpoint
   </Card>
   
   <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    Leer meer over het Crawls eindpunt
+    Leer over de Crawls endpoint
   </Card>
   
   <Card title="Python SDK" icon="python" href="/sdks/python">
-    Ontdek de Python SDK
+    Verken de Python SDK
+  </Card>
+  
+  <Card title="LangChain Website" icon="link" href="https://www.langchain.com">
+    LangChain platform
   </Card>
 </CardGroup>

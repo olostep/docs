@@ -1,0 +1,183 @@
+---
+sidebarTitle: "Olostep + OpenClaw"
+title: "Integrazione Olostep + OpenClaw"
+description: "Fornisci al tuo agente OpenClaw accesso web live con 13 competenze e un server MCP con 9 strumenti"
+---
+
+Il tuo agente OpenClaw può leggere la documentazione, ma non può leggere il web. Il [plugin Olostep Web Agent](https://clawhub.ai/plugins/olostep-web-agent) risolve questo problema — cerca, estrae, esplora e raccoglie dati strutturati da qualsiasi sito web, direttamente all'interno del flusso di lavoro del tuo agente.
+
+Un'installazione ti offre **13 competenze** per compiti di alto livello (debug di un errore da thread live di StackOverflow, scrittura di codice di integrazione dalla documentazione attuale, ricerca di strumenti con confronti strutturati) e un **server MCP con 9 strumenti** per l'accesso programmato diretto. SPAs pesanti in JS, CAPTCHA, Cloudflare, proxy residenziali — gestiti automaticamente.
+
+## Installazione
+
+```bash
+clawhub install olostep
+```
+
+Ecco fatto. Se preferisci collegare manualmente il server MCP, aggiungi questo alla configurazione di OpenClaw:
+
+```json
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+Ottieni una chiave API gratuita su [olostep.com/auth](https://olostep.com/auth) — 500 richieste/mese, nessuna carta di credito.
+
+## Competenze
+
+### Competenze di Base sui Dati
+
+Queste sei competenze sono i mattoni fondamentali. Ognuna fa una cosa bene, e il tuo agente può combinarle per flussi di lavoro complessi.
+
+<CardGroup cols={2}>
+  <Card title="scrape" icon="file-lines">
+    Qualsiasi URL in markdown pulito, HTML, JSON o testo. Rendering completo del browser, bypass anti-bot, targeting geografico, azioni del browser (clic, scorrimento, digitazione) e parser pre-costruiti per tipi di siti comuni.
+  </Card>
+
+  <Card title="search" icon="magnifying-glass">
+    Tre modalità: risposte sintetizzate dall'AI con citazioni, dati grezzi di Google SERP (risultati organici, PAA, knowledge graph) e scoperta di URL limitata al dominio.
+  </Card>
+
+  <Card title="crawl" icon="spider-web">
+    Inizia da un URL, segui i link, estrae ogni pagina scoperta. Imposta il numero massimo di pagine, includi/escludi pattern di URL e controlla la profondità dell'esplorazione.
+  </Card>
+
+  <Card title="batch" icon="layer-group">
+    Estrai fino a 10.000 URL in parallelo con rendering completo. Etichetta ogni URL con `custom_id` per mappare i risultati alle tue fonti.
+  </Card>
+
+  <Card title="map" icon="map">
+    Scopri ogni URL su un sito web senza estrarne alcuno. Filtra con pattern glob, classifica per rilevanza della query di ricerca, limita con `top_n`.
+  </Card>
+
+  <Card title="answers" icon="question">
+    Fai una domanda in linguaggio naturale, ottieni una risposta sintetizzata dall'AI basata su fonti web live. Passa un parametro `json` per ottenere un output strutturato che corrisponde a qualsiasi schema definisci.
+  </Card>
+</CardGroup>
+
+### Competenze di Flusso di Lavoro
+
+Queste sette competenze concatenano più operazioni di base insieme. Gestiscono il pensiero — il tuo agente sceglie solo la competenza giusta per il lavoro.
+
+<CardGroup cols={2}>
+  <Card title="research" icon="microscope">
+    "Confronta i primi 3 ORM per Node.js" — l'agente cerca in più fonti, estrae pagine di prezzi e caratteristiche, e restituisce un confronto strutturato con citazioni e una raccomandazione.
+  </Card>
+
+  <Card title="debug-error" icon="bug">
+    Incolla un traceback o un messaggio di errore. L'agente cerca nei problemi di GitHub e su StackOverflow per quell'errore esatto, estrae i thread rilevanti e restituisce una soluzione basata su ciò che hanno fatto gli sviluppatori che hanno incontrato lo stesso problema.
+  </Card>
+
+  <Card title="docs-to-code" icon="code">
+    Indica un URL di documentazione. L'agente estrae il riferimento API corrente e scrive codice di integrazione funzionante da ciò che è effettivamente pubblicato — non da dati di addestramento obsoleti che potrebbero fare riferimento a metodi deprecati.
+  </Card>
+
+  <Card title="migrate-code" icon="code-branch">
+    Fornisci la tua versione corrente e la versione di destinazione. L'agente estrae la guida alla migrazione, estrae ogni cambiamento critico con pattern prima/dopo, e riscrive il tuo codice per adattarlo.
+  </Card>
+
+  <Card title="extract-schema" icon="table">
+    Trasforma qualsiasi pagina web non strutturata — elenchi di prodotti, annunci di lavoro, articoli — in JSON tipizzato che corrisponde a un'interfaccia TypeScript, uno schema JSON o un modello di database che fornisci.
+  </Card>
+
+  <Card title="integrate" icon="plug">
+    Rileva automaticamente il tuo stack (linguaggio, framework, toolkit AI) e scrive un'integrazione completa dell'SDK Olostep: comandi di installazione, configurazione del client, collegamento degli strumenti e un passaggio di verifica.
+  </Card>
+
+  <Card title="setup" icon="key">
+    Configura la chiave API Olostep e verifica la connessione. Include la risoluzione dei problemi per i problemi di configurazione comuni.
+  </Card>
+</CardGroup>
+
+## Strumenti MCP
+
+Il server MCP incluso (`olostep-mcp`) fornisce al tuo agente 9 strumenti che può chiamare direttamente. Usali quando hai bisogno di un controllo dettagliato oltre ciò che le competenze di flusso di lavoro forniscono.
+
+| Strumento | Cosa fa |
+|------|-------------|
+| `scrape_website` | Estrai un singolo URL in markdown, HTML, JSON o testo |
+| `get_webpage_content` | Recupera una pagina web come markdown pulito, pronto per LLM |
+| `search_web` | Cerca nel web live, ottieni risposte sintetizzate dall'AI |
+| `google_search` | Dati strutturati di Google SERP — risultati organici, PAA, knowledge graph |
+| `answers` | Fai una domanda, ottieni una risposta citata con output JSON strutturato opzionale |
+| `batch_scrape_urls` | Estrai fino a 10.000 URL in parallelo con rendering completo |
+| `create_crawl` | Esplora un sito web seguendo i link da un URL iniziale |
+| `create_map` | Scopri tutti gli URL su un sito web, filtrabili per pattern e query |
+| `get_website_urls` | Trova e recupera URL rilevanti da un dominio specifico |
+
+## Come si Presenta nella Pratica
+
+### "Perché sta fallendo?" — Debug dal web live
+
+Incolli `ECONNRESET quando chiami l'endpoint webhook di Stripe` nel tuo agente. Cerca nei problemi di GitHub e su StackOverflow per quell'errore esatto, estrae i tre thread più rilevanti e restituisce una soluzione concreta — non "controlla le impostazioni di rete", ma la configurazione di timeout effettiva che l'ha risolto per altri sviluppatori che hanno incontrato lo stesso ostacolo.
+
+### "Scrivi l'integrazione" — Codice dalla documentazione attuale, non da dati di addestramento obsoleti
+
+Hai bisogno di integrare un'API di pagamento. La competenza `docs-to-code` estrae il riferimento API corrente — quello pubblicato oggi, non la versione su cui il tuo modello è stato addestrato sei mesi fa — e scrive codice funzionante usando i parametri e gli endpoint che esistono effettivamente.
+
+### "Quale dovrei usare?" — Confronti strutturati di strumenti
+
+Valutando ORM? Confrontando fornitori di autenticazione? La competenza `research` cerca in più fonti, estrae pagine di prezzi reali e matrici di caratteristiche, e restituisce una tabella di confronto strutturata con citazioni. Ottieni una raccomandazione supportata da ciò che è effettivamente sul sito di ciascun prodotto, non dalla popolarità nei dati di addestramento.
+
+### Costruisci una pipeline RAG da qualsiasi sito di documentazione
+
+```
+map   → scopri ogni URL sul sito di documentazione
+batch → estrai tutte le pagine in parallelo come markdown pulito
+      → alimenta nel tuo archivio vettoriale
+```
+
+Due competenze, una pipeline. Funziona su siti di documentazione con centinaia o migliaia di pagine.
+
+### Estrai dati strutturati su larga scala
+
+```
+map   → trova tutti gli URL di prodotto, elenco o lavoro
+batch → estrai ogni pagina con un parser pre-costruito → JSON tipizzato
+      → invia al tuo database, API, o file di seed
+```
+
+### Migra a una nuova versione del framework
+
+Stai aggiornando Next.js dalla versione 13 alla 15. La competenza `migrate-code` estrae la guida ufficiale alla migrazione, estrae ogni cambiamento critico con pattern di codice prima/dopo, e riscrive i tuoi file per adattarli — basato sulla documentazione reale, non sulla migliore ipotesi del modello.
+
+## Parser Pre-costruiti
+
+Passa il parametro `parser` a qualsiasi chiamata di estrazione e ottieni JSON tipizzato invece di contenuto grezzo. Nessuna definizione di schema necessaria — questi gestiscono l'estrazione per te.
+
+| Parser | Restituisce |
+|--------|---------|
+| `@olostep/google-search` | Risultati organici, knowledge graph, People Also Ask |
+| `@olostep/amazon-it-product` | Prezzo, valutazione, caratteristiche, disponibilità |
+| `@olostep/extract-emails` | Ogni indirizzo email trovato sulla pagina |
+| `@olostep/extract-calendars` | Eventi del calendario strutturati |
+| `@olostep/extract-socials` | Link ai profili dei social media |
+
+## Link
+
+<CardGroup cols={2}>
+  <Card title="Installa su ClawHub" icon="store" href="https://clawhub.ai/plugins/olostep-web-agent">
+    Elenco plugin, cronologia delle versioni e installazione con un comando
+  </Card>
+
+  <Card title="Ottieni Chiave API" icon="key" href="https://olostep.com/auth">
+    500 richieste gratuite/mese, nessuna carta di credito
+  </Card>
+
+  <Card title="Documentazione Server MCP" icon="server" href="/integrations/mcp-server">
+    Configurazione completa del server MCP per Cursor, Claude Desktop e altri client
+  </Card>
+
+  <Card title="Riferimento API" icon="book" href="https://docs.olostep.com">
+    Documentazione completa degli endpoint con esempi
+  </Card>
+</CardGroup>

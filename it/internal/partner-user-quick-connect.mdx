@@ -1,0 +1,144 @@
+---
+title: "Connessione Rapida Utente Partner"
+description: "Assicurati che i tuoi clienti abbiano accesso al web con una sola chiamata: email verificata più intestazioni partner (vedi OpenAPI); ID account, crediti promozionali quando idonei, e una chiave API quando ne generiamo una. Utenti Olostep nuovi ed esistenti."
+icon: "link"
+openapi: "it/openapi/partnerships.json POST /partnerships/quick-connect/user"
+---
+
+## Panoramica
+
+La Connessione Rapida Utente Partner è un singolo `POST` che fornisce o collega un account Olostep da un'email che hai già verificato.
+
+**Cosa invii**
+1. **`X-Partner-Key`** — il segreto della partnership che Olostep ti ha fornito (autentica la tua integrazione).
+2. **`Idempotency-Key`** — un valore che scegli per garantire che i tentativi e le ripetizioni siano sicuri (vedi la **Descrizione** di OpenAPI per le regole complete).
+3. **Corpo JSON** con **`verified_email`** — l'indirizzo dell'utente finale, come `Content-Type: application/json`.
+
+**Cosa può succedere dalla nostra parte**
+
+- **`200` successo** — Risolviamo o creiamo l'utente, eseguiamo la concessione promozionale partner una tantum quando idonea, e restituiamo ID, crediti applicati in questa chiamata, messaggi e metadati della chiave API quando rilevanti. Ciò include **prime concessioni** (positivo **`applied_quick_connect_credits`**), **già reclamati** (crediti `0`, nessuna concessione duplicata), e **ripetizione idempotente** (stessa chiave + stessa email restituisce il corpo di successo memorizzato).
+- **Errori del client** — Ad esempio **`401`** se la chiave partner è errata o mancante, **`400`** per problemi di validazione, **`409`** mentre la stessa chiave di idempotenza è ancora in corso, e **`422`** se riutilizzi una chiave di idempotenza con un'email **diversa** dalla prima richiesta.
+- **Errori del server** — **`500`** quando qualcosa fallisce dopo che abbiamo accettato il lavoro (es. concessione del credito); i tentativi con la **stessa** `Idempotency-Key` sono appropriati quando la risposta non è chiara.
+
+Consulta il pannello OpenAPI in questa pagina per richieste di esempio, risposte e un playground interattivo per provare l'endpoint Quick-Connect.
+
+---
+
+## Cosa vede l'utente
+
+Dopo un **`200`** di successo, usa il JSON per fornire al cliente una chiave API quando ne generiamo una e per sapere **se Olostep ha inviato loro un'email transazionale in questa chiamata** (e quale modello).
+
+### Accesso API e dashboard
+
+I clienti possono chiamare le API di Olostep **non appena hai la chiave**—non è richiesto il sito web o il dashboard di Olostep per l'uso dell'API. Fornisci loro **`user.api_key.auto_generated_api_key`** quando è **non-null** (abbiamo generato un token predefinito su questa concessione); quando è **`null`**, avevano già token o non è stato creato un nuovo predefinito qui—possono usare un'altra chiave o gestire le chiavi nel dashboard (vedi esempi OpenAPI).
+
+Gli utenti con connessione rapida **non ricevono una password iniziale per il dashboard**. Le email transazionali includono **Imposta la tua password del dashboard** (flusso di autenticazione "password dimenticata") solo per l'accesso al dashboard—separato dall'accesso API tramite la chiave che passi dal tuo backend.
+
+### Lettura del corpo `200`
+
+| Campo | Cosa ti dice |
+|-------|--------------|
+| **`applied_quick_connect_credits`** | **Positivo** — prima concessione partner per questo utente in questa chiamata: crediti promozionali applicati e **esattamente una** email transazionale inviata (vedi **Email transazionale** sotto). **`0`** — nessuna nuova concessione (di solito **già reclamati**): **nessuna** email di benvenuto o **Crediti partner aggiunti** in **questa** risposta; **`user_message`** lo descrive; **`user.api_key.auto_generated_api_key`** è **`null`**. |
+| **`user.is_new_user`** | Significativo quando i crediti sono **positivi**: **`true`** → **Benvenuto in Olostep**; **`false`** → **Crediti partner aggiunti**. |
+| **`user.api_key.auto_generated_api_key`** | Passa al cliente quando impostato; altrimenti affidati ai token esistenti / dashboard. |
+| **`user_message`** | Breve testo di risultato per la tua UI. |
+| **Ripetizione idempotente** | Stessa **`Idempotency-Key`** + **`verified_email`** restituisce il corpo di successo **memorizzato** dalla concessione originale—deduci email e chiavi da quel payload allo stesso modo. |
+
+### Email transazionale
+
+Solo quando **`applied_quick_connect_credits`** è **positivo**. **`user.is_new_user`** seleziona il modello:
+
+```mermaid
+flowchart LR
+  S[200 — prima concessione riuscita]
+  S --> Q{Nuovo login Olostep creato in questa chiamata?}
+
+  Q -->|Sì — is_new_user: true| N[Inviamo email di benvenuto]
+  Q -->|No — is_new_user: false| X[Inviamo email crediti aggiunti]
+
+  N --> R[Messaggio tipico: account creato + crediti]
+  X --> T[Messaggio tipico: crediti su account esistente]
+
+  R --> K[user.api_key]
+  T --> K
+  K --> Note[auto_generated_api_key solo se abbiamo generato un nuovo token predefinito qui; altrimenti null]
+```
+
+Entrambi i modelli informano il cliente che **tu** fornisci la chiave API di Olostep in modo che possano iniziare senza visitare prima Olostep, e includono l'impostazione della password del dashboard per l'accesso all'interfaccia utente.
+
+| Modello | Quando (`is_new_user`) | Cosa vede il cliente |
+|---------|------------------------|----------------------|
+| **Benvenuto in Olostep** | **`true`** | Nome del partner, linea dei crediti, **Come accedere** (chiave dal partner), link al dashboard opzionale, CTA per impostare la password. |
+| **Crediti partner aggiunti** | **`false`** | Stesso schema di crediti e accesso per un login Olostep **esistente**. |
+
+**Benvenuto in Olostep** (nuovo utente):
+
+<img
+  src="/images/partnerships/quick-connect-email-new-user.png"
+  alt="Email di benvenuto Olostep: il partner ha registrato l'utente, crediti concessi, come accedere tramite chiave API del partner, pulsante e link per impostare la password del dashboard"
+  style={{
+    height: 'auto',
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: 720,
+    objectFit: 'contain',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px'
+  }}
+/>
+
+**Crediti partner aggiunti** (utente esistente):
+
+<img
+  src="/images/partnerships/quick-connect-email-existing-user.png"
+  alt="Email crediti partner Olostep: crediti aggiunti a un account esistente, chiave API dal partner, link al dashboard, impostare la password per l'accesso all'interfaccia utente"
+  style={{
+    height: 'auto',
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: 720,
+    objectFit: 'contain',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px'
+  }}
+/>
+
+---
+
+## Appendice
+
+### Flusso completo end-to-end
+
+Percorsi decisionali dall'ingresso attraverso l'idempotenza, il provisioning, la richiesta di affiliazione e la concessione del credito (stesso comportamento del contratto OpenAPI).
+
+```mermaid
+flowchart TB
+  subgraph ingresso [La tua richiesta]
+    R[POST + verified_email]
+    H[X-Partner-Key + Idempotency-Key]
+  end
+
+  ingresso --> V{Chiave partner valida?}
+  V -->|No| E401[401 invalid_partner_key]
+  V -->|Sì| I{Slot di idempotenza}
+  I -->|Ripetizione stessi parametri| REP[Restituisci corpo 200 memorizzato]
+  I -->|Ripetizione email diversa| E422[422 idempotency_key_reuse]
+  I -->|In corso| E409[409 idempotency_key_in_progress]
+  I -->|Nuovo slot| P[Provision utente + dati app + token se necessario]
+
+  P --> C{Promo già reclamata per questo cliente?}
+  C -->|Sì| Z[200 — crediti 0, già reclamati]
+  C -->|No| W{Vincere la gara di richiesta?}
+  W -->|Gara persa| Z
+  W -->|Gara vinta| CR[Concedi crediti promozionali partner]
+  CR -->|Fallimento| E500[500 — riprova]
+  CR -->|OK| OK[200 — prima concessione]
+
+  REP --> DONE([Il tuo backend])
+  Z --> DONE
+  OK --> DONE
+  E401 --> DONE
+  E422 --> DONE
+  E409 --> DONE
+  E500 --> DONE
+```

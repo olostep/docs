@@ -232,7 +232,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "El ID del lote para recuperar ítems.",
+            "description": "El ID del lote para obtener elementos.",
             "example": "batch_abc123xyz"
           }
         ],
@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Encabezado de autenticación Bearer del formulario Bearer <token>, donde <token> es tu token de autenticación."
+        "description": "Encabezado de autenticación Bearer del formato Bearer <token>, donde <token> es tu token de autenticación."
       }
     },
     "schemas": {
@@ -337,7 +337,7 @@
               "maxLength": 100
             },
             "default": [],
-            "description": "Nombres de marca a buscar en el contenido de la página. El LLM extraerá menciones de estas marcas de cada página."
+            "description": "Nombres de marcas a buscar en el contenido de la página. El LLM extraerá menciones de estas marcas de cada página."
           },
           "country": {
             "type": "string",
@@ -348,7 +348,7 @@
             "type": "string",
             "format": "uri",
             "nullable": true,
-            "description": "URL para recibir notificaciones de webhook para eventos del ciclo de vida del lote."
+            "description": "URL para recibir notificaciones webhook para eventos del ciclo de vida del lote."
           },
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
@@ -391,7 +391,7 @@
           },
           "created": {
             "type": "integer",
-            "description": "Marca de tiempo Unix (milisegundos) cuando se creó el lote."
+            "description": "Marca de tiempo Unix (milisegundos) cuando el lote fue creado."
           },
           "total_urls": {
             "type": "integer",
@@ -433,7 +433,7 @@
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Si el modo de lote asincrónico LLM está habilitado."
+            "description": "Si el modo de lote LLM asíncrono está habilitado."
           },
           "scraping": {
             "$ref": "#/components/schemas/ScrapingStatus"
@@ -803,7 +803,7 @@
           },
           "batch_mode": {
             "type": "boolean",
-            "description": "Si se usó el API batch asíncrono"
+            "description": "Si se usó el batch API asíncrono"
           },
           "llm": {
             "$ref": "#/components/schemas/LLMInfo"

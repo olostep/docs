@@ -4,14 +4,14 @@ icon: "map"
 title: "Mapas"
 description: "Obtén todas las URLs de un sitio web."
 ---
-A través del endpoint `/v1/maps` de Olostep puedes obtener todas las URLs de un sitio web. Esto es útil para el descubrimiento de contenido, análisis de la estructura del sitio (por ejemplo, SEO), o decidir qué URLs quieres extraer a continuación.
+A través del endpoint `/v1/maps` de Olostep puedes obtener todas las URLs de un sitio web. Esto es útil para el descubrimiento de contenido, análisis de la estructura del sitio (por ejemplo, SEO), o decidir qué URLs deseas extraer a continuación.
 
 - Obtén todas las URLs de un sitio web (incluyendo sitemaps y enlaces descubiertos)
 - Usa patrones especiales para incluir/excluir rutas (por ejemplo, `/blog/**`)
 - Pagina respuestas grandes con `cursor` (hasta 10MB por respuesta)
 - Limita el volumen con `top_n`
 
-Para detalles del API, consulta la [Referencia del API del Endpoint de Mapa](/api-reference/maps/create).
+Para detalles de la API, consulta la [Referencia de la API del Endpoint de Mapas](/api-reference/maps/create).
 
 ## Instalación
 
@@ -26,7 +26,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl está disponible por defecto en macOS, Linux y Windows
 ```
 
 ```javascript Node (API)
@@ -109,9 +109,9 @@ print(json.dumps(response.json(), indent=2))
 
 </CodeGroup>
 
-El tiempo de respuesta es típicamente de segundos, pero puede tardar hasta 120 segundos para sitios web más complejos. Puede extraer todas las URLs de un sitio web, incluso los backlinks y aquellos no presentes en los Sitemaps. También puedes decidir las rutas de URLs que quieres incluir o excluir de la respuesta.
+El tiempo de respuesta suele ser de segundos, pero puede tardar hasta 120 segundos para sitios web más complejos. Puede extraer todas las URLs de un sitio web, incluso los backlinks y aquellos no presentes en los Sitemaps. También puedes decidir los caminos de URLs que deseas incluir o excluir de la respuesta.
 
-Por defecto, el endpoint devuelve alrededor de 100k URLs en una sola llamada (máximo 10MB). Si la respuesta incluye más datos, el API devuelve un parámetro `cursor` que puede ser usado para paginación y obtener las URLs subsecuentes. Para más detalles, consulta la [Referencia del API](/api-reference/maps/create#body-cursor).
+Por defecto, el endpoint devuelve alrededor de 100k URLs en una sola llamada (máximo 10MB). Si la respuesta incluye más datos, la API devuelve un parámetro `cursor` que se puede usar para paginar y obtener las URLs subsecuentes. Para más detalles, consulta la [Referencia de la API](/api-reference/maps/create#body-cursor).
 
 Este endpoint es particularmente útil cuando necesitas:
 - Descubrir todas las páginas de contenido en un sitio web
@@ -123,7 +123,7 @@ Para un control más detallado sobre las URLs devueltas, puedes usar los paráme
 
 ### Ejemplo
 
-Digamos que de www.brex.com quieres extraer todas las URLs que tienen las rutas después de `/product/` por ejemplo `https://www.brex.com/product/api/no-code` pero también incluir `www.brex.com/product`.
+Supongamos que desde www.brex.com deseas extraer todas las URLs que tienen las rutas después de `/product/`, por ejemplo, `https://www.brex.com/product/api/no-code` pero también incluir `www.brex.com/product`.
 Puedes usar el siguiente código:
 
 <CodeGroup>
@@ -213,7 +213,7 @@ print(response.text)
 
 ## Conclusión
 
-El endpoint de mapas es una herramienta poderosa para el descubrimiento de contenido y análisis del sitio. Proporciona una lista completa de URLs en un sitio web, permitiéndote extraer contenido de páginas específicas o analizar la estructura del sitio. Este endpoint es particularmente útil para profesionales de SEO, marketers de contenido, agentes de IA que necesitan analizar contenido o estructura de sitios web.
+El endpoint de mapas es una herramienta poderosa para el descubrimiento de contenido y el análisis del sitio. Proporciona una lista completa de URLs en un sitio web, permitiéndote extraer contenido de páginas específicas o analizar la estructura del sitio. Este endpoint es particularmente útil para profesionales de SEO, mercadólogos de contenido, agentes de IA que necesitan analizar el contenido o la estructura de un sitio web.
 
 ## Precios
 

@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "バッチAPI",
+    "title": "バッチ API",
     "version": "1.0.0"
   },
   "servers": [
@@ -79,7 +79,7 @@
     "/v1/batches/recent": {
       "get": {
         "summary": "最近のバッチを一覧表示",
-        "description": "認証されたユーザーの最近のバッチのリストを取得します。",
+        "description": "認証されたユーザーの最近のバッチ一覧を取得します。",
         "security": [
           {
             "Authorization": []
@@ -109,7 +109,7 @@
         ],
         "responses": {
           "200": {
-            "description": "最近のバッチのリストを含む成功したレスポンス。",
+            "description": "最近のバッチ一覧を含む成功したレスポンス。",
             "content": {
               "application/json": {
                 "schema": {
@@ -245,7 +245,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "バッチ実行の国。ISO 3166-1 alpha-2コードで提供してください。例：US（アメリカ）、IN（インド）など。"
+                    "description": "バッチ実行の国。ISO 3166-1 alpha-2コードで提供してください。例: US(USA), IN(India)など。"
                   },
                   "parser": {
                     "type": "object",
@@ -258,7 +258,7 @@
                     "required": [
                       "id"
                     ],
-                    "description": "このパラメータを使って使用するパーサーを指定できるよ。パーサーはウェブページから構造化されたコンテンツを抽出するのに便利だよ。Olostepには一般的なウェブページ用のパーサーがいくつか組み込まれていて、自分でパーサーを作成することもできるよ。"
+                    "description": "このパラメータを使って使用するパーサーを指定できるよ。パーサーはウェブページから構造化されたコンテンツを抽出するのに便利だよ。Olostepには一般的なウェブページ用のパーサーがいくつか組み込まれていて、自分でパーサーを作ることもできるよ。"
                   },
                   "links_on_page": {
                     "type": "object",
@@ -266,7 +266,7 @@
                       "absolute_links": {
                         "type": "boolean",
                         "default": true,
-                        "description": "trueの場合、相対パス（例: '/page'）の代わりに完全なURL（例: 'https://example.com/page'）を返すよ。"
+                        "description": "trueの場合、相対パス（例: '/page'）ではなく、完全なURL（例: 'https://example.com/page'）を返すよ。"
                       },
                       "include_links": {
                         "type": "array",
@@ -386,7 +386,7 @@
             }
           },
           "400": {
-            "description": "不正なパラメータのための不正リクエスト。詳細は[Bad Request](/api-reference/errors/bad_request)を参照してね。",
+            "description": "不正なリクエスト - パラメータが間違っているか不足しているよ。詳細は[Bad Request](/api-reference/errors/bad_request)を参照してね。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -398,7 +398,7 @@
                   "code": "validation_error",
                   "type": "https://docs.olostep.com/api-reference/errors/bad_request",
                   "status": 400,
-                  "title": "不正リクエスト",
+                  "title": "不正なリクエスト",
                   "detail": "The 'items' array is required and must contain at least one item.",
                   "created": 1704067200,
                   "metadata": {}
@@ -779,7 +779,7 @@
                   "code": "invalid_metadata",
                   "type": "https://docs.olostep.com/api-reference/errors/bad_request",
                   "status": 400,
-                  "title": "不正リクエスト",
+                  "title": "不正なリクエスト",
                   "detail": "No metadata field provided. Only metadata can be updated.",
                   "created": 1704067200,
                   "metadata": {}
@@ -855,8 +855,8 @@
     },
     "/v1/batches/{batch_id}/items": {
       "get": {
-        "summary": "特定のバッチに対する完了または失敗したアイテムリストを、オプションでコンテンツと共に取得",
-        "description": "指定されたバッチIDに対して、リクエストされたステータスに基づくアイテムとコンテンツのリストを取得します。",
+        "summary": "特定のバッチに対して、完了または失敗したアイテムリストをオプションでコンテンツと共に取得",
+        "description": "特定のバッチIDに対して、リクエストされたステータスに基づくアイテムとコンテンツのリストを取得します。",
         "security": [
           {
             "Authorization": []
@@ -999,7 +999,7 @@
                   "code": "validation_error",
                   "type": "https://docs.olostep.com/api-reference/errors/bad_request",
                   "status": 400,
-                  "title": "不正リクエスト",
+                  "title": "不正なリクエスト",
                   "detail": "Status must be either 'completed' or 'failed'",
                   "created": 1704067200,
                   "metadata": {}
@@ -1105,7 +1105,7 @@
           "type": {
             "type": "string",
             "format": "uri",
-            "description": "問題のタイプを識別するURI参照"
+            "description": "問題の種類を識別するURI参照"
           },
           "status": {
             "type": "integer",
@@ -1128,7 +1128,7 @@
           },
           "errors": {
             "type": "array",
-            "description": "追加のエラー詳細のオプションの配列",
+            "description": "追加のエラー詳細のオプション配列",
             "items": {}
           }
         },

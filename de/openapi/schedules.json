@@ -49,7 +49,7 @@
                   },
                   "payload": {
                     "type": "object",
-                    "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird. Kann jede benötigte JSON-Struktur enthalten. Für GET-Anfragen ist dies typischerweise leer. Für POST-Anfragen sollte dies die Daten enthalten, die du an den Endpunkt senden möchtest.",
+                    "description": "Die Nutzlast, die mit dem API-Aufruf gesendet wird. Kann jede JSON-Struktur enthalten, die du benötigst. Für GET-Anfragen ist dies typischerweise leer. Für POST-Anfragen sollte dies die Daten enthalten, die du an den Endpunkt senden möchtest.",
                     "default": {}
                   },
                   "cron_expression": {
@@ -63,11 +63,11 @@
                   },
                   "expression_timezone": {
                     "type": "string",
-                    "description": "IANA-Zeitzonenkennung (z.B. 'UTC', 'America/New_York', 'Europe/London') für den Zeitplan. Erforderlich für wiederkehrende Zeitpläne, optional für einmalige Zeitpläne. Bei Verwendung von natürlichem Sprachtext wird standardmäßig 'UTC' verwendet."
+                    "description": "IANA-Zeitzonenkennung (z.B. 'UTC', 'America/New_York', 'Europe/London') für den Zeitplan. Erforderlich für wiederkehrende Zeitpläne, optional für einmalige Zeitpläne. Bei Verwendung von natürlichem Sprachtext ist dies standardmäßig 'UTC'."
                   },
                   "text": {
                     "type": "string",
-                    "description": "Natürlicher Sprachtext, um automatisch einen Cron-Ausdruck zu generieren. Das System wandelt deinen Text in einen gültigen Cron-Ausdruck um. Beispiele: 'alle 3 Minuten', 'jeden Tag um 10 Uhr', 'jeden Montag um 9 Uhr'. Schließt sich gegenseitig mit cron_expression und execute_at aus. Bei Verwendung wird expression_timezone standardmäßig auf 'UTC' gesetzt."
+                    "description": "Natürlicher Sprachtext, um automatisch einen Cron-Ausdruck zu generieren. Das System wandelt deinen Text in einen gültigen Cron-Ausdruck um. Beispiele: 'alle 3 Minuten', 'jeden Tag um 10 Uhr', 'jeden Montag um 9 Uhr'. Schließt sich gegenseitig mit cron_expression und execute_at aus. Bei Verwendung ist expression_timezone standardmäßig 'UTC'."
                   }
                 },
                 "required": [
@@ -117,7 +117,7 @@
                     "execute_at": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                      "description": "Ausführungsdatum und -uhrzeit (nur bei einmaligen Zeitplänen vorhanden)"
                     },
                     "expression_timezone": {
                       "type": "string",
@@ -126,7 +126,7 @@
                     "created": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan erstellt wurde"
+                      "description": "ISO 8601-Datetime, wann der Zeitplan erstellt wurde"
                     }
                   }
                 }
@@ -212,7 +212,7 @@
                           "execute_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                            "description": "Ausführungsdatum und -uhrzeit (nur bei einmaligen Zeitplänen vorhanden)"
                           },
                           "expression_timezone": {
                             "type": "string",
@@ -233,7 +233,7 @@
                           "created_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan erstellt wurde"
+                            "description": "ISO 8601-Datetime, wann der Zeitplan erstellt wurde"
                           },
                           "updated_at": {
                             "type": "string",
@@ -349,7 +349,7 @@
                         "execute_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "Ausführungsdatum und -zeit (nur bei einmaligen Zeitplänen vorhanden)"
+                          "description": "Ausführungsdatum und -uhrzeit (nur bei einmaligen Zeitplänen vorhanden)"
                         },
                         "expression_timezone": {
                           "type": "string",
@@ -370,7 +370,7 @@
                         "created_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "ISO 8601-Datum und -Uhrzeit, wann der Zeitplan erstellt wurde"
+                          "description": "ISO 8601-Datetime, wann der Zeitplan erstellt wurde"
                         },
                         "updated_at": {
                           "type": "string",
@@ -393,13 +393,13 @@
             }
           },
           "400": {
-            "description": "Ungültige Anfrage aufgrund eines falschen schedule_id-Formats. Die Zeitplan-ID muss mit 'schedule_' beginnen."
+            "description": "Ungültige Anfrage aufgrund eines ungültigen schedule_id-Formats. Die Zeitplan-ID muss mit 'schedule_' beginnen."
           },
           "401": {
             "description": "Ungültiger API-Schlüssel."
           },
           "404": {
-            "description": "Kein Zeitplan für die angegebene ID gefunden."
+            "description": "Zeitplan für die angegebene ID nicht gefunden."
           },
           "500": {
             "description": "Interner Serverfehler beim Abrufen des Zeitplans."
@@ -448,13 +448,13 @@
             }
           },
           "400": {
-            "description": "Ungültige Anfrage aufgrund eines falschen schedule_id-Formats oder weil der Zeitplan bereits gelöscht wurde. Die Zeitplan-ID muss mit 'schedule_' beginnen."
+            "description": "Ungültige Anfrage aufgrund eines ungültigen schedule_id-Formats oder bereits gelöschten Zeitplans. Die Zeitplan-ID muss mit 'schedule_' beginnen."
           },
           "401": {
             "description": "Ungültiger API-Schlüssel."
           },
           "404": {
-            "description": "Kein Zeitplan für die angegebene ID gefunden."
+            "description": "Zeitplan für die angegebene ID nicht gefunden."
           },
           "500": {
             "description": "Interner Serverfehler beim Löschen des Zeitplans."

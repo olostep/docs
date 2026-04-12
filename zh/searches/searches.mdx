@@ -1,0 +1,130 @@
+---
+sidebarTitle: "搜索"
+title: "搜索 API"
+icon: "magnifying-glass"
+---
+
+Olostep 的 `/v1/searches` 端点允许你使用自然语言查询搜索网络，并返回去重的相关链接列表，包括标题和描述。
+
+- 用简单的英文发送查询
+- 从网络中获取结构化的链接
+
+它将在网络上语义搜索查询并返回结果。
+
+有关 API 详细信息，请参阅 [搜索端点 API 参考](/api-reference/searches/create)。
+
+## 安装
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: 内置的 curl 就可以
+```
+
+</CodeGroup>
+
+## 使用方法
+
+发送自然语言查询并接收相关链接列表。
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/searches"
+payload = {
+  "query": "最佳答案引擎优化初创公司"
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/searches', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: '最佳答案引擎优化初创公司'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/searches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "最佳答案引擎优化初创公司"
+  }'
+```
+
+</CodeGroup>
+
+## 响应
+
+你将收到一个 `search` 对象作为响应。`search` 对象包含一个 `id`，你原始的 `query`，以及一个包含 `links` 列表的 `result`。
+
+```json
+{
+  "id": "search_9bi0sbj9xa",
+  "object": "search",
+  "created": 1760327323,
+  "metadata": {},
+  "query": "最佳答案引擎优化初创公司",
+  "result": {
+    "json_content": "...",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/search_9bi0sbj9xa.json",
+    "links": [
+      {
+        "url": "https://www.adweek.com/media/hottest-startups-shaping-the-future-of-ai-search-optimization-aeo-geo/",
+        "title": "认识塑造 AI SEO 未来的 7 大最热门初创公司",
+        "description": "1. Profound · 2. Bluefish · 3. Scrunch · 4. Evertune · 5. Peec AI · 6. Brandlight · 7. AthenaHQ."
+      },
+      {
+        "url": "https://www.failory.com/startups/search-engine",
+        "title": "2026 年值得关注的 48 家搜索引擎初创公司",
+        "description": "深入探讨 48 家最有前途的搜索引擎初创公司..."
+      },
+      {
+        "url": "https://clutch.co/seo-firms/startups",
+        "title": "2026 年 3 月排名前 30 的初创公司 SEO 公司",
+        "description": "与最佳 SEO 公司联系..."
+      }
+    ]
+  }
+}
+```
+
+`result.links` 中的每个链接包含：
+
+| 字段         | 类型   | 描述                                      |
+|---------------|--------|------------------------------------------|
+| `url`         | string | 搜索结果的 URL                           |
+| `title`       | string | 结果页面的标题                           |
+| `description` | string | 描述结果的简短片段                       |
+
+完整结果也可以在 `result.json_hosted_url` 作为托管 JSON 文件获取。
+
+## 价格
+
+每次请求搜索费用为 5 个积分。

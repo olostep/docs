@@ -1,18 +1,18 @@
 ---
-sidebarTitle: "Batch"
-title: "Punto de Acceso Batch"
+sidebarTitle: "Lote"
+title: "Endpoint de Lote"
 icon: "layer-group"
 ---
-A través del punto de acceso `/v1/batches` de Olostep puedes procesar miles de URLs en un solo trabajo. Úsalo para extraer contenido o datos estructurados a gran escala.
+A través del endpoint de Olostep `/v1/batches` puedes procesar miles de URLs en un solo trabajo. Úsalo para extraer contenido o datos estructurados a gran escala.
 
 - Envía hasta 10k URLs por lote; ejecuta muchos lotes en paralelo
 - Tiempo de procesamiento constante (~5–8 minutos) independientemente del tamaño del lote
-- Usa analizadores para devolver JSON estructurado, o recupera markdown/html a través de `/v1/retrieve`
+- Usa parsers para devolver JSON estructurado, o recupera markdown/html a través de `/v1/retrieve`
 
-Para detalles del API, consulta la [Referencia del API del Punto de Acceso Batch](/api-reference/batches/create).
+Para detalles de la API, consulta la [Referencia de la API del Endpoint de Lote](/api-reference/batches/create).
 
 <Warning>
-**Limitación de Cuenta Nueva**: Para cuentas nuevas, los lotes están limitados a 100 elementos por lote. Para levantar esta limitación, por favor contáctanos en info@olostep.com o únete a nosotros en [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email).
+**Limitación de Cuenta Nueva**: Para cuentas nuevas, los lotes están limitados a 100 elementos por lote. Para levantar esta limitación, por favor contáctanos en info@olostep.com o únete a nuestro [Slack](https://olostep-users.slack.com/join/shared_invite/zt-2bfddyi8h-JzfjOgavg~98DJ1om1B5Lg#/shared-invite/email).
 </Warning>
 
 ## Instalación
@@ -28,7 +28,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl está disponible por defecto en macOS, Linux y Windows
 ```
 
 ```javascript Node (API)
@@ -43,9 +43,9 @@ pip install requests
 
 ## Iniciar un lote
 
-Proporciona un arreglo de `items` con un `custom_id` y `url`. Estas son las URLs que se procesarán en el lote, el `custom_id` es un identificador único interno para la URL.
+Proporciona un array de `items` con un `custom_id` y `url`. Estas son las URLs que se procesarán en el lote, el `custom_id` es un identificador único interno para la URL.
 
-Opcionalmente pasa `parser` o `country`. A través del parámetro `parser` puedes especificar el analizador a usar para el lote, esto devolverá JSON estructurado de las páginas.
+Opcionalmente pasa `parser` o `country`. A través del parámetro `parser` puedes especificar el parser a usar para el lote, esto devolverá JSON estructurado de las páginas.
 
 <CodeGroup>
 
@@ -64,7 +64,7 @@ batch = client.batches.create(
 
 print(batch.id, batch.status)
 
-# Wait and iterate results (auto-waits for completion)
+# Espera e itera resultados (espera automática para la finalización)
 for item in batch.items():
     content = item.retrieve(["json"])
     print(item.url, item.custom_id)
@@ -85,7 +85,7 @@ const batch = await client.batches.create([
 
 console.log(batch.id, batch.total_urls)
 
-// Wait and iterate results (auto-waits for completion)
+// Espera e itera resultados (espera automática para la finalización)
 for await (const item of batch.items()) {
   const content = await item.retrieve(['json'])
   console.log(item.url, item.custom_id)
@@ -98,11 +98,11 @@ import requests
 import hashlib
 import time
 
-API_KEY = "<YOUR_API_KEY>"  # Replace with your actual API key
+API_KEY = "<YOUR_API_KEY>"  # Reemplaza con tu clave API real
 API_URL = "https://api.olostep.com/v1"
 
 
-# Step 1: Utilities
+# Paso 1: Utilidades
 def create_hash_id(url):
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
@@ -121,7 +121,7 @@ def compose_items_array():
         "https://www.google.com/search?q=braintree&gl=us&hl=en"
     ]
 
-    # Add the parser configuration to each item
+    # Añade la configuración del parser a cada elemento
     items = []
     for url in urls:
         items.append({
@@ -146,7 +146,7 @@ def start_batch(items):
     return response.json()["id"]
 
 
-# Step 3: Wait for completion
+# Paso 3: Esperar a la finalización
 def check_batch_status(batch_id):
     headers = {"Authorization": f"Bearer {API_KEY}"}
     response = requests.get(
@@ -158,17 +158,17 @@ def check_batch_status(batch_id):
 
 
 def wait_until_complete(batch_id):
-    print("Waiting for batch to complete...")
+    print("Esperando a que el lote se complete...")
     while True:
         status = check_batch_status(batch_id)
-        print("Status:", status)
+        print("Estado:", status)
         if status == "completed":
-            print("Batch completed!")
+            print("¡Lote completado!")
             return
         time.sleep(10)
 
 
-# Step 4: Get items
+# Paso 4: Obtener elementos
 def get_completed_items(batch_id):
     headers = {"Authorization": f"Bearer {API_KEY}"}
     response = requests.get(f"{API_URL}/batches/{batch_id}/items", headers=headers)
@@ -176,7 +176,7 @@ def get_completed_items(batch_id):
     return response.json()["items"]
 
 
-# Step 5: Retrieve content with format specified
+# Paso 5: Recuperar contenido con el formato especificado
 def retrieve_content(retrieve_id):
     url = f"{API_URL}/retrieve"
     headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -189,33 +189,33 @@ def retrieve_content(retrieve_id):
     return response.json()
 
 
-# Step 6: Run end-to-end flow
+# Paso 6: Ejecutar flujo de extremo a extremo
 if __name__ == "__main__":
-    print("Composing batch...")
+    print("Componiendo lote...")
     items = compose_items_array()
 
-    print("Starting batch...")
+    print("Iniciando lote...")
     batch_id = start_batch(items)
-    print("Batch ID:", batch_id)
-    print(f"You can check the status of the batch at: {API_URL}/batches/{batch_id}?token={API_KEY}")
+    print("ID del lote:", batch_id)
+    print(f"Puedes verificar el estado del lote en: {API_URL}/batches/{batch_id}?token={API_KEY}")
 
     wait_until_complete(batch_id)
 
-    print("Fetching completed items...")
+    print("Obteniendo elementos completados...")
     completed_items = get_completed_items(batch_id)
 
-    print("Retrieving content...")
+    print("Recuperando contenido...")
     for item in completed_items:
         retrieve_id = item["retrieve_id"]
-        print(f"\nRetrieving content for item {item['retrieve_id']}...")
+        print(f"\nRecuperando contenido para el elemento {item['retrieve_id']}...")
         content = retrieve_content(retrieve_id)
-        print(f"\n---\nURL: {item['url']}\nCustom ID: {item['custom_id']}\n")
-        #print("Markdown:\n", content.get("markdown_content", "[No markdown found]"))
-        print("JSON:\n", content.get("json_content", "[No JSON found]"))
+        print(f"\n---\nURL: {item['url']}\nID Personalizado: {item['custom_id']}\n")
+        #print("Markdown:\n", content.get("markdown_content", "[No se encontró markdown]"))
+        print("JSON:\n", content.get("json_content", "[No se encontró JSON]"))
 
-        # If you want to see the parsed content specifically
+        # Si deseas ver el contenido analizado específicamente
         if "parsed_content" in content:
-            print("\nParsed Content:")
+            print("\nContenido Analizado:")
             print(content["parsed_content"])
 ```
 
@@ -270,25 +270,25 @@ Dado que Olostep sigue un enfoque orientado a objetos, recibirás un objeto `bat
 
 ## Verificar estado del lote
 
-Consulta hasta que `status` sea `completed`. También puedes verificar la propiedad `completed_urls` para ver cuántas URLs han sido procesadas.
+Haz polling hasta que `status` sea `completed`. También puedes verificar la propiedad `completed_urls` para ver cuántas URLs han sido procesadas.
 
 <CodeGroup>
 
 ```python Python
-# Using the batch object from the previous step
+# Usando el objeto batch del paso anterior
 info = batch.info()
 print(info.status, info.completed_urls, info.total_urls)
 
-# Or wait until completed
+# O espera hasta que se complete
 batch.wait_till_done(check_every_n_secs=10)
 ```
 
 ```js Node
-// Using the batch object from the previous step
+// Usando el objeto batch del paso anterior
 const info = await batch.info()
 console.log(info.status, info.completed_urls, info.total_urls)
 
-// Or wait until completed
+// O espera hasta que se complete
 await batch.waitTillDone({ checkEveryNSecs: 10 })
 ```
 
@@ -323,12 +323,12 @@ print(info['status'])
 
 ## Recuperar contenido
 
-Usa el `retrieve_id` de cada elemento con `/v1/retrieve` para obtener `html_content`, `markdown_content` o `json_content`.
+Usa el `retrieve_id` de cada elemento con `/v1/retrieve` para obtener `html_content`, `markdown_content`, o `json_content`.
 
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each batch item
+# Recuperar contenido para cada elemento del lote
 for item in batch.items():
     content = item.retrieve(["json"])
     print(item.url, item.custom_id)
@@ -336,7 +336,7 @@ for item in batch.items():
 ```
 
 ```js Node
-// Retrieve content for each batch item
+// Recuperar contenido para cada elemento del lote
 for await (const item of batch.items()) {
   const content = await item.retrieve(['json'])
   console.log(item.url, item.custom_id)
@@ -376,13 +376,13 @@ Obtén elementos usando `cursor` y `limit`. Prefiere usar `/v1/retrieve` con `re
 <CodeGroup>
 
 ```python Python
-# Iterate all items (auto-waits for completion, handles pagination)
+# Itera todos los elementos (espera automática para la finalización, maneja la paginación)
 for item in batch.items():
     print(item.custom_id, item.url, item.retrieve_id)
 ```
 
 ```js Node
-// Iterate all items (auto-waits for completion, handles pagination)
+// Itera todos los elementos (espera automática para la finalización, maneja la paginación)
 for await (const item of batch.items()) {
   console.log(item.custom_id, item.url, item.retrieve_id)
 }
@@ -426,7 +426,7 @@ while True:
 
 ## Formato de Respuesta
 
-Cuando ejecutes el código de ejemplo proporcionado, recibirás una respuesta como la siguiente
+Cuando ejecutas el código de ejemplo proporcionado, recibirás una respuesta como la siguiente
 
 ```json
 
@@ -528,7 +528,7 @@ JSON:
  {"searchParameters":{"type":"search","engine":"google","q":"saas payments"},"knowledgeGraph":{"description":"Launch new plans and start accepting payments in minutes. Collect and store payment details including cards, ACH, and other popular payment methods. · Support ..."},"organic":[{"title":"Billing Platform for SaaS Businesses","link":"https://stripe.com/use-cases/saas","position":1,"snippet":"Launch new plans and start accepting payments in minutes. Collect and store payment details including cards, ACH, and other popular payment methods. · Support ..."},{"title":"Guidance for students from Scotland - GOV.UK","link":"https://www.gov.uk/guidance/guidance-for-students-from-scotland#:~:text=Student%20Loans%20Company%20(%20SLC%20)%20pays,do%20not%20pay%20student%20loans.","position":2},{"title":"What payment system do you use for your SaaS?","link":"https://www.reddit.com/r/SaaS/comments/1ejbn9i/what_payment_system_do_you_use_for_your_saas/","position":3,"snippet":"Try depositfix.com. It integrates a lot of possible payment systems, integrates with crm as well. Its great. Upvote 2. Downvote Reply reply"},{"title":"SaaS payment processing 101","link":"https://stripe.com/resources/more/challenges-of-saas-payment-processing","position":4,"snippet":"Mar 9, 2023 — SaaS payment processing refers to the way companies accept and process payments. While ecommerce sales consist of one-off online payments, SaaS ..."},{"title":"Moving Up(front) with Upfront SaaS Payments","link":"https://gsablogs.gsa.gov/technology/2024/07/25/moving-upfront-with-upfront-saas-payments/","position":5,"snippet":"Jul 25, 2024 — To offer the upfront payment option, vendors must submit a modification adding it to their schedule contract. We encourage vendors to offer SaaS ..."},{"title":"Understanding SaaS Payment Processing: Implementation ...","link":"https://staxpayments.com/blog/saas-payment-processing/","position":6,"snippet":"A SaaS payment processor is a service provider that focuses on providing the tools that SaaS companies need to manage payments and subscriptions accurately."},{"title":"Paddle - Payments, tax and subscription management for ...","link":"https://www.paddle.com/","position":7,"snippet":"The only complete billing solution for digital products. Payments, tax, subscription management and more, all handled for you. Discover Billing. SaaS billing ..."},{"title":"SaaS Spend Management Solution","link":"https://meshpayments.com/saas-spend-management/","position":8,"snippet":"Manage all your SaaS subscriptions from one platform, with actionable insights and controls at the right time to continuously optimize your spend."},{"title":"Top SaaS Payment Solutions for Streamlining Transactions","link":"https://wise.com/us/blog/saas-payment-solutions","position":9,"snippet":"Mar 10, 2025 — SaaS payment solutions are specialized payment platforms that enable software providers to efficiently manage and process recurring subscription ..."},{"title":"SaaS payments: everything SaaS businesses need to know","link":"https://www.checkout.com/blog/saas-payments","position":10,"snippet":"Sep 19, 2023 — SaaS payments are charged by subscription businesses on a recurring basis in exchange for access to a service."}],"peopleAlsoAsk":[{"question":"What are SaaS payments?","link":"https://www.gov.uk/guidance/guidance-for-students-from-scotland#:~:text=Student%20Loans%20Company%20(%20SLC%20)%20pays,do%20not%20pay%20student%20loans.","title":"Guidance for students from Scotland - GOV.UK"},{"question":"What are SaaS transactions?","link":"https://www.cognism.com/sales-saas#:~:text=SaaS%20sales%20is%20the%20process,their%20pain%20points%20or%20problems.","title":"What Is SaaS Sales? Everything You Need to Know in 2025 - Cognism"},{"question":"What does SaaS mean?","link":"https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-saas#:~:text=Software%20as%20a%20service%20definition,purchasing%20and%20installing%20them%20locally.","title":"What is Software as a Service (SaaS)? - Microsoft Azure"},{"question":"What date is the SaaS payment?","link":"https://www.saas.gov.uk/need-to-know/payments/loan-payments#:~:text=The%20SLC%20will%20issue%20a,released%20at%20the%20same%20time.","title":"Loan Payments - SAAS"}],"relatedSearches":[{"query":"Saas payments login"},{"query":"Saas payments reddit"},{"query":"SaaS billing"},{"query":"SaaS billing software"},{"query":"Best SaaS billing software"},{"query":"B2B SaaS billing software"},{"query":"Stripe SaaS billing"},{"query":"SaaS billing models"}]}
 ```
 
-Dado que pasamos el analizador para recuperar el JSON estructurado y estamos imprimiendo solo eso, la respuesta contiene:
+Dado que pasamos el parser para recuperar el JSON estructurado y estamos imprimiendo solo eso, la respuesta contiene:
 
 - **json_content** con resultados de búsqueda estructurados incluyendo:
 - `searchParameters`: Información sobre la consulta de búsqueda
@@ -537,38 +537,68 @@ Dado que pasamos el analizador para recuperar el JSON estructurado y estamos imp
 - `peopleAlsoAsk`: Preguntas relacionadas que los usuarios buscan comúnmente
 - `relatedSearches`: Sugerencias de consultas de búsqueda relacionadas
 
-Si no quieres el JSON estructurado sino simplemente el markdown o html, puedes recuperarlos desde el punto de acceso retrieve. 
+Si no deseas el JSON estructurado sino simplemente el markdown o html, puedes recuperarlos desde el endpoint de retrieve.
 
-## Metadatos
+## Webhooks
 
-Puedes adjuntar pares clave-valor personalizados a los lotes usando el parámetro `metadata`. Esto es útil para rastrear, filtrar y organizar tus lotes vinculándolos a sistemas internos como IDs de pedidos, IDs de clientes o nombres de proyectos.
+En lugar de hacer polling del estado del lote, puedes pasar una URL de **`webhook`** cuando creas el lote. Olostep envía un **HTTP POST** a esa URL cuando el lote finaliza (todos los elementos completados o fallidos).
 
-Para reglas de validación y ejemplos de uso, consulta [Metadatos](/api-reference/common/metadata).
+Tu endpoint de webhook debe ser **accesible públicamente** a través de **`http://` o `https://`**. No puede apuntar a localhost o direcciones IP privadas. Para conocer la forma completa del payload, comportamiento de reintento y mejores prácticas (responder rápidamente con `2xx`, deduplicar usando el `id` del evento), consulta [Webhooks](/api-reference/common/webhooks).
+
+<Tip>
+**Nombre del parámetro:** El campo canónico es `webhook`. Por compatibilidad con versiones anteriores, también se acepta **`webhook_url`** como alias.
+</Tip>
+
+Para lotes, el evento **`batch.completed`** incluye el id del lote, estado y conteo de elementos. Las entregas fallidas se reintentan automáticamente (hasta **5 intentos** durante aproximadamente **30 minutos** con retroceso exponencial). Tu manejador debe devolver un estado **2xx** dentro de **30 segundos** por intento.
+
+## Metadata
+
+Adjunta metadatos personalizados de **clave-valor de cadena** a los lotes para rastrear, filtrar y correlacionar trabajos con tus propios sistemas (IDs de pedidos, nombres de proyectos, etapa de la tubería, etc.). Los metadatos siguen las mismas reglas que en nuestra referencia de [Metadata](/api-reference/common/metadata).
+
+Puedes establecer metadatos en **dos niveles** al crear un lote:
+
+- **A nivel de lote** — `metadata` en el **cuerpo de la solicitud** (se aplica a todo el lote)
+- **A nivel de elemento** — `metadata` en **cada objeto** en el array `items` (por URL)
+
+Los metadatos se **devuelven** en respuestas **GET** posteriores para ese lote. Puedes **actualizar y fusionar** los metadatos del lote más tarde con [Update Batch](/api-reference/batches/update) (`PATCH`); consulta la guía de metadatos para el comportamiento de agregar, sobrescribir y eliminar.
+
+| Restricción | Límite |
+| --- | --- |
+| Máximo de claves | 50 |
+| Longitud de la clave | 40 caracteres |
+| Formato de la clave | Sin corchetes (`[` o `]`) |
+| Longitud del valor | 500 caracteres (almacenados como cadenas) |
+
+<Note>
+**Coerción de tipo:** Los números y booleanos se convierten a cadenas (por ejemplo `42` → `"42"`, `true` → `"true"`). Los objetos anidados y arrays son rechazados.
+</Note>
+
+Para ejemplos completos y semántica de PATCH, consulta [Metadata](/api-reference/common/metadata).
 
 ## Notas Importantes
 
-Si quieres JSON estructurado necesitas pasar el analizador específico al API antes de hacer las solicitudes. Por ejemplo, si quieres obtener el JSON de Google Search debes pasar este analizador `"parser": {"id": "@olostep/google-search"}`
-Puedes crear tus propios analizadores para obtener los datos que deseas de cualquier página. Ponte en contacto con `info@olostep.com` para saber más.
+Si deseas JSON estructurado necesitas pasar el parser específico a la API antes de hacer las solicitudes. Por ejemplo, si deseas obtener el JSON de Google Search, pasarás este parser `"parser": {"id": "@olostep/google-search"}`
+Puedes crear tus propios parsers para recuperar los datos que deseas de cualquier página. Comunícate con `info@olostep.com` para saber más.
 
 ## Conclusión
 
-El punto de acceso batch es útil si necesitas obtener datos de muchas URLs en un corto período de tiempo. Necesitas tener ya la lista de URLs de las que quieres obtener los datos.
+El endpoint de lote es útil si necesitas obtener datos de muchas URLs en un corto período de tiempo. Necesitas tener ya la lista de URLs de las que deseas obtener los datos.
 
 Aplicaciones comunes pueden ser:
 
 - Servicios de seguimiento de precios que monitorean múltiples sitios de comercio electrónico para cambios de precios en productos
 - Herramientas de monitoreo de sitios web que verifican actualizaciones de contenido en numerosas páginas
-- Agregación de datos para organizadores de conciertos que rastrean la disponibilidad de entradas en múltiples lugares
+- Agregación de datos para organizadores de conciertos que rastrean la disponibilidad de boletos en múltiples lugares
 - Motores de búsqueda que recopilan e indexan contenido de muchos sitios web simultáneamente
 - Agregadores de noticias que recopilan artículos de varias publicaciones
-- Plataformas inmobiliarias que monitorean listados de propiedades en múltiples sitios
-- Tableros de empleo que agregan vacantes de páginas de carreras de empresas
+- Plataformas de bienes raíces que monitorean listados de propiedades en múltiples sitios
+- Bolsas de trabajo que agregan vacantes de páginas de carreras de empresas
 - Servicios de datos financieros que rastrean precios de acciones e información del mercado
 - Herramientas de monitoreo de redes sociales que analizan menciones en diferentes plataformas
 - Investigación académica que recopila datos de múltiples fuentes para análisis
 
-Es mejor usar el punto de acceso batch si quieres el contenido de 100 a 10k URLs a la vez. Si necesitas extraer menos de 50 URLs a la vez, recomendamos usar el punto de acceso scrape y enviar las URLs en paralelo ya que es más rápido que el punto de acceso batch.
+Es mejor usar el endpoint de lote si deseas el contenido de 100 a 10k URLs a la vez. Si necesitas extraer menos de 50 URLs a la vez, recomendamos usar el endpoint de scrape y enviar las URLs en paralelo ya que es más rápido que el endpoint de lote.
 
 ## Precios
 
-El batch cuesta 1 crédito por URL.
+El costo del lote es de 1 crédito por URL.

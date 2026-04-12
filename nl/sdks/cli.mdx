@@ -2,20 +2,20 @@
 sidebarTitle: "CLI"
 title: "Olostep CLI"
 icon: "terminal"
-description: "Command-line interface voor maps, scrapen, crawls, batches en antwoorden: JSON-output voor scripts, CI en agents"
+description: "Command-line interface voor map, scrape, crawl, batches en answers: JSON-uitvoer voor scripts, CI en agents"
 ---
 
-**NPM-pakket:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
+**NPM pakket:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
 
-CLI voor de [Olostep API](https://www.olostep.com/): **map**, **answer**, **scrape**, **scrape-get**, **crawl**, **batch-scrape** en **batch-update**. Antwoorden zijn **JSON** (netjes geformatteerd) voor scripts, CI en agents.
+CLI voor de [Olostep API](https://www.olostep.com/): **map**, **answer**, **scrape**, **scrape-get**, **crawl**, **batch-scrape**, en **batch-update**. Antwoorden zijn **JSON** (mooi geprint) voor scripts, CI en agents.
 
-Bij installatie wordt een **standalone binary** voor jouw besturingssysteem gedownload. Je hebt geen Python nodig om `olostep` te draaien.
+Het installeren van dit pakket downloadt een **zelfstandige binary** voor je besturingssysteem. Je hebt geen Python nodig om `olostep` te draaien.
 
 <Note>
-  Na installatie downloadt een postinstall-stap de juiste binary uit de [GitHub-releases](https://github.com/olostep-api/CLI/releases) van het pakket. Als dat mislukt, controleer of er een release is voor deze pakketversie en jouw platform en installeer opnieuw.
+  Bij installatie downloadt een postinstall-stap de bijpassende binary van de [GitHub releases](https://github.com/olostep-api/CLI/releases) van het pakket. Als dat mislukt, controleer dan of er een release bestaat voor deze pakketversie en jouw platform, en installeer dan opnieuw.
 </Note>
 
-## Installatie
+## Installeren
 
 **Vereisten:** Node.js **16+** (alleen voor `npm` / `npx`; de CLI zelf is een native binary).
 
@@ -23,7 +23,7 @@ Bij installatie wordt een **standalone binary** voor jouw besturingssysteem gedo
 npm install -g olostep-cli
 ```
 
-Zonder globale installatie:
+Draaien zonder globale installatie:
 
 ```bash
 npx -y olostep-cli@latest --help
@@ -33,9 +33,9 @@ npx -y olostep-cli@latest --help
 
 ## API-sleutel
 
-Zet **`OLOSTEP_API_KEY`** in je omgeving of in een `.env`-bestand in de map waar je `olostep` uitvoert.
+Stel **`OLOSTEP_API_KEY`** in je omgeving in, of in een `.env` bestand in de directory waar je `olostep` uitvoert.
 
-Sleutels aanmaken: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys).
+Maak sleutels aan: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys).
 
 ```bash
 export OLOSTEP_API_KEY=your_key_here
@@ -44,31 +44,31 @@ olostep --help
 
 ## Uitvoer
 
-| Flag | Gedrag |
-| ---- | ------ |
-| `--out <path>` | Schrijf JSON naar een bestand (bovenliggende mappen worden zo nodig aangemaakt). |
-| `--out -` | Schrijf JSON alleen naar **stdout** (UTF-8, ingesprongen). Handig voor pipes en subprocess-capture. |
+| Vlag | Gedrag |
+| ---- | ------- |
+| `--out <pad>` | Schrijf JSON naar een bestand (bovenliggende mappen worden aangemaakt indien nodig). |
+| `--out -` | Schrijf JSON alleen naar **stdout** (UTF-8, ingesprongen). Goed voor pipes en subprocess capture. |
 
-Voortgang en logs gaan naar **stderr**, zodat stdout parseerbaar blijft.
+Voortgangs- en logregels gaan naar **stderr**, zodat stdout parseerbaar blijft.
 
 ```bash
 olostep map "https://example.com" --top-n 20 --out - | jq '.urls[:10]'
 olostep scrape "https://example.com" --out - | jq .result.markdown_content
 ```
 
-Zonder `--out` komen bestanden in `output/` (zie [standaardpaden voor `--out`](#default-out-paths)).
+Als je `--out` weglaat, worden bestanden geplaatst onder `output/` (zie [Standaard `--out` paden](#default-out-paths)).
 
 ## Commando's
 
-Gebruik `olostep <commando> --help` voor alle opties. De meeste commando's accepteren `--timeout` (HTTP, seconden).
+Gebruik `olostep <commando> --help` voor elke optie. De meeste commando's accepteren `--timeout` (HTTP, seconden).
 
-### `map`: URL's ontdekken
+### `map`: ontdek URL's
 
 | Optie | Beschrijving |
 | ----- | ------------ |
 | `--out` | Bestandspad of `-` |
 | `--top-n` | Maximaal aantal URL's |
-| `--search-query` | Stuurt het ontdekken |
+| `--search-query` | Leid ontdekking |
 | `--include-subdomain` / `--no-include-subdomain` | Subdomeinen |
 | `--include-url` / `--exclude-url` | Herhaalbare patronen |
 | `--cursor` | Paginering |
@@ -81,12 +81,12 @@ olostep map "https://example.com" --top-n 100 --search-query "blog"
 
 ### `answer`: onderzocht antwoord
 
-Pollt tot het antwoord klaar is.
+Vraagt totdat het antwoord klaar is.
 
 | Optie | Beschrijving |
 | ----- | ------------ |
 | `--out` | Bestand of `-` |
-| `--json-format` | Optionele hint voor gestructureerde uitvoer (JSON-object als string) |
+| `--json-format` | Optionele gestructureerde uitvoer hint (JSON object string) |
 | `--poll-interval` / `--poll-timeout` | Polling (seconden) |
 
 Gebruik `--json-format`, niet `--model` (verwijderd).
@@ -98,32 +98,32 @@ olostep answer "Extract facts" --json-format '{"company":"","year":""}' --out -
 
 ### `scrape`: één URL
 
-**Formaten:** `html`, `markdown`, `text`, `json`, `raw_pdf`, `screenshot` (kommagescheiden; standaard `markdown`).
+**Formaten:** `html`, `markdown`, `text`, `json`, `raw_pdf`, `screenshot` (komma-gescheiden; standaard `markdown`).
 
 | Optie | Beschrijving |
 | ----- | ------------ |
-| `--formats` | Kommagescheiden |
+| `--formats` | Komma-gescheiden |
 | `--country` | Landcode |
-| `--wait-before-scraping` | Milliseconden wachten vóór scrape |
-| `--payload-json` | Geavanceerde opties als JSON-string |
-| `--payload-file` | Zelfde uit bestand (niet samen met `--payload-json`) |
+| `--wait-before-scraping` | Ms om te wachten voor scrape |
+| `--payload-json` | Geavanceerde opties als JSON object string |
+| `--payload-file` | Hetzelfde, uit bestand (niet samen met `--payload-json`) |
 
 ```bash
 olostep scrape "https://example.com" --formats markdown,html
 olostep scrape "https://example.com" --payload-file scrape-options.json --out -
 ```
 
-### `scrape-get`: op scrape-ID
+### `scrape-get`: door scrape ID
 
 ```bash
 olostep scrape-get "scrape_abc123" --out -
 ```
 
-### `crawl`: site-crawl
+### `crawl`: site crawl
 
-**Ophaalformaten:** `markdown`, `html`, `json`.
+**Ophalen formaten:** `markdown`, `html`, `json`.
 
-Belangrijke flags: `--max-pages`, `--max-depth`, `--include-subdomain`, `--include-external`, `--include-url`, `--exclude-url`, `--search-query`, `--top-n`, `--webhook`, `--crawl-timeout`, `--follow-robots-txt` / `--ignore-robots-txt`, `--formats`, `--pages-limit`, `--pages-search-query`, `--poll-seconds`, `--poll-timeout`, `--dry-run` (payload tonen, geen request).
+Opmerkelijke vlaggen: `--max-pages`, `--max-depth`, `--include-subdomain`, `--include-external`, `--include-url`, `--exclude-url`, `--search-query`, `--top-n`, `--webhook`, `--crawl-timeout`, `--follow-robots-txt` / `--ignore-robots-txt`, `--formats`, `--pages-limit`, `--pages-search-query`, `--poll-seconds`, `--poll-timeout`, `--dry-run` (print payload, geen verzoek).
 
 ```bash
 olostep crawl "https://docs.example.com" --max-pages 50 --formats markdown,html
@@ -132,31 +132,31 @@ olostep crawl "https://example.com" --max-pages 10 --dry-run
 
 ### `batch-scrape`: CSV
 
-CSV-kolommen: **`custom_id` of `id`**, en **`url`**.
+CSV kolommen: **`custom_id` of `id`**, en **`url`**.
 
 | Optie | Beschrijving |
 | ----- | ------------ |
 | `--formats` | `markdown`, `html`, `json` |
 | `--country` | Optioneel |
-| `--parser-id` | Parser voor gestructureerde extractie |
+| `--parser-id` | Gestructureerde extractie parser |
 | `--poll-seconds`, `--log-every`, `--items-limit` | Polling / paginering |
-| `--dry-run` | Alleen payload tonen |
+| `--dry-run` | Alleen payload printen |
 
 ```bash
 olostep batch-scrape urls.csv --formats markdown,html
 ```
 
-### `batch-update`: batch-metadata
+### `batch-update`: batch metadata
 
-Vereist **één van** `--metadata-json` of `--metadata-file` (JSON-object).
+Vereist **één van** `--metadata-json` of `--metadata-file` (JSON object).
 
 ```bash
 olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
 ```
 
-## Standaardpaden voor `--out` {#default-out-paths}
+## Standaard `--out` paden {#default-out-paths}
 
-Zonder `--out`:
+Wanneer `--out` wordt weggelaten:
 
 | Commando | Standaard |
 | -------- | --------- |
@@ -168,9 +168,9 @@ Zonder `--out`:
 | `batch-scrape` | `output/batch_results.json` |
 | `batch-update` | `output/batch_update.json` |
 
-## Globale flags
+## Globale vlaggen
 
-| Flag | Beschrijving |
+| Vlag | Beschrijving |
 | ---- | ------------ |
 | `-V`, `--version` | Versie |
 | `-h`, `--help` | Help |
@@ -183,4 +183,4 @@ Zonder `--out`:
 
 ## Beveiliging
 
-Houd API-sleutels buiten versiebeheer; roteer bij lekken.
+Houd API-sleutels uit versiebeheer; roteer als ze gelekt zijn.

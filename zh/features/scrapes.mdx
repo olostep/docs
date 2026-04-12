@@ -1,21 +1,21 @@
 ---
 sidebarTitle: "抓取"
 title: "抓取"
-description: "将任何URL转换为干净的数据"
+description: "将任何网址转换为干净的数据"
 icon: "file-lines"
 ---
 
 通过 Olostep 的 `/v1/scrapes` 端点，你可以实时从任何 URL 提取适合 LLM 的 Markdown、HTML、文本、截图或结构化 JSON。
 
 - 输出干净的 markdown、结构化数据、截图或 html
-- 通过 [解析器](/features/structured-content/parsers) 或 [LLM 提取](/features/structured-content/llm-extraction) 提取 JSON
-- 处理动态内容：js 渲染的网站、通过操作的登录流程、PDF
+- 通过 [Parsers](/features/structured-content/parsers) 或 [LLM 提取](/features/structured-content/llm-extraction) 提取 JSON
+- 处理动态内容：js 渲染的网站、通过动作的登录流程、PDF
 
-有关 API 详情，请参阅 [抓取端点 API 参考](/api-reference/scrapes/create)。
+有关 API 详细信息，请参阅 [抓取端点 API 参考](/api-reference/scrapes/create)。
 
-## 抓取 URL
+## 抓取一个 URL
 
-使用 `/v1/scrapes` 端点抓取单个 URL 并选择输出格式。
+使用 `/v1/scrapes` 端点抓取单个 URL，并选择输出格式。
 
 ### 安装
 
@@ -30,7 +30,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl 在 macOS、Linux 和 Windows 上默认可用
 ```
 
 ```javascript Node (API)
@@ -43,9 +43,9 @@ pip install requests
 
 </CodeGroup>
 
-### 用法
+### 使用方法
 
-你可以使用该端点抓取单个 URL 并选择输出格式。必需的参数是 `url_to_scrape` 和 `formats`。
+你可以使用该端点抓取单个 URL，并选择输出格式。必需的参数是 `url_to_scrape` 和 `formats`。
 
 其他一些常用参数包括 `wait_before_scraping`（以毫秒为单位）、`remove_css_selectors`（默认、无或选择器数组）和 `country`。
 
@@ -133,7 +133,7 @@ API 返回一个 `scrape` 对象作为响应。
 
 `scrape` 有一些属性，如 `id` 和 `result`。
 
-`result` 对象具有以下字段（根据 `formats` 参数，有些可能为 null）：
+`result` 对象有以下字段（根据 `formats` 参数，有些可能为 null）：
 - `html_content`: 页面的 HTML 内容。传递 `formats: ["html"]` 获取此内容。
 - `markdown_content`: 页面的 MD 内容。传递 `formats: ["markdown"]` 获取此内容。
 - `text_content`: 页面的文本内容。传递 `formats: ["text"]` 获取此内容。
@@ -175,21 +175,21 @@ API 返回一个 `scrape` 对象作为响应。
 通过 `formats` 选择一个或多个输出格式：
 
 - `markdown`: 适合 LLM 的 markdown
-- `html`: 清理过的 HTML
+- `html`: 清理后的 HTML
 - `text`: 纯文本
 - `json`: 结构化输出（通过解析器或 llm_extract）
 - `raw_pdf`: 提取到托管 URL 的原始 PDF 字节
-- `screenshot`: 通过操作设置以捕获截图并返回托管 URL
+- `screenshot`: 通过动作设置以捕获截图并返回托管 URL
 
-输出键在 `result` 中作为 `*_content` 字段返回，还有一个 `*_hosted_url`。
+输出键在 `result` 中以 `*_content` 字段和 `*_hosted_url` 返回。
 
 ## 提取结构化数据
 
-你可以通过两种方式提取结构化 JSON：使用解析器或 LLM 提取。
+你可以通过两种方式提取结构化 JSON：使用 Parsers 或 LLM 提取。
 
-### 使用解析器（推荐用于规模）
+### 使用 Parser（推荐用于规模化）
 
-定义 `formats: ["json"]` 并提供解析器 `id`。
+定义 `formats: ["json"]` 并提供一个解析器 `id`。
 
 <CodeGroup>
 
@@ -267,15 +267,15 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Olostep 提供了一些针对 [热门网站](https://www.olostep.com/store) 的预构建解析器，但你也可以通过仪表板创建自己的解析器，或者请求我们的团队为你创建。
+Olostep 提供了一些预构建的解析器用于 [热门网站](https://www.olostep.com/store)，但你也可以通过仪表板创建自己的解析器，或者请求我们的团队为你创建。
 
 解析器是自愈的，会自动更新到网站的最新版本。
 
 ### 使用 LLM 提取（模式和/或提示）
 
-提供 `llm_extract`，带有 JSON Schema（`schema`）和/或自然语言指令（`prompt`）。你可以同时传递这两个参数，但如果都提供了，`schema` 优先。
+提供 `llm_extract` 以及 JSON Schema（`schema`）和/或自然语言指令（`prompt`）。你可以同时传递这两个参数，但如果都提供了，`schema` 优先。
 
-相反，如果你只传递一个 `prompt`，LLM 将根据提示提取数据，并自行决定数据结构。
+如果你只传递 `prompt`，LLM 将根据提示提取数据，并自行决定数据结构。
 
 <CodeGroup>
 
@@ -396,18 +396,18 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-注意：`result.json_content` 返回一个字符串化的 JSON。如果你需要一个对象，请在代码中解析它。
+注意：`result.json_content` 返回的是字符串化的 JSON。如果你需要对象，请在代码中解析它。
 
-## 使用操作与页面交互
+## 使用动作与页面交互
 
-在抓取之前执行操作以与动态网站交互。支持的操作：
+在抓取之前执行动作以与动态网站交互。支持的动作：
 
-- `wait` 带有 `milliseconds`
-- `click` 带有 `selector`
-- `fill_input` 带有 `selector` 和 `value`
-- `scroll` 带有 `direction` 和 `amount`
+- `wait` 与 `milliseconds`
+- `click` 与 `selector`
+- `fill_input` 与 `selector` 和 `value`
+- `scroll` 与 `direction` 和 `amount`
 
-在其他操作之前/之后使用 `wait` 以允许页面加载通常是有用的。
+通常在其他动作之前/之后使用 `wait` 以允许页面加载。
 
 ### 示例
 
@@ -516,10 +516,9 @@ print(json.dumps(res.json(), indent=2))
 
 响应将包括任何请求的格式（例如，`markdown_content`）。
 
-## 用例
+## 使用案例
 
 以下是一些客户使用 `/scrapes` 端点的实际应用。
-
 ### 内容分析与研究
 - **竞争分析**：从竞争对手网站提取产品详情、定价和功能
 - **市场研究**：分析登陆页面、产品描述和客户评价
@@ -529,26 +528,26 @@ print(json.dumps(res.json(), indent=2))
 ### 电子商务与零售
 - **动态定价策略**：从竞争商店获取实时产品定价
 - **产品信息管理**：提取详细规格和描述
-- **库存/库存监控**：检查其他零售商的产品可用性
-- **评论分析**：收集消费者反馈和特定产品的情感
+- **库存监控**：检查其他零售商的产品可用性
+- **评论分析**：收集特定产品的消费者反馈和情感
 
 ### 营销与内容创作
-- **内容策展**：为新闻通讯提取相关文章和博客帖子
+- **内容策划**：为新闻简报提取相关文章和博客文章
 - **SEO 分析**：检查竞争对手的关键词使用、元描述和页面结构
 - **潜在客户生成**：从商业目录或公司页面提取联系信息
-- **影响者研究**：收集影响者个人资料的参与指标和内容风格
+- **影响者研究**：收集影响者资料的参与度指标和内容风格
 - **个性化社交媒体生成**：通过分析客户网站创建 AI 驱动的社交媒体营销
 
 ### 数据应用
 - **AI 训练数据收集**：为机器学习模型收集特定示例
 - **自定义知识库构建**：从软件网站提取文档或说明
 - **历史数据档案**：在特定时间点保存网站内容
-- **结构化数据提取**：将网页内容转换为格式化数据集以进行分析
+- **结构化数据提取**：将网页内容转换为格式化数据集以供分析
 
 ### 监控与警报
-- **合规监控**：跟踪法律或监管网站的更改
+- **合规性监控**：跟踪法律或监管网站的更改
 - **危机管理**：监控新闻网站以获取特定事件或组织的提及
-- **事件跟踪**：从场地或组织者网站提取即将发生的事件的详细信息
+- **事件跟踪**：从场地或组织者网站提取即将举行的事件的详细信息
 - **服务状态监控**：检查特定平台或工具的服务状态页面
 
 ### 出版与媒体
@@ -567,15 +566,15 @@ print(json.dumps(res.json(), indent=2))
 - **API 文档提取**：收集技术文档以供参考
 - **集成测试**：提取网站元素以验证第三方集成
 - **可访问性测试**：分析网站结构以符合可访问性标准
-- **网站档案创建**：捕获完整网站内容以进行历史保存
+- **网络档案创建**：捕获完整网站内容以供历史保存
 
 ### 集成场景
-- **CRM 系统**：通过公司网站或 LinkedIn 的数据增强客户资料
+- **CRM 系统**：通过公司网站或 Linkedin 增强客户档案
 - **内容管理系统**：导入相关的外部内容
-- **商业智能工具**：用外部市场信息补充内部数据
-- **项目管理软件**：从客户网站提取规格或要求
+- **商业智能工具**：补充外部市场信息与内部数据
+- **项目管理软件**：从客户网站提取规格或需求
 - **自定义仪表板**：将提取的数据与内部指标一起显示
 
 ## 定价
 
-抓取默认花费 1 个信用。如果你还传递 [解析器](/features/structured-content/parsers)，费用根据解析器不同（1-5 个信用）。如果你使用 [LLM 提取](/features/structured-content/llm-extraction)，则花费 20 个信用。
+默认情况下，抓取费用为 1 个信用。如果你还传递 [parsers](/features/structured-content/parsers)，费用因解析器而异（1-5 个信用）。如果你使用 [LLM 提取](/features/structured-content/llm-extraction)，则费用为 20 个信用。

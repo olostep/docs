@@ -1,19 +1,19 @@
 ---
-sidebarTitle: "Zeitplan"
-title: "Zeitplan"
-description: "Planen Sie API-Aufrufe, die automatisch zu festgelegten Zeiten ausgeführt werden"
+sidebarTitle: "Zeitpläne"
+title: "Zeitpläne"
+description: "Plane API-Aufrufe so, dass sie automatisch zu festgelegten Zeiten ausgeführt werden"
 icon: "clock"
 ---
 
-Über den Olostep-Endpunkt `/v1/schedules` können Sie API-Aufrufe planen, die automatisch zu festgelegten Zeiten ausgeführt werden. Planen Sie einmalige Ausführungen oder wiederkehrende Aufgaben mit Cron-Ausdrücken oder natürlicher Sprache.
+Über den Olostep-Endpunkt `/v1/schedules` kannst du API-Aufrufe planen, die automatisch zu festgelegten Zeiten ausgeführt werden. Plane einmalige Ausführungen oder wiederkehrende Aufgaben mit Cron-Ausdrücken oder natürlicher Sprache.
 
-- Planen Sie einmalige Ausführungen zu einem bestimmten Datum und Uhrzeit
-- Erstellen Sie wiederkehrende Zeitpläne mit Cron-Ausdrücken
-- Verwenden Sie Text in natürlicher Sprache, um automatisch Cron-Ausdrücke zu generieren
-- Planen Sie HTTP-Endpunkte (GET oder POST)
-- Für POST-Anfragen verwenden Sie Kurzform-Olostep-Endpunkte (automatisch vorangestellt) oder vollständige URLs
-- Übergeben Sie beliebige Nutzdaten - die Nutzdaten werden genau so gesendet, wie Sie sie angeben
-- Verwalten Sie den Lebenszyklus des Zeitplans automatisch
+- Plane einmalige Ausführungen zu einem bestimmten Datum und Uhrzeit
+- Erstelle wiederkehrende Zeitpläne mit Cron-Ausdrücken
+- Verwende natürliche Sprache, um automatisch Cron-Ausdrücke zu generieren
+- Plane HTTP-Endpunkte (GET oder POST)
+- Für POST-Anfragen verwende kurze Olostep-Endpunkte (automatisch vorangestellt) oder vollständige URLs
+- Übermittle beliebige Nutzdaten - die Nutzdaten werden genau so gesendet, wie du sie angibst
+- Verwalte den Lebenszyklus des Zeitplans automatisch
 
 Für API-Details siehe die [Schedule Endpoint API Reference](/api-reference/schedules/create).
 
@@ -38,18 +38,18 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: eingebaute curl ist ausreichend
+# macOS: builtin curl ist ausreichend
 ```
 
 </CodeGroup>
 
-## Erstellen eines Zeitplans
+## Erstelle einen Zeitplan
 
-Erstellen Sie einen Zeitplan, um API-Aufrufe automatisch auszuführen. Sie können einmalige oder wiederkehrende Zeitpläne mit Cron-Ausdrücken erstellen. Der `endpoint` kann jede URL sein (nicht auf Olostep-Endpunkte beschränkt), und die `payload` kann beliebige Daten enthalten, die Sie senden möchten.
+Erstelle einen Zeitplan, um API-Aufrufe automatisch auszuführen. Du kannst einmalige oder wiederkehrende Zeitpläne mit Cron-Ausdrücken erstellen. Der `endpoint` kann jede URL sein (nicht auf Olostep-Endpunkte beschränkt), und die `payload` kann beliebige Daten enthalten, die du senden möchtest.
 
 ### Einmaliger Zeitplan
 
-Planen Sie einen API-Aufruf, der einmal zu einem bestimmten Datum und Uhrzeit ausgeführt wird.
+Plane einen API-Aufruf, der einmal zu einem bestimmten Datum und Uhrzeit ausgeführt wird.
 
 <CodeGroup>
 
@@ -61,7 +61,7 @@ from datetime import datetime, timedelta
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Planen Sie einen Scrape, der in 1 Stunde ausgeführt wird
+# Plane einen Scrape, der in 1 Stunde ausgeführt wird
 execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
 
 payload = {
@@ -125,7 +125,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ### Wiederkehrender Zeitplan mit Cron-Ausdruck
 
-Erstellen Sie einen wiederkehrenden Zeitplan mit einem Cron-Ausdruck. Cron-Ausdrücke verwenden das 6-Felder-Format: Minute Stunde Tag Monat Wochentag Jahr.
+Erstelle einen wiederkehrenden Zeitplan mit einem Cron-Ausdruck. Cron-Ausdrücke verwenden ein 6-Felder-Format: Minute Stunde Tag Monat Wochentag Jahr.
 
 <CodeGroup>
 
@@ -136,7 +136,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Planen Sie einen Scrape, der jeden Tag um 10 Uhr UTC ausgeführt wird
+# Plane einen Scrape, der jeden Tag um 10 Uhr UTC ausgeführt wird
 payload = {
     "method": "POST",
     "endpoint": "v1/scrapes",
@@ -195,9 +195,9 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-### Planung in natürlicher Sprache
+### Planung mit natürlicher Sprache
 
-Verwenden Sie Text in natürlicher Sprache, um automatisch Cron-Ausdrücke zu generieren. Das System wandelt Ihren Text in einen gültigen Cron-Ausdruck um.
+Verwende natürliche Sprache, um automatisch Cron-Ausdrücke zu generieren. Das System wandelt deinen Text in einen gültigen Cron-Ausdruck um.
 
 <CodeGroup>
 
@@ -208,7 +208,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Planen Sie mit natürlicher Sprache
+# Plane mit natürlicher Sprache
 payload = {
     "method": "POST",
     "endpoint": "v1/scrapes",
@@ -216,7 +216,7 @@ payload = {
         "url_to_scrape": "https://example.com",
         "formats": ["markdown"]
     },
-    "text": "alle 3 Minuten",
+    "text": "every 3 minutes",
     "expression_timezone": "UTC"
 }
 
@@ -242,7 +242,7 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    text: 'jeden Montag um 9 Uhr',
+    text: 'every Monday at 9am',
     expression_timezone: 'UTC'
   })
 })
@@ -260,7 +260,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "url_to_scrape": "https://example.com",
       "formats": ["markdown"]
     },
-    "text": "jeden Tag um 10 Uhr",
+    "text": "every day at 10am",
     "expression_timezone": "UTC"
   }'
 ```
@@ -269,7 +269,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ## Antwortformat
 
-Wenn Sie einen Zeitplan erstellen, erhalten Sie ein Zeitplan-Objekt mit den folgenden Eigenschaften:
+Wenn du einen Zeitplan erstellst, erhältst du ein Zeitplan-Objekt mit den folgenden Eigenschaften:
 
 ```json
 {
@@ -301,7 +301,7 @@ Für einmalige Zeitpläne enthält die Antwort `execute_at` anstelle von `cron_e
 
 ## Zeitpläne auflisten
 
-Rufen Sie alle Zeitpläne für Ihr Team ab. Standardmäßig werden gelöschte Zeitpläne herausgefiltert. Verwenden Sie den Abfrageparameter `include_deleted`, um sie einzubeziehen.
+Rufe alle Zeitpläne für dein Team ab. Standardmäßig werden gelöschte Zeitpläne herausgefiltert. Verwende den `include_deleted` Abfrageparameter, um sie einzuschließen.
 
 <CodeGroup>
 
@@ -322,7 +322,7 @@ print(f"Total schedules: {result['count']}")
 for schedule in result['schedules']:
     print(json.dumps(schedule, indent=2))
 
-# Um gelöschte Zeitpläne einzubeziehen:
+# Um gelöschte Zeitpläne einzuschließen:
 # response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
 ```
 
@@ -336,7 +336,7 @@ const result = await res.json()
 console.log(`Total schedules: ${result.count}`)
 result.schedules.forEach(s => console.log(s))
 
-// Um gelöschte Zeitpläne einzubeziehen:
+// Um gelöschte Zeitpläne einzuschließen:
 // const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
 ```
 
@@ -344,7 +344,7 @@ result.schedules.forEach(s => console.log(s))
 curl -s -X GET "https://api.olostep.com/v1/schedules" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# Um gelöschte Zeitpläne einzubeziehen:
+# Um gelöschte Zeitpläne einzuschließen:
 # curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
 #   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
@@ -353,7 +353,7 @@ curl -s -X GET "https://api.olostep.com/v1/schedules" \
 
 ## Einen Zeitplan abrufen
 
-Rufen Sie einen einzelnen Zeitplan anhand seiner ID ab.
+Rufe einen einzelnen Zeitplan anhand seiner ID ab.
 
 <CodeGroup>
 
@@ -392,7 +392,7 @@ curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ## Einen Zeitplan löschen
 
-Löschen Sie einen Zeitplan anhand seiner ID. Dies stoppt alle zukünftigen Ausführungen.
+Lösche einen Zeitplan anhand seiner ID. Dies stoppt alle zukünftigen Ausführungen.
 
 <CodeGroup>
 
@@ -434,17 +434,17 @@ curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ### Olostep-Endpunkte (Kurzform)
 
-Für POST-Anfragen können Sie Kurzformen für Olostep-Endpunkte verwenden. Das System wird automatisch `https://api.olostep.com/` für diese voranstellen:
+Für POST-Anfragen kannst du Kurzformen für Olostep-Endpunkte verwenden. Das System wird automatisch `https://api.olostep.com/` für diese voranstellen:
 
-- `v1/scrapes` - Planen Sie Web-Scraping-Aufgaben
-- `v1/batches` - Planen Sie Batch-Verarbeitungsjobs
-- `v1/crawls` - Planen Sie Website-Crawling-Operationen
-- `v1/maps` - Planen Sie Kartendatenextraktionen
-- `v1/answers` - Planen Sie Antwortgenerierungen
+- `v1/scrapes` - Plane Web-Scraping-Aufgaben
+- `v1/batches` - Plane Batch-Verarbeitungsjobs
+- `v1/crawls` - Plane Website-Crawling-Operationen
+- `v1/maps` - Plane Kartendatenextraktion
+- `v1/answers` - Plane Antwortgenerierung
 
 ### Vollständige URLs
 
-Sie können auch vollständige URLs für Ihre Endpunkte angeben. Dies ist erforderlich für externe APIs oder Webhooks:
+Du kannst auch vollständige URLs für deine Endpunkte angeben. Dies ist erforderlich für externe APIs oder Webhooks:
 
 <CodeGroup>
 
@@ -456,7 +456,7 @@ from datetime import datetime, timedelta
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Planen Sie einen Aufruf an eine externe API
+# Plane einen Aufruf zu einer externen API
 payload = {
     "method": "POST",
     "endpoint": "https://api.example.com/webhook",
@@ -518,11 +518,11 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-Das `payload`-Feld akzeptiert jedes JSON-Objekt - Sie können es so strukturieren, wie Sie es für Ihren Zielendpunkt benötigen.
+Das `payload`-Feld akzeptiert jedes JSON-Objekt - du kannst es so strukturieren, wie du es für deinen Zielendpunkt benötigst.
 
 ## Cron-Ausdrucksformat
 
-Cron-Ausdrücke verwenden das 6-Felder-Format:
+Cron-Ausdrücke verwenden ein 6-Felder-Format:
 
 ```
 Minute Stunde Tag Monat Wochentag Jahr
@@ -534,17 +534,17 @@ Beispiele:
 - `0 9 ? * MON *` - Jeden Montag um 9:00 Uhr
 - `0 0 1 * ? *` - Erster Tag jedes Monats um Mitternacht
 
-Verwenden Sie `?` für Tag des Monats oder Wochentag, wenn nicht angegeben.
+Verwende `?` für Tag des Monats oder Wochentag, wenn nicht angegeben.
 
 ## Beispiele für natürliche Sprache
 
-Sie können natürliche Sprache verwenden, um Zeitpläne zu beschreiben. Das System wandelt sie automatisch in Cron-Ausdrücke um:
+Du kannst natürliche Sprache verwenden, um Zeitpläne zu beschreiben. Das System wird sie automatisch in Cron-Ausdrücke umwandeln:
 
-- "alle 3 Minuten" → `0/3 * * * ? *`
-- "jeden Tag um 10 Uhr" → `0 10 * * ? *`
-- "jeden Montag um 9 Uhr" → `0 9 ? * MON *`
-- "jede Stunde" → `0 * * * ? *`
-- "jede Woche am Montag" → `0 0 ? * MON *`
+- "every 3 minutes" → `0/3 * * * ? *`
+- "every day at 10am" → `0 10 * * ? *`
+- "every Monday at 9am" → `0 9 ? * MON *`
+- "every hour" → `0 * * * ? *`
+- "every week on Monday" → `0 0 ? * MON *`
 
 ## Wichtige Hinweise
 
@@ -552,14 +552,14 @@ Sie können natürliche Sprache verwenden, um Zeitpläne zu beschreiben. Das Sys
 - Wiederkehrende Zeitpläne laufen weiter, bis sie manuell gelöscht werden
 - Die Zeitzone muss ein gültiger IANA-Zeitzonenbezeichner sein (z.B. "UTC", "America/New_York", "Europe/London")
 - Das `execute_at`-Datum muss in der Zukunft liegen
-- Die Umwandlung in natürliche Sprache kann Wiederholungen erfordern; das System versucht es bis zu 3 Mal
-- Bei Verwendung von Text in natürlicher Sprache (Parameter `text`) wird die Zeitzone standardmäßig auf "UTC" gesetzt
-- Zeitpläne führen den API-Aufruf mit den bereitgestellten Nutzdaten genau so aus, wie angegeben - Sie können jede benötigte JSON-Struktur übergeben
-- Für POST-Anfragen werden Kurzform-Olostep-Endpunkte (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) automatisch mit `https://api.olostep.com/` vorangestellt
-- Für andere Endpunkte geben Sie die vollständige URL an
-- Das `payload` kann jede Datenstruktur enthalten - es wird unverändert an Ihren Zielendpunkt gesendet
+- Die Umwandlung natürlicher Sprache kann Wiederholungen erfordern; das System wird bis zu 3 Mal versuchen
+- Bei Verwendung von natürlichem Sprachtext (Parameter `text`) ist die Standardzeitzone "UTC"
+- Zeitpläne führen den API-Aufruf mit den bereitgestellten Nutzdaten genau so aus, wie angegeben - du kannst jede benötigte JSON-Struktur übergeben
+- Für POST-Anfragen werden Kurzformen von Olostep-Endpunkten (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) automatisch mit `https://api.olostep.com/` vorangestellt
+- Für andere Endpunkte gib die vollständige URL an
+- Das `payload` kann jede Datenstruktur enthalten - es wird unverändert an deinen Zielendpunkt gesendet
 - Das Löschen eines bereits gelöschten Zeitplans führt zu einem 400-Fehler
 
 ## Preisgestaltung
 
-Die Zeitpläne selbst sind kostenlos. Sie zahlen nur für die API-Aufrufe, die ausgeführt werden, wenn der Zeitplan läuft. Wenn Sie beispielsweise einen Scrape planen, wird Ihnen 1 Kredit pro Ausführung berechnet (oder mehr, wenn Parser oder LLM-Extraktion verwendet werden).
+Zeitpläne selbst sind kostenlos. Du zahlst nur für die API-Aufrufe, die ausgeführt werden, wenn der Zeitplan läuft. Zum Beispiel, wenn du einen Scrape planst, wird dir 1 Kredit pro Ausführung berechnet (oder mehr, wenn Parser oder LLM-Extraktion verwendet werden).

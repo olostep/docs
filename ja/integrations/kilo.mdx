@@ -1,0 +1,241 @@
+---
+sidebarTitle: "Olostep + Kilo"
+title: "Olostep + Kilo 統合"
+description: "Olostep MCP サーバーを Kilo でのウェブ検索、スクレイピング、コンテンツ抽出の外部ツールとして使用"
+---
+
+Kilo は MCP (Model Context Protocol) サーバーをサポートするオールインワンのエージェント工学プラットフォームです。Olostep MCP サーバーは Kilo とシームレスに統合され、AI エージェントに強力なウェブデータ機能を提供します。
+
+## 特徴
+
+Olostep MCP サーバーは、5 つの主要な Olostep 機能へのアクセスを提供します：
+
+<CardGroup cols={2}>
+  <Card title="ウェブサイトをスクレイプ" icon="file-lines">
+    任意の単一 URL から複数の形式（Markdown、HTML、JSON、テキスト）でコンテンツを抽出
+  </Card>
+  
+  <Card title="ウェブを検索" icon="search">
+    ウェブを検索し、構造化されたパーサーベースの結果を取得
+  </Card>
+  
+  <Card title="回答 (AI)" icon="brain">
+    自然言語クエリと引用を用いた AI 駆動の回答を取得
+  </Card>
+  
+  <Card title="URL を一括スクレイプ" icon="layer-group">
+    最大 10,000 の URL を並行処理。大規模データ抽出に最適
+  </Card>
+  
+  <Card title="ウェブサイトをクロール" icon="spider-web">
+    リンクをたどってウェブサイト全体を自動的に発見しスクレイプ
+  </Card>
+</CardGroup>
+
+## インストール
+
+### 1. API キーを取得
+
+[Olostep ダッシュボード](https://olostep.com/dashboard/api-keys)から Olostep API キーを取得します。
+
+### 2. Kilo を設定
+
+プロジェクトディレクトリで、`.kilocode/mcp.json` を作成または編集して Olostep MCP サーバーを追加します：
+
+<CodeGroup>
+```json Remote Hosted MCP (推奨)
+{
+  "mcpServers": {
+    "olostep": {
+      "url": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+```json Local/Stdio MCP
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+`YOUR_OLOSTEP_API_KEY` を Olostep ダッシュボードから取得した実際の API キーに置き換えます。
+
+### 3. インストールを確認
+
+Kilo を実行し、Olostep ツールが自動的に利用可能であることを確認します：
+
+```bash
+kilo
+```
+
+## 使用可能なツール
+
+設定後、以下の Olostep ツールが Kilo エージェントで利用可能になります：
+
+### scrape_website
+
+単一の URL からコンテンツを抽出します。複数の形式と JavaScript レンダリングをサポート。
+
+**例のプロンプト:**
+```
+https://example.com のコンテンツをスクレイプして、Markdown バージョンをください
+```
+
+**パラメータ:**
+- `url` - スクレイプするウェブサイトの URL (必須)
+- `format` - 出力形式: `markdown`, `html`, `json`, または `text` (デフォルト: markdown)
+- `country` - 地域特有のコンテンツ用の国コード (例: "US", "GB")
+- `wait_before_scraping` - JavaScript レンダリングの待機時間 (0-10000 ミリ秒)
+- `parser` - 特殊な抽出用のオプションのパーサー ID (例: "@olostep/amazon-product")
+
+### search_web
+
+ウェブを検索し、構造化されたパーサーベースの結果を返します。
+
+**例のプロンプト:**
+```
+EU における AI 規制に関する最新ニュースを検索
+```
+
+**パラメータ:**
+- `query` - 検索クエリ (必須)
+- `country` - 地域特有の結果用の国コード
+
+### answers
+
+ソースと引用を伴うウェブ検索から AI 駆動の回答を取得します。
+
+**例のプロンプト:**
+```
+2026 年のトップ 5 の新興 AI トレンドは何ですか？ソース付きで構造化された回答をください。
+```
+
+**パラメータ:**
+- `query` - 自然言語の質問 (必須)
+- `format` - 回答の出力形式 (任意の JSON 構造)
+- `country` - 地域特有の検索用の国コード
+
+### batch_scrape_urls
+
+複数の URL を並行処理します。大規模データ抽出に最適。
+
+**例のプロンプト:**
+```
+これらの 50 の商品 URL をスクレイプし、タイトル、価格、説明を JSON 形式で抽出
+```
+
+**パラメータ:**
+- `urls` - スクレイプする URL の配列 (必須)
+- `format` - すべての URL の出力形式
+- `country` - 地域特有のコンテンツ用の国コード
+- `parser` - すべての URL に対するオプションのパーサー ID
+
+### create_crawl
+
+開始 URL からリンクをたどってウェブサイト全体を自動的に発見しスクレイプします。
+
+**例のプロンプト:**
+```
+https://example.com から始めてウェブサイトをクロールし、すべての商品ページを抽出
+```
+
+**パラメータ:**
+- `start_url` - クロールの開始 URL (必須)
+- `max_pages` - クロールする最大ページ数 (デフォルト: 10)
+- `follow_links` - リンクをたどるかどうか (デフォルト: true)
+
+### create_map
+
+ウェブサイトからすべての URL を抽出してサイト構造分析とコンテンツ発見を行います。
+
+**例のプロンプト:**
+```
+https://example.com のすべての URL をマッピングしてサイト構造を理解
+```
+
+**パラメータ:**
+- `website_url` - マッピングするウェブサイト (必須)
+- `search_query` - 結果をフィルタリングするためのオプションのクエリ
+- `top_n` - 返される URL の数を制限
+
+## 例のワークフロー
+
+### ウェブ検索を使った調査タスク
+
+Kilo エージェントにウェブから情報を収集させます：
+
+```
+search_web ツールを使って LLM の安全性に関する最近の記事を見つけ、
+次に answers ツールを使ってソース付きで主要な発見を合成。
+包括的な要約をください。
+```
+
+### 商品データの抽出
+
+複数の商品ページをスクレイプ：
+
+```
+e コマースサイトから 100 の商品 URL があります。batch_scrape_urls を使って
+各商品のタイトル、価格、説明、在庫状況を抽出。
+結果を JSON 形式でフォーマット。
+```
+
+### ウェブサイトの発見と分析
+
+ウェブサイトの構造をクロールして分析：
+
+```
+https://example.com の構造を理解したい。
+まず create_map を使ってすべての URL を取得し、次に主要なセクションをクロールして
+サイトのコンテンツ構成の概要をください。
+```
+
+## 環境変数
+
+ローカル/stdio 設定を使用する場合、環境に API キーが設定されていることを確認してください：
+
+```bash
+export OLOSTEP_API_KEY="your_api_key_here"
+kilo
+```
+
+または `.env` ファイルに：
+```
+OLOSTEP_API_KEY=your_api_key_here
+```
+
+## トラブルシューティング
+
+**Kilo にツールが表示されない:**
+- `.kilocode/mcp.json` が正しくフォーマットされているか確認 (有効な JSON)
+- 設定で API キーが正しいか確認
+- 設定変更後に Kilo を再起動してみてください
+
+**API キー認証エラー:**
+- [Olostep ダッシュボード](https://olostep.com/dashboard/api-keys)からの API キーを再確認
+- キーに余分なスペースや特殊文字がないことを確認
+
+**リモートホストされた MCP が接続しない:**
+- インターネット接続を確認
+- `https://mcp.olostep.com/mcp` にアクセス可能か確認
+- Authorization ヘッダーの形式が正しいことを確認：`Bearer YOUR_KEY`
+
+## 詳しく学ぶ
+
+- [Kilo ウェブサイト](https://kilo.ai/)
+- [Kilo ドキュメント](https://docs.kilo.ai/)
+- [Olostep MCP サーバーリポジトリ](https://github.com/olostep/olostep-mcp-server)
+- [Model Context Protocol (MCP) 仕様](https://modelcontextprotocol.io/)

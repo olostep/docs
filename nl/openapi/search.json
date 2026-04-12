@@ -21,7 +21,7 @@
   "paths": {
     "/v1/searches/{search_id}": {
       "get": {
-        "summary": "Haal Zoekopdracht",
+        "summary": "Zoek Ophalen",
         "description": "Haal een eerder voltooide zoekopdracht op met zijn ID.",
         "security": [
           {
@@ -41,7 +41,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met het zoekobject.",
+            "description": "Succesvolle reactie met het zoekobject.",
             "content": {
               "application/json": {
                 "schema": {
@@ -112,8 +112,8 @@
     },
     "/v1/searches": {
       "post": {
-        "summary": "Maak Zoekopdracht",
-        "description": "Doorzoek het web met een natuurlijke taalquery en krijg een gededupliceerde lijst van relevante links met titels en beschrijvingen terug.  Het zal de query semantisch over het web doorzoeken en resultaten teruggeven.  Zie [Zoekfunctie](/features/search).",
+        "summary": "Zoekopdracht Aanmaken",
+        "description": "Doorzoek het web met een zoekopdracht in natuurlijke taal en krijg een gededupliceerde lijst van relevante links met titels en beschrijvingen terug.  Het zal semantisch naar de zoekopdracht zoeken op het web en resultaten teruggeven.  Zie [Zoekfunctie](/features/search).",
         "security": [
           {
             "Authorization": []
@@ -128,7 +128,7 @@
                 "properties": {
                   "query": {
                     "type": "string",
-                    "description": "De zoekquery in natuurlijke taal."
+                    "description": "De zoekopdracht in natuurlijke taal."
                   }
                 },
                 "required": [
@@ -140,7 +140,7 @@
         },
         "responses": {
           "200": {
-            "description": "Succesvolle respons met zoekresultaten.",
+            "description": "Succesvolle reactie met zoekresultaten.",
             "content": {
               "application/json": {
                 "schema": {
@@ -179,7 +179,7 @@
                         },
                         "links": {
                           "type": "array",
-                          "description": "Gededupliceerde lijst van relevante links gevonden over meerdere zoekopdrachten.",
+                          "description": "Gededupliceerde lijst van relevante links gevonden in meerdere zoekopdrachten.",
                           "items": {
                             "type": "object",
                             "properties": {
@@ -195,7 +195,7 @@
                               "description": {
                                 "type": "string",
                                 "nullable": true,
-                                "description": "Een kort fragment of beschrijving van het resultaat."
+                                "description": "Een korte snippet of beschrijving van het resultaat."
                               }
                             }
                           }
@@ -208,7 +208,7 @@
             }
           },
           "400": {
-            "description": "Foutieve Aanvraag (Ontbrekende query)"
+            "description": "Foutieve Aanvraag (Ontbrekende zoekopdracht)"
           },
           "401": {
             "description": "Ongeldige API Sleutel"

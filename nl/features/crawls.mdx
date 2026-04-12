@@ -9,10 +9,10 @@ Via de Olostep `/v1/crawls` endpoint kun je een website crawlen en de inhoud van
 
 - Crawlen van een website en de inhoud van alle subpagina's ophalen (of de diepte van de crawl beperken)
 - Gebruik speciale patronen om specifieke pagina's te crawlen (bijv. `/blog/**`)
-- Geef een `webhook_url` door om een melding te krijgen wanneer de crawl voltooid is
-- Zoekopdracht om alleen specifieke pagina's te vinden en sorteren op relevantie
+- Geef een `webhook_url` door om een melding te krijgen wanneer de crawl is voltooid
+- Zoekopdracht om alleen specifieke pagina's te vinden en te sorteren op relevantie
 
-Voor API-details zie de [Crawl Endpoint API Reference](/api-reference/crawls/create).
+Voor API-details zie de [Crawl Endpoint API Referentie](/api-reference/crawls/create).
 
 ## Installatie
 
@@ -27,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl is standaard beschikbaar op macOS, Linux en Windows
 ```
 
 ```javascript Node (API)
@@ -42,7 +42,7 @@ pip install requests
 
 ## Start een crawl
 
-Geef de start-URL, include/exclude URL-globs, en `max_pages`. Optioneel: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`.
+Geef de start-URL, include/exclude URL-globs en `max_pages`. Optioneel: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`.
 
 <CodeGroup>
 
@@ -139,20 +139,20 @@ Poll de crawl om de voortgang te volgen totdat `status` `completed` is.
 <CodeGroup>
 
 ```python Python
-# Using the crawl object from the previous step
+# Gebruikmakend van het crawl object van de vorige stap
 info = crawl.info()
 print(info.status, info.pages_count)
 
-# Or wait until completed
+# Of wacht tot voltooid
 crawl.wait_till_done(check_every_n_secs=5)
 ```
 
 ```js Node
-// Using the crawl object from the previous step
+// Gebruikmakend van het crawl object van de vorige stap
 const info = await crawl.info()
 console.log(info.status, info.pages_count)
 
-// Or wait until completed
+// Of wacht tot voltooid
 await crawl.waitTillDone({ checkEveryNSecs: 5 })
 ```
 
@@ -186,7 +186,7 @@ while True:
 
 </CodeGroup>
 
-Als alternatief kun je een `webhook_url` doorgeven bij het starten van de crawl om een melding te krijgen wanneer de crawl voltooid is.
+Als alternatief kun je een `webhook_url` doorgeven bij het starten van de crawl om een melding te krijgen wanneer de crawl is voltooid.
 
 ## Lijst pagina's (pagineren/streamen met cursor)
 
@@ -195,13 +195,13 @@ Haal pagina's op en itereren met `cursor` en `limit`. Werkt terwijl de crawl `in
 <CodeGroup>
 
 ```python Python
-# Iterate all pages (auto-waits for crawl completion, handles pagination)
+# Itereer over alle pagina's (wacht automatisch op voltooiing van de crawl, behandelt paginering)
 for page in crawl.pages():
     print(page.url, page.retrieve_id)
 ```
 
 ```js Node
-// Iterate all pages (auto-waits for crawl completion, handles pagination)
+// Itereer over alle pagina's (wacht automatisch op voltooiing van de crawl, behandelt paginering)
 for await (const page of crawl.pages()) {
   console.log(page.url, page.retrieve_id)
 }
@@ -327,14 +327,14 @@ Gebruik de `retrieve_id` van elke pagina met `/v1/retrieve` om `html_content` en
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each crawled page
+# Haal inhoud op voor elke gecrawlde pagina
 for page in crawl.pages():
     content = page.retrieve(["markdown"])
     print(content.markdown_content)
 ```
 
 ```js Node
-// Retrieve content for each crawled page
+// Haal inhoud op voor elke gecrawlde pagina
 for await (const page of crawl.pages()) {
   const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
   console.log(content.markdown_content)
@@ -366,7 +366,7 @@ for page in get_pages(crawl['id'], limit=5)['pages']:
 ## Notities
 
 - Paginering is cursor-gebaseerd; herhaal verzoeken totdat `cursor` afwezig is.
-- Inhoudsvelden op `/v1/crawls/{crawl_id}/pages` zijn verouderd; geef de voorkeur aan `/v1/retrieve`.
+- Inhoudsvelden op `/v1/crawls/{crawl_id}/pages` zijn verouderd; gebruik liever `/v1/retrieve`.
 - Webhooks: stel `webhook_url` in om een POST te ontvangen wanneer de crawl voltooid is.
 
 ## Prijzen

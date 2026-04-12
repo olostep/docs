@@ -38,7 +38,7 @@
                   "url_to_scrape": {
                     "type": "string",
                     "format": "uri",
-                    "description": "De URL om te beginnen met scrapen."
+                    "description": "De URL om het scrapen te starten."
                   },
                   "wait_before_scraping": {
                     "type": "integer",
@@ -89,7 +89,7 @@
                               "enum": [
                                 "wait"
                               ],
-                              "description": "Wacht een gespecificeerde hoeveelheid milliseconden"
+                              "description": "Wacht een opgegeven aantal milliseconden"
                             },
                             "milliseconds": {
                               "type": "integer",
@@ -133,7 +133,7 @@
                               "enum": [
                                 "fill_input"
                               ],
-                              "description": "Vul een invoerelement met een waarde in"
+                              "description": "Vul een invoerelement met een waarde"
                             },
                             "selector": {
                               "type": "string",
@@ -141,13 +141,13 @@
                             },
                             "value": {
                               "type": "string",
-                              "description": "Tekst om in te voeren in de invoer"
+                              "description": "Tekst om in te voeren in de input"
                             }
                           }
                         },
                         {
                           "type": "object",
-                          "title": "Scrollen",
+                          "title": "Scroll",
                           "required": [
                             "type",
                             "direction",
@@ -183,7 +183,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "Woonland van waaruit het verzoek wordt geladen.  Ondersteunde waarden zijn: - US (Verenigde Staten) - CA (Canada) - IT (Italië) - IN (India) - GB (Engeland) - JP (Japan) - MX (Mexico) - AU (Australië) - ID (Indonesië) - UA (VAE) - RU (Rusland) - RANDOM  Sommige operaties, zoals het scrapen van Google Search en Google News, ondersteunen alle landen."
+                    "description": "Woonland van waaruit het verzoek moet worden geladen.  Ondersteunde waarden zijn: - US (Verenigde Staten) - CA (Canada) - IT (Italië) - IN (India) - GB (Engeland) - JP (Japan) - MX (Mexico) - AU (Australië) - ID (Indonesië) - UA (VAE) - RU (Rusland) - RANDOM  Sommige operaties, zoals het scrapen van Google Search en Google News, ondersteunen alle landen."
                   },
                   "transformer": {
                     "type": "string",
@@ -191,7 +191,7 @@
                       "postlight",
                       "none"
                     ],
-                    "description": "Specificeer de HTML-transformer die je wilt gebruiken, indien van toepassing. De Mercury Parser-bibliotheek van Postlight wordt gebruikt om advertenties en andere ongewenste inhoud uit de gescrapete inhoud te verwijderen."
+                    "description": "Specificeer de HTML-transformer die je wilt gebruiken, indien van toepassing. Postlight's Mercury Parser-bibliotheek wordt gebruikt om advertenties en andere ongewenste inhoud uit de gescrapete inhoud te verwijderen."
                   },
                   "remove_images": {
                     "type": "boolean",
@@ -237,7 +237,7 @@
                       },
                       "query_to_order_links_by": {
                         "type": "string",
-                        "description": "Sorteert de geretourneerde links op hun gelijkenis met de opgegeven zoektekst, waarbij de meest relevante overeenkomsten eerst worden geprioriteerd."
+                        "description": "Sorteert de geretourneerde links op hun gelijkenis met de opgegeven querytekst, waarbij de meest relevante overeenkomsten eerst worden geprioriteerd."
                       },
                       "include_links": {
                         "type": "array",

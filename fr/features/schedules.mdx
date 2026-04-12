@@ -1,21 +1,21 @@
 ---
-sidebarTitle: "Planification"
-title: "Planification"
-description: "Planifiez des appels API pour qu’ils s’exécutent automatiquement à des moments spécifiés"
+sidebarTitle: "Horaires"
+title: "Horaires"
+description: "Planifiez les appels API pour qu’ils s’exécutent automatiquement à des moments spécifiés"
 icon: "clock"
 ---
 
 Grâce à l'endpoint Olostep `/v1/schedules`, tu peux planifier des appels API pour qu'ils s'exécutent automatiquement à des moments spécifiés. Planifie des exécutions uniques ou des tâches récurrentes en utilisant des expressions cron ou un langage naturel.
 
-- Planifie des exécutions uniques à une date et heure spécifique
-- Crée des planifications récurrentes en utilisant des expressions cron
+- Planifie des exécutions uniques à une date et heure spécifiques
+- Crée des horaires récurrents en utilisant des expressions cron
 - Utilise du texte en langage naturel pour générer automatiquement des expressions cron
 - Planifie des endpoints HTTP (GET ou POST)
-- Pour les requêtes POST, utilise des endpoints Olostep en format court (préfixés automatiquement) ou des URLs complètes
-- Passe n'importe quelle charge utile que tu souhaites - la charge utile est envoyée exactement comme tu la spécifies
-- Gère automatiquement le cycle de vie des planifications
+- Pour les requêtes POST, utilise des endpoints Olostep en format court (automatiquement préfixés) ou des URLs complètes
+- Transmets la charge utile que tu souhaites - elle est envoyée exactement comme tu la spécifies
+- Gère automatiquement le cycle de vie des horaires
 
-Pour les détails de l'API, consulte la [Référence de l'API Endpoint de Planification](/api-reference/schedules/create).
+Pour les détails de l'API, consulte la [Référence de l'API Endpoint des Horaires](/api-reference/schedules/create).
 
 ## Installation
 
@@ -38,18 +38,18 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: le curl intégré convient
+# macOS : le curl intégré convient
 ```
 
 </CodeGroup>
 
-## Créer une planification
+## Créer un horaire
 
-Crée une planification pour exécuter des appels API automatiquement. Tu peux créer des planifications uniques ou récurrentes en utilisant des expressions cron. L'`endpoint` peut être n'importe quelle URL (pas limité aux endpoints Olostep), et la `payload` peut contenir toutes les données que tu souhaites envoyer.
+Crée un horaire pour exécuter automatiquement des appels API. Tu peux créer des horaires uniques ou récurrents en utilisant des expressions cron. L'`endpoint` peut être n'importe quelle URL (pas limité aux endpoints Olostep), et la `payload` peut contenir toutes les données que tu souhaites envoyer.
 
-### Planification unique
+### Horaire unique
 
-Planifie un appel API pour qu'il s'exécute une fois à une date et heure spécifique.
+Planifie un appel API pour qu'il s'exécute une fois à une date et heure spécifiques.
 
 <CodeGroup>
 
@@ -123,9 +123,9 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-### Planification récurrente avec expression cron
+### Horaire récurrent avec expression cron
 
-Crée une planification récurrente en utilisant une expression cron. Les expressions cron utilisent un format à 6 champs : minute heure jour mois jour-de-la-semaine année.
+Crée un horaire récurrent en utilisant une expression cron. Les expressions cron utilisent un format à 6 champs : minute heure jour mois jour-de-la-semaine année.
 
 <CodeGroup>
 
@@ -216,7 +216,7 @@ payload = {
         "url_to_scrape": "https://example.com",
         "formats": ["markdown"]
     },
-    "text": "toutes les 3 minutes",
+    "text": "every 3 minutes",
     "expression_timezone": "UTC"
 }
 
@@ -242,7 +242,7 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    text: 'tous les lundis à 9h',
+    text: 'every Monday at 9am',
     expression_timezone: 'UTC'
   })
 })
@@ -260,7 +260,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
       "url_to_scrape": "https://example.com",
       "formats": ["markdown"]
     },
-    "text": "tous les jours à 10h",
+    "text": "every day at 10am",
     "expression_timezone": "UTC"
   }'
 ```
@@ -269,7 +269,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ## Format de réponse
 
-Lorsque tu crées une planification, tu recevras un objet planification avec les propriétés suivantes :
+Lorsque tu crées un horaire, tu recevras un objet horaire avec les propriétés suivantes :
 
 ```json
 {
@@ -284,7 +284,7 @@ Lorsque tu crées une planification, tu recevras un objet planification avec les
 }
 ```
 
-Pour les planifications uniques, la réponse inclut `execute_at` au lieu de `cron_expression` :
+Pour les horaires uniques, la réponse inclut `execute_at` au lieu de `cron_expression` :
 
 ```json
 {
@@ -299,9 +299,9 @@ Pour les planifications uniques, la réponse inclut `execute_at` au lieu de `cro
 }
 ```
 
-## Lister les planifications
+## Lister les horaires
 
-Récupère toutes les planifications pour ton équipe. Par défaut, les planifications supprimées sont filtrées. Utilise le paramètre de requête `include_deleted` pour les inclure.
+Récupère tous les horaires pour ton équipe. Par défaut, les horaires supprimés sont filtrés. Utilise le paramètre de requête `include_deleted` pour les inclure.
 
 <CodeGroup>
 
@@ -318,11 +318,11 @@ headers = {
 
 response = requests.get(f"{API_URL}/schedules", headers=headers)
 result = response.json()
-print(f"Total des planifications : {result['count']}")
+print(f"Total schedules: {result['count']}")
 for schedule in result['schedules']:
     print(json.dumps(schedule, indent=2))
 
-# Pour inclure les planifications supprimées :
+# Pour inclure les horaires supprimés :
 # response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
 ```
 
@@ -333,10 +333,10 @@ const res = await fetch(`${API_URL}/schedules`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
 const result = await res.json()
-console.log(`Total des planifications : ${result.count}`)
+console.log(`Total schedules: ${result.count}`)
 result.schedules.forEach(s => console.log(s))
 
-// Pour inclure les planifications supprimées :
+// Pour inclure les horaires supprimés :
 // const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
 ```
 
@@ -344,16 +344,16 @@ result.schedules.forEach(s => console.log(s))
 curl -s -X GET "https://api.olostep.com/v1/schedules" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# Pour inclure les planifications supprimées :
+# Pour inclure les horaires supprimés :
 # curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
 #   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
 
 </CodeGroup>
 
-## Obtenir une planification
+## Obtenir un horaire
 
-Récupère une planification unique par son ID.
+Récupère un seul horaire par son ID.
 
 <CodeGroup>
 
@@ -390,9 +390,9 @@ curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 </CodeGroup>
 
-## Supprimer une planification
+## Supprimer un horaire
 
-Supprime une planification par son ID. Cela arrêtera toute exécution future.
+Supprime un horaire par son ID. Cela arrêtera toutes les exécutions futures.
 
 <CodeGroup>
 
@@ -444,7 +444,7 @@ Pour les requêtes POST, tu peux utiliser des formats courts pour les endpoints 
 
 ### URLs complètes
 
-Tu peux également fournir des URLs complètes pour tes endpoints. Cela est requis pour les API externes ou les webhooks :
+Tu peux également fournir des URLs complètes pour tes endpoints. Cela est nécessaire pour les API externes ou les webhooks :
 
 <CodeGroup>
 
@@ -534,32 +534,32 @@ Exemples :
 - `0 9 ? * MON *` - Tous les lundis à 9h00
 - `0 0 1 * ? *` - Premier jour de chaque mois à minuit
 
-Utilise `?` pour jour-du-mois ou jour-de-la-semaine lorsqu'il n'est pas spécifié.
+Utilise `?` pour le jour du mois ou le jour de la semaine lorsqu'il n'est pas spécifié.
 
 ## Exemples de langage naturel
 
-Tu peux utiliser le langage naturel pour décrire les planifications. Le système les convertira automatiquement en expressions cron :
+Tu peux utiliser le langage naturel pour décrire les horaires. Le système les convertira automatiquement en expressions cron :
 
 - "toutes les 3 minutes" → `0/3 * * * ? *`
 - "tous les jours à 10h" → `0 10 * * ? *`
 - "tous les lundis à 9h" → `0 9 ? * MON *`
 - "toutes les heures" → `0 * * * ? *`
-- "toutes les semaines le lundi" → `0 0 ? * MON *`
+- "chaque semaine le lundi" → `0 0 ? * MON *`
 
-## Remarques importantes
+## Notes importantes
 
-- Les planifications uniques sont automatiquement supprimées après exécution
-- Les planifications récurrentes continuent jusqu'à suppression manuelle
+- Les horaires uniques sont automatiquement supprimés après exécution
+- Les horaires récurrents continuent jusqu'à leur suppression manuelle
 - Le fuseau horaire doit être un identifiant de fuseau horaire IANA valide (par exemple, "UTC", "America/New_York", "Europe/London")
 - La date et l'heure `execute_at` doivent être dans le futur
-- La conversion en langage naturel peut nécessiter des tentatives supplémentaires ; le système essaiera jusqu'à 3 fois
-- Lors de l'utilisation de texte en langage naturel (paramètre `text`), le fuseau horaire par défaut est "UTC"
-- Les planifications exécutent l'appel API avec la charge utile fournie exactement comme spécifié - tu peux passer n'importe quelle structure JSON dont tu as besoin
+- La conversion en langage naturel peut nécessiter des tentatives ; le système essaiera jusqu'à 3 fois
+- Lors de l'utilisation du texte en langage naturel (paramètre `text`), le fuseau horaire par défaut est "UTC"
+- Les horaires exécutent l'appel API avec la charge utile fournie exactement comme spécifié - tu peux transmettre toute structure JSON dont tu as besoin
 - Pour les requêtes POST, les endpoints Olostep en format court (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) sont automatiquement préfixés par `https://api.olostep.com/`
-- Pour les autres endpoints, fournis l'URL complète
-- La `payload` peut contenir n'importe quelle structure de données - elle est envoyée telle quelle à ton endpoint cible
-- Supprimer une planification déjà supprimée renverra une erreur 400
+- Pour d'autres endpoints, fournis l'URL complète
+- La `payload` peut contenir toute structure de données - elle est envoyée telle quelle à ton endpoint cible
+- Supprimer un horaire déjà supprimé retournera une erreur 400
 
 ## Tarification
 
-Les planifications elles-mêmes sont gratuites. Tu ne paies que pour les appels API qui sont exécutés lorsque la planification s'exécute. Par exemple, si tu planifies une extraction, tu seras facturé 1 crédit par exécution (ou plus si tu utilises des analyseurs ou une extraction LLM).
+Les horaires eux-mêmes sont gratuits. Tu ne paies que pour les appels API qui sont exécutés lorsque l'horaire s'exécute. Par exemple, si tu planifies une extraction, tu seras facturé 1 crédit par exécution (ou plus si tu utilises des parseurs ou une extraction LLM).

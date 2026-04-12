@@ -44,7 +44,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "使用 glob 语法在爬虫中包含的 URL 路径模式。  默认为 `/**`，包括所有 URL。使用类似 `/blog/**` 的模式来爬取特定部分（例如，仅博客页面），`/products/*.html` 用于产品页面，或多个模式用于不同部分。支持标准的 glob 功能，如 *（任意字符）和 **（递归匹配）。"
+                    "description": "使用 glob 语法在爬虫中包含的 URL 路径模式。  默认为 `/**`，包括所有 URL。使用类似 `/blog/**` 的模式来爬取特定部分（例如，仅博客页面），`/products/*.html` 用于产品页面，或为不同部分使用多个模式。支持标准 glob 特性，如 *（任意字符）和 **（递归匹配）。"
                   },
                   "exclude_urls": {
                     "type": "array",
@@ -55,7 +55,7 @@
                   },
                   "max_pages": {
                     "type": "number",
-                    "description": "爬虫的最大页面数量。推荐用于大多数用例，如爬取整个网站。"
+                    "description": "要爬取的最大页面数。推荐用于大多数用例，如爬取整个网站。"
                   },
                   "max_depth": {
                     "type": "number",
@@ -67,7 +67,7 @@
                   },
                   "include_subdomain": {
                     "type": "boolean",
-                    "description": "包含网站的子域名。默认 `false`。"
+                    "description": "包含网站的子域名。默认值为 `false`。"
                   },
                   "search_query": {
                     "type": "string",
@@ -75,7 +75,7 @@
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "可选的数字，仅爬取每个页面上最相关的前 N 个链接，依据搜索查询。"
+                    "description": "可选的数字，仅爬取每个页面上搜索查询中最相关的前 N 个链接。"
                   },
                   "webhook": {
                     "type": "string",
@@ -88,12 +88,12 @@
                   },
                   "follow_robots_txt": {
                     "type": "boolean",
-                    "description": "是否遵守 robots.txt 规则。如果设置为 `false`，爬虫将不顾 robots.txt 的禁止指令抓取网站。默认 `true`。",
+                    "description": "是否遵循 robots.txt 规则。如果设置为 `false`，爬虫将不顾 robots.txt 的禁止指令抓取网站。默认值为 `true`。",
                     "default": true
                   },
                   "scrape_options": {
                     "type": "object",
-                    "description": "控制每个页面抓取请求从 Olostep API 获取的内容。所有字段都是可选的。",
+                    "description": "控制每个单独页面从 Olostep API 请求的内容。所有字段都是可选的。",
                     "properties": {
                       "formats": {
                         "type": "array",
@@ -143,7 +143,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "对象的类型。此端点为 \"crawl\"。"
+                      "description": "The kind of object. \"crawl\" for this endpoint."
                     },
                     "status": {
                       "type": "string",
@@ -151,11 +151,11 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建时间（epoch格式）"
+                      "description": "Created time in epoch"
                     },
                     "start_date": {
                       "type": "string",
-                      "description": "创建时间（日期格式）"
+                      "description": "Created time in date"
                     },
                     "start_url": {
                       "type": "string"
@@ -189,11 +189,11 @@
                     },
                     "current_depth": {
                       "type": "number",
-                      "description": "爬取过程的当前深度。"
+                      "description": "The current depth of the crawl process."
                     },
                     "pages_count": {
                       "type": "number",
-                      "description": "已爬取页面的数量"
+                      "description": "Count of pages crawled"
                     },
                     "webhook": {
                       "type": "string"
@@ -207,7 +207,7 @@
             }
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "Bad request due to incorrect or missing parameters."
           },
           "500": {
             "description": "内部服务器错误。"
@@ -217,8 +217,8 @@
     },
     "/v1/crawls/{crawl_id}": {
       "get": {
-        "summary": "获取爬取信息",
-        "description": "使用特定的 `crawl_id` 获取关于某次爬取的信息。",
+        "summary": "Retrieve crawl information",
+        "description": "Fetches information about a specific crawl using its `crawl_id`.",
         "security": [
           {
             "Authorization": []
@@ -232,12 +232,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "要获取信息的爬取ID。"
+            "description": "The ID of the crawl to retrieve information for."
           }
         ],
         "responses": {
           "200": {
-            "description": "成功响应，包含爬取信息。",
+            "description": "Successful response with crawl information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -249,7 +249,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "对象的类型。此端点为 \"crawl\"。"
+                      "description": "The kind of object. \"crawl\" for this endpoint."
                     },
                     "status": {
                       "type": "string",
@@ -257,11 +257,11 @@
                     },
                     "created": {
                       "type": "number",
-                      "description": "创建时间（epoch格式）"
+                      "description": "Created time in epoch"
                     },
                     "start_date": {
                       "type": "string",
-                      "description": "创建时间（日期格式）"
+                      "description": "Created time in date"
                     },
                     "start_url": {
                       "type": "string"
@@ -295,11 +295,11 @@
                     },
                     "current_depth": {
                       "type": "number",
-                      "description": "爬取过程的当前深度。"
+                      "description": "The current depth of the crawl process."
                     },
                     "pages_count": {
                       "type": "number",
-                      "description": "已爬取页面的数量"
+                      "description": "Count of pages crawled"
                     },
                     "webhook": {
                       "type": "string"
@@ -313,10 +313,10 @@
             }
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "Bad request due to incorrect or missing parameters."
           },
           "404": {
-            "description": "提供的ID未找到爬取。"
+            "description": "Crawl not found for the provided ID."
           },
           "500": {
             "description": "内部服务器错误。"
@@ -326,8 +326,8 @@
     },
     "/v1/crawls/{crawl_id}/pages": {
       "get": {
-        "summary": "获取已爬取页面的列表，可选择包含内容",
-        "description": "获取已处理的特定爬取ID的页面和内容列表。",
+        "summary": "Retrieve list of crawled pages optionally with content",
+        "description": "Fetches the list of crawled pages and content that have been processed for a specific crawl ID.",
         "security": [
           {
             "Authorization": []
@@ -341,7 +341,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "要获取URL列表的爬取ID。"
+            "description": "The ID of the crawl to retrieve the list of URLs for."
           },
           {
             "name": "cursor",
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "可选整数，表示开始获取内容的索引。用于分页，直到获取所有URL。从0开始，然后提供上次请求的 `response['cursor']` 值。"
+            "description": "Optional integer representing the index to start fetching content from. Useful to paginate until all URLs are fetched. Start with 0, then provide `response['cursor']` value of the last request."
           },
           {
             "name": "limit",
@@ -359,7 +359,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "可选整数，用于限制返回结果的数量。建议一次返回10-50个结果。使用*cursor*分页。单次请求最多可获取10MB的内容。"
+            "description": "Optional integer to limit the number of results returned. Recommended 10-50 results at a time. Paginated using *cursor*. Maximum 10MB of content can be fetched in a single request."
           },
           {
             "name": "search_query",
@@ -368,7 +368,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "可选的搜索查询，用于按相关性排序结果。如果提供，默认使用原始search_query。"
+            "description": "An optional search query to sort the results by relevance. Uses the original search_query by default if provided."
           },
           {
             "name": "formats",
@@ -384,12 +384,12 @@
                 ]
               }
             },
-            "description": "**已弃用：** 使用带有 `retrieve_id` 的 `/retrieve` 端点。  要获取的格式数组（例如，[\"html\", \"markdown\"]）。"
+            "description": "**Deprecated:** Use `/retrieve` endpoint with `retrieve_id`.\n\nArray of formats to fetch (e.g., [\"html\", \"markdown\"])."
           }
         ],
         "responses": {
           "200": {
-            "description": "成功响应，包含URL列表。",
+            "description": "Successful response with the list of URLs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -401,7 +401,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "对象的类型。此端点为 \"crawl\"。"
+                      "description": "The kind of object. \"crawl\" for this endpoint."
                     },
                     "status": {
                       "type": "string",
@@ -423,7 +423,7 @@
                           },
                           "retrieve_id": {
                             "type": "string",
-                            "description": "从 `/retrieve` 端点获取内容。"
+                            "description": "To fetch content from the `/retrieve` endpoint"
                           },
                           "url": {
                             "type": "string"
@@ -463,7 +463,7 @@
                     },
                     "cursor": {
                       "type": "integer",
-                      "description": "在下一个请求的查询中传递以获取下一个项目。"
+                      "description": "在下一个请求的查询中传递，以获取下一个项目。"
                     }
                   }
                 }
@@ -471,10 +471,10 @@
             }
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "Bad request due to incorrect or missing parameters."
           },
           "404": {
-            "description": "提供的ID未找到爬取。"
+            "description": "Crawl not found for the provided ID."
           },
           "500": {
             "description": "内部服务器错误。"

@@ -2,22 +2,22 @@
 sidebarTitle: "CLI"
 title: "Olostep CLI"
 icon: "terminal"
-description: "マップ、スクレイプ、クロール、バッチ、回答のためのコマンドライン: スクリプト、CI、エージェント向けの JSON 出力"
+description: "マップ、スクレイプ、クロール、バッチ、アンサー用のコマンドラインインターフェース：スクリプト、CI、エージェント向けのJSON出力"
 ---
 
-**NPM パッケージ:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
+**NPMパッケージ:** [olostep-cli](https://www.npmjs.com/package/olostep-cli)
 
-[Olostep API](https://www.olostep.com/) 向け CLI：**map**、**answer**、**scrape**、**scrape-get**、**crawl**、**batch-scrape**、**batch-update**。応答は **JSON**（整形済み）で、スクリプト、CI、エージェント向けです。
+[Olostep API](https://www.olostep.com/)用のCLI: **map**、**answer**、**scrape**、**scrape-get**、**crawl**、**batch-scrape**、**batch-update**。レスポンスはスクリプト、CI、エージェント向けに**JSON**（整形済み）です。
 
-このパッケージをインストールすると、OS 向けの**スタンドアロン・バイナリ**がダウンロードされます。`olostep` の実行に **Python は不要**です。
+このパッケージをインストールすると、OSに対応した**スタンドアロンバイナリ**がダウンロードされます。`olostep`を実行するのにPythonは必要ありません。
 
 <Note>
-  インストール時に postinstall で、パッケージの [GitHub リリース](https://github.com/olostep-api/CLI/releases)から対応バイナリを取得します。失敗する場合は、このパッケージ版とプラットフォームにリリースがあるか確認し、再インストールしてください。
+  インストール時に、ポストインストールステップでパッケージの[GitHubリリース](https://github.com/olostep-api/CLI/releases)から対応するバイナリがダウンロードされます。失敗した場合は、このパッケージバージョンとプラットフォームに対応するリリースが存在することを確認し、再インストールしてください。
 </Note>
 
 ## インストール
 
-**要件:** Node.js **16+**（`npm` / `npx` 用のみ。CLI 自体はネイティブバイナリです）。
+**要件:** Node.js **16+**（`npm` / `npx` のみ; CLI自体はネイティブバイナリです）。
 
 ```bash
 npm install -g olostep-cli
@@ -29,13 +29,13 @@ npm install -g olostep-cli
 npx -y olostep-cli@latest --help
 ```
 
-**対応プラットフォーム:** macOS（Apple Silicon / Intel）、Linux x64、Windows x64。
+**プラットフォーム:** macOS (Apple SiliconとIntel)、Linux x64、Windows x64。
 
-## API キー
+## APIキー
 
-環境変数 **`OLOSTEP_API_KEY`** を設定するか、`olostep` を実行するディレクトリの `.env` に記述します。
+環境に**`OLOSTEP_API_KEY`**を設定するか、`olostep`を実行するディレクトリに`.env`ファイルを作成してください。
 
-キー作成: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys)。
+キーの作成: [Olostep API Keys](https://www.olostep.com/dashboard/api-keys)。
 
 ```bash
 export OLOSTEP_API_KEY=your_key_here
@@ -45,75 +45,75 @@ olostep --help
 ## 出力
 
 | フラグ | 動作 |
-| ------ | ---- |
-| `--out <path>` | JSON をファイルに書き込み（必要なら親ディレクトリを作成）。 |
-| `--out -` | JSON を **stdout** のみに出力（UTF-8、インデント付き）。パイプやサブプロセス取得に便利。 |
+| ---- | -------- |
+| `--out <path>` | JSONをファイルに書き込む（必要なら親ディレクトリも作成）。 |
+| `--out -` | JSONを**stdout**のみに書き込む（UTF-8、インデント付き）。パイプやサブプロセスキャプチャに最適。 |
 
-進捗とログは **stderr** に出るため、stdout はパースしやすいままです。
+進行状況とログ行は**stderr**に出力されるため、stdoutは解析可能なままです。
 
 ```bash
 olostep map "https://example.com" --top-n 20 --out - | jq '.urls[:10]'
 olostep scrape "https://example.com" --out - | jq .result.markdown_content
 ```
 
-`--out` を省略すると `output/` 配下に保存されます（[既定の `--out` パス](#default-out-paths) を参照）。
+`--out`を省略した場合、ファイルは`output/`に保存されます（[デフォルトの`--out`パス](#default-out-paths)を参照）。
 
 ## コマンド
 
-`olostep <command> --help` で全オプションを確認できます。多くのコマンドは `--timeout`（HTTP、秒）を受け付けます。
+すべてのオプションについては`olostep <command> --help`を使用してください。ほとんどのコマンドは`--timeout`（HTTP、秒）を受け付けます。
 
-### `map`: URL の発見
+### `map`: URLの発見
 
 | オプション | 説明 |
-| ---------- | ---- |
-| `--out` | ファイルパスまたは `-` |
-| `--top-n` | 最大 URL 数 |
-| `--search-query` | 発見のガイド |
+| ------ | ----------- |
+| `--out` | ファイルパスまたは`-` |
+| `--top-n` | 最大URL数 |
+| `--search-query` | 発見をガイド |
 | `--include-subdomain` / `--no-include-subdomain` | サブドメイン |
 | `--include-url` / `--exclude-url` | 繰り返し可能なパターン |
 | `--cursor` | ページネーション |
 
-`--limit` は廃止のため **`--top-n`** を使ってください。
+`--limit`（削除済み）ではなく`--top-n`を使用してください。
 
 ```bash
 olostep map "https://example.com" --top-n 100 --search-query "blog"
 ```
 
-### `answer`: 調査付き回答
+### `answer`: 調査済みの回答
 
 回答が準備できるまでポーリングします。
 
 | オプション | 説明 |
-| ---------- | ---- |
-| `--out` | ファイルまたは `-` |
-| `--json-format` | 構造化出力の任意ヒント（JSON オブジェクト文字列） |
+| ------ | ----------- |
+| `--out` | ファイルまたは`-` |
+| `--json-format` | オプションの構造化出力ヒント（JSONオブジェクト文字列） |
 | `--poll-interval` / `--poll-timeout` | ポーリング（秒） |
 
-`--model` は廃止のため **`--json-format`** を使ってください。
+`--model`（削除済み）ではなく`--json-format`を使用してください。
 
 ```bash
 olostep answer "What does this company build?" --out answer.json
 olostep answer "Extract facts" --json-format '{"company":"","year":""}' --out -
 ```
 
-### `scrape`: 単一 URL
+### `scrape`: 1つのURL
 
-**形式:** `html`、`markdown`、`text`、`json`、`raw_pdf`、`screenshot`（カンマ区切り。既定は `markdown`）。
+**フォーマット:** `html`、`markdown`、`text`、`json`、`raw_pdf`、`screenshot`（カンマ区切り; デフォルトは`markdown`）。
 
 | オプション | 説明 |
-| ---------- | ---- |
+| ------ | ----------- |
 | `--formats` | カンマ区切り |
 | `--country` | 国コード |
-| `--wait-before-scraping` | スクレイプ前の待機（ミリ秒） |
-| `--payload-json` | 高度なオプションを JSON 文字列で |
-| `--payload-file` | ファイルから同様（`--payload-json` と同時不可） |
+| `--wait-before-scraping` | スクレイプ前に待機するミリ秒 |
+| `--payload-json` | 高度なオプションをJSONオブジェクト文字列として |
+| `--payload-file` | 同じく、ファイルから（`--payload-json`と一緒には使用不可） |
 
 ```bash
 olostep scrape "https://example.com" --formats markdown,html
 olostep scrape "https://example.com" --payload-file scrape-options.json --out -
 ```
 
-### `scrape-get`: スクレイプ ID 指定
+### `scrape-get`: スクレイプIDで
 
 ```bash
 olostep scrape-get "scrape_abc123" --out -
@@ -121,9 +121,9 @@ olostep scrape-get "scrape_abc123" --out -
 
 ### `crawl`: サイトクロール
 
-**取得形式:** `markdown`、`html`、`json`。
+**取得フォーマット:** `markdown`、`html`、`json`。
 
-主なフラグ: `--max-pages`、`--max-depth`、`--include-subdomain`、`--include-external`、`--include-url`、`--exclude-url`、`--search-query`、`--top-n`、`--webhook`、`--crawl-timeout`、`--follow-robots-txt` / `--ignore-robots-txt`、`--formats`、`--pages-limit`、`--pages-search-query`、`--poll-seconds`、`--poll-timeout`、`--dry-run`（ペイロードのみ表示、リクエストなし）。
+注目すべきフラグ: `--max-pages`、`--max-depth`、`--include-subdomain`、`--include-external`、`--include-url`、`--exclude-url`、`--search-query`、`--top-n`、`--webhook`、`--crawl-timeout`、`--follow-robots-txt` / `--ignore-robots-txt`、`--formats`、`--pages-limit`、`--pages-search-query`、`--poll-seconds`、`--poll-timeout`、`--dry-run`（ペイロードを表示、リクエストなし）。
 
 ```bash
 olostep crawl "https://docs.example.com" --max-pages 50 --formats markdown,html
@@ -132,15 +132,15 @@ olostep crawl "https://example.com" --max-pages 10 --dry-run
 
 ### `batch-scrape`: CSV
 
-CSV 列: **`custom_id` または `id`**、および **`url`**。
+CSV列: **`custom_id`または`id`**、および**`url`**。
 
 | オプション | 説明 |
-| ---------- | ---- |
+| ------ | ----------- |
 | `--formats` | `markdown`、`html`、`json` |
-| `--country` | 任意 |
+| `--country` | オプション |
 | `--parser-id` | 構造化抽出パーサー |
 | `--poll-seconds`、`--log-every`、`--items-limit` | ポーリング / ページング |
-| `--dry-run` | ペイロードのみ表示 |
+| `--dry-run` | ペイロードのみを表示 |
 
 ```bash
 olostep batch-scrape urls.csv --formats markdown,html
@@ -148,18 +148,18 @@ olostep batch-scrape urls.csv --formats markdown,html
 
 ### `batch-update`: バッチメタデータ
 
-**`--metadata-json` または `--metadata-file` のいずれか一方**が必要（JSON オブジェクト）。
+**`--metadata-json`または`--metadata-file`**（JSONオブジェクト）のいずれかが必要です。
 
 ```bash
 olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
 ```
 
-## 既定の `--out` パス {#default-out-paths}
+## デフォルトの`--out`パス {#default-out-paths}
 
-`--out` を省略した場合:
+`--out`を省略した場合:
 
-| コマンド | 既定 |
-| -------- | ---- |
+| コマンド | デフォルト |
+| ------- | ------- |
 | `map` | `output/map.json` |
 | `answer` | `output/answer.json` |
 | `scrape` | `output/scrape.json` |
@@ -171,16 +171,16 @@ olostep batch-update "batch_abc123" --metadata-json '{"team":"growth"}'
 ## グローバルフラグ
 
 | フラグ | 説明 |
-| ------ | ---- |
-| `-V`、`--version` | バージョン |
-| `-h`、`--help` | ヘルプ |
+| ---- | ----------- |
+| `-V`, `--version` | バージョン |
+| `-h`, `--help` | ヘルプ |
 
 ## 関連ドキュメント
 
-- [Maps](/features/maps) · [Batches](/features/batches) · [Parsers](/features/structured-content/parsers)
+- [マップ](/features/maps) · [バッチ](/features/batches) · [パーサー](/features/structured-content/parsers)
 
 **リポジトリ:** [github.com/olostep-api/CLI](https://github.com/olostep-api/CLI)
 
 ## セキュリティ
 
-API キーをソース管理に含めないでください。漏洩した場合はローテーションしてください。
+APIキーはソース管理から外し、漏洩した場合はローテーションしてください。

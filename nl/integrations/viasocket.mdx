@@ -1,0 +1,176 @@
+---
+sidebarTitle: "Olostep + ViaSocket"
+title: "Olostep + ViaSocket"
+description: "Verbind Olostep met elke AI-client — Claude, Cursor, ChatGPT en meer — via ViaSocket Mushrooms als een MCP-gateway."
+---
+
+[ViaSocket Mushrooms](https://mushrooms.viasocket.com/) is een MCP-gateway die apps zoals Olostep verbindt met elke AI-client via een enkele MCP-eindpunt-URL. Zodra je Olostep als een Mushroom hebt verbonden, kun je Claude, Cursor, ChatGPT of een andere ondersteunde client instrueren om websites te scrapen, batchtaken uit te voeren, sites te crawlen en AI-gebaseerde antwoorden te krijgen — allemaal in gewone taal, zonder een regel code te schrijven.
+
+## Voordat je begint
+
+- **Een Olostep-account met een API-sleutel:** [krijg er gratis een](https://olostep.com/dashboard), geen creditcard vereist. Je eerste 500 credits zijn inbegrepen.
+- **Een ViaSocket-account:** maak er een aan op [viasocket.com](https://viasocket.com/).
+- **Een AI-client:** Claude, Cursor, ChatGPT, Windsurf, VS Code of een andere MCP-compatibele client.
+
+---
+
+## Installatie
+
+<Steps>
+  <Step title="Maak een nieuwe Cluster aan">
+    Open [ViaSocket Mushrooms](https://mushrooms.viasocket.com/) en klik op **+ Nieuwe Cluster**. ViaSocket zal je vragen om de AI-client te kiezen waarmee deze Cluster verbinding maakt — selecteer Claude, Cursor, ChatGPT of welke client je ook gebruikt.
+
+    ![ViaSocket Nieuwe Cluster dialoog — Kies je AI-client, toont Claude, ChatGPT, Cursor, Windsurf en meer](/images/integrations/viasocket/step1.png)
+  </Step>
+
+  <Step title="Blader door integraties">
+    Binnen je Cluster, klik op **+ BROWSE INTEGRATIONS** om de Mushrooms-bibliotheek te openen — een catalogus van meer dan 2.500 apps waartoe je je AI toegang kunt geven.
+
+    ![ViaSocket Mushrooms dashboard toont Nieuwe Mushroom toevoegen en Blader door Integraties knop](/images/integrations/viasocket/step2.png)
+  </Step>
+
+  <Step title="Vind Olostep">
+    Zoek naar **olostep** in de zoekbalk. Selecteer **Olostep** uit de resultaten.
+
+    ![Zoeken naar olostep in ViaSocket Mushrooms — Olostep verschijnt in resultaten](/images/integrations/viasocket/step3.png)
+  </Step>
+
+  <Step title="Verbind met Olostep">
+    Op de Olostep-detailpagina, klik op **VERBIND MET OLOSTEP** om je account te autoriseren en Olostep-acties aan je Cluster toe te voegen.
+
+    ![Olostep detailpagina in ViaSocket toont Verbind om te beginnen en VERBIND MET OLOSTEP knop](/images/integrations/viasocket/step4.png)
+  </Step>
+
+  <Step title="Selecteer acties">
+    Kies welke Olostep-acties je AI-client kan gebruiken. Alle zeven zijn standaard ingeschakeld — schakel uit wat je niet nodig hebt en klik op **VOLGENDE**.
+
+    ![Olostep Selecteer Acties scherm in ViaSocket toont 7 beschikbare acties met schakelknoppen](/images/integrations/viasocket/step5.png)
+  </Step>
+
+  <Step title="Voer je Olostep API-sleutel in">
+    Plak je Olostep API-sleutel in het **API Key** veld en klik op **VERBINDING TOEVOEGEN**. ViaSocket zal de sleutel verifiëren en de referentie opslaan.
+
+    ![Nieuwe Verbinding Toevoegen scherm voor Olostep in ViaSocket met API Key invoerveld](/images/integrations/viasocket/step6.png)
+
+    Haal je sleutel van het [Olostep dashboard →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="Kopieer je MCP-eindpunt en verbind je AI-client">
+    Olostep verschijnt nu als een ingeschakelde Mushroom in je Cluster. Kopieer de **MCP Endpoint URL** (of het volledige JSON-configuratieblok) van het **Cursor Configuration** paneel en plak het in het MCP-instellingenbestand van je AI-client.
+
+    ![ViaSocket Cluster toont Olostep ingeschakeld en de MCP-eindpunt-URL met JSON-configuratie klaar om te kopiëren](/images/integrations/viasocket/step7.png)
+
+    De configuratie ziet er als volgt uit — plak het in de instellingen van je AI-client:
+
+    ```json
+    {
+      "mcpServers": {
+        "viasocket": {
+          "type": "http",
+          "url": "https://mcp.viasocket.com/mcp/<YOUR-CLUSTER-ID>"
+        }
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Acties
+
+<CardGroup cols={2}>
+  <Card title="Scrape Website" icon="file-lines">
+    Haal inhoud van elke URL op als Markdown, HTML, JSON of platte tekst. Behandelt JS-gerenderde pagina's met optionele wachttijden en landdoelwit.
+  </Card>
+
+  <Card title="Genereer AI Antwoord" icon="sparkles">
+    Stel een vraag in natuurlijke taal en krijg een geciteerd antwoord gebaseerd op de pagina's die je verstrekt of een live webzoekopdracht.
+  </Card>
+
+  <Card title="Batch URL Scraper" icon="layer-group">
+    Dien tot 100.000 URL's in één taak in, verwerkt in parallel. Geeft een `batch_id` terug voor asynchrone opvraging.
+  </Card>
+
+  <Card title="Haal Batch Items op" icon="download">
+    Haal de resultaten op van een voltooide batchtaak met behulp van zijn `batch_id`.
+  </Card>
+
+  <Card title="Start Crawl" icon="spider-web">
+    Begin vanaf een zaad-URL, volg links en scrape alle subpagina's. Geeft een `crawl_id` terug.
+  </Card>
+
+  <Card title="Krijg Crawl Info" icon="circle-info">
+    Controleer de status en haal resultaten op voor een lopende of voltooide crawl met `crawl_id`.
+  </Card>
+
+  <Card title="Maak Kaart" icon="map">
+    Krijg elke URL op een site zonder inhoud te scrapen. Handig voor ontdekking voorafgaand aan een batchtaak.
+  </Card>
+</CardGroup>
+
+---
+
+## Voorbeeld: Vraag Claude om een concurrent te onderzoeken
+
+Zodra je MCP-eindpunt is geconfigureerd in Claude, kun je instructies in gewone taal geven zoals:
+
+> *"Scrape de prijspagina op acme.com/pricing en geef me een samenvatting van hun plannen en prijzen."*
+
+Claude zal de **Scrape Website** actie van Olostep via ViaSocket aanroepen, de pagina-inhoud retourneren en deze samenvatten — geen workflowbouwer, geen code.
+
+Je kunt acties op dezelfde manier koppelen:
+
+> *"Kaart alle pagina's op docs.example.com, scrape vervolgens de eerste 50 in batch en bouw een kennisbasis samenvatting."*
+
+---
+
+## Problemen oplossen
+
+<AccordionGroup>
+  <Accordion title="API-sleutel afgewezen">
+    Kopieer de sleutel direct van [olostep.com/dashboard](https://olostep.com/dashboard) zonder spaties aan het einde. Verwijder en maak de Olostep-verbinding opnieuw in ViaSocket als de fout aanhoudt.
+  </Accordion>
+
+  <Accordion title="AI-client kan de Olostep-tools niet zien">
+    Zorg ervoor dat je de MCP-eindpunt-URL (of JSON-configuratieblok) in het juiste instellingenbestand voor je AI-client hebt geplakt. Voor Claude Desktop is dit `claude_desktop_config.json`. Voor Cursor is het `.cursor/mcp.json` in je project of de globale Cursor-instellingen. Herstart de client na het opslaan.
+  </Accordion>
+
+  <Accordion title="Gescrapete inhoud is leeg">
+    Verhoog de wachttijd bij het aanroepen van **Scrape Website** (probeer 2000–5000ms voor JS-zware pagina's). Bevestig dat de URL openbaar toegankelijk is zonder inlog.
+  </Accordion>
+
+  <Accordion title="MCP-eindpunt-URL blijft veranderen">
+    De eindpunt-URL is gekoppeld aan je Cluster. Als je de Cluster verwijdert en opnieuw maakt, krijg je een nieuwe URL en moet je je AI-clientconfiguratie bijwerken. Houd de URL privé — het autoriseert alle acties op je verbonden accounts.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Gerelateerd
+
+<CardGroup cols={2}>
+  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
+    Volledige referentie voor het scrape-eindpunt
+  </Card>
+
+  <Card title="Batches API" icon="layer-group" href="/features/batches">
+    Hoe batchtaken werken en hoe resultaten op te halen
+  </Card>
+
+  <Card title="Crawls API" icon="spider-web" href="/features/crawls">
+    Crawlconfiguratie en resultaatophaling
+  </Card>
+
+  <Card title="Maps API" icon="map" href="/features/maps">
+    URL-ontdekking en filteropties
+  </Card>
+
+  <Card title="MCP Server" icon="server" href="/integrations/mcp-server">
+    Gebruik Olostep's native MCP-server direct
+  </Card>
+
+  <Card title="ViaSocket Website" icon="link" href="https://viasocket.com">
+    ViaSocket platform
+  </Card>
+</CardGroup>

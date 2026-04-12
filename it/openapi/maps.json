@@ -14,7 +14,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+        "description": "Intestazione di autenticazione Bearer della forma Bearer <token>, dove <token> è il tuo token di autenticazione."
       }
     }
   },
@@ -22,7 +22,7 @@
     "/v1/maps/{map_id}": {
       "get": {
         "summary": "Ottieni Mappa",
-        "description": "Recupera una mappa completata in precedenza tramite il suo ID.",
+        "description": "Recupera una mappa precedentemente completata tramite il suo ID.",
         "security": [
           {
             "Authorization": []
@@ -103,7 +103,7 @@
                   "url": {
                     "type": "string",
                     "format": "uri",
-                    "description": "L'URL del sito web per cui vuoi i link"
+                    "description": "L'URL del sito web per il quale vuoi i link"
                   },
                   "search_query": {
                     "type": "string",
@@ -122,18 +122,18 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Modelli di percorso URL da includere usando la sintassi glob. Per esempio: `/blog/**` per includere solo URL del blog. Saranno restituiti solo gli URL che corrispondono a questi modelli."
+                    "description": "Modelli di percorso URL da includere usando la sintassi glob. Per esempio: `/blog/**` per includere solo gli URL del blog. Verranno restituiti solo gli URL che corrispondono a questi modelli."
                   },
                   "exclude_urls": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "Modelli di percorso URL da escludere usando la sintassi glob. Per esempio: `/careers/**`. Gli URL esclusi prevarranno sugli URL inclusi."
+                    "description": "Modelli di percorso URL da escludere usando la sintassi glob. Per esempio: `/careers/**`. Gli URL esclusi prevalgono sugli URL inclusi."
                   },
                   "cursor": {
                     "type": "string",
-                    "description": "OPZIONALE: Cursore di paginazione da una risposta precedente. Quando fornito, restituisce il prossimo set di URL da dove la richiesta precedente si era fermata a causa del limite di dimensione della risposta."
+                    "description": "OPZIONALE: Cursore di paginazione da una risposta precedente. Quando fornito, restituisce il prossimo set di URL da dove la richiesta precedente si è interrotta a causa del limite di dimensione della risposta."
                   }
                 },
                 "required": [
@@ -240,7 +240,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri errati o mancanti."
           },
           "401": {
             "description": "Accesso non autorizzato a causa di token API mancante o non valido."

@@ -15,7 +15,7 @@
       "post": {
         "operationId": "createAirOpsBatch",
         "summary": "AirOpsバッチを作成",
-        "description": "スクレイピングとLLMベースのエンリッチメントを組み合わせたバッチプロセスを開始します。ワークフロー: URLをスクレイプ → メタデータを抽出 → ギャップ分析 → 欠落フィールドのためのLLMエンリッチメント。",
+        "description": "スクレイピングとLLMベースのエンリッチメントを組み合わせたバッチプロセスを開始します。ワークフロー: URLをスクレイピング → メタデータを抽出 → ギャップ分析 → 欠落フィールドのためのLLMエンリッチメント。",
         "security": [
           {
             "Authorization": []
@@ -134,7 +134,7 @@
     "/v1/batches-airops/{batch_id}": {
       "get": {
         "operationId": "getAirOpsBatch",
-        "summary": "AirOpsバッチのステータスを取得",
+        "summary": "AirOpsバッチステータスを取得",
         "description": "AirOpsバッチの現在のステータスと設定を取得します。",
         "security": [
           {
@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Bearer <token>形式のBearer認証ヘッダー。<token>はあなたの認証トークンです。"
+        "description": "Bearer認証ヘッダーの形式はBearer <token>で、<token>はあなたの認証トークンです。"
       }
     },
     "schemas": {
@@ -342,7 +342,7 @@
           "country": {
             "type": "string",
             "default": "RANDOM",
-            "description": "ジオターゲティングされたスクレイピングのための国。ISO 3166-1 alpha-2 コード（US, GB, DE など）または自動選択のための 'RANDOM' を使用。"
+            "description": "ジオターゲティングされたスクレイピングのための国。ISO 3166-1 alpha-2 コード（US、GB、DE など）または自動選択のための 'RANDOM' を使用。"
           },
           "webhook": {
             "type": "string",
@@ -490,7 +490,7 @@
           },
           "message": {
             "type": "string",
-            "description": "バッチがまだ処理中の場合に表示されるステータスメッセージ。"
+            "description": "ステータスメッセージ（バッチがまだ処理中の場合に表示）。"
           }
         }
       },
@@ -562,7 +562,7 @@
             "items": {
               "type": "string"
             },
-            "description": "ページで見つかったブランド。"
+            "description": "ページ上で見つかったブランド。"
           },
           "failed_stage": {
             "type": "string",
@@ -635,7 +635,7 @@
             "items": {
               "type": "string"
             },
-            "description": "入力リストからページで言及されたブランド。"
+            "description": "ページで言及された、入力リストからのブランド。"
           },
           "methods": {
             "type": "object",
@@ -703,7 +703,7 @@
           },
           "failed": {
             "type": "integer",
-            "description": "失敗したスクレイピング。"
+            "description": "スクレイピングに失敗したもの。"
           },
           "started_at": {
             "type": "integer",
@@ -739,12 +739,12 @@
           },
           "items_complete": {
             "type": "integer",
-            "description": "パーサーからすべてのフィールドが揃ったアイテム。"
+            "description": "パーサーからすべてのフィールドが揃っているアイテム。"
           },
           "fields_to_enrich": {
             "type": "object",
             "nullable": true,
-            "description": "各フィールドを必要とするアイテムの数。",
+            "description": "各フィールドが必要なアイテムの数。",
             "properties": {
               "page_type": {
                 "type": "integer"

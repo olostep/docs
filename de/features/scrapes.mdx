@@ -1,21 +1,21 @@
 ---
 sidebarTitle: "Scrape"
 title: "Scrape"
-description: "Verwandeln Sie jede URL in saubere Daten"
+description: "Verwandle jede URL in saubere Daten"
 icon: "file-lines"
 ---
 
-Über den Olostep `/v1/scrapes` Endpunkt können Sie LLM-freundliches Markdown, HTML, Text, Screenshots oder strukturiertes JSON in Echtzeit aus jeder URL extrahieren.
+Über den Olostep `/v1/scrapes` Endpunkt kannst du LLM-freundliches Markdown, HTML, Text, Screenshots oder strukturiertes JSON in Echtzeit aus jeder URL extrahieren.
 
 - Gibt sauberes Markdown, strukturierte Daten, Screenshots oder HTML aus
-- Extrahieren Sie JSON über [Parsers](/features/structured-content/parsers) oder [LLM-Extraktion](/features/structured-content/llm-extraction)
-- Verarbeitet dynamische Inhalte: JS-gerenderte Seiten, Login-Flows über Aktionen, PDFs
+- Extrahiere JSON über [Parsers](/features/structured-content/parsers) oder [LLM-Extraktion](/features/structured-content/llm-extraction)
+- Handhabt dynamische Inhalte: JS-gerenderte Seiten, Login-Flows über Aktionen, PDFs
 
 Für API-Details siehe die [Scrape Endpoint API Referenz](/api-reference/scrapes/create).
 
 ## Eine URL scrapen
 
-Verwenden Sie den `/v1/scrapes` Endpunkt, um eine einzelne URL zu scrapen und Ausgabeformate auszuwählen.
+Verwende den `/v1/scrapes` Endpunkt, um eine einzelne URL zu scrapen und Ausgabeformate auszuwählen.
 
 ### Installation
 
@@ -30,7 +30,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl ist standardmäßig auf macOS, Linux und Windows verfügbar
 ```
 
 ```javascript Node (API)
@@ -45,9 +45,9 @@ pip install requests
 
 ### Verwendung
 
-Sie können den Endpunkt verwenden, um eine einzelne URL zu scrapen und Ausgabeformate auszuwählen. Die obligatorischen Parameter sind `url_to_scrape` und `formats`.
+Du kannst den Endpunkt verwenden, um eine einzelne URL zu scrapen und Ausgabeformate auszuwählen. Die obligatorischen Parameter sind `url_to_scrape` und `formats`.
 
-Einige andere gängige Parameter sind `wait_before_scraping` (in Millisekunden), `remove_css_selectors` (Standard, keine oder ein Array von Selektoren) und `country`.
+Einige andere häufige Parameter sind `wait_before_scraping` (in Millisekunden), `remove_css_selectors` (standardmäßig keine oder ein Array von Selektoren) und `country`.
 
 <CodeGroup>
 
@@ -129,15 +129,15 @@ print(json.dumps(response.json(), indent=2))
 
 ### Antwort
 
-Die API gibt ein `scrape`-Objekt als Antwort zurück.
+Die API gibt ein `scrape` Objekt als Antwort zurück.
 
-Das `scrape`-Objekt hat einige Eigenschaften wie `id` und `result`.
+Das `scrape` hat einige Eigenschaften wie `id` und `result`.
 
-Das `result`-Objekt hat die folgenden Felder (je nach `formats`-Parameter können einige null sein):
-- `html_content`: der HTML-Inhalt der Seite. Übergeben Sie `formats: ["html"]`, um dies zu erhalten.
-- `markdown_content`: der MD-Inhalt der Seite. Übergeben Sie `formats: ["markdown"]`, um dies zu erhalten.
-- `text_content`: der Textinhalt der Seite. Übergeben Sie `formats: ["text"]`, um dies zu erhalten.
-- `json_content`: der JSON-Inhalt der Seite. Übergeben Sie `formats: ["json"]`, um dies zu erhalten und geben Sie auch einen `parser` oder `llm_extract` Parameter an.
+Das `result` Objekt hat die folgenden Felder (je nach `formats` Parameter können einige null sein):
+- `html_content`: der HTML-Inhalt der Seite. Gib `formats: ["html"]` an, um dies zu erhalten.
+- `markdown_content`: der MD-Inhalt der Seite. Gib `formats: ["markdown"]` an, um dies zu erhalten.
+- `text_content`: der Textinhalt der Seite. Gib `formats: ["text"]` an, um dies zu erhalten.
+- `json_content`: der JSON-Inhalt der Seite. Gib `formats: ["json"]` an, um dies zu erhalten, und stelle auch einen `parser` oder `llm_extract` Parameter bereit.
 - `screenshot_hosted_url`: die gehostete URL des Screenshots.
 - `html_hosted_url`: die gehostete URL des HTML-Inhalts
 - `markdown_hosted_url`: die gehostete URL des Markdown-Inhalts
@@ -172,24 +172,24 @@ Das `result`-Objekt hat die folgenden Felder (je nach `formats`-Parameter könne
 
 ## Scrape-Formate
 
-Wählen Sie ein oder mehrere Ausgabeformate über `formats`:
+Wähle ein oder mehrere Ausgabeformate über `formats`:
 
 - `markdown`: LLM-freundliches Markdown
 - `html`: bereinigtes HTML
 - `text`: Klartext
 - `json`: strukturiertes Ausgabeformat (über Parser oder llm_extract)
 - `raw_pdf`: rohe PDF-Bytes, die zu einer gehosteten URL extrahiert werden
-- `screenshot`: über Aktionen festgelegt, um einen Screenshot aufzunehmen und eine gehostete URL zurückzugeben
+- `screenshot`: über Aktionen festgelegt, um einen Screenshot zu erstellen und eine gehostete URL zurückzugeben
 
 Ausgabeschlüssel werden innerhalb von `result` als `*_content` Felder und eine `*_hosted_url` zurückgegeben.
 
 ## Strukturierte Daten extrahieren
 
-Sie können strukturiertes JSON auf zwei Arten extrahieren: mit Parsers oder LLM-Extraktion.
+Du kannst strukturiertes JSON auf zwei Arten extrahieren: mit Parsers oder LLM-Extraktion.
 
-### Verwendung eines Parsers (empfohlen für Skalierung)
+### Einen Parser verwenden (empfohlen für Skalierung)
 
-Definieren Sie `formats: ["json"]` und geben Sie eine Parser-`id` an.
+Definiere `formats: ["json"]` und stelle eine Parser `id` bereit.
 
 <CodeGroup>
 
@@ -267,15 +267,15 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Olostep hat einige vorgefertigte Parser für [beliebte Websites](https://www.olostep.com/store), aber Sie können auch Ihre eigenen Parser über das Dashboard erstellen oder unser Team bitten, dies für Sie zu tun.
+Olostep hat einige vorgefertigte Parser für [beliebte Websites](https://www.olostep.com/store), aber du kannst auch deine eigenen Parser über das Dashboard erstellen oder unser Team bitten, dies für dich zu tun.
 
-Parser sind selbstheilend und aktualisieren sich auf die neueste Version der Website.
+Parser sind selbstheilend und aktualisieren sich selbst auf die neueste Version der Website.
 
-### Verwendung der LLM-Extraktion (Schema und/oder Prompt)
+### LLM-Extraktion verwenden (Schema und/oder Prompt)
 
-Geben Sie `llm_extract` mit einem JSON-Schema (`schema`) und/oder einer natürlichen Sprachinstruktion (`prompt`) an. Sie können beide Parameter übergeben, aber wenn beide angegeben sind, hat `schema` Vorrang.
+Stelle `llm_extract` mit einem JSON-Schema (`schema`) und/oder einer natürlichen Sprachinstruktion (`prompt`) bereit. Du kannst beide Parameter übergeben, aber wenn beide bereitgestellt werden, hat `schema` Vorrang.
 
-Wenn Sie stattdessen nur einen `prompt` übergeben, extrahiert das LLM die Daten basierend auf dem Prompt und entscheidet die Datenstruktur selbst.
+Wenn du stattdessen nur einen `prompt` übergibst, wird das LLM die Daten basierend auf dem Prompt extrahieren und die Datenstruktur selbst bestimmen.
 
 <CodeGroup>
 
@@ -343,7 +343,7 @@ curl -s -X POST "https://api.olostep.com/v1/scrapes" \
     "url_to_scrape": "https://www.berklee.edu/events/stefano-marchese-friends",
     "formats": ["json"],
     "llm_extract": {
-      "prompt": "Extract the event title, date, description, venue, address, and start time from the page."
+      "prompt": "Extrahiere den Titel, das Datum, die Beschreibung, den Veranstaltungsort, die Adresse und die Startzeit des Events von der Seite."
     }
   }'
 ```
@@ -356,7 +356,7 @@ const res = await fetch('https://api.olostep.com/v1/scrapes', {
     url_to_scrape: 'https://www.berklee.edu/events/stefano-marchese-friends',
     formats: ['json'],
     llm_extract: {
-      prompt: 'Extract the event title, date, description, venue, address, and start time from the page.'
+      prompt: 'Extrahiere den Titel, das Datum, die Beschreibung, den Veranstaltungsort, die Adresse und die Startzeit des Events von der Seite.'
     }
   })
 })
@@ -396,11 +396,11 @@ print(json.dumps(res.json(), indent=2))
 
 </CodeGroup>
 
-Hinweis: `result.json_content` gibt ein stringifiziertes JSON zurück. Parsen Sie es in Ihrem Code, wenn Sie ein Objekt benötigen.
+Hinweis: `result.json_content` gibt ein stringifiziertes JSON zurück. Parsen es in deinem Code, wenn du ein Objekt benötigst.
 
-## Interaktion mit der Seite durch Aktionen
+## Mit der Seite über Aktionen interagieren
 
-Führen Sie Aktionen vor dem Scrapen durch, um mit dynamischen Seiten zu interagieren. Unterstützte Aktionen:
+Führe Aktionen vor dem Scraping aus, um mit dynamischen Seiten zu interagieren. Unterstützte Aktionen:
 
 - `wait` mit `milliseconds`
 - `click` mit `selector`
@@ -518,63 +518,63 @@ Die Antwort wird alle angeforderten Formate enthalten (z.B. `markdown_content`).
 
 ## Anwendungsfälle
 
-Nachfolgend sind einige praktische Anwendungen von Kunden aufgeführt, die den `/scrapes` Endpunkt verwenden.
+Nachfolgend sind einige praktische Anwendungen von Kunden aufgeführt, die den `/scrapes` Endpunkt nutzen.
 ### Inhaltsanalyse & Forschung
-- **Wettbewerbsanalyse**: Extrahieren Sie Produktdetails, Preise und Funktionen von Wettbewerber-Websites
-- **Marktforschung**: Analysieren Sie Landingpages, Produktbeschreibungen und Kundenbewertungen
-- **Akademische Forschung**: Sammeln Sie spezifische Daten aus wissenschaftlichen Publikationen oder Forschungsportalen
-- **Rechtsdokumentation**: Extrahieren Sie Fallstudien, Vorschriften oder rechtliche Präzedenzfälle von offiziellen Websites
+- **Wettbewerbsanalyse**: Extrahiere Produktdetails, Preise und Funktionen von Wettbewerber-Websites
+- **Marktforschung**: Analysiere Landingpages, Produktbeschreibungen und Kundenrezensionen
+- **Akademische Forschung**: Sammle spezifische Daten aus wissenschaftlichen Publikationen oder Forschungsportalen
+- **Rechtsdokumentation**: Extrahiere Fallstudien, Vorschriften oder rechtliche Präzedenzfälle von offiziellen Websites
 
 ### E-Commerce & Einzelhandel
-- **Dynamische Preisstrategien**: Erhalten Sie Echtzeit-Produktpreise von konkurrierenden Geschäften
-- **Produktinformationsmanagement**: Extrahieren Sie detaillierte Spezifikationen und Beschreibungen
-- **Bestandsüberwachung**: Überprüfen Sie die Produktverfügbarkeit bei anderen Einzelhändlern
-- **Bewertungsanalyse**: Sammeln Sie Verbraucherfeedback und -stimmung für bestimmte Produkte
+- **Dynamische Preisstrategien**: Erhalte Echtzeit-Produktpreise von konkurrierenden Geschäften
+- **Produktinformationsmanagement**: Extrahiere detaillierte Spezifikationen und Beschreibungen
+- **Lager-/Inventarüberwachung**: Überprüfe die Produktverfügbarkeit bei anderen Einzelhändlern
+- **Bewertungsanalyse**: Sammle Verbraucherfeedback und Stimmungen für bestimmte Produkte
 
-### Marketing & Inhaltserstellung
-- **Inhaltskuratierung**: Extrahieren Sie relevante Artikel und Blogposts für Newsletter
-- **SEO-Analyse**: Untersuchen Sie die Keyword-Nutzung, Meta-Beschreibungen und Seitenstruktur von Wettbewerbern
-- **Lead-Generierung**: Extrahieren Sie Kontaktinformationen aus Unternehmensverzeichnissen oder Firmenwebseiten
-- **Influencer-Forschung**: Sammeln Sie Engagement-Metriken und Inhaltsstile von Influencer-Profilen
-- **Personalisierte Social Media Generierung**: Erstellen Sie KI-gestützte Social-Media-Marketing durch Analyse von Kunden-Websites
+### Marketing & Content-Erstellung
+- **Content-Kuration**: Extrahiere relevante Artikel und Blogposts für Newsletter
+- **SEO-Analyse**: Untersuche die Keyword-Nutzung, Meta-Beschreibungen und Seitenstruktur von Wettbewerbern
+- **Lead-Generierung**: Extrahiere Kontaktinformationen aus Unternehmensverzeichnissen oder Firmenwebseiten
+- **Influencer-Forschung**: Sammle Engagement-Metriken und Content-Stile von Influencer-Profilen
+- **Personalisierte Social-Media-Generierung**: Erstelle KI-gestützte Social-Media-Marketing durch Analyse von Kundenwebsites
 
 ### Datenanwendungen
-- **AI-Trainingsdatensammlung**: Sammeln Sie spezifische Beispiele für maschinelle Lernmodelle
-- **Benutzerdefinierte Wissensdatenbank-Erstellung**: Extrahieren Sie Dokumentationen oder Anleitungen von Software-Websites
-- **Historische Datenarchive**: Bewahren Sie Website-Inhalte zu bestimmten Zeitpunkten auf
-- **Strukturierte Datenextraktion**: Transformieren Sie Webinhalte in formatierte Datensätze zur Analyse
+- **AI-Trainingsdatensammlung**: Sammle spezifische Beispiele für maschinelle Lernmodelle
+- **Benutzerdefinierte Wissensdatenbank-Erstellung**: Extrahiere Dokumentationen oder Anleitungen von Softwareseiten
+- **Historische Datenarchive**: Bewahre Website-Inhalte zu bestimmten Zeitpunkten
+- **Strukturierte Datenextraktion**: Transformiere Webinhalte in formatierte Datensätze zur Analyse
 
-### Überwachung & Warnungen
-- **Überwachung der Einhaltung gesetzlicher Vorschriften**: Verfolgen Sie Änderungen auf rechtlichen oder regulatorischen Websites
-- **Krisenmanagement**: Überwachen Sie Nachrichtenseiten auf Erwähnungen bestimmter Ereignisse oder Organisationen
-- **Ereignisverfolgung**: Extrahieren Sie Details zu bevorstehenden Veranstaltungen von Veranstaltungsorten oder Veranstalter-Websites
-- **Service-Statusüberwachung**: Überprüfen Sie Service-Statusseiten für bestimmte Plattformen oder Tools
+### Überwachung & Benachrichtigungen
+- **Überwachung der Einhaltung gesetzlicher Vorschriften**: Verfolge Änderungen auf rechtlichen oder regulatorischen Websites
+- **Krisenmanagement**: Überwache Nachrichtenseiten auf Erwähnungen bestimmter Ereignisse oder Organisationen
+- **Ereignisverfolgung**: Extrahiere Details zu bevorstehenden Veranstaltungen von Veranstaltungsorten oder Organisator-Websites
+- **Überwachung des Dienststatus**: Überprüfe Dienststatusseiten für spezifische Plattformen oder Tools
 
-### Verlagswesen & Medien
-- **Nachrichtenaggregation**: Extrahieren Sie aktuelle Nachrichten aus offiziellen Quellen
-- **Medienüberwachung**: Verfolgen Sie spezifische Themen auf Nachrichtenseiten
-- **Inhaltsverifizierung**: Extrahieren Sie Informationen, um Behauptungen oder Aussagen zu überprüfen
-- **Multimedia-Extraktion**: Sammeln Sie eingebettete Videos, Bilder oder Audiodateien für Medienbibliotheken
+### Veröffentlichung & Medien
+- **Nachrichtenaggregation**: Extrahiere aktuelle Nachrichten aus offiziellen Quellen
+- **Medienüberwachung**: Verfolge spezifische Themen auf Nachrichtenseiten
+- **Inhaltsverifizierung**: Extrahiere Informationen zur Überprüfung von Behauptungen oder Aussagen
+- **Multimedia-Extraktion**: Sammle eingebettete Videos, Bilder oder Audio für Medienbibliotheken
 
 ### Finanzanwendungen
-- **Investitionsforschung**: Extrahieren Sie Finanzberichte oder Jahresberichte von Unternehmenswebsites
-- **Wirtschaftsindikatoren**: Sammeln Sie Wirtschaftsdaten von Regierungs- oder Finanzinstitutionswebsites
-- **Kryptowährungsdaten**: Extrahieren Sie Echtzeit-Preise und Marktkapitalisierungsinformationen
-- **Finanznachrichtenanalyse**: Überwachen Sie Finanznachrichtenseiten auf spezifische Marktsignale
+- **Investmentforschung**: Extrahiere Finanzberichte oder Jahresberichte von Unternehmenswebsites
+- **Wirtschaftsindikatoren**: Sammle Wirtschaftsdaten von Regierungs- oder Finanzinstitutionswebsites
+- **Kryptowährungsdaten**: Extrahiere Echtzeit-Preise und Marktkapitalisierungsinformationen
+- **Finanznachrichtenanalyse**: Überwache Finanznachrichtenseiten auf spezifische Marktsignale
 
 ### Technische Anwendungen
-- **API-Dokumentationsextraktion**: Sammeln Sie technische Dokumentationen zur Referenz
-- **Integrationstests**: Extrahieren Sie Website-Elemente, um Drittanbieter-Integrationen zu überprüfen
-- **Barrierefreiheitstests**: Analysieren Sie die Website-Struktur auf Einhaltung von Barrierefreiheitsstandards
-- **Webarchiverstellung**: Erfassen Sie vollständige Website-Inhalte zur historischen Bewahrung
+- **API-Dokumentationsextraktion**: Sammle technische Dokumentationen zur Referenz
+- **Integrationstests**: Extrahiere Website-Elemente zur Überprüfung von Drittanbieter-Integrationen
+- **Barrierefreiheitstests**: Analysiere die Website-Struktur auf Einhaltung von Barrierefreiheitsstandards
+- **Webarchiverstellung**: Erfasse vollständige Website-Inhalte zur historischen Bewahrung
 
 ### Integrationsszenarien
-- **CRM-Systeme**: Verbessern Sie Kundenprofile mit Daten von Unternehmenswebsites oder LinkedIn
-- **Content-Management-Systeme**: Importieren Sie relevante externe Inhalte
-- **Business-Intelligence-Tools**: Ergänzen Sie interne Daten mit externen Marktinformationen
-- **Projektmanagement-Software**: Extrahieren Sie Spezifikationen oder Anforderungen von Kunden-Websites
-- **Benutzerdefinierte Dashboards**: Anzeigen extrahierter Daten neben internen Metriken
+- **CRM-Systeme**: Ergänze Kundenprofile mit Daten von Unternehmenswebsites oder LinkedIn
+- **Content-Management-Systeme**: Importiere relevante externe Inhalte
+- **Business-Intelligence-Tools**: Ergänze interne Daten mit externen Marktinformationen
+- **Projektmanagement-Software**: Extrahiere Spezifikationen oder Anforderungen von Kundenwebsites
+- **Benutzerdefinierte Dashboards**: Zeige extrahierte Daten neben internen Metriken an
 
 ## Preisgestaltung
 
-Scrape kostet standardmäßig 1 Kredit. Wenn Sie auch [Parsers](/features/structured-content/parsers) verwenden, variieren die Kosten je nach Parser (1-5 Credits). Wenn Sie [LLM extract](/features/structured-content/llm-extraction) verwenden, kostet es 20 Credits.
+Scrape kostet standardmäßig 1 Credit. Wenn du auch [parsers](/features/structured-content/parsers) verwendest, variieren die Kosten je nach Parser (1-5 Credits). Wenn du [LLM extract](/features/structured-content/llm-extraction) verwendest, kostet es 20 Credits.

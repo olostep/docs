@@ -1,17 +1,17 @@
 ---
 sidebarTitle: "Suche"
 title: "Such-API"
-icon: "lupe"
+icon: "magnifying-glass"
 ---
 
-Der Olostep-Endpunkt `/v1/searches` ermöglicht es Ihnen, das Web mit einer natürlichen Sprachabfrage zu durchsuchen und eine deduplizierte Liste relevanter Links mit Titeln und Beschreibungen zurückzubekommen.
+Der Olostep-Endpunkt `/v1/searches` ermöglicht es dir, das Web mit einer natürlichen Sprachabfrage zu durchsuchen und eine deduplizierte Liste relevanter Links mit Titeln und Beschreibungen zurückzubekommen.
 
-- Senden Sie eine Abfrage in einfachem Englisch
-- Erhalten Sie strukturierte Links aus dem gesamten Web
+- Sende eine Abfrage in einfachem Englisch
+- Erhalte strukturierte Links aus dem gesamten Web zurück
 
-Es wird die Abfrage semantisch im Web durchsuchen und Ergebnisse zurückgeben.
+Es wird die Abfrage semantisch im gesamten Web durchsuchen und Ergebnisse zurückgeben.
 
-Für API-Details siehe die [Such-Endpunkt-API-Referenz](/api-reference/searches/create).
+Für API-Details, siehe die [Such-Endpunkt-API-Referenz](/api-reference/searches/create).
 
 ## Installation
 
@@ -34,14 +34,14 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: eingebautes curl ist ausreichend
+# macOS: builtin curl ist ausreichend
 ```
 
 </CodeGroup>
 
 ## Verwendung
 
-Senden Sie eine natürliche Sprachabfrage und erhalten Sie eine Liste relevanter Links.
+Sende eine Abfrage in natürlicher Sprache und erhalte eine Liste relevanter Links.
 
 <CodeGroup>
 
@@ -82,7 +82,7 @@ curl -s -X POST "https://api.olostep.com/v1/searches" \
 
 ## Antwort
 
-Sie erhalten ein `search`-Objekt als Antwort. Das `search`-Objekt enthält eine `id`, Ihre ursprüngliche `query` und ein `result` mit einer Liste von `links`.
+Du erhältst ein `search`-Objekt als Antwort. Das `search`-Objekt enthält eine `id`, deine ursprüngliche `query` und ein `result` mit einer Liste von `links`.
 
 ```json
 {
@@ -117,10 +117,10 @@ Sie erhalten ein `search`-Objekt als Antwort. Das `search`-Objekt enthält eine 
 
 Jeder Link in `result.links` enthält:
 
-| Feld          | Typ    | Beschreibung                              |
-|---------------|--------|-------------------------------------------|
-| `url`         | string | Die URL des Suchergebnisses               |
-| `title`       | string | Der Titel der Ergebnisseite               |
+| Feld          | Typ    | Beschreibung                             |
+|---------------|--------|------------------------------------------|
+| `url`         | string | Die URL des Suchergebnisses              |
+| `title`       | string | Der Titel der Ergebnisseite              |
 | `description` | string | Ein kurzer Ausschnitt, der das Ergebnis beschreibt |
 
 Das vollständige Ergebnis ist auch als gehostete JSON-Datei unter `result.json_hosted_url` verfügbar.

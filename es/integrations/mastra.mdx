@@ -1,11 +1,10 @@
 ---
-sidebarTitle: "Mastra"
-icon: "robot"
-title: "Integración de Mastra"
-description: "Construye agentes de IA con capacidades de búsqueda web, scraping y crawling usando el marco de agentes de Mastra.ai"
+sidebarTitle: "Olostep + Mastra"
+title: "Integración Olostep + Mastra"
+description: "Construye agentes de IA con capacidades de búsqueda web, scraping y crawling utilizando el marco de agentes de Mastra.ai"
 ---
 
-La integración de Olostep Mastra lleva potentes capacidades de extracción de datos web a los agentes de Mastra.ai. Olostep es una API de búsqueda web, scraping y crawling — una API para buscar, extraer y estructurar datos web. Construye agentes de IA inteligentes que puedan buscar, extraer, analizar y estructurar datos de cualquier sitio web de manera autónoma.
+La integración de Olostep Mastra aporta potentes capacidades de extracción de datos web a los agentes de Mastra.ai. Olostep es una API de búsqueda, scraping y crawling web — una API para buscar, extraer y estructurar datos web. Construye agentes de IA inteligentes que puedan buscar, extraer, analizar y estructurar datos de cualquier sitio web de manera autónoma.
 
 [Instalar desde npm →](https://www.npmjs.com/package/@olostep/mastra-tools)
 
@@ -23,11 +22,11 @@ La integración proporciona 4 potentes APIs para la extracción automatizada de 
   </Card>
   
   <Card title="Crear Crawl" icon="spider-web">
-    Descubre y extrae sitios web enteros de manera autónoma siguiendo enlaces
+    Descubre y extrae automáticamente sitios web completos siguiendo enlaces
   </Card>
   
   <Card title="Crear Mapa" icon="map">
-    Extrae todas las URLs de un sitio web para el análisis de la estructura del sitio y el descubrimiento de contenido
+    Extrae todas las URLs de un sitio web para el análisis de la estructura del sitio y descubrimiento de contenido
   </Card>
 </CardGroup>
 
@@ -63,13 +62,13 @@ En tu archivo de configuración de Mastra:
 import { Mastra } from '@mastra/core';
 import { createOlostepIntegration } from '@olostep/mastra-tools';
 
-// Crea la integración de Olostep
+// Crear la integración de Olostep
 const olostep = createOlostepIntegration();
 
-// Registra las APIs (esto las hace disponibles para los agentes)
+// Registrar APIs (esto las hace disponibles para los agentes)
 olostep.registerApis();
 
-// Añade a tu configuración de Mastra
+// Añadir a tu configuración de Mastra
 export const mastra = new Mastra({
   config: {
     integrations: [olostep],
@@ -78,21 +77,21 @@ export const mastra = new Mastra({
 });
 ```
 
-### 3. Configurar la Clave API
+### 3. Configurar la Clave de API
 
-Configura tu clave API de Olostep como una variable de entorno:
+Establece tu clave de API de Olostep como una variable de entorno:
 
 ```bash
-export OLOSTEP_API_KEY=tu-clave-api-aquí
+export OLOSTEP_API_KEY=tu-clave-de-api-aquí
 ```
 
 O en tu archivo `.env`:
 
 ```
-OLOSTEP_API_KEY=tu-clave-api-aquí
+OLOSTEP_API_KEY=tu-clave-de-api-aquí
 ```
 
-Obtén tu clave API desde el [Panel de Olostep](https://olostep.com/dashboard).
+Obtén tu clave de API desde el [Tablero de Olostep](https://olostep.com/dashboard).
 
 ## APIs Disponibles
 
@@ -111,7 +110,7 @@ Extrae contenido de una sola URL. Soporta múltiples formatos y renderizado de J
 **Parámetros del Esquema:**
 
 <ParamField path="apiKey" type="string" required>
-  Tu clave API de Olostep
+  Tu clave de API de Olostep
 </ParamField>
 
 <ParamField path="url_to_scrape" type="string" required>
@@ -123,7 +122,7 @@ Extrae contenido de una sola URL. Soporta múltiples formatos y renderizado de J
 </ParamField>
 
 <ParamField path="country" type="string">
-  Código de país para contenido específico de ubicación (por ejemplo, "US", "GB", "CA")
+  Código de país para contenido específico de ubicación (e.g., "US", "GB", "CA")
 </ParamField>
 
 <ParamField path="wait_before_scraping" type="number">
@@ -131,7 +130,7 @@ Extrae contenido de una sola URL. Soporta múltiples formatos y renderizado de J
 </ParamField>
 
 <ParamField path="parser" type="string">
-  ID de parser opcional para extracción especializada (por ejemplo, "@olostep/amazon-product")
+  ID de parser opcional para extracción especializada (e.g., "@olostep/amazon-product")
 </ParamField>
 
 **Respuesta:**
@@ -169,7 +168,7 @@ const result = await mastra.callApi({
 Procesa múltiples URLs en paralelo (hasta 100,000 a la vez). Perfecto para la extracción de datos a gran escala.
 
 **Casos de Uso:**
-- Extraer catálogos completos de productos
+- Extraer catálogos de productos completos
 - Extraer datos de múltiples resultados de búsqueda
 - Procesar listas de URLs desde hojas de cálculo
 - Extracción masiva de contenido
@@ -177,7 +176,7 @@ Procesa múltiples URLs en paralelo (hasta 100,000 a la vez). Perfecto para la e
 **Parámetros del Esquema:**
 
 <ParamField path="apiKey" type="string" required>
-  Tu clave API de Olostep
+  Tu clave de API de Olostep
 </ParamField>
 
 <ParamField path="batch_array" type="array" required>
@@ -228,22 +227,22 @@ const result = await mastra.callApi({
 
 ### createCrawl
 
-Descubre y extrae sitios web enteros de manera autónoma siguiendo enlaces. Perfecto para sitios de documentación, blogs y repositorios de contenido.
+Descubre y extrae automáticamente sitios web completos siguiendo enlaces. Perfecto para sitios de documentación, blogs y repositorios de contenido.
 
 **Casos de Uso:**
 - Rastrear y archivar sitios de documentación completos
-- Extraer todas las publicaciones de blog de un sitio web
+- Extraer todas las publicaciones de un blog
 - Construir bases de conocimiento a partir de contenido web
 - Monitorear cambios en la estructura del sitio web
 
 **Parámetros del Esquema:**
 
 <ParamField path="apiKey" type="string" required>
-  Tu clave API de Olostep
+  Tu clave de API de Olostep
 </ParamField>
 
 <ParamField path="start_url" type="string" required>
-  URL de inicio para el crawl (debe incluir http:// o https://)
+  URL de inicio para el rastreo (debe incluir http:// o https://)
 </ParamField>
 
 <ParamField path="max_pages" type="number" default="10">
@@ -259,7 +258,7 @@ Descubre y extrae sitios web enteros de manera autónoma siguiendo enlaces. Perf
 </ParamField>
 
 <ParamField path="country" type="string">
-  Código de país opcional para crawling específico de ubicación
+  Código de país opcional para rastreo específico de ubicación
 </ParamField>
 
 <ParamField path="parser" type="string">
@@ -267,9 +266,9 @@ Descubre y extrae sitios web enteros de manera autónoma siguiendo enlaces. Perf
 </ParamField>
 
 **Respuesta:**
-- `id` - ID de crawl (usa esto para recuperar resultados más tarde)
+- `id` - ID de rastreo (usa esto para recuperar resultados más tarde)
 - `object` - Tipo de objeto ("crawl")
-- `status` - Estado del crawl
+- `status` - Estado del rastreo
 - `created` - Marca de tiempo Unix
 
 **Ejemplo de Uso:**
@@ -292,18 +291,18 @@ const result = await mastra.callApi({
 
 ### createMap
 
-Extrae todas las URLs de un sitio web para el descubrimiento de contenido y el análisis de la estructura del sitio.
+Extrae todas las URLs de un sitio web para el descubrimiento de contenido y análisis de la estructura del sitio.
 
 **Casos de Uso:**
 - Construir mapas del sitio y diagramas de estructura del sitio
-- Descubrir todas las páginas antes de extraer en lote
+- Descubrir todas las páginas antes de la extracción en lote
 - Encontrar páginas rotas o faltantes
-- Auditorías y análisis SEO
+- Auditorías y análisis de SEO
 
 **Parámetros del Esquema:**
 
 <ParamField path="apiKey" type="string" required>
-  Tu clave API de Olostep
+  Tu clave de API de Olostep
 </ParamField>
 
 <ParamField path="url" type="string" required>
@@ -311,7 +310,7 @@ Extrae todas las URLs de un sitio web para el descubrimiento de contenido y el a
 </ParamField>
 
 <ParamField path="search_query" type="string">
-  Consulta de búsqueda opcional para filtrar URLs (por ejemplo, "blog")
+  Consulta de búsqueda opcional para filtrar URLs (e.g., "blog")
 </ParamField>
 
 <ParamField path="top_n" type="number">
@@ -319,11 +318,11 @@ Extrae todas las URLs de un sitio web para el descubrimiento de contenido y el a
 </ParamField>
 
 <ParamField path="include_urls" type="array">
-  Patrones glob para incluir rutas específicas (por ejemplo, ["/blog/**"])
+  Patrones glob para incluir rutas específicas (e.g., ["/blog/**"])
 </ParamField>
 
 <ParamField path="exclude_urls" type="array">
-  Patrones glob para excluir rutas específicas (por ejemplo, ["/admin/**"])
+  Patrones glob para excluir rutas específicas (e.g., ["/admin/**"])
 </ParamField>
 
 **Respuesta:**
@@ -368,7 +367,7 @@ const agent = new Agent({
   name: 'investigador-web',
   instructions: `
     Eres un asistente de investigación web. Cuando los usuarios te pidan obtener información de un sitio web,
-    usa la API scrapeWebsite de Olostep para extraer el contenido, luego resúmelo para ellos.
+    utiliza la API scrapeWebsite de Olostep para extraer el contenido, luego resúmelo para ellos.
   `,
   model: 'openai/gpt-4',
 });
@@ -381,7 +380,7 @@ const agent = new Agent({
 Construye un flujo de trabajo de investigación que descubra y extraiga contenido:
 
 ```typescript
-// 1. Mapea un sitio web para descubrir URLs
+// 1. Mapear un sitio web para descubrir URLs
 const mapResult = await mastra.callApi({
   integrationName: 'olostep',
   api: 'createMap',
@@ -423,20 +422,20 @@ const summary = await agent.generate({
 Construye un agente que investigue temas de manera autónoma:
 
 <AccordionGroup>
-  <Accordion title="Investigación Multi-Fuente">
+  <Accordion title="Investigación de Múltiples Fuentes">
     **Flujo de Trabajo:**
     1. Usuario pregunta: "Investiga tendencias de IA"
-    2. El agente usa `createMap` para descubrir páginas relevantes
-    3. El agente usa `batchScrape` para extraer contenido
-    4. El agente analiza y resume los hallazgos
-    5. Devuelve un informe de investigación estructurado
+    2. Agente usa `createMap` para descubrir páginas relevantes
+    3. Agente usa `batchScrape` para extraer contenido
+    4. Agente analiza y resume los hallazgos
+    5. Devuelve informe de investigación estructurado
   </Accordion>
 
   <Accordion title="Monitoreo de Competencia">
     **Flujo de Trabajo:**
     1. Programa monitoreo diario
-    2. Usa `scrapeWebsite` para revisar páginas de competidores
-    3. Compara con datos anteriores
+    2. Usa `scrapeWebsite` para verificar páginas de competidores
+    3. Compara con datos previos
     4. Alerta sobre cambios significativos
     5. Genera informes semanales
   </Accordion>
@@ -457,24 +456,24 @@ Monitorea productos y precios:
 
 ```
 Flujo de Trabajo del Agente:
-1. Extrae páginas de productos (scrapeWebsite)
-2. Extrae datos estructurados (con parser)
-3. Rastrea cambios de precios
-4. Genera alertas
-5. Actualiza base de datos
+1. Extraer páginas de productos (scrapeWebsite)
+2. Extraer datos estructurados (con parser)
+3. Rastrear cambios de precios
+4. Generar alertas
+5. Actualizar base de datos
 ```
 
 ### Análisis SEO
 
-Analiza la estructura y el contenido del sitio web:
+Analiza la estructura y contenido del sitio web:
 
 ```
 Flujo de Trabajo del Agente:
-1. Mapea la estructura del sitio web (createMap)
+1. Mapear estructura del sitio web (createMap)
 2. Rastrear secciones importantes (createCrawl)
-3. Analiza la calidad del contenido
-4. Identifica oportunidades SEO
-5. Genera recomendaciones
+3. Analizar calidad del contenido
+4. Identificar oportunidades de SEO
+5. Generar recomendaciones
 ```
 
 ## Parsers Especializados
@@ -522,14 +521,14 @@ El parser extrae automáticamente datos estructurados específicos para ese tipo
 
 <AccordionGroup>
   <Accordion title="Usa Procesamiento en Lote para Múltiples URLs">
-    Cuando extraigas más de 3-5 URLs, usa `batchScrape` en lugar de múltiples llamadas a `scrapeWebsite`. El procesamiento en lote es:
-    - Mucho más rápido (procesamiento paralelo)
+    Al extraer más de 3-5 URLs, usa `batchScrape` en lugar de múltiples llamadas a `scrapeWebsite`. El procesamiento en lote es:
+    - Mucho más rápido (procesamiento en paralelo)
     - Más rentable
     - Más fácil de gestionar
-    - Mejor para los límites de tasa
+    - Mejor para límites de tasa
   </Accordion>
 
-  <Accordion title="Configura Tiempos de Espera Apropiados">
+  <Accordion title="Establece Tiempos de Espera Apropiados">
     Para sitios con mucho JavaScript, usa el parámetro `wait_before_scraping`:
     - Sitios simples: 0-1000ms
     - Sitios dinámicos: 2000-3000ms
@@ -543,13 +542,13 @@ El parser extrae automáticamente datos estructurados específicos para ese tipo
     - Obtén datos estructurados automáticamente
     - Extracción más confiable
     - No necesitas parsing personalizado
-    - Mantenido por Olostep
+    - Mantenidos por Olostep
   </Accordion>
 
   <Accordion title="Maneja Operaciones Asíncronas">
-    Las operaciones de Lote, Crawl y Mapa son asíncronas:
+    Las operaciones Batch, Crawl y Map son asíncronas:
     - Almacena el ID devuelto (batch_id, crawl_id, map_id)
-    - Haz polling para la finalización o usa webhooks
+    - Realiza sondeos para la finalización o usa webhooks
     - Configura flujos de trabajo separados para la recuperación
   </Accordion>
 
@@ -573,25 +572,25 @@ El parser extrae automáticamente datos estructurados específicos para ese tipo
     Ten en cuenta los límites de tasa:
     - Espacia las solicitudes con demoras
     - Usa procesamiento en lote cuando sea posible
-    - Monitorea el uso en el panel de Olostep
+    - Monitorea el uso en el tablero de Olostep
     - Mejora el plan si es necesario
   </Accordion>
 </AccordionGroup>
 
 ## Ejemplo Completo
 
-Aquí tienes un ejemplo completo de construcción de un agente de investigación:
+Aquí tienes un ejemplo completo de cómo construir un agente de investigación:
 
 ```typescript
 import { Mastra } from '@mastra/core';
 import { Agent } from '@mastra/core';
 import { createOlostepIntegration } from '@olostep/mastra-tools';
 
-// Crea y registra la integración de Olostep
+// Crear y registrar la integración de Olostep
 const olostep = createOlostepIntegration();
 olostep.registerApis();
 
-// Inicializa Mastra
+// Inicializar Mastra
 export const mastra = new Mastra({
   config: {
     integrations: [olostep],
@@ -599,7 +598,7 @@ export const mastra = new Mastra({
   },
 });
 
-// Crea agente de investigación
+// Crear agente de investigación
 const researchAgent = new Agent({
   name: 'asistente-de-investigación',
   instructions: `
@@ -615,7 +614,7 @@ const researchAgent = new Agent({
 
 // Usa el agente
 async function researchTopic(topic: string) {
-  // Paso 1: Descubre páginas relevantes
+  // Paso 1: Descubrir páginas relevantes
   const mapResult = await mastra.callApi({
     integrationName: 'olostep',
     api: 'createMap',
@@ -628,7 +627,7 @@ async function researchTopic(topic: string) {
     }
   });
 
-  // Paso 2: Extrae las páginas descubiertas
+  // Paso 2: Extraer páginas descubiertas
   const batchResult = await mastra.callApi({
     integrationName: 'olostep',
     api: 'batchScrape',
@@ -641,7 +640,7 @@ async function researchTopic(topic: string) {
     }
   });
 
-  // Paso 3: Analiza con el agente
+  // Paso 3: Analizar con el agente
   const summary = await researchAgent.generate({
     messages: [{
       role: 'user',
@@ -656,14 +655,14 @@ async function researchTopic(topic: string) {
 ## Solución de Problemas
 
 <AccordionGroup>
-  <Accordion title="Fallo de Autenticación">
-    **Error**: "Clave API inválida"
+  <Accordion title="Autenticación Fallida">
+    **Error**: "Clave de API inválida"
     
     **Soluciones**:
-    - Verifica la clave API desde el [panel](https://olostep.com/dashboard)
-    - Asegúrate de que la clave API esté configurada en la variable de entorno
-    - Verifica que la clave API esté activa
-    - Revisa si hay espacios extra en la clave API
+    - Verifica la clave de API desde el [tablero](https://olostep.com/dashboard)
+    - Asegúrate de que la clave de API esté establecida en la variable de entorno
+    - Verifica que la clave de API esté activa
+    - Revisa si hay espacios extra en la clave de API
   </Accordion>
 
   <Accordion title="API No Encontrada">
@@ -694,7 +693,7 @@ async function researchTopic(topic: string) {
     - Espacia las solicitudes con demoras
     - Usa procesamiento en lote en lugar de extracciones individuales
     - Mejora tu plan de Olostep
-    - Verifica el límite de tasa en el panel
+    - Verifica el límite de tasa en el tablero
   </Accordion>
 
   <Accordion title="Errores de TypeScript">
@@ -704,7 +703,7 @@ async function researchTopic(topic: string) {
     - Asegúrate de que `@mastra/core` esté instalado
     - Verifica la compatibilidad de la versión de TypeScript
     - Comprueba que todas las dependencias estén instaladas
-    - Reconstruye: `npm run build`
+    - Reconstruir: `npm run build`
   </Accordion>
 </AccordionGroup>
 
@@ -714,7 +713,7 @@ Olostep cobra en función del uso de la API, independiente de Mastra:
 
 - **Extracciones**: Pago por extracción
 - **Lotes**: Pago por URL en lote
-- **Crawls**: Pago por página rastreada
+- **Rastreos**: Pago por página rastreada
 - **Mapas**: Pago por operación de mapa
 
 Consulta los precios actuales en [olostep.com/pricing](https://olostep.com/pricing).
@@ -749,8 +748,8 @@ Consulta los precios actuales en [olostep.com/pricing](https://olostep.com/prici
     Aprende sobre el endpoint de Lotes
   </Card>
   
-  <Card title="API de Crawls" icon="spider-web" href="/features/crawls">
-    Aprende sobre el endpoint de Crawls
+  <Card title="API de Rastreos" icon="spider-web" href="/features/crawls">
+    Aprende sobre el endpoint de Rastreos
   </Card>
   
   <Card title="API de Mapas" icon="map" href="/features/maps">
@@ -764,9 +763,13 @@ Consulta los precios actuales en [olostep.com/pricing](https://olostep.com/prici
   <Card title="Integración con LangChain" icon="link" href="/integrations/langchain">
     Construye agentes de IA con LangChain
   </Card>
+  
+  <Card title="Sitio Web de Mastra" icon="link" href="https://mastra.ai">
+    Plataforma Mastra
+  </Card>
 </CardGroup>
 
-## Comienza
+## Comienza Ahora
 
 ¿Listo para construir agentes de IA con capacidades de scraping web?
 

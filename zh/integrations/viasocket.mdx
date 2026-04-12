@@ -1,0 +1,176 @@
+---
+sidebarTitle: "Olostep + ViaSocket"
+title: "Olostep + ViaSocket"
+description: "使用 ViaSocket Mushrooms 作为 MCP 网关，将 Olostep 连接到任何 AI 客户端——Claude、Cursor、ChatGPT 等。"
+---
+
+[ViaSocket Mushrooms](https://mushrooms.viasocket.com/) 是一个 MCP 网关，通过单一的 MCP 端点 URL 将 Olostep 等应用程序连接到任何 AI 客户端。一旦你将 Olostep 连接为一个 Mushroom，你可以指示 Claude、Cursor、ChatGPT 或任何其他支持的客户端抓取网站、运行批处理作业、爬取网站，并获得基于 AI 的答案——全部使用简单语言，无需编写一行代码。
+
+## 开始之前
+
+- **拥有 API 密钥的 Olostep 账户：** [免费获取](https://olostep.com/dashboard)，无需信用卡。你的前 500 个积分已包含在内。
+- **ViaSocket 账户：** 在 [viasocket.com](https://viasocket.com/) 创建一个。
+- **AI 客户端：** Claude、Cursor、ChatGPT、Windsurf、VS Code 或任何兼容 MCP 的客户端。
+
+---
+
+## 设置
+
+<Steps>
+  <Step title="创建一个新的集群">
+    打开 [ViaSocket Mushrooms](https://mushrooms.viasocket.com/) 并点击 **+ New Cluster**。ViaSocket 将提示你选择此集群将连接的 AI 客户端——选择 Claude、Cursor、ChatGPT 或你使用的任何客户端。
+
+    ![ViaSocket 新建集群对话框——选择你的 AI 客户端，显示 Claude、ChatGPT、Cursor、Windsurf 等](/images/integrations/viasocket/step1.png)
+  </Step>
+
+  <Step title="浏览集成">
+    在你的集群中，点击 **+ BROWSE INTEGRATIONS** 打开 Mushrooms 库——一个包含 2500 多个应用程序的目录，你可以让你的 AI 访问这些应用程序。
+
+    ![ViaSocket Mushrooms 仪表板显示添加新 Mushroom 和浏览集成按钮](/images/integrations/viasocket/step2.png)
+  </Step>
+
+  <Step title="查找 Olostep">
+    在搜索栏中搜索 **olostep**。从结果中选择 **Olostep**。
+
+    ![在 ViaSocket Mushrooms 中搜索 olostep——Olostep 出现在结果中](/images/integrations/viasocket/step3.png)
+  </Step>
+
+  <Step title="连接到 Olostep">
+    在 Olostep 详情页上，点击 **CONNECT TO OLOSTEP** 授权你的账户并开始将 Olostep 操作添加到你的集群中。
+
+    ![ViaSocket 中 Olostep 详情页显示连接以开始和 CONNECT TO OLOSTEP 按钮](/images/integrations/viasocket/step4.png)
+  </Step>
+
+  <Step title="选择操作">
+    选择你的 AI 客户端可以使用的 Olostep 操作。默认情况下启用所有七个——关闭你不需要的，然后点击 **NEXT**。
+
+    ![ViaSocket 中 Olostep 选择操作屏幕显示 7 个可用操作及切换开关](/images/integrations/viasocket/step5.png)
+  </Step>
+
+  <Step title="输入你的 Olostep API 密钥">
+    将你的 Olostep API 密钥粘贴到 **API Key** 字段中，然后点击 **ADD CONNECTION**。ViaSocket 将验证密钥并保存凭据。
+
+    ![ViaSocket 中 Olostep 的添加新连接屏幕，带有 API Key 输入字段](/images/integrations/viasocket/step6.png)
+
+    从 [Olostep 仪表板 →](https://olostep.com/dashboard) 获取你的密钥
+  </Step>
+
+  <Step title="复制你的 MCP 端点并连接你的 AI 客户端">
+    Olostep 现在在你的集群中显示为已启用的 Mushroom。从 **Cursor Configuration** 面板复制 **MCP Endpoint URL**（或完整的 JSON 配置块），并将其粘贴到你的 AI 客户端的 MCP 设置文件中。
+
+    ![ViaSocket 集群显示 Olostep 已启用和 MCP 端点 URL，带有准备复制的 JSON 配置](/images/integrations/viasocket/step7.png)
+
+    配置如下所示——将其粘贴到你的 AI 客户端设置中：
+
+    ```json
+    {
+      "mcpServers": {
+        "viasocket": {
+          "type": "http",
+          "url": "https://mcp.viasocket.com/mcp/<YOUR-CLUSTER-ID>"
+        }
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## 操作
+
+<CardGroup cols={2}>
+  <Card title="抓取网站" icon="file-lines">
+    从任何 URL 提取内容为 Markdown、HTML、JSON 或纯文本。处理 JS 渲染页面，支持可选等待时间和国家定位。
+  </Card>
+
+  <Card title="生成 AI 答案" icon="sparkles">
+    提出自然语言问题，并获得基于你提供的页面或实时网络搜索的引用答案。
+  </Card>
+
+  <Card title="批量 URL 抓取器" icon="layer-group">
+    在一个作业中提交最多 100,000 个 URL，并行处理。返回一个 `batch_id` 以供异步检索。
+  </Card>
+
+  <Card title="获取批量项目" icon="download">
+    使用其 `batch_id` 检索已完成批处理作业的结果。
+  </Card>
+
+  <Card title="开始爬取" icon="spider-web">
+    从种子 URL 开始，跟随链接并抓取所有子页面。返回一个 `crawl_id`。
+  </Card>
+
+  <Card title="获取爬取信息" icon="circle-info">
+    通过 `crawl_id` 检查正在运行或已完成爬取的状态并检索结果。
+  </Card>
+
+  <Card title="创建地图" icon="map">
+    获取站点上的每个 URL 而不抓取内容。适用于批处理作业前的发现。
+  </Card>
+</CardGroup>
+
+---
+
+## 示例：让 Claude 研究竞争对手
+
+一旦你的 MCP 端点在 Claude 中配置好，你可以发出简单语言指令，如：
+
+> *"抓取 acme.com/pricing 的定价页面，并给我一个他们计划和价格的总结。"*
+
+Claude 将通过 ViaSocket 调用 Olostep 的 **抓取网站** 操作，返回页面内容并总结它——无需工作流构建器，无需代码。
+
+你可以以同样的方式链接操作：
+
+> *"映射 docs.example.com 上的所有页面，然后批量抓取前 50 个并构建知识库总结。"*
+
+---
+
+## 疑难解答
+
+<AccordionGroup>
+  <Accordion title="API 密钥被拒绝">
+    直接从 [olostep.com/dashboard](https://olostep.com/dashboard) 复制密钥，不要有尾随空格。如果错误仍然存在，请删除并重新创建 ViaSocket 中的 Olostep 连接。
+  </Accordion>
+
+  <Accordion title="AI 客户端看不到 Olostep 工具">
+    确保你已将 MCP 端点 URL（或 JSON 配置块）粘贴到你的 AI 客户端的正确设置文件中。对于 Claude Desktop，这是 `claude_desktop_config.json`。对于 Cursor，这是 `.cursor/mcp.json` 在你的项目或全局 Cursor 设置中。保存后重启客户端。
+  </Accordion>
+
+  <Accordion title="抓取的内容为空">
+    调用 **抓取网站** 时增加等待时间（尝试 2000–5000ms 以处理 JS 密集页面）。确认 URL 可以公开访问，无需登录。
+  </Accordion>
+
+  <Accordion title="MCP 端点 URL 不断变化">
+    端点 URL 与你的集群绑定。如果你删除并重新创建集群，你将获得一个新 URL，并需要更新你的 AI 客户端配置。保持 URL 私密——它授权你连接账户上的所有操作。
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 相关
+
+<CardGroup cols={2}>
+  <Card title="抓取 API" icon="file-lines" href="/features/scrapes">
+    抓取端点的完整参考
+  </Card>
+
+  <Card title="批处理 API" icon="layer-group" href="/features/batches">
+    批处理作业的工作原理及如何检索结果
+  </Card>
+
+  <Card title="爬取 API" icon="spider-web" href="/features/crawls">
+    爬取配置和结果检索
+  </Card>
+
+  <Card title="地图 API" icon="map" href="/features/maps">
+    URL 发现和过滤选项
+  </Card>
+
+  <Card title="MCP 服务器" icon="server" href="/integrations/mcp-server">
+    直接使用 Olostep 的原生 MCP 服务器
+  </Card>
+
+  <Card title="ViaSocket 网站" icon="link" href="https://viasocket.com">
+    ViaSocket 平台
+  </Card>
+</CardGroup>

@@ -59,15 +59,15 @@
                   "execute_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Chaîne datetime ISO 8601 pour l'exécution d'un horaire unique. Doit être un datetime futur valide. Requis pour les horaires uniques. Mutuellement exclusif avec cron_expression."
+                    "description": "Chaîne datetime ISO 8601 pour l'exécution d'un horaire unique. Doit être une datetime future valide. Requis pour les horaires uniques. Mutuellement exclusif avec cron_expression."
                   },
                   "expression_timezone": {
                     "type": "string",
-                    "description": "Identifiant de fuseau horaire IANA (par exemple, 'UTC', 'America/New_York', 'Europe/London') pour l'horaire. Requis pour les horaires récurrents, optionnel pour les horaires uniques. Lors de l'utilisation de texte en langage naturel, cela par défaut à 'UTC'."
+                    "description": "Identifiant de fuseau horaire IANA (par exemple, 'UTC', 'America/New_York', 'Europe/London') pour l'horaire. Requis pour les horaires récurrents, optionnel pour les horaires uniques. Lors de l'utilisation de texte en langage naturel, cela par défaut est 'UTC'."
                   },
                   "text": {
                     "type": "string",
-                    "description": "Texte en langage naturel pour générer automatiquement une expression cron. Le système convertira ton texte en une expression cron valide. Exemples : 'toutes les 3 minutes', 'tous les jours à 10h', 'tous les lundis à 9h'. Mutuellement exclusif avec cron_expression et execute_at. Lorsqu'il est utilisé, expression_timezone par défaut à 'UTC'."
+                    "description": "Texte en langage naturel pour générer automatiquement une expression cron. Le système convertira ton texte en une expression cron valide. Exemples : 'toutes les 3 minutes', 'tous les jours à 10h', 'tous les lundis à 9h'. Mutuellement exclusif avec cron_expression et execute_at. Lorsqu'il est utilisé, expression_timezone par défaut est 'UTC'."
                   }
                 },
                 "required": [
@@ -117,7 +117,7 @@
                     "execute_at": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "Datetime d'exécution (présent uniquement pour les horaires uniques)"
+                      "description": "Date et heure d'exécution (présente uniquement pour les horaires uniques)"
                     },
                     "expression_timezone": {
                       "type": "string",
@@ -126,7 +126,7 @@
                     "created": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "Datetime ISO 8601 lorsque l'horaire a été créé"
+                      "description": "Chaîne datetime ISO 8601 lorsque l'horaire a été créé"
                     }
                   }
                 }
@@ -137,7 +137,7 @@
             "description": "Mauvaise requête en raison de paramètres incorrects ou manquants. Erreurs courantes : méthode invalide, point de terminaison manquant, cron_expression invalide, datetime execute_at invalide, fuseau horaire invalide, ou format de schedule_id invalide."
           },
           "401": {
-            "description": "Clé API invalide. Essaie de la vérifier à nouveau ou contacte info@olostep.com si tu rencontres des problèmes."
+            "description": "Clé API invalide. Essaie de la vérifier ou contacte info@olostep.com si tu rencontres des problèmes."
           },
           "500": {
             "description": "Erreur interne du serveur lors de la création du planning."
@@ -146,7 +146,7 @@
       },
       "get": {
         "summary": "Lister les plannings",
-        "description": "Récupère tous les plannings pour ton équipe. Retourne une liste de plannings avec leur configuration, statut et métadonnées. Par défaut, les plannings supprimés sont filtrés.",
+        "description": "Récupère tous les plannings pour ton équipe. Renvoie une liste de plannings avec leur configuration, statut et métadonnées. Par défaut, les plannings supprimés sont filtrés.",
         "security": [
           {
             "Authorization": []
@@ -212,7 +212,7 @@
                           "execute_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Datetime d'exécution (présent uniquement pour les horaires uniques)"
+                            "description": "Date et heure d'exécution (présente uniquement pour les horaires uniques)"
                           },
                           "expression_timezone": {
                             "type": "string",
@@ -233,7 +233,7 @@
                           "created_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Datetime ISO 8601 lorsque l'horaire a été créé"
+                            "description": "Chaîne datetime ISO 8601 lorsque l'horaire a été créé"
                           },
                           "updated_at": {
                             "type": "string",
@@ -349,7 +349,7 @@
                         "execute_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "Datetime d'exécution (présent uniquement pour les horaires uniques)"
+                          "description": "Date et heure d'exécution (présente uniquement pour les horaires uniques)"
                         },
                         "expression_timezone": {
                           "type": "string",
@@ -370,7 +370,7 @@
                         "created_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "Datetime ISO 8601 lorsque l'horaire a été créé"
+                          "description": "Chaîne datetime ISO 8601 lorsque l'horaire a été créé"
                         },
                         "updated_at": {
                           "type": "string",
@@ -408,7 +408,7 @@
       },
       "delete": {
         "summary": "Supprimer le planning",
-        "description": "Supprime un planning par son ID. Cela arrêtera toute exécution future et supprimera le planning de EventBridge.",
+        "description": "Supprime un planning par son ID. Cela arrêtera toute exécution future et supprimera le planning d'EventBridge.",
         "security": [
           {
             "Authorization": []

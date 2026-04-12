@@ -107,11 +107,11 @@
                   },
                   "search_query": {
                     "type": "string",
-                    "description": "可选的搜索查询，用于按搜索相关性排序链接。"
+                    "description": "一个可选的搜索查询，用于按搜索相关性排序链接。"
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "可选的数字，用于限制搜索查询的前 n 个链接。"
+                    "description": "一个可选的数字，用于限制搜索查询的前 n 个链接。"
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -133,7 +133,7 @@
                   },
                   "cursor": {
                     "type": "string",
-                    "description": "可选：来自上一个响应的分页游标。当提供时，从上一个请求由于响应大小限制而停止的地方返回下一组 URL。"
+                    "description": "可选：来自先前响应的分页游标。当提供时，将返回从上一个请求由于响应大小限制而停止的地方的下一组 URL。"
                   }
                 },
                 "required": [
@@ -195,7 +195,7 @@
                     },
                     "cursor": {
                       "type": "string",
-                      "description": "分页游标用于检索由于10MB大小限制而受限的下一组URL。如果为null或不存在，则表示所有URL已被检索。"
+                      "description": "分页游标用于获取由于10MB大小限制而限制的下一组URL。如果为null或不存在，则表示已检索到所有URL。"
                     }
                   }
                 },
@@ -240,7 +240,7 @@
             }
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "Bad request due to incorrect or missing parameters."
           },
           "401": {
             "description": "由于缺少或无效的API令牌导致的未授权访问。"

@@ -4,11 +4,12 @@ icon: "map"
 title: "地图"
 description: "获取网站上的所有URL。"
 ---
+
 通过 Olostep 的 `/v1/maps` 端点，你可以获取网站上的所有URL。这对于内容发现、网站结构分析（例如SEO）或决定下一个要抓取的URL非常有用。
 
 - 获取网站上的所有URL（包括站点地图和发现的链接）
 - 使用特殊模式包含/排除路径（例如 `/blog/**`）
-- 使用 `cursor` 分页大型响应（每次响应最多10MB）
+- 使用 `cursor` 对大响应进行分页（每个响应最多10MB）
 - 使用 `top_n` 限制数量
 
 有关API详细信息，请参阅 [地图端点API参考](/api-reference/maps/create)。
@@ -26,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl 在 macOS、Linux 和 Windows 上默认可用
 ```
 
 ```javascript Node (API)
@@ -109,22 +110,21 @@ print(json.dumps(response.json(), indent=2))
 
 </CodeGroup>
 
-响应时间通常在几秒钟内，但对于更复杂的网站可能需要长达120秒。它可以从网站中提取所有URL，甚至是反向链接和站点地图中不存在的链接。你还可以决定要在响应中包含或排除的URL路径。
+响应时间通常在几秒钟内，但对于更复杂的网站可能需要长达120秒。它可以从网站中提取所有URL，甚至是反向链接和不在站点地图中的链接。你还可以决定要在响应中包含或排除的URL路径。
 
-默认情况下，端点在一次调用中返回大约100k个URL（最大10MB）。如果响应包含更多数据，API将返回一个 `cursor` 参数，可用于分页和获取后续的URL。有关详细信息，请参阅 [API参考](/api-reference/maps/create#body-cursor)。
+默认情况下，端点在一次调用中返回大约100k个URL（最大10MB）。如果响应包含更多数据，API会返回一个 `cursor` 参数，可以用于分页和获取后续的URL。有关更多详细信息，请参阅 [API参考](/api-reference/maps/create#body-cursor)。
 
-这个端点在你需要时特别有用：
+这个端点在以下情况下特别有用：
 - 发现网站上的所有内容页面
 - 分析网站结构和层次
-- 准备URL以进行批处理
+- 准备批量处理的URL
 - 决定要抓取的特定URL
 
-为了更细粒度地控制返回的URL，你可以使用参数 `include_urls` 和 `exclude_urls`。
+为了更精细地控制返回的URL，你可以使用参数 `include_urls` 和 `exclude_urls`。
 
 ### 示例
 
-假设你想从 www.brex.com 提取所有路径在 `/product/` 之后的URL，例如 `https://www.brex.com/product/api/no-code`，但也包括 `www.brex.com/product`。
-你可以使用以下代码：
+假设你想从 www.brex.com 提取所有路径在 `/product/` 之后的URL，例如 `https://www.brex.com/product/api/no-code`，但也包括 `www.brex.com/product`。你可以使用以下代码：
 
 <CodeGroup>
 
@@ -213,8 +213,8 @@ print(response.text)
 
 ## 结论
 
-地图端点是内容发现和网站分析的强大工具。它提供了网站上URL的全面列表，使你能够从特定页面提取内容或分析网站结构。这个端点对于需要分析网站内容或结构的SEO专业人士、内容营销人员、AI代理特别有用。
+地图端点是内容发现和网站分析的强大工具。它提供网站上的URL的全面列表，使你能够从特定页面提取内容或分析网站结构。这个端点对于需要分析网站内容或结构的SEO专业人士、内容营销人员和AI代理特别有用。
 
-## 价格
+## 定价
 
-地图费用为1个信用点。然后对于响应中返回的每额外1000个URL，将收取额外的信用点。
+地图消耗1个积分。然后对于响应中每返回额外的1000个URL，将额外收取一个积分。

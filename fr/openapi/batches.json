@@ -186,7 +186,7 @@
                   "code": "internal_server_error",
                   "type": "https://docs.olostep.com/api-reference/errors/internal_error",
                   "status": 500,
-                  "title": "Erreur Interne du Serveur",
+                  "title": "Erreur interne du serveur",
                   "detail": "An unexpected error occurred",
                   "created": 1704067200,
                   "metadata": {}
@@ -291,7 +291,7 @@
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL HTTPS pour recevoir une requête POST lorsque le lot est terminé. Doit être une URL publiquement accessible utilisant le protocole `http://` ou `https://`. Ne peut pas pointer vers localhost ou des adresses IP privées. Voir [Webhooks](/api-reference/common/webhooks) pour le format de la charge utile et le comportement de nouvelle tentative."
+                    "description": "URL HTTPS pour recevoir une requête POST lorsque le lot est terminé. Doit être une URL publiquement accessible utilisant le protocole `http://` ou `https://`. Ne peut pas pointer vers localhost ou des adresses IP privées. Voir [Webhooks](/api-reference/common/webhooks) pour le format de la charge utile et le comportement de réessai."
                   }
                 },
                 "required": [
@@ -365,7 +365,7 @@
                     },
                     "webhook": {
                       "type": "string",
-                      "description": "URL de webhook pour recevoir la notification de fin"
+                      "description": "URL du webhook pour recevoir la notification de fin"
                     }
                   }
                 },
@@ -524,7 +524,7 @@
                   "code": "internal_server_error",
                   "type": "https://docs.olostep.com/api-reference/errors/internal_error",
                   "status": 500,
-                  "title": "Erreur Interne du Serveur",
+                  "title": "Erreur interne du serveur",
                   "detail": "An unexpected error occurred",
                   "created": 1704067200,
                   "metadata": {}
@@ -598,7 +598,7 @@
                     },
                     "webhook": {
                       "type": "string",
-                      "description": "URL de webhook pour recevoir la notification de fin"
+                      "description": "URL du webhook pour recevoir la notification de fin"
                     }
                   }
                 }
@@ -660,7 +660,7 @@
                   "code": "internal_server_error",
                   "type": "https://docs.olostep.com/api-reference/errors/internal_error",
                   "status": 500,
-                  "title": "Erreur Interne du Serveur",
+                  "title": "Erreur interne du serveur",
                   "detail": "An unexpected error occurred",
                   "created": 1704067200,
                   "metadata": {}
@@ -842,7 +842,7 @@
                   "code": "internal_server_error",
                   "type": "https://docs.olostep.com/api-reference/errors/internal_error",
                   "status": 500,
-                  "title": "Erreur Interne du Serveur",
+                  "title": "Erreur interne du serveur",
                   "detail": "An unexpected error occurred",
                   "created": 1704067200,
                   "metadata": {}
@@ -855,7 +855,7 @@
     },
     "/v1/batches/{batch_id}/items": {
       "get": {
-        "summary": "Récupérer la liste des éléments complétés ou échoués avec contenu optionnel pour un lot spécifique",
+        "summary": "Récupérer la liste des éléments complétés ou échoués éventuellement avec le contenu pour un lot spécifique",
         "description": "Récupère la liste des éléments et du contenu selon le statut demandé pour un ID de lot spécifique.",
         "security": [
           {
@@ -892,7 +892,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Curseur de pagination. Omet ce paramètre lors de la première requête. Pour les requêtes suivantes, utilise la valeur `cursor` de la réponse précédente. Voir [Pagination](/api-reference/common/pagination) pour plus de détails."
+            "description": "Curseur de pagination. Omettre ce paramètre lors de la première requête. Pour les requêtes suivantes, utiliser la valeur `cursor` de la réponse précédente. Voir [Pagination](/api-reference/common/pagination) pour plus de détails."
           },
           {
             "name": "limit",
@@ -1062,7 +1062,7 @@
                   "code": "internal_server_error",
                   "type": "https://docs.olostep.com/api-reference/errors/internal_error",
                   "status": 500,
-                  "title": "Erreur Interne du Serveur",
+                  "title": "Erreur interne du serveur",
                   "detail": "An unexpected error occurred",
                   "created": 1704067200,
                   "metadata": {}
@@ -1113,11 +1113,11 @@
           },
           "title": {
             "type": "string",
-            "description": "Résumé court et lisible par l'humain"
+            "description": "Résumé court et lisible par l'homme"
           },
           "detail": {
             "type": "string",
-            "description": "Explication lisible par l'humain"
+            "description": "Explication lisible par l'homme"
           },
           "created": {
             "type": "integer",
@@ -1145,7 +1145,7 @@
       },
       "Metadata": {
         "type": "object",
-        "description": "Ensemble de paires clé-valeur pour stocker des informations supplémentaires sur un objet. Suit l'approche de Stripe avec des règles de validation : max 50 clés, clé max 40 caractères (pas de crochets), valeur max 500 caractères, toutes les valeurs stockées sous forme de chaînes.",
+        "description": "Ensemble de paires clé-valeur pour stocker des informations supplémentaires sur un objet. Suit l'approche de Stripe avec des règles de validation : max 50 clés, clé max 40 caractères (pas de crochets), valeur max 500 caractères, toutes les valeurs stockées en tant que chaînes.",
         "additionalProperties": {
           "type": "string",
           "maxLength": 500,

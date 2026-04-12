@@ -1,16 +1,16 @@
 ---
 sidebarTitle: "クロール"
 title: "クロール"
-description: "URLをクロールしてすべてのサブページからコンテンツを取得"
+description: "URLをクロールしてすべてのサブページからコンテンツを取得する"
 icon: "spider"
 ---
 
 Olostepの`/v1/crawls`エンドポイントを通じて、ウェブサイトをクロールし、すべてのページからコンテンツを取得できます。
 
 - ウェブサイトをクロールしてすべてのサブページからコンテンツを取得（またはクロールの深さを制限）
-- 特定のページをクロールするための特別なパターンを使用（例：`/blog/**`）
+- 特定のページをクロールするための特別なパターンを使用（例: `/blog/**`）
 - クロールが完了したときに通知を受け取るために`webhook_url`を渡す
-- 特定のページを見つけるための検索クエリを使用し、関連性でソート
+- 特定のページのみを見つけるための検索クエリと関連性によるソート
 
 APIの詳細については、[クロールエンドポイントAPIリファレンス](/api-reference/crawls/create)を参照してください。
 
@@ -27,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curlはmacOS、Linux、Windowsでデフォルトで利用可能
 ```
 
 ```javascript Node (API)
@@ -42,7 +42,7 @@ pip install requests
 
 ## クロールを開始する
 
-開始URL、含める/除外するURLグロブ、`max_pages`を指定します。オプション: `max_depth`, `include_external`, `include_subdomain`, `search_query`, `top_n`, `webhook_url`, `timeout`。
+開始URL、含める/除外するURLグロブ、`max_pages`を指定します。オプション: `max_depth`、`include_external`、`include_subdomain`、`search_query`、`top_n`、`webhook_url`、`timeout`。
 
 <CodeGroup>
 
@@ -130,29 +130,29 @@ print(json.dumps(crawl, indent=2))
 
 </CodeGroup>
 
-Olostepではすべてがオブジェクトなので、レスポンスとして`crawl`オブジェクトを受け取ります。`crawl`オブジェクトには`id`や`status`などのプロパティがあり、クロールを追跡するのに使用できます。
+Olostepではすべてがオブジェクトであるため、レスポンスとして`crawl`オブジェクトを受け取ります。`crawl`オブジェクトには`id`や`status`などのプロパティがあり、クロールを追跡するのに使用できます。
 
-## クロールのステータスを確認する
+## クロールステータスを確認する
 
 `status`が`completed`になるまでクロールをポーリングして進行状況を追跡します。
 
 <CodeGroup>
 
 ```python Python
-# Using the crawl object from the previous step
+# 前のステップからのcrawlオブジェクトを使用
 info = crawl.info()
 print(info.status, info.pages_count)
 
-# Or wait until completed
+# または完了するまで待つ
 crawl.wait_till_done(check_every_n_secs=5)
 ```
 
 ```js Node
-// Using the crawl object from the previous step
+// 前のステップからのcrawlオブジェクトを使用
 const info = await crawl.info()
 console.log(info.status, info.pages_count)
 
-// Or wait until completed
+// または完了するまで待つ
 await crawl.waitTillDone({ checkEveryNSecs: 5 })
 ```
 
@@ -186,22 +186,22 @@ while True:
 
 </CodeGroup>
 
-また、クロールを開始するときに`webhook_url`を渡すことで、クロールが完了したときに通知を受け取ることができます。
+または、クロール開始時に`webhook_url`を渡して、クロールが完了したときに通知を受け取ることもできます。
 
-## ページをリストする（カーソルでページネーション/ストリーム）
+## ページをリストする（カーソルでページネート/ストリーム）
 
-`cursor`と`limit`を使用してページを取得し、繰り返し処理します。クロールが`in_progress`または`completed`の間に機能します。
+ページを取得し、`cursor`と`limit`を使用して反復します。クロールが`in_progress`または`completed`の間に動作します。
 
 <CodeGroup>
 
 ```python Python
-# Iterate all pages (auto-waits for crawl completion, handles pagination)
+# すべてのページを反復（クロール完了を自動的に待機し、ページネーションを処理）
 for page in crawl.pages():
     print(page.url, page.retrieve_id)
 ```
 
 ```js Node
-// Iterate all pages (auto-waits for crawl completion, handles pagination)
+// すべてのページを反復（クロール完了を自動的に待機し、ページネーションを処理）
 for await (const page of crawl.pages()) {
   console.log(page.url, page.retrieve_id)
 }
@@ -247,7 +247,7 @@ while True:
 
 </CodeGroup>
 
-## 検索クエリ（関連性の高いトップNに制限）
+## 検索クエリ（関連性の高い上位N件に制限）
 
 開始時に`search_query`を使用し、オプションで`search_query`でリストをフィルタリングします。ページごとの探索を`top_n`で制限します。
 
@@ -322,19 +322,19 @@ print(len(pages['pages']))
 
 ## コンテンツを取得する
 
-各ページの`retrieve_id`を使用して`/v1/retrieve`から`html_content`や`markdown_content`を取得します。
+各ページの`retrieve_id`を使用して、`/v1/retrieve`から`html_content`や`markdown_content`を取得します。
 
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each crawled page
+# クロールされた各ページのコンテンツを取得
 for page in crawl.pages():
     content = page.retrieve(["markdown"])
     print(content.markdown_content)
 ```
 
 ```js Node
-// Retrieve content for each crawled page
+// クロールされた各ページのコンテンツを取得
 for await (const page of crawl.pages()) {
   const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
   console.log(content.markdown_content)
@@ -366,9 +366,9 @@ for page in get_pages(crawl['id'], limit=5)['pages']:
 ## 注意事項
 
 - ページネーションはカーソルベースです。`cursor`がなくなるまでリクエストを繰り返します。
-- `/v1/crawls/{crawl_id}/pages`のコンテンツフィールドは非推奨です。`/v1/retrieve`を使用してください。
+- `/v1/crawls/{crawl_id}/pages`のコンテンツフィールドは廃止予定です。`/v1/retrieve`を使用してください。
 - Webhooks: クロール完了時にPOSTを受け取るために`webhook_url`を設定します。
 
 ## 料金
 
-クロールはクロールされたページごとに1クレジットかかります。
+クロールはクロールされたページごとに1クレジットがかかります。

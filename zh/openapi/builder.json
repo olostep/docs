@@ -24,8 +24,8 @@
   "paths": {
     "/olostep-p2p-incomingAPI": {
       "get": {
-        "summary": "使用各种配置启动网页抓取",
-        "description": "此端点允许用户通过各种选项抓取网页，例如设置超时、抓取前的等待时间、数据格式偏好等。",
+        "summary": "使用多种配置启动网页抓取",
+        "description": "此端点允许用户通过多种选项抓取网页，例如设置超时时间、抓取前的等待时间、数据格式偏好等。",
         "servers": [
           {
             "url": "https://agent.olostep.com"
@@ -106,7 +106,7 @@
             "name": "htmlTransformer",
             "in": "query",
             "required": false,
-            "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的抓取内容。",
+            "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的内容。",
             "schema": {
               "type": "string",
               "default": "none",
@@ -150,7 +150,7 @@
             "name": "actions",
             "in": "query",
             "required": false,
-            "description": "在获取内容之前对页面执行的操作",
+            "description": "获取内容前在页面上执行的操作",
             "schema": {
               "type": "array",
               "items": {
@@ -216,7 +216,7 @@
                         "enum": [
                           "fill_input"
                         ],
-                        "description": "用一个值填写输入元素"
+                        "description": "用一个值填充输入元素"
                       },
                       "selector": {
                         "type": "string",
@@ -267,7 +267,7 @@
         ],
         "responses": {
           "200": {
-            "description": "请求数据成功响应。"
+            "description": "成功响应请求的数据。"
           },
           "400": {
             "description": "由于参数错误或缺失导致的错误请求。"
@@ -338,7 +338,7 @@
         ],
         "responses": {
           "200": {
-            "description": "数据集信息成功响应。"
+            "description": "成功响应数据集信息。"
           },
           "400": {
             "description": "由于参数错误或缺失导致的错误请求。"

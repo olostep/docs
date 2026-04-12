@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "API Batches di AirOps",
+    "title": "API AirOps Batches",
     "version": "1.0.0",
-    "description": "API interna per lo scraping batch specifico di AirOps con arricchimento LLM automatizzato per l'estrazione dei metadati delle pagine."
+    "description": "API interno per lo scraping batch specifico di AirOps con arricchimento LLM automatizzato per l'estrazione dei metadati delle pagine."
   },
   "servers": [
     {
@@ -15,7 +15,7 @@
       "post": {
         "operationId": "createAirOpsBatch",
         "summary": "Crea Batch AirOps",
-        "description": "Avvia un processo batch che combina lo scraping con l'arricchimento basato su LLM per l'estrazione dei metadati delle pagine. Il flusso di lavoro: scraping degli URL → estrazione dei metadati → analisi delle lacune → arricchimento LLM per i campi mancanti.",
+        "description": "Avvia un processo batch che combina lo scraping con l'arricchimento basato su LLM per l'estrazione dei metadati delle pagine. Il flusso di lavoro: scrape URL → estrai metadati → analisi delle lacune → arricchimento LLM per i campi mancanti.",
         "security": [
           {
             "Authorization": []
@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Header di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+        "description": "Header di autenticazione Bearer della forma Bearer <token>, dove <token> è il tuo token di autenticazione."
       }
     },
     "schemas": {
@@ -470,7 +470,7 @@
             "properties": {
               "total": {
                 "type": "integer",
-                "description": "Totale degli elementi nel batch."
+                "description": "Totale elementi nel batch."
               },
               "succeeded": {
                 "type": "integer",
@@ -571,7 +571,7 @@
               "analyzing",
               "enriching"
             ],
-            "description": "Fase in cui si è verificato l'errore (presente quando lo stato è \"failed\")."
+            "description": "Fase in cui si è verificato il fallimento (presente quando lo stato è \"failed\")."
           },
           "error": {
             "$ref": "#/components/schemas/StepError",

@@ -4,21 +4,21 @@ title: "答案 API"
 icon: "globe-pointer"
 ---
 
-通过 Olostep 的 `/v1/answers` 端点，你可以使用自然语言搜索网络，并以你想要的 JSON 形式返回由 AI 驱动的答案和数据。这使你能够将产品建立在真实世界的数据和来源之上，丰富数据点或电子表格。
+通过 Olostep 的 `/v1/answers` 端点，你可以使用自然语言搜索网络，并以你想要的 JSON 形式返回 AI 驱动的答案和数据。这使你能够将产品建立在真实世界的数据和来源上，丰富数据点或电子表格。
 
-- 提出一个问题或提供一个你想要丰富的数据点
+- 提出问题或提供你想要丰富的 AI 数据点
 - 可选：指定你想要返回的 JSON 结构
 
-它将会：
-- 搜索、清理、验证并返回它在网络上找到的数据
+它将：
+- 搜索、清理、验证并返回它在网上找到的数据
 - 返回用于生成答案的来源
 - 当数据无法验证时，用 `NOT_FOUND` 值处理不确定性
 
-有关 API 详细信息，请参见 [答案端点 API 参考](/api-reference/answers/create)。
+有关 API 详细信息，请参阅 [答案端点 API 参考](/api-reference/answers/create)。
 
-默认情况下，我们使用通用的网络索引和具有成本效益的 LLM 验证器。
+默认情况下，我们使用通用的网络索引和成本效益高的 LLM 验证器。
 
-企业客户可以访问专有的行业特定网络索引、独家私人数据（包括电话号码和电子邮件）以及最适合其用例的自定义 LLM 模型。联系我们以获取访问权限：info@olostep.com
+企业客户可以访问专有的行业特定网络索引、独家私人数据（包括电话号码和电子邮件）以及最适合其用例的自定义 LLM 模型。联系我们获取访问权限：info@olostep.com
 
 
 
@@ -27,7 +27,7 @@ icon: "globe-pointer"
  - 将 AI 应用程序建立在真实世界的数据和事实之上
  - 为招聘、金融、咨询和销售丰富电子表格和数据点
 
-这是一个由答案端点驱动的 AI 电子表格演示：
+这是一个由答案端点驱动的 AI 电子表格的演示：
 https://www.olostep.com/demos/spreadsheet-enrich
 
 
@@ -45,7 +45,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl 在 macOS、Linux 和 Windows 上默认可用
 ```
 
 ```javascript Node (API)
@@ -60,7 +60,7 @@ pip install requests
 
 ## 使用方法
 
-提出一个问题并传递一个 JSON 架构来指导输出。你也可以不传递 `json` 参数，API 将返回一个包含答案文本的 `result` 字段的 json 对象。
+提出一个问题并传递一个 JSON 模式来指导输出。你也可以不传递 `json` 参数，API 将返回一个包含答案文本的 json 对象在 `result` 字段中。
 
 <CodeGroup>
 
@@ -70,7 +70,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="What is the latest book by J.K. Rowling?",
+    task="J.K. Rowling 的最新书是什么？",
     json_format={"book_title": "", "author": "", "release_date": ""},
 )
 
@@ -84,7 +84,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'What is the latest book by J.K. Rowling?',
+  task: 'J.K. Rowling 的最新书是什么？',
   jsonFormat: { book_title: '', author: '', release_date: '' },
 })
 
@@ -97,7 +97,7 @@ curl -s -X POST "https://api.olostep.com/v1/answers" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "What is the latest book by J.K. Rowling?",
+    "task": "J.K. Rowling 的最新书是什么？",
     "json": {"book_title": "", "author": "", "release_date": ""}
   }'
 ```
@@ -107,7 +107,7 @@ const res = await fetch('https://api.olostep.com/v1/answers', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    task: 'What is the latest book by J.K. Rowling?',
+    task: 'J.K. Rowling 的最新书是什么？',
     json: { book_title: '', author: '', release_date: '' }
   })
 })
@@ -119,7 +119,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "What is the latest book by J.K. Rowling?",
+  "task": "J.K. Rowling 的最新书是什么？",
   "json": {"book_title": "", "author": "", "release_date": ""}
 }
 headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
@@ -132,7 +132,7 @@ print(json.dumps(response.json(), indent=2))
 
 ## 响应
 
-像其他 Olostep 端点一样，你将收到一个 `answer` 对象作为响应。`answer` 对象有几个属性，比如 `id` 和 `result`。
+与其他 Olostep 端点一样，你将收到一个 `answer` 对象作为响应。`answer` 对象有一些属性，如 `id` 和 `result`。
 
 ```json
 {
@@ -140,7 +140,7 @@ print(json.dumps(response.json(), indent=2))
   "object": "answer",
   "created": 1760327323,
   "metadata": {},
-  "task": "J.K. Rowling 的最新一本书是什么？",
+  "task": "J.K. Rowling 的最新书是什么？",
   "result": {
     "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
     "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
@@ -160,7 +160,7 @@ print(json.dumps(response.json(), indent=2))
 }
 ```
 
-你请求的答案，根据 `json` 参数格式化，位于 `response.result.json_content` 中，来源列表位于 `response.result.sources` 中。你可以解析字符串化的 JSON 来访问结构化数据。
+你请求的答案，根据 `json` 参数格式化，位于 `response.result.json_content` 中，来源列表在 `response.result.sources` 中。你可以解析字符串化的 JSON 来访问结构化数据。
 
 ```json
 {
@@ -182,17 +182,17 @@ print(json.dumps(response.json(), indent=2))
 ]
 ```
 
-当你不传递 `json` 参数时，API 将返回一个包含答案文本的 `result` 字段的 json 对象。
+当你不传递 `json` 参数时，API 将返回一个包含答案文本的 json 对象在 `result` 字段中。
 
 ```json
 {
-  "result": "J.K. Rowling 的最新一本书是 The Hallmarked Man。"
+  "result": "J.K. Rowling 的最新书是 The Hallmarked Man。"
 }
 ```
 
 ### 灵活的 `json` 参数
 
-- 提供一个具有空值的 JSON 对象作为架构，或描述你想要的数据的字符串。
+- 提供一个带有空值的 JSON 对象作为模式，或描述你想要的数据的字符串。
 - 如果代理不确定，它会为该字段返回 `NOT_FOUND`。
 
 <CodeGroup>
@@ -203,7 +203,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="how much did Olostep raise?",
+    task="Olostep 筹集了多少钱？",
     json_format={"amount": ""},
 )
 
@@ -216,7 +216,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'how much did Olostep raise?',
+  task: 'Olostep 筹集了多少钱？',
   jsonFormat: { amount: '' },
 })
 
@@ -228,7 +228,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "how much did Olostep raise?", 
+  "task": "Olostep 筹集了多少钱？", 
   "json": {
     "amount": ""
   }
@@ -251,6 +251,6 @@ print(json.dumps(response.json(), indent=2))
 }
 ```
 
-## 价格
+## 定价
 
-每次请求答案需要 20 个积分。
+每个请求答案需要 20 个积分。

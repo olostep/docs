@@ -1,553 +1,185 @@
 ---
-sidebarTitle: "Relay"
-icon: "bolt"
-title: "リレー統合"
-description: "Relay.appの最新ワークフロービルダーを使用して、AIと人間のループ機能を組み込んだウェブ検索、スクレイピング、クロールを自動化"
+sidebarTitle: "Olostep + Relay"
+title: "Olostep + Relay"
+description: "コード不要で、ウェブスクレイピング、AI駆動のリサーチ、バッチジョブ、クローリング、サイトマップを任意のRelayワークフローに追加できます。"
 ---
 
-OlostepのRelay.app統合は、強力なウェブスクレイピング機能をRelayの最新の自動化プラットフォームに提供します。Relayの使いやすいインターフェースと、AIや人間のループ機能を組み込んだ高度な機能を使用して、ウェブデータを抽出、監視、処理する自動化ワークフローを構築しましょう。
+Relayの[Olostepアプリ](https://www.relay.app/apps/olostep/integrations)は、Relayのビジュアルビルダー内でURLをスクレイピングするか、サイト上のすべてのリンクをマッピングする2つのアクションを提供します。
 
-[Relay.appでOlostepを始める →](https://www.relay.app/apps/olostep/integrations)
+[Relayで見る →](https://www.relay.app/apps/olostep/integrations)
 
-## 特徴
+## 始める前に
 
-Relay.appは、深い統合と強力なワークフロー機能を備えた最新の自動化体験を提供します：
+- **APIキー付きのOlostepアカウント:** [無料で取得](https://olostep.com/dashboard)、クレジットカード不要。最初の500クレジットが含まれています。
+- **Relayアカウント:** [relay.app](https://www.relay.app/)で作成してください。
+- **コーディング不要:** このガイドのすべてはRelayのビジュアルエディタを通じて行われます。
+
+---
+
+## セットアップ
+
+<Steps>
+  <Step title="RelayでOlostepを見つける">
+    Relayでワークフローを開き、ステップを追加し、**Olostep**を検索します。アプリリストから**Olostep**を選択します。
+
+    ![プレースホルダー: RelayアプリピッカーでOlostepを検索](/images/integrations/relay/step-1.png)
+  </Step>
+
+  <Step title="アクションを選択">
+    **Olostep**を選択した後、ステップ設定で利用可能なOlostepアクションの1つを選択します。
+
+    ![プレースホルダー: RelayでのOlostepアクションセレクター](/images/integrations/relay/step-2.png)
+  </Step>
+
+  <Step title="アカウントを接続">
+    **アカウントを接続**をクリックし、Olostep APIキーを貼り付けて接続を承認します。Relayはこのアカウントを将来のワークフローのために保存します。
+
+    ![プレースホルダー: Olostep APIキー入力フィールド付きのRelayアカウント接続モーダル](/images/integrations/relay/step-3.png)
+
+    [Olostepダッシュボードからキーを取得 →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="ウェブサイトをスクレイピング (URL + フォーマット)">
+    - **スクレイピングするURL:** 前のステップからマッピングするか、手動で入力
+    - **出力フォーマット:** `Markdown`、`HTML`、`JSON`、または`Text`を選択
+
+    ![プレースホルダー: URLと出力フォーマット付きのRelay Olostepスクレイピングフィールド](/images/integrations/relay/step-4.png)
+  </Step>
+
+  <Step title="テストと公開">
+    出力を確認するためにテストを実行し、結果が正しいことを確認したらワークフローを公開またはオンにします。
+
+    ![プレースホルダー: Relayのテスト出力と公開フロー](/images/integrations/relay/step-5.png)
+  </Step>
+</Steps>
+
+---
+
+## アクション
 
 <CardGroup cols={2}>
-  <Card title="深い統合" icon="link">
-    シームレスなワークフロー自動化のための多数のアプリケーションとの包括的で使いやすい統合
+  <Card title="ウェブサイトをスクレイピング" icon="file-lines">
+    任意のURLからMarkdown、HTML、JSON、またはプレーンテキストとしてコンテンツを取得します。JSレンダリングされたページをオプションの待機時間と国ターゲティングで処理します。
   </Card>
-  
-  <Card title="組み込みAI" icon="brain">
-    人間のような理解を必要とするタスクを自動化し、意思決定を強化するための組み込みAI機能
-  </Card>
-  
-  <Card title="人間のループ" icon="users">
-    人間の判断が必要なタスクのための手動ステップを追加し、柔軟性と品質管理を確保
-  </Card>
-  
-  <Card title="強力なワークフロー" icon="workflow">
-    条件付きロジック、エラーハンドリング、並列処理を含む豊富なワークフローの必需品
+
+  <Card title="マップを作成" icon="map">
+    コンテンツをスクレイピングせずにサイト上のすべてのURLを取得します。バッチジョブの前に発見のために使用します。`map_id`を返します。
   </Card>
 </CardGroup>
 
-## インストール
-
-### 1. Relay.appでOlostepを見つける
-
-新しいワークフローを作成する際にRelay.appで「Olostep」を検索します：
-
-1. [Relay.appでのOlostep](https://www.relay.app/apps/olostep/integrations)に移動
-2. 「無料で始める」または「ワークフローを作成」をクリック
-3. アプリセレクターで「Olostep」を検索
-4. Olostepアプリを選択
-
-または、[Olostep統合ページ](https://www.relay.app/apps/olostep/integrations)に直接アクセスして、利用可能なアクションを閲覧し、最初のワークフローを作成します。
-
-### 2. アカウントを接続する
-
-ワークフローで初めてOlostepを使用する際に、アカウント接続を求められます：
-
-1. 「Olostepを接続」をクリック
-2. Olostep APIキーを入力
-3. 接続を承認
-
-APIキーは[Olostepダッシュボード](https://olostep.com/dashboard)から取得できます。
-
-## 利用可能なアクション
-
-### URLをスクレイプ
-
-単一のURLからコンテンツを抽出します。複数のフォーマットとJavaScriptレンダリングをサポート。
-
-**ユースケース:**
-- 特定のページの変更を監視
-- eコマースサイトから商品情報を抽出
-- ニュース記事やブログ投稿からデータを収集
-- コンテンツ集約のためのコンテンツを引き出す
-
-**設定:**
-
-<ParamField path="URL" type="string" required>
-  スクレイプするウェブサイトのURL（http://またはhttps://を含む必要があります）
-</ParamField>
-
-<ParamField path="Format" type="dropdown" default="Markdown">
-  フォーマットを選択：Markdown、HTML、JSON、またはプレーンテキスト
-</ParamField>
-
-<ParamField path="Country Code" type="string">
-  ロケーション固有のコンテンツのための国コード（例："US", "GB", "CA"）
-</ParamField>
-
-<ParamField path="Wait Before Scraping" type="integer">
-  JavaScriptレンダリングのための待機時間（ミリ秒単位、0-10000）
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  特殊な抽出のためのオプションのパーサーID（例："@olostep/amazon-product"）
-</ParamField>
-
-**出力フィールド:**
-- スクレイプID
-- スクレイプされたURL
-- Markdownコンテンツ
-- HTMLコンテンツ
-- JSONコンテンツ
-- テキストコンテンツ
-- ステータス
-- タイムスタンプ
-- スクリーンショットURL（利用可能な場合）
-- ページメタデータ
-
-**例のワークフロー:**
-
-<AccordionGroup>
-  <Accordion title="競合価格の監視">
-    **トリガー:** スケジュール（毎日午前9時）
-    
-    **アクション:** Olostep - URLをスクレイプ
-    - URL: 競合製品ページ
-    - フォーマット: JSON
-    - パーサー: @olostep/amazon-product
-    
-    **アクション:** Google Sheets - 行を作成
-    - 価格データを追跡スプレッドシートに追加
-    
-    **人間のループ:** 価格変更を確認
-    - 大幅な価格下落を承認
-    
-    **アクション:** Slack - メッセージを送信
-    - 承認された価格変更についてチームに通知
-  </Accordion>
-
-  <Accordion title="ブログ投稿の抽出と保存">
-    **トリガー:** RSSフィード - 新しいアイテム
-    
-    **アクション:** Olostep - URLをスクレイプ
-    - URL: \{\{投稿URL\}\}
-    - フォーマット: Markdown
-    
-    **アクション:** Notion - ページを作成
-    - 記事コンテンツをNotionデータベースに保存
-  </Accordion>
-
-  <Accordion title="AIを使ったリードエンリッチメント">
-    **トリガー:** Google Sheets - 新しい行
-    
-    **アクション:** Olostep - URLをスクレイプ
-    - URL: シートからの会社ウェブサイト
-    - フォーマット: Markdown
-    
-    **AIアクション:** OpenAI - データを抽出
-    - 抽出: 会社の規模、業界、製品
-    
-    **アクション:** Google Sheets - 行を更新
-    - エンリッチされたデータをシートに戻す
-  </Accordion>
-</AccordionGroup>
-
-## Relay.appの利点
-
-Relay.appは従来の自動化プラットフォームに比べていくつかの利点を提供します：
-
-### 人間のループワークフロー
-
-ワークフローに手動レビューのステップを直接追加：
-
-```
-1. Olostepがウェブサイトをスクレイプ
-2. 人間のレビューのステップ ← データをレビューして承認
-3. 承認された場合のみデータベースに保存
-```
-
-最適な用途：
-- データ処理前の品質管理
-- 抽出されたコンテンツに対する人間の判断
-- 機密データの承認ワークフロー
-- AI生成の要約のレビュー
-
-### 組み込みAI機能
-
-外部統合なしでワークフローにAIを使用：
-
-- **AI意思決定**: スクレイプされたコンテンツに基づいてワークフローパスをAIに決定させる
-- **スマートフィルタリング**: スクレイプされたデータを自動的にフィルタリングおよび分類
-- **コンテンツ要約**: 保存前に長い記事を要約
-- **データ抽出**: 構造化されていないコンテンツからAIを使用して構造化データを抽出
-
-### 優れたUXとテスト
-
-Relay.appの使いやすいインターフェースでワークフローの構築が簡単に：
-
-- 明確なテスト情報
-- 役立つエラーメッセージ
-- ビジュアルワークフロービルダー
-- 簡単なデバッグとトラブルシューティング
-
-## 人気のワークフロー例
-
-### レビュー付きのEコマース価格監視
-
-人間の承認を伴う競合価格の監視：
-
-```
-トリガー: スケジュール（毎時）
-↓
-アクション: Olostep - URLをスクレイプ
-  - URL: 競合製品ページ
-  - フォーマット: JSON
-  - パーサー: @olostep/amazon-product
-↓
-人間のレビューのステップ
-  - 価格変更を確認
-  - 承認または拒否
-↓
-アクション: Slack - メッセージを送信（承認された場合）
-  - アラート: "価格が$\{\{price\}\}に変更されました"
-```
-
-### AIを使ったコンテンツ集約
-
-複数のソースからコンテンツを集約し、強化：
-
-```
-トリガー: Google Sheets - 新しい行
-↓
-アクション: Olostep - URLをスクレイプ
-  - URL: \{\{シートからのURL\}\}
-  - フォーマット: Markdown
-↓
-AIアクション: コンテンツを要約
-  - 要約を生成
-↓
-アクション: Airtable - レコードを作成
-  - AIの要約を含む記事を保存
-```
-
-### リードエンリッチメントパイプライン
-
-ウェブ情報とAIを使用してリードデータを強化：
-
-```
-トリガー: HubSpot - 新しい連絡先
-↓
-アクション: Olostep - URLをスクレイプ
-  - URL: \{\{会社のウェブサイト\}\}
-  - フォーマット: Markdown
-↓
-AIアクション: 会社情報を抽出
-  - 抽出: 会社の規模、業界、製品
-↓
-人間のレビューのステップ
-  - AI抽出の精度を確認
-↓
-アクション: HubSpot - 連絡先を更新
-  - 検証されたエンリッチデータを追加
-```
-
-## 人気アプリとの統合
-
-### Google Sheets
-
-データ収集と追跡に最適：
-
-```
-1. Olostepがウェブサイトをスクレイプ
-2. AI - データを処理してフォーマット
-3. 人間のレビュー（オプション）
-4. Google Sheets - 行を作成/更新
-```
-
-**ユースケース:**
-- 価格追跡スプレッドシート
-- リードエンリッチメントデータベース
-- コンテンツインベントリ
-- 競合分析シート
-
-### Airtable
-
-スクレイプされたデータで強力なデータベースを構築：
-
-```
-1. Olostepがスクレイプまたはクロール
-2. AI - 構造化データを抽出
-3. Airtable - レコードを作成
-```
-
-**ユースケース:**
-- 製品カタログ
-- リサーチデータベース
-- コンテンツカレンダー
-- リンクデータベース
-
-### Slack
-
-承認ワークフローで即時通知を受け取る：
-
-```
-1. Olostepがページを監視
-2. フィルタ - 変更を確認
-3. 人間の承認ステップ
-4. Slack - メッセージを送信（承認された場合）
-```
-
-**ユースケース:**
-- 価格下落アラート（承認付き）
-- コンテンツ更新通知
-- エラーモニタリング
-- 日次ダイジェスト
-
-### HubSpot / Salesforce
-
-CRMデータを自動的にエンリッチ：
-
-```
-1. 新しい連絡先が追加される
-2. Olostepが会社のウェブサイトをスクレイプ
-3. AIが主要情報を抽出
-4. 人間のレビューのステップ
-5. CRM - 連絡先を更新（承認された場合）
-```
-
-**ユースケース:**
-- 品質管理を伴うリードエンリッチメント
-- 会社リサーチ
-- 競合インテリジェンス
-- アカウントマッピング
-
-### Notion
-
-レビュー済みコンテンツでナレッジベースを構築：
-
-```
-1. Olostepがドキュメントをクロール
-2. AI - コンテンツを解析して構造化
-3. 人間のレビューのステップ
-4. Notion - ページを作成（承認されたコンテンツ）
-```
-
-**ユースケース:**
-- ドキュメントミラー
-- リサーチリポジトリ
-- コンテンツライブラリ
-- チームウィキ
-
-## ベストプラクティス
-
-<AccordionGroup>
-  <Accordion title="品質管理のための人間のループを使用">
-    Relay.appの人間のループ機能を活用して：
-    - AI生成の要約をレビュー
-    - 保存前に機密データを承認
-    - スクレイプされたコンテンツの精度を検証
-    - ワークフローパスに対する判断を行う
-  </Accordion>
-
-  <Accordion title="組み込みAIと組み合わせる">
-    Relay.appの組み込みAI機能を使用：
-    - スクレイプされたコンテンツを自動的に分類
-    - 保存前に要約を生成
-    - 構造化されていないコンテンツから構造化データを抽出
-    - ワークフローでスマートな意思決定を行う
-  </Accordion>
-
-  <Accordion title="適切な待機時間を設定">
-    JavaScriptが多用されているサイトには、「スクレイプ前の待機時間」パラメータを使用：
-    - シンプルなサイト: 0-1000ms
-    - 動的なサイト: 2000-3000ms
-    - 重いJavaScript: 5000-8000ms
-    
-    最適な待機時間を見つけるために異なる値でテストしてください。
-  </Accordion>
-
-  <Accordion title="専門のパーサーを使用">
-    人気のあるウェブサイト（Amazon、LinkedIn、Google）には、事前に構築されたパーサーを使用：
-    - 自動的に構造化データを取得
-    - より信頼性の高い抽出
-    - カスタムパーシングの必要なし
-    - Olostepによって維持管理
-  </Accordion>
-
-  <Accordion title="Relay.appのテスト機能を活用">
-    Relay.appの優れたテスト機能を使用：
-    - 各ステップの明確なテスト情報
-    - 役立つエラーメッセージ
-    - 簡単なデバッグ
-    - 有効化前にワークフローをテスト
-  </Accordion>
-
-  <Accordion title="結果を適切に保存">
-    ニーズに基づいて適切なストレージを選択：
-    - **Google Sheets**: シンプルな追跡、チームコラボレーション
-    - **Airtable**: リレーショナルデータ、リッチフォーマット
-    - **データベース**: 大規模、複雑なクエリ
-    - **Notion**: ナレッジベース、ドキュメンテーション
-  </Accordion>
-</AccordionGroup>
-
-## 業界別の一般的なユースケース
-
-### Eコマース
-- **価格監視**: 人間の承認ワークフローで競合価格を追跡
-- **製品リサーチ**: トレンド製品と市場のギャップを発見
-- **在庫追跡**: 在庫の可用性を監視
-- **レビュー分析**: AIで顧客レビューを集約し分析
-
-### マーケティング & SEO
-- **コンテンツ発見**: AIの支援でコンテンツの機会を見つける
-- **競合分析**: 競合の戦略を追跡
-- **バックリンクリサーチ**: リンクの機会を発見
-- **キーワードリサーチ**: 検索結果からキーワードデータを抽出
-
-### セールス & リードジェネレーション
-- **リードエンリッチメント**: ウェブ情報と人間のレビューでCRMデータを強化
-- **会社リサーチ**: 会社のインテリジェンスを収集
-- **コンタクト発見**: 意思決定者を見つける
-- **競合インテリジェンス**: 競合の動きを追跡
-
-### リサーチ & アナリティクス
-- **データ収集**: 複数のソースからデータを収集
-- **市場調査**: 業界のトレンドを追跡
-- **学術研究**: 研究データを収集
-- **価格インテリジェンス**: 価格戦略を分析
-
-### メディア & 出版
-- **コンテンツ集約**: 複数のサイトからAI要約付きでコンテンツをキュレート
-- **ニュース監視**: ニュースと言及を追跡
-- **ソーシャルメディア**: ソーシャルプラットフォームを監視
-- **トレンド検出**: トレンドトピックを特定
+<Note>
+  **マップは非同期です。** 返された`map_id`を保存し、Relayで遅延/ポーリングパターンを使用して処理が完了したら結果を取得します。
+</Note>
+
+---
+
+## 例のワークフロー: 競合ページの定期スクレイピング
+
+**内容:** このワークフローはスケジュールに基づいて競合ページをスクレイピングし、後続のRelayステップで再利用できるクリーンなコンテンツを保存します。
+
+**使用するノード:** スケジュール -> Olostepウェブサイトスクレイピング
+
+![プレースホルダー: スケジュールとOlostepスクレイピングステップを表示するRelayキャンバス](/images/integrations/relay/workflow-example.png)
+
+---
+
+### ステップ1: スケジュールトリガーを追加
+
+ワークフローを作成し、スケジュールトリガーを追加します（例: 平日の午前8時）。
+
+### ステップ2: Olostepウェブサイトスクレイピングを追加
+
+**Olostep**ステップを追加し、**ウェブサイトをスクレイピング**を選択します。設定:
+- **URL:** `https://competitor.com/blog`
+- **出力フォーマット:** Markdown
+
+### ステップ3: テストと公開
+
+出力を確認するためにテストを実行し、ワークフローを公開またはオンにします。
+
+### 得られるもの
+
+各実行で分析やルーティングの準備が整ったクリーンなページコンテンツを生成します:
+
+> **スクレイピング結果**
+> - ソースURL
+> - 選択したフォーマットで取得したコンテンツ
+> - Relayでのタイムスタンプ付きの実行出力
+
+---
+
+## パーサー
+
+スクレイピングアクションの**Parser**フィールドにパーサーIDを追加して、生のコンテンツではなく構造化データを取得します:
+
+| パーサー | 抽出内容 |
+|--------|----------|
+| `@olostep/amazon-product` | タイトル、価格、評価、レビュー、画像、バリエーション |
+| `@olostep/google-search` | 結果のタイトル、URL、スニペット |
+| `@olostep/google-maps` | ビジネス名、住所、評価、レビュー |
+| `@olostep/extract-emails` | 任意のページからのメールアドレス |
+| `@olostep/extract-socials` | ソーシャルプロファイルリンク (X, GitHub, LinkedInなど) |
+| `@olostep/extract-calendars` | GoogleカレンダーとICSリンク |
+
+[Olostepパーサーストアで全リストを見る →](https://www.olostep.com/store)
+
+---
+
+## Relay.app vs Zapier
+
+Relay.appは、レビューとAIファーストのオーケストレーションが必要なワークフローにおいてZapierの強力な代替手段です。
+
+**Relay.appの利点:**
+- **ヒューマンインザループ:** ワークフロー内でのネイティブな承認とレビューのステップ
+- **AIファーストのワークフローデザイン:** AIの意思決定と要約をファーストクラスのステップとして追加しやすい
+- **ワークフローの明確さ:** 明確な実行コンテキストとステップ出力を持つクリーンなビジュアルビルダー
+
+**Zapierがより適している場合:**
+- Zapierでのみ利用可能なニッチなアプリのカバレッジが必要
+- チームが既に多くのZapとZapierに関連する運用ツールを持っている
+
+両方のプラットフォームがスタックをサポートしている場合、レビューとAIのコラボレーションがプロセスの中心であるときはRelayを選択してください。
+
+---
 
 ## トラブルシューティング
 
 <AccordionGroup>
-  <Accordion title="認証失敗">
-    **エラー**: "無効なAPIキー"
-    
-    **解決策**:
-    - [ダッシュボード](https://olostep.com/dashboard)からAPIキーを確認
-    - APIキーに余分なスペースがないことを確認
-    - Relay.appでOlostepアカウントを再接続
-    - APIキーがアクティブであることを確認
+  <Accordion title="APIキーが拒否される">
+    [olostep.com/dashboard](https://olostep.com/dashboard)から直接キーをコピーし、末尾にスペースがないことを確認します。エラーが続く場合はRelayでOlostepアカウントを再接続します。
   </Accordion>
 
-  <Accordion title="スクレイプが空のコンテンツを返す">
-    **エラー**: コンテンツフィールドが空
-    
-    **解決策**:
-    - 「スクレイプ前の待機時間」を増やす
-    - ウェブサイトがログインを必要とするか確認
-    - 異なるフォーマットを試す（HTML対Markdown）
-    - URLがアクセス可能であることを確認
-    - サイトが自動アクセスをブロックしていないか確認
+  <Accordion title="スクレイピングされたコンテンツが空">
+    **スクレイピング前の待機時間**を増やします（JSが多いページの場合は2000–5000msを試してください）。URLがログインなしで公開アクセス可能であることを確認します。特定のドメインが一貫して失敗する場合は、[info@olostep.com](mailto:info@olostep.com)に連絡してください。
   </Accordion>
 
-  <Accordion title="レート制限を超えた">
-    **エラー**: "レート制限を超えた"
-    
-    **解決策**:
-    - ワークフローの実行を遅延で間隔をあける
-    - 個別のスクレイプの代わりにバッチ処理を使用
-    - Olostepプランをアップグレード
-    - ダッシュボードでレート制限を確認
+  <Accordion title="レート制限に達した">
+    スクレイピングが多い実行間に遅延を追加し、大規模なワークフローではバックオフを使用して再試行します。現在の使用状況は[ダッシュボード](https://olostep.com/dashboard)で確認できます。
   </Accordion>
 
-  <Accordion title="URLがスクレイプされない">
-    **エラー**: 特定のURLがスクレイプに失敗
-    
-    **解決策**:
-    - URL形式を確認（http://またはhttps://を含む）
-    - URLが認証を必要とするか確認
-    - まずブラウザでURLをテスト
-    - 国のパラメータで試す
-    - ブロックされたドメインについてサポートに連絡
+  <Accordion title="マップステップが予想より長くかかる">
+    マップは非同期です。返された`map_id`を最初に保存し、処理が完了した後のステップ/実行で結果を取得します。
   </Accordion>
 </AccordionGroup>
 
-## Relay.app vs Zapier
+---
 
-Relay.appはZapierに対するモダンな代替手段で、いくつかの利点があります：
-
-**Relay.appの利点:**
-- **人間のループ**: 組み込みの手動レビューのステップ
-- **組み込みAI**: ワークフローに統合されたAI機能
-- **より良いUX**: より直感的なインターフェースと明確なエラーメッセージ
-- **より良い価格設定**: 多くのユースケースでよりコスト効果が高い
-- **より深い統合**: 人気のあるアプリとのより包括的な統合
-
-**Zapierを選ぶとき:**
-- あまり一般的でないアプリとの統合が必要
-- より確立されたプラットフォームを好む
-- Zapier専用の特定の機能が必要
-
-詳細な比較については、[Relay.appのZapier比較](https://www.relay.app/blog/zapier-alternatives)を参照してください。
-
-## 価格設定
-
-OlostepはAPIの使用に基づいて料金を請求し、Relay.appとは独立しています：
-
-- **スクレイプ**: スクレイプごとに支払い
-- **バッチ**: バッチ内のURLごとに支払い
-- **クロール**: クロールされたページごとに支払い
-- **マップ**: マップ操作ごとに支払い
-
-現在の価格は[olostep.com/pricing](https://olostep.com/pricing)で確認してください。
-
-**Relay.appプラン**: ワークフローを実行するにはアクティブなRelay.appプランも必要です。
-
-## サポート
-
-Relay.app統合に関するヘルプが必要ですか？
+## 関連
 
 <CardGroup cols={2}>
-  <Card title="ドキュメント" icon="book" href="https://docs.olostep.com">
-    完全なAPIドキュメントを閲覧
+  <Card title="スクレイピングAPI" icon="file-lines" href="/features/scrapes">
+    スクレイピングエンドポイントの完全なリファレンス
   </Card>
-  
-  <Card title="サポートメール" icon="envelope" href="mailto:info@olostep.com">
-    メール: info@olostep.com
-  </Card>
-  
-  <Card title="Relay.appヘルプセンター" icon="help-circle" href="https://help.relay.app">
-    Relay.appのヘルプセンターを訪問
-  </Card>
-  
-</CardGroup>
 
-## 関連リソース
+  <Card title="バッチAPI" icon="layer-group" href="/features/batches">
+    バッチジョブの動作と結果の取得方法
+  </Card>
 
-<CardGroup cols={2}>
-  <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    Scrapesエンドポイントについて学ぶ
+  <Card title="クローリングAPI" icon="spider-web" href="/features/crawls">
+    クローリングの設定と結果の取得
   </Card>
-  
-  <Card title="Batches API" icon="layer-group" href="/features/batches">
-    Batchesエンドポイントについて学ぶ
-  </Card>
-  
-  <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    Crawlsエンドポイントについて学ぶ
-  </Card>
-  
-  <Card title="Maps API" icon="map" href="/features/maps">
-    Mapsエンドポイントについて学ぶ
-  </Card>
-  
-  <Card title="Python SDK" icon="python" href="/sdks/python">
-    OlostepをPythonで使用
-  </Card>
-  
-  <Card title="Zapier統合" icon="bolt" href="/integrations/zapier">
-    Zapier統合との比較
+
+  <Card title="マップAPI" icon="map" href="/features/maps">
+    URLの発見とフィルタリングオプション
   </Card>
 </CardGroup>
-
-## 始めましょう
-
-Relay.appでウェブスクレイピングワークフローを自動化する準備はできましたか？
-
-<Card title="最初のワークフローを作成" icon="bolt" href="https://www.relay.app/apps/olostep/integrations">
-  OlostepとRelay.appで自動化ワークフローを構築し始めましょう
-</Card>
-
-OlostepをRelay.appの最新の自動化プラットフォームと接続し、今日からウェブデータ抽出を自動化しましょう！

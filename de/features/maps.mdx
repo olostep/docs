@@ -2,14 +2,15 @@
 sidebarTitle: "Karte"
 icon: "map"
 title: "Karten"
-description: "Erhalten Sie alle URLs auf einer Website."
+description: "Erhalte alle URLs auf einer Website."
 ---
-Über den Olostep `/v1/maps` Endpunkt können Sie alle URLs auf einer Website abrufen. Dies ist nützlich für die Inhaltserkennung, die Analyse der Seitenstruktur (z.B. SEO) oder um zu entscheiden, welche URLs Sie als nächstes scrapen möchten.
 
-- Erhalten Sie alle URLs auf einer Website (einschließlich Sitemaps und entdeckter Links)
-- Verwenden Sie spezielle Muster, um Pfade einzuschließen/auszuschließen (z.B. `/blog/**`)
-- Paginieren Sie große Antworten mit `cursor` (bis zu 10MB pro Antwort)
-- Begrenzen Sie das Volumen mit `top_n`
+Über den Olostep `/v1/maps` Endpunkt kannst du alle URLs auf einer Website abrufen. Dies ist nützlich für die Inhaltserkennung, die Analyse der Seitenstruktur (z.B. SEO) oder um zu entscheiden, welche URLs du als nächstes scrapen möchtest.
+
+- Erhalte alle URLs auf einer Website (einschließlich Sitemaps und entdeckter Links)
+- Verwende spezielle Muster, um Pfade einzuschließen/auszuschließen (z.B. `/blog/**`)
+- Paginierung großer Antworten mit `cursor` (bis zu 10MB pro Antwort)
+- Begrenze das Volumen mit `top_n`
 
 Für API-Details siehe die [Map Endpoint API Referenz](/api-reference/maps/create).
 
@@ -26,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl ist standardmäßig auf macOS, Linux und Windows verfügbar
 ```
 
 ```javascript Node (API)
@@ -41,7 +42,7 @@ pip install requests
 
 ## Verwendung
 
-Senden Sie eine POST-Anfrage mit der Website-`url`. Optional können Sie `include_urls`, `exclude_urls` (Glob-Muster) und `top_n` übergeben.
+Sende eine POST-Anfrage mit der Website-`url`. Optional kannst du `include_urls`, `exclude_urls` (Glob-Muster) und `top_n` übergeben.
 
 <CodeGroup>
 
@@ -109,22 +110,22 @@ print(json.dumps(response.json(), indent=2))
 
 </CodeGroup>
 
-Die Antwortzeit liegt typischerweise im Sekundenbereich, kann aber bei komplexeren Websites bis zu 120 Sekunden dauern. Es können alle URLs von einer Website extrahiert werden, sogar Backlinks und solche, die nicht in den Sitemaps vorhanden sind. Sie können auch entscheiden, welche URL-Pfade Sie in die Antwort ein- oder ausschließen möchten.
+Die Antwortzeit liegt normalerweise innerhalb von Sekunden, kann aber bei komplexeren Websites bis zu 120 Sekunden dauern. Es können alle URLs von einer Website extrahiert werden, sogar Backlinks und solche, die nicht in den Sitemaps vorhanden sind. Du kannst auch entscheiden, welche URL-Pfade du in die Antwort ein- oder ausschließen möchtest.
 
-Standardmäßig gibt der Endpunkt etwa 100.000 URLs in einem einzigen Aufruf zurück (maximal 10MB). Wenn die Antwort mehr Daten enthält, gibt die API einen `cursor`-Parameter zurück, der für die Paginierung und das Abrufen der nachfolgenden URLs verwendet werden kann. Für weitere Details siehe die [API-Referenz](/api-reference/maps/create#body-cursor).
+Standardmäßig gibt der Endpunkt etwa 100.000 URLs in einem einzigen Aufruf zurück (max. 10MB). Wenn die Antwort mehr Daten enthält, gibt die API einen `cursor`-Parameter zurück, der für die Paginierung und das Abrufen der nachfolgenden URLs verwendet werden kann. Für weitere Details siehe die [API Referenz](/api-reference/maps/create#body-cursor).
 
-Dieser Endpunkt ist besonders nützlich, wenn Sie:
-- Alle Inhaltsseiten auf einer Website entdecken möchten
-- Die Seitenstruktur und Hierarchie analysieren möchten
-- URLs für die Stapelverarbeitung vorbereiten möchten
-- Entscheiden möchten, welche spezifischen URLs gescrapt werden sollen
+Dieser Endpunkt ist besonders nützlich, wenn du:
+- Alle Inhaltsseiten auf einer Website entdecken möchtest
+- Die Seitenstruktur und Hierarchie analysieren möchtest
+- URLs für die Batch-Verarbeitung vorbereiten möchtest
+- Entscheiden möchtest, welche spezifischen URLs gescrapt werden sollen
 
-Für eine genauere Kontrolle über die zurückgegebenen URLs können Sie die Parameter `include_urls` und `exclude_urls` verwenden.
+Für eine feinere Kontrolle über die zurückgegebenen URLs kannst du die Parameter `include_urls` und `exclude_urls` verwenden.
 
 ### Beispiel
 
-Angenommen, Sie möchten von www.brex.com alle URLs extrahieren, die die Pfade nach `/product/` haben, z.B. `https://www.brex.com/product/api/no-code`, aber auch `www.brex.com/product` einbeziehen.
-Sie können den folgenden Code verwenden:
+Angenommen, du möchtest von www.brex.com alle URLs extrahieren, die die Pfade nach `/product/` haben, z.B. `https://www.brex.com/product/api/no-code`, aber auch `www.brex.com/product` einbeziehen.
+Du kannst den folgenden Code verwenden:
 
 <CodeGroup>
 
@@ -213,8 +214,8 @@ print(response.text)
 
 ## Fazit
 
-Der Maps-Endpunkt ist ein leistungsstarkes Werkzeug zur Inhaltserkennung und Seitenanalyse. Er bietet eine umfassende Liste von URLs auf einer Website, sodass Sie Inhalte von bestimmten Seiten extrahieren oder die Seitenstruktur analysieren können. Dieser Endpunkt ist besonders nützlich für SEO-Profis, Content-Marketer und KI-Agenten, die Website-Inhalte oder -Strukturen analysieren müssen.
+Der Karten-Endpunkt ist ein leistungsstarkes Werkzeug für die Inhaltserkennung und Seitenanalyse. Er bietet eine umfassende Liste von URLs auf einer Website, die es dir ermöglicht, Inhalte von bestimmten Seiten zu extrahieren oder die Seitenstruktur zu analysieren. Dieser Endpunkt ist besonders nützlich für SEO-Profis, Content-Marketer und KI-Agenten, die Website-Inhalte oder -Strukturen analysieren müssen.
 
 ## Preisgestaltung
 
-Die Karte kostet 1 Kredit. Für jede zusätzlichen 1000 URLs, die in der Antwort zurückgegeben werden, wird ein zusätzlicher Kredit berechnet.
+Eine Karte kostet 1 Kredit. Für jede weiteren 1000 URLs, die in der Antwort zurückgegeben werden, wird ein zusätzlicher Kredit berechnet.

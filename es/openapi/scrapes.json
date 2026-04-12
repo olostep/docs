@@ -21,8 +21,8 @@
   "paths": {
     "/v1/scrapes": {
       "post": {
-        "summary": "Iniciar un scrapeo de página web",
-        "description": "Este endpoint permite a los usuarios iniciar un scrapeo de página web con varias configuraciones.",
+        "summary": "Iniciar un scrape de página web",
+        "description": "Este endpoint permite a los usuarios iniciar un scrape de página web con varias configuraciones.",
         "security": [
           {
             "Authorization": []
@@ -42,7 +42,7 @@
                   },
                   "wait_before_scraping": {
                     "type": "integer",
-                    "description": "Tiempo de espera en milisegundos antes de comenzar el scrapeo."
+                    "description": "Tiempo de espera en milisegundos antes de comenzar el scraping."
                   },
                   "formats": {
                     "type": "array",
@@ -66,7 +66,7 @@
                       "none",
                       "array"
                     ],
-                    "description": "Opción para eliminar ciertos selectores CSS del contenido. Opcionalmente, también puedes pasar un array en formato JSON de selectores específicos que deseas eliminar. Los selectores CSS eliminados cuando esta opción está configurada por defecto son ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
+                    "description": "Opción para eliminar ciertos selectores CSS del contenido. Opcionalmente, también puedes pasar un array en formato JSON stringificado de selectores específicos que deseas eliminar. Los selectores CSS eliminados cuando esta opción está configurada por defecto son ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
                   },
                   "actions": {
                     "type": "array",
@@ -121,7 +121,7 @@
                         },
                         {
                           "type": "object",
-                          "title": "Llenar Entrada",
+                          "title": "Rellenar Entrada",
                           "required": [
                             "type",
                             "selector",
@@ -133,7 +133,7 @@
                               "enum": [
                                 "fill_input"
                               ],
-                              "description": "Llena un elemento de entrada con un valor"
+                              "description": "Rellenar un elemento de entrada con un valor"
                             },
                             "selector": {
                               "type": "string",
@@ -159,7 +159,7 @@
                               "enum": [
                                 "scroll"
                               ],
-                              "description": "Desplaza la página"
+                              "description": "Desplazar la página"
                             },
                             "direction": {
                               "type": "string",
@@ -183,7 +183,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "País residencial desde el cual cargar la solicitud.  Valores soportados son: - US (Estados Unidos) - CA (Canadá) - IT (Italia) - IN (India) - GB (Inglaterra) - JP (Japón) - MX (México) - AU (Australia) - ID (Indonesia) - UA (EAU) - RU (Rusia) - RANDOM  Algunas operaciones, como el scrapeo de Google Search y Google News, soportan todos los países."
+                    "description": "País residencial desde el cual cargar la solicitud.  Valores soportados son: - US (Estados Unidos) - CA (Canadá) - IT (Italia) - IN (India) - GB (Inglaterra) - JP (Japón) - MX (México) - AU (Australia) - ID (Indonesia) - UA (EAU) - RU (Rusia) - RANDOM  Algunas operaciones, como scraping de Google Search y Google News, soportan todos los países."
                   },
                   "transformer": {
                     "type": "string",
@@ -216,7 +216,7 @@
                     "required": [
                       "id"
                     ],
-                    "description": "Al definir json como un formato, puedes usar este parámetro para especificar el parser a usar. Los parsers son útiles para extraer contenido estructurado de páginas web. Olostep tiene algunos parsers integrados para las páginas web más comunes, y también puedes crear tus propios parsers."
+                    "description": "Al definir json como formato, puedes usar este parámetro para especificar el parser a usar. Los parsers son útiles para extraer contenido estructurado de páginas web. Olostep tiene algunos parsers integrados para las páginas web más comunes, y también puedes crear tus propios parsers."
                   },
                   "llm_extract": {
                     "type": "object",

@@ -5,13 +5,13 @@ description: "Upload en beheer JSON-bestanden voor gebruik als context in API-ve
 icon: "file-upload"
 ---
 
-Via het Olostep `/v1/files` eindpunt kun je JSON-bestanden uploaden die gebruikt kunnen worden als context in je API-verzoeken. Dit stelt je in staat om gestructureerde data te leveren om je scrapes, antwoorden en andere operaties te verbeteren.
+Via de Olostep `/v1/files` endpoint kun je JSON-bestanden uploaden die als context in je API-verzoeken kunnen worden gebruikt. Dit stelt je in staat om gestructureerde data te leveren om je scrapes, antwoorden en andere operaties te verbeteren.
 
 - Upload JSON-bestanden tot 200MB
-- Bestanden worden automatisch gevalideerd op correct JSON-formaat
-- Gebruik bestanden als context in scrapes, antwoorden en andere eindpunten
+- Bestanden worden automatisch gevalideerd op juiste JSON-indeling
+- Gebruik bestanden als context in scrapes, antwoorden en andere endpoints
 - Bestanden verlopen na 30 dagen
-- Beveiligd uploadproces met vooraf ondertekende URL
+- Veilige uploadprocedure met vooraf ondertekende URL
 
 Voor API-details zie de [Files Endpoint API Reference](/api-reference/files/create).
 
@@ -45,11 +45,11 @@ const fetch = require('node-fetch')
 
 Het uploadproces van een bestand bestaat uit twee stappen:
 1. **Maak upload-URL aan**: Vraag een vooraf ondertekende URL aan voor het uploaden van je bestand
-2. **Voltooi upload**: Upload je bestand naar de vooraf ondertekende URL en roep vervolgens het complete eindpunt aan om te valideren en finaliseren
+2. **Voltooi upload**: Upload je bestand naar de vooraf ondertekende URL en roep vervolgens de complete endpoint aan om te valideren en af te ronden
 
 ### Stap 1: Maak upload-URL aan
 
-Maak eerst een upload-URL aan door de bestandsnaam en optioneel het doel op te geven. De `purpose` parameter ondersteunt alleen twee waarden: `"context"` (standaard) of `"batch"`.
+Maak eerst een upload-URL aan door de bestandsnaam en optioneel het doel op te geven. De `purpose` parameter ondersteunt slechts twee waarden: `"context"` (standaard) of `"batch"`.
 
 <CodeGroup>
 
@@ -62,7 +62,7 @@ API_URL = "https://api.olostep.com/v1"
 
 # Stap 1: Maak upload-URL aan
 payload = {
-    "filename": "mijn-data.json",
+    "filename": "my-data.json",
     "purpose": "context"  # Optioneel, standaard is "context". Ondersteunde waarden: "context" of "batch"
 }
 
@@ -85,7 +85,7 @@ const res = await fetch(`${API_URL}/files`, {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    filename: 'mijn-data.json',
+    filename: 'my-data.json',
     purpose: 'context'  // Optioneel, standaard is "context". Ondersteunde waarden: "context" of "batch"
   })
 })
@@ -98,7 +98,7 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "filename": "mijn-data.json",
+    "filename": "my-data.json",
     "purpose": "context"
   }'
 
@@ -128,7 +128,7 @@ De reactie bevat een vooraf ondertekende `upload_url` die verloopt na 10 minuten
 
 ### Stap 2: Upload bestand en voltooi
 
-Upload je JSON-bestand naar de vooraf ondertekende URL en roep vervolgens het complete eindpunt aan om de upload te valideren en finaliseren.
+Upload je JSON-bestand naar de vooraf ondertekende URL en roep vervolgens de complete endpoint aan om de upload te valideren en af te ronden.
 
 <CodeGroup>
 
@@ -204,7 +204,7 @@ console.log(fileInfo)
 # Stap 2a: Upload bestand naar vooraf ondertekende URL
 curl -X PUT "$UPLOAD_URL" \
   -H "Content-Type: application/json" \
-  -d @mijn-data.json
+  -d @my-data.json
 
 # Stap 2b: Voltooi de upload
 curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
@@ -213,14 +213,14 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 
 </CodeGroup>
 
-Het complete eindpunt valideert het JSON-bestand en retourneert bestandsmetadata:
+De complete endpoint valideert het JSON-bestand en retourneert bestandsmetadata:
 
 ```json
 {
   "id": "file_abc123xyz789",
   "object": "file",
   "created": 1760329882,
-  "filename": "mijn-data.json",
+  "filename": "my-data.json",
   "bytes": 1024,
   "purpose": "context",
   "status": "completed"
@@ -259,9 +259,9 @@ curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## Haal bestand op via ID
+## Haal bestandobject op via ID
 
-Verkrijg een vooraf ondertekende URL om de JSON-inhoud van een voltooid bestand te downloaden. Geef optioneel de vervaltijd voor de download-URL op met behulp van de `expires_in` queryparameter (standaard is 600 seconden / 10 minuten).
+Verkrijg een vooraf ondertekende URL om de JSON-inhoud van een voltooid bestand te downloaden. Specificeer optioneel de vervaltijd voor de download-URL met de `expires_in` queryparameter (standaard is 600 seconden / 10 minuten).
 
 <CodeGroup>
 
@@ -286,7 +286,7 @@ response = requests.get(
     headers={"Authorization": f"Bearer {API_KEY}"}
 )
 download_info = response.json()
-print(f"Download-URL verloopt in: {download_info['expires_in']} seconden")
+print(f"Download-URL verloopt over: {download_info['expires_in']} seconden")
 ```
 
 ```js Node
@@ -309,7 +309,7 @@ const customRes = await fetch(`${API_URL}/files/${fileId}/content?expires_in=360
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
 const customDownloadInfo = await customRes.json()
-console.log(`Download-URL verloopt in: ${customDownloadInfo.expires_in} seconden`)
+console.log(`Download-URL verloopt over: ${customDownloadInfo.expires_in} seconden`)
 ```
 
 ```bash cURL
@@ -334,7 +334,7 @@ De reactie bevat een vooraf ondertekende `download_url` die verloopt na de opgeg
   "id": "file_abc123xyz789",
   "object": "file",
   "created": 1760329882,
-  "filename": "mijn-data.json",
+  "filename": "my-data.json",
   "bytes": 1024,
   "download_url": "https://olostep-files.s3.amazonaws.com/files/...",
   "expires_in": 600
@@ -403,7 +403,7 @@ De reactie bevat een lijst van bestanden:
       "id": "file_abc123xyz789",
       "object": "file",
       "created": 1760329882,
-      "filename": "mijn-data.json",
+      "filename": "my-data.json",
       "bytes": 1024,
       "purpose": "context",
       "status": "completed"
@@ -534,9 +534,9 @@ console.log(`Bestandsgrootte: ${fileInfo.bytes} bytes`)
 
 </CodeGroup>
 
-## Upload batchbestand voorbeeld
+## Upload batch bestand voorbeeld
 
-Hier is een voorbeeld dat een JSON-bestand uploadt met `purpose="batch"` dat geldige batchdata bevat die kan worden gebruikt met het `/v1/batches` eindpunt:
+Hier is een voorbeeld dat een JSON-bestand uploadt met `purpose="batch"` dat geldige batchgegevens bevat die kunnen worden gebruikt met de `/v1/batches` endpoint:
 
 <CodeGroup>
 
@@ -557,7 +557,7 @@ upload_data = create_response.json()
 file_id = upload_data["id"]
 upload_url = upload_data["upload_url"]
 
-# Stap 2: Bereid batch JSON-data voor (geldig formaat voor /v1/batches eindpunt)
+# Stap 2: Bereid batch JSON-data voor (geldige indeling voor /v1/batches endpoint)
 batch_data = {
     "items": [
         {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
@@ -582,7 +582,7 @@ complete_response = requests.post(
 )
 file_info = complete_response.json()
 
-print(f"Batchbestand succesvol geüpload: {file_info['id']}")
+print(f"Batch bestand succesvol geüpload: {file_info['id']}")
 print(f"Bestandsgrootte: {file_info['bytes']} bytes")
 print(f"Doel: {file_info['purpose']}")
 ```
@@ -600,7 +600,7 @@ const uploadData = await createRes.json()
 const fileId = uploadData.id
 const uploadUrl = uploadData.upload_url
 
-// Stap 2: Bereid batch JSON-data voor (geldig formaat voor /v1/batches eindpunt)
+// Stap 2: Bereid batch JSON-data voor (geldige indeling voor /v1/batches endpoint)
 const batchData = {
   items: [
     { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
@@ -624,7 +624,7 @@ const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
 })
 const fileInfo = await completeRes.json()
 
-console.log(`Batchbestand succesvol geüpload: ${fileInfo.id}`)
+console.log(`Batch bestand succesvol geüpload: ${fileInfo.id}`)
 console.log(`Bestandsgrootte: ${fileInfo.bytes} bytes`)
 console.log(`Doel: ${fileInfo.purpose}`)
 ```
@@ -639,7 +639,7 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
     "purpose": "batch"
   }'
 
-# Stap 2: Upload batch JSON-data (sla op in batch-items.json eerst)
+# Stap 2: Upload batch JSON-data (eerst opslaan in batch-items.json)
 # batch-items.json inhoud:
 # {
 #   "items": [
@@ -662,7 +662,7 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 
 </CodeGroup>
 
-Het geüploade batchbestand bevat een geldige JSON-structuur die overeenkomt met het `/v1/batches` eindpunt formaat:
+Het geüploade batchbestand bevat een geldige JSON-structuur die overeenkomt met het `/v1/batches` endpoint formaat:
 - `items`: Array van objecten met `custom_id` en `url` velden
 - `parser`: Optionele parserconfiguratie
 - `country`: Optionele landcode
@@ -673,9 +673,9 @@ Dit bestand kan worden gebruikt als invoer voor batchverwerkingsoperaties.
 
 - **Bestandsformaat**: Alleen JSON-bestanden worden ondersteund (`.json` extensie vereist)
 - **Bestandsgrootte**: Maximaal 200MB per bestand
-- **Vervaldatum**: Bestanden verlopen na 30 dagen
+- **Verloop**: Bestanden verlopen na 30 dagen
 - **Upload-URL**: Vooraf ondertekende URL's verlopen na 10 minuten
-- **Doelparameter**: Ondersteunt alleen `"context"` of `"batch"` waarden (standaard is `"context"`)
+- **Purpose parameter**: Ondersteunt alleen `"context"` of `"batch"` waarden (standaard is `"context"`)
 
 ## Prijzen
 

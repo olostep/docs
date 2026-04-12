@@ -2,16 +2,16 @@
 sidebarTitle: "Carte"
 icon: "map"
 title: "Cartes"
-description: "Obtenez tous les URLs d’un site web."
+description: "Obtenez toutes les URLs d’un site web."
 ---
-Grâce au point de terminaison `/v1/maps` d'Olostep, tu peux obtenir tous les URLs d'un site web. Cela est utile pour la découverte de contenu, l'analyse de la structure du site (par exemple, SEO), ou pour décider quels URLs tu souhaites extraire ensuite.
+Grâce à l’endpoint Olostep `/v1/maps`, tu peux obtenir toutes les URLs d’un site web. Cela est utile pour la découverte de contenu, l’analyse de la structure du site (par exemple, SEO), ou pour décider quelles URLs tu souhaites scraper ensuite.
 
-- Obtenez tous les URLs d'un site web (y compris les sitemaps et les liens découverts)
-- Utilisez des motifs spéciaux pour inclure/exclure des chemins (par exemple, `/blog/**`)
-- Paginer les grandes réponses avec `cursor` (jusqu'à 10MB par réponse)
+- Obtiens toutes les URLs d’un site web (y compris les sitemaps et les liens découverts)
+- Utilise des motifs spéciaux pour inclure/exclure des chemins (par exemple, `/blog/**`)
+- Paginer les réponses volumineuses avec `cursor` (jusqu'à 10MB par réponse)
 - Limiter le volume avec `top_n`
 
-Pour les détails de l'API, consulte la [Référence API du point de terminaison Carte](/api-reference/maps/create).
+Pour les détails de l'API, consulte la [Référence de l'API du point de terminaison Carte](/api-reference/maps/create).
 
 ## Installation
 
@@ -26,7 +26,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl est disponible par défaut sur macOS, Linux et Windows
 ```
 
 ```javascript Node (API)
@@ -41,7 +41,7 @@ pip install requests
 
 ## Utilisation
 
-Envoie une requête POST avec l'`url` du site web. Optionnellement, passe `include_urls`, `exclude_urls` (motifs globaux), et `top_n`.
+Envoie une requête POST avec l’`url` du site web. Tu peux également passer `include_urls`, `exclude_urls` (motifs globaux), et `top_n`.
 
 <CodeGroup>
 
@@ -109,21 +109,21 @@ print(json.dumps(response.json(), indent=2))
 
 </CodeGroup>
 
-Le temps de réponse est généralement de quelques secondes mais peut prendre jusqu'à 120 secondes pour les sites web plus complexes. Il peut extraire tous les URLs d'un site web, y compris les backlinks et ceux non présents dans les Sitemaps. Tu peux également décider des chemins d'URLs que tu souhaites inclure ou exclure de la réponse.
+Le temps de réponse est généralement de quelques secondes, mais peut prendre jusqu'à 120 secondes pour les sites web plus complexes. Il peut extraire toutes les URLs d’un site web, même les backlinks et celles non présentes dans les Sitemaps. Tu peux également décider des chemins d'URLs que tu souhaites inclure ou exclure de la réponse.
 
-Par défaut, le point de terminaison renvoie environ 100k URLs en un seul appel (10MB max). Si la réponse inclut plus de données, l'API renvoie un paramètre `cursor` qui peut être utilisé pour la pagination et obtenir les URLs suivantes. Pour plus de détails, consulte la [Référence API](/api-reference/maps/create#body-cursor).
+Par défaut, l’endpoint retourne environ 100k URLs en un seul appel (10MB max). Si la réponse inclut plus de données, l'API retourne un paramètre `cursor` qui peut être utilisé pour la pagination et obtenir les URLs suivantes. Pour plus de détails, consulte la [Référence de l'API](/api-reference/maps/create#body-cursor).
 
-Ce point de terminaison est particulièrement utile lorsque tu as besoin de :
-- Découvrir toutes les pages de contenu d'un site web
+Cet endpoint est particulièrement utile lorsque tu as besoin de :
+- Découvrir toutes les pages de contenu d’un site web
 - Analyser la structure et la hiérarchie du site
 - Préparer les URLs pour un traitement par lots
-- Décider quels URLs spécifiques extraire
+- Décider quelles URLs spécifiques scraper
 
-Pour un contrôle plus précis sur les URLs retournés, tu peux utiliser les paramètres `include_urls` et `exclude_urls`.
+Pour un contrôle plus précis sur les URLs retournées, tu peux utiliser les paramètres `include_urls` et `exclude_urls`.
 
 ### Exemple
 
-Disons que depuis www.brex.com tu veux extraire tous les urls qui ont les chemins après `/product/` par exemple `https://www.brex.com/product/api/no-code` mais aussi inclure `www.brex.com/product`.
+Disons que depuis www.brex.com tu veux extraire toutes les URLs qui ont les chemins après `/product/` par exemple `https://www.brex.com/product/api/no-code` mais aussi inclure `www.brex.com/product`.
 Tu peux utiliser le code suivant :
 
 <CodeGroup>
@@ -213,8 +213,8 @@ print(response.text)
 
 ## Conclusion
 
-Le point de terminaison des cartes est un outil puissant pour la découverte de contenu et l'analyse de site. Il fournit une liste complète des URLs d'un site web, te permettant d'extraire du contenu de pages spécifiques ou d'analyser la structure du site. Ce point de terminaison est particulièrement utile pour les professionnels du SEO, les spécialistes du marketing de contenu, les agents IA qui ont besoin d'analyser le contenu ou la structure d'un site web.
+L'endpoint des cartes est un outil puissant pour la découverte de contenu et l'analyse de site. Il fournit une liste complète des URLs d’un site web, te permettant d'extraire du contenu de pages spécifiques ou d'analyser la structure du site. Cet endpoint est particulièrement utile pour les professionnels du SEO, les spécialistes du marketing de contenu, les agents d'IA qui ont besoin d'analyser le contenu ou la structure d’un site web.
 
 ## Tarification
 
-La carte coûte 1 crédit. Ensuite, pour chaque 1000 URLs supplémentaires retournés dans la réponse, un crédit supplémentaire est facturé.
+La carte coûte 1 crédit. Ensuite, pour chaque tranche supplémentaire de 1000 URLs retournées dans la réponse, un crédit supplémentaire est facturé.

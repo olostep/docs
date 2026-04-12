@@ -15,7 +15,7 @@
       "post": {
         "operationId": "createAirOpsBatch",
         "summary": "Créer un Lot AirOps",
-        "description": "Démarre un processus par lots qui combine le scraping avec un enrichissement basé sur LLM pour l'extraction des métadonnées de page. Le flux de travail : scraper les URLs → extraire les métadonnées → analyse des lacunes → enrichissement LLM pour les champs manquants.",
+        "description": "Démarre un processus par lots qui combine le scraping avec un enrichissement basé sur LLM pour l'extraction des métadonnées de page. Le workflow : scraper les URLs → extraire les métadonnées → analyse des lacunes → enrichissement LLM pour les champs manquants.",
         "security": [
           {
             "Authorization": []
@@ -391,7 +391,7 @@
           },
           "created": {
             "type": "integer",
-            "description": "Horodatage Unix (millisecondes) quand le lot a été créé."
+            "description": "Horodatage Unix (millisecondes) lorsque le lot a été créé."
           },
           "total_urls": {
             "type": "integer",
@@ -455,7 +455,7 @@
           },
           "completed_at": {
             "type": "string",
-            "description": "Horodatage ISO 8601 quand le lot est terminé."
+            "description": "Horodatage ISO 8601 lorsque le lot est terminé."
           },
           "status": {
             "type": "string",
@@ -490,7 +490,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Message de statut (présent quand le lot est encore en cours de traitement)."
+            "description": "Message de statut (présent lorsque le lot est encore en cours de traitement)."
           }
         }
       },
@@ -555,7 +555,7 @@
           "date_modified": {
             "type": "string",
             "nullable": true,
-            "description": "Date de la dernière modification."
+            "description": "Date de dernière modification."
           },
           "brand_mentions": {
             "type": "array",
@@ -575,7 +575,7 @@
           },
           "error": {
             "$ref": "#/components/schemas/StepError",
-            "description": "Détails de l'erreur (présents lorsque le statut est \"failed\")."
+            "description": "Détails de l'erreur (présent lorsque le statut est \"failed\")."
           }
         }
       },
@@ -628,7 +628,7 @@
           "date_modified": {
             "type": "string",
             "nullable": true,
-            "description": "Date de la dernière modification."
+            "description": "Date de dernière modification."
           },
           "brand_mentions": {
             "type": "array",
@@ -739,7 +739,7 @@
           },
           "items_complete": {
             "type": "integer",
-            "description": "Éléments avec tous les champs présents à partir du parseur."
+            "description": "Éléments avec tous les champs présents du parseur."
           },
           "fields_to_enrich": {
             "type": "object",

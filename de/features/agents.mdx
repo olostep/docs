@@ -1,16 +1,16 @@
 ---
-sidebarTitle: "Agents"
-title: "Agents API"
+sidebarTitle: "Agenten"
+title: "Agenten-API"
 icon: "robot"
 ---
 
-Über die Olostep Agents API können Sie autonome Forschungsagenten erstellen, die Datenpipelines und Suchaufgaben nach einem Zeitplan automatisieren und strukturierte Ergebnisse liefern.
+Über die Olostep Agenten-API kannst du autonome Forschungsagenten erstellen, die Datenpipelines und Suchaufgaben nach einem Zeitplan automatisieren und strukturierte Ergebnisse liefern können.
 
 - Web-Recherche über Websites mit automatisierter Extraktion
 - Mehrstufige Workflows mit geplanter Ausführung und Benachrichtigungen
 - Ausgabe in JSON/CSV/Sheets/DB
 
-Für Verfügbarkeit und Details kontaktieren Sie uns unter [info@olostep.com](mailto:info@olostep.com) oder [Kontakt Vertrieb](https://www.olostep.com/contact-sales).
+Für Verfügbarkeit und Details kontaktiere uns unter [info@olostep.com](mailto:info@olostep.com) oder [Kontakt Vertrieb](https://www.olostep.com/contact-sales).
 
 ## Installation
 
@@ -33,19 +33,19 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: eingebautes curl ist ausreichend
+# macOS: eingebaute curl ist ausreichend
 ```
 
 </CodeGroup>
 
-## Einen Agenten erstellen
+## Erstelle einen Agenten
 
-Erstellen Sie einen Agenten mit einem natürlichen Sprachprompt und einem Zielmodell.
+Erstelle einen Agenten mit einem natürlichen Sprachprompt und einem Zielmodell.
 
 <CodeGroup>
 
 ```python Python
-API_URL = 'https://api.olostep.com/v1/agents' # Endpoint für ausgewählte Kunden verfügbar
+API_URL = 'https://api.olostep.com/v1/agents' # Endpoint verfügbar für ausgewählte Kunden
 API_KEY = '<YOUR_API_KEY>'
 
 headers = {
@@ -55,11 +55,11 @@ headers = {
 
 data = {
   "prompt": """
-    Finden Sie Portfoliounternehmen von https://www.vcsheet.com/funds und 
-    schreiben Sie in ein Google Sheet mit den Spalten (Fondsname, Fonds-Website-URL, 
+    Finde Portfoliounternehmen von https://www.vcsheet.com/funds und 
+    schreibe in ein Google Sheet mit den Spalten (Fondsname, Fonds-Website-URL, 
     Fonds-LinkedIn-URL, Portfoliounternehmensname, Portfoliounternehmens-URL, 
-    Portfoliounternehmens-LinkedIn-URL). Führen Sie dies wöchentlich am Montag um 9:00 Uhr 
-    aus und senden Sie eine E-Mail an steve@example.com, wenn neue Unternehmen hinzugefügt werden.
+    Portfoliounternehmens-LinkedIn-URL). Führe wöchentlich am Montag um 9:00 Uhr 
+    aus und sende eine E-Mail an steve@example.com, wenn neue Unternehmen hinzugefügt werden.
   """,
   "model": "gpt-4.1"
 }
@@ -74,7 +74,7 @@ const res = await fetch('https://api.olostep.com/v1/agents', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    prompt: 'Finden Sie Portfoliounternehmen von https://www.vcsheet.com/funds und schreiben Sie in ein Google Sheet...',
+    prompt: 'Finde Portfoliounternehmen von https://www.vcsheet.com/funds und schreibe in ein Google Sheet...',
     model: 'gpt-4.1'
   })
 })
@@ -86,7 +86,7 @@ curl -s -X POST "https://api.olostep.com/v1/agents" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "prompt": "Finden Sie Portfoliounternehmen von https://www.vcsheet.com/funds und schreiben Sie in ein Google Sheet...",
+    "prompt": "Finde Portfoliounternehmen von https://www.vcsheet.com/funds und schreibe in ein Google Sheet...",
     "model": "gpt-4.1"
   }'
 ```
@@ -97,20 +97,20 @@ curl -s -X POST "https://api.olostep.com/v1/agents" \
 
 Der Olostep-Agent kann:
 
-- **Web-Recherche**: Automatisches Suchen und Extrahieren von Daten aus Websites
-- **Datenorganisation**: Strukturierung von Informationen in Tabellen, Datenbanken oder anderen Formaten
-- **Geplante Ausführung**: Aufgaben in einem wiederkehrenden Zeitplan ausführen (täglich, wöchentlich, zu einer festgelegten Zeit)
+- **Web-Recherche**: Automatisch Daten von Websites suchen und extrahieren
+- **Datenorganisation**: Informationen in Tabellen, Datenbanken oder anderen Formaten strukturieren
+- **Geplante Ausführung**: Aufgaben nach einem wiederkehrenden Zeitplan ausführen (täglich, wöchentlich, zu einer vorgegebenen Zeit)
 - **Mehrstufige Workflows**: Komplexe, mehrteilige Forschungsaufgaben autonom durchführen
-- **Benachrichtigungen**: E-Mail-Benachrichtigungen senden, wenn neue Daten gefunden werden oder Aufgaben abgeschlossen sind
-- **Benutzerdefinierte Ausgabe**: Daten als CSV, JSON, Google Sheet oder direkt in Ihrer Datenbank zurückgeben
+- **Benachrichtigungen**: E-Mail-Benachrichtigungen senden, wenn neue Daten gefunden oder Aufgaben abgeschlossen sind
+- **Benutzerdefinierte Ausgabe**: Daten als CSV, JSON, Google Sheet oder direkt in deiner Datenbank zurückgeben
 
 ## Zugang
 
-Die Agents API ist derzeit für ausgewählte Kunden verfügbar. Um Zugang zu erhalten:
+Die Agenten-API ist derzeit für ausgewählte Kunden verfügbar. Um Zugang zu erhalten:
 
-- Schreiben Sie uns eine E-Mail an [info@olostep.com](mailto:info@olostep.com)
-- Oder [kontaktieren Sie unser Vertriebsteam](https://www.olostep.com/contact-sales)
+- Schreibe uns eine E-Mail an [info@olostep.com](mailto:info@olostep.com)
+- Oder [kontaktiere unser Vertriebsteam](https://www.olostep.com/contact-sales)
 
 ## Preisgestaltung
 
-Die Preisgestaltung für Agents ist variabel. Sie wird nach Ergebnis abgerechnet. Der Preis wird zwischen dem Kunden und dem Agenten verhandelt. Kontaktieren Sie info@olostep.com für weitere Details.
+Die Preisgestaltung für Agenten ist variabel. Sie wird nach Ergebnis abgerechnet. Der Preis wird zwischen dem Kunden und dem Agenten ausgehandelt. Kontaktiere info@olostep.com für weitere Details.

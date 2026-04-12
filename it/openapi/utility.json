@@ -14,7 +14,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+        "description": "Intestazione di autenticazione Bearer della forma Bearer <token>, dove <token> è il tuo token di autenticazione."
       }
     }
   },
@@ -22,7 +22,7 @@
     "/v1/retrieve": {
       "get": {
         "summary": "Recupera il contenuto della pagina",
-        "description": "Recupera il contenuto di una pagina scansionata utilizzando il suo `retrieve_id`.",
+        "description": "Recupera il contenuto di una pagina scansionata usando il suo `retrieve_id`.",
         "security": [
           {
             "Authorization": []
@@ -78,15 +78,15 @@
                     },
                     "html_hosted_url": {
                       "type": "string",
-                      "description": "URL del bucket S3 di html. Scade in 7 giorni."
+                      "description": "URL del bucket S3 dell'html. Scade in 7 giorni."
                     },
                     "markdown_hosted_url": {
                       "type": "string",
-                      "description": "URL del bucket S3 di markdown. Scade in 7 giorni."
+                      "description": "URL del bucket S3 del markdown. Scade in 7 giorni."
                     },
                     "json_hosted_url": {
                       "type": "string",
-                      "description": "URL del bucket S3 di json. Scade in 7 giorni."
+                      "description": "URL del bucket S3 del json. Scade in 7 giorni."
                     },
                     "size_exceeded": {
                       "type": "boolean",
@@ -98,7 +98,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri errati o mancanti."
           },
           "404": {
             "description": "Contenuto non trovato per il `retrieve_id` fornito."

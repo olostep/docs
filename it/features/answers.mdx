@@ -4,10 +4,10 @@ title: "API Risposte"
 icon: "globe-pointer"
 ---
 
-Attraverso l'endpoint Olostep `/v1/answers` puoi cercare sul web utilizzando il linguaggio naturale e ottenere risposte e dati potenziati dall'AI nel formato JSON che desideri. Questo ti consente di basare i tuoi prodotti su dati e fonti reali, arricchire punti dati o fogli di calcolo.
+Attraverso l'endpoint Olostep `/v1/answers` puoi cercare sul web utilizzando il linguaggio naturale e ottenere risposte e dati potenziati dall'AI nella forma JSON che desideri. Questo ti permette di basare i tuoi prodotti su dati e fonti del mondo reale, arricchire punti dati o fogli di calcolo.
 
-- Fai una domanda o fornisci un punto dati che desideri arricchire all'AI
-- Opzionale: specifica la struttura JSON che desideri ricevere
+- Fai una domanda o fornisci un punto dati che vuoi arricchire all'AI
+- Facoltativo: specifica la struttura JSON che vuoi ottenere
 
 L'API:
 - Cerca, pulisce, valida e restituisce i dati trovati sul Web
@@ -18,16 +18,16 @@ Per i dettagli dell'API, consulta il [Riferimento API dell'Endpoint Risposte](/a
 
 Per impostazione predefinita, utilizziamo un indice web generico e un validatore LLM economico.
 
-I clienti aziendali hanno accesso a indici web specifici per settore proprietari, dati privati esclusivi (inclusi numeri di telefono ed email) e modelli LLM personalizzati più adatti al loro caso d'uso. Contattaci per l'accesso: info@olostep.com
+I clienti aziendali hanno accesso a indici web proprietari specifici per settore, dati privati esclusivi (inclusi numeri di telefono ed email) e modelli LLM personalizzati più adatti al loro caso d'uso. Contattaci per l'accesso: info@olostep.com
 
 
 
 ## Casi d'uso
-L'endpoint delle risposte può essere utilizzato per:
- - Basare applicazioni AI su dati e fatti del mondo reale
+L'endpoint risposte può essere utilizzato per:
+ - Basare le applicazioni AI su dati e fatti del mondo reale
  - Arricchire fogli di calcolo e punti dati per Reclutamento, Finanza, Consulenza e Vendite
 
-Ecco una demo di un foglio di calcolo potenziato dall'AI alimentato dall'endpoint Risposte:
+Ecco una demo di un foglio di calcolo potenziato dall'AI tramite l'endpoint Risposte:
 https://www.olostep.com/demos/spreadsheet-enrich
 
 
@@ -45,7 +45,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl è disponibile di default su macOS, Linux e Windows
 ```
 
 ```javascript Node (API)
@@ -70,7 +70,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="What is the latest book by J.K. Rowling?",
+    task="Qual è l'ultimo libro di J.K. Rowling?",
     json_format={"book_title": "", "author": "", "release_date": ""},
 )
 
@@ -84,7 +84,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'What is the latest book by J.K. Rowling?',
+  task: 'Qual è l\'ultimo libro di J.K. Rowling?',
   jsonFormat: { book_title: '', author: '', release_date: '' },
 })
 
@@ -97,7 +97,7 @@ curl -s -X POST "https://api.olostep.com/v1/answers" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "What is the latest book by J.K. Rowling?",
+    "task": "Qual è l\'ultimo libro di J.K. Rowling?",
     "json": {"book_title": "", "author": "", "release_date": ""}
   }'
 ```
@@ -107,7 +107,7 @@ const res = await fetch('https://api.olostep.com/v1/answers', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    task: 'What is the latest book by J.K. Rowling?',
+    task: 'Qual è l\'ultimo libro di J.K. Rowling?',
     json: { book_title: '', author: '', release_date: '' }
   })
 })
@@ -119,7 +119,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "What is the latest book by J.K. Rowling?",
+  "task": "Qual è l'ultimo libro di J.K. Rowling?",
   "json": {"book_title": "", "author": "", "release_date": ""}
 }
 headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
@@ -160,7 +160,7 @@ Come altri endpoint Olostep, riceverai un oggetto `answer` in risposta. L'oggett
 }
 ```
 
-La risposta richiesta, formattata secondo il parametro `json`, si trova in `response.result.json_content` e l'elenco delle fonti in `response.result.sources`. Puoi analizzare il JSON stringato per accedere ai dati strutturati.
+La risposta richiesta, formattata secondo il parametro `json`, si trova in `response.result.json_content` e l'elenco delle fonti in `response.result.sources`. Puoi analizzare il JSON serializzato per accedere ai dati strutturati.
 
 ```json
 {
@@ -203,7 +203,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="how much did Olostep raise?",
+    task="quanto ha raccolto Olostep?",
     json_format={"amount": ""},
 )
 
@@ -216,7 +216,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'how much did Olostep raise?',
+  task: 'quanto ha raccolto Olostep?',
   jsonFormat: { amount: '' },
 })
 
@@ -228,7 +228,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "how much did Olostep raise?", 
+  "task": "quanto ha raccolto Olostep?", 
   "json": {
     "amount": ""
   }

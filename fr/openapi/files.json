@@ -21,8 +21,8 @@
   "paths": {
     "/v1/files": {
       "post": {
-        "summary": "Créer un Téléchargement de Fichier",
-        "description": "Génère une URL pré-signée pour télécharger un fichier JSON. Après le téléchargement, tu dois appeler le point de terminaison complet pour finaliser le téléchargement. L'URL de téléchargement expire dans 10 minutes.",
+        "summary": "Créer un Téléversement de Fichier",
+        "description": "Génère une URL pré-signée pour téléverser un fichier JSON. Après le téléversement, tu dois appeler le point de terminaison complet pour finaliser le téléversement. L'URL de téléversement expire dans 10 minutes.",
         "security": [
           {
             "Authorization": []
@@ -42,7 +42,7 @@
                   },
                   "purpose": {
                     "type": "string",
-                    "description": "Le but du fichier. Valeurs supportées : 'context' ou 'batch'. Par défaut, 'context'.",
+                    "description": "Le but du fichier. Valeurs supportées : 'context' ou 'batch'. Par défaut, c'est 'context'.",
                     "enum": [
                       "context",
                       "batch"
@@ -59,7 +59,7 @@
         },
         "responses": {
           "200": {
-            "description": "Réponse réussie avec URL de téléchargement.",
+            "description": "Réponse réussie avec l'URL de téléversement.",
             "content": {
               "application/json": {
                 "schema": {
@@ -80,11 +80,11 @@
                     "upload_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "URL pré-signée pour télécharger le fichier. Expire dans 10 minutes."
+                      "description": "URL pré-signée pour téléverser le fichier. Expire dans 10 minutes."
                     },
                     "expires_in": {
                       "type": "integer",
-                      "description": "Nombre de secondes avant l'expiration de l'URL de téléchargement (600 secondes = 10 minutes)"
+                      "description": "Nombre de secondes avant l'expiration de l'URL de téléversement (600 secondes = 10 minutes)"
                     }
                   }
                 }
@@ -127,7 +127,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Réponse réussie avec liste de fichiers.",
+            "description": "Réponse réussie avec la liste des fichiers.",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,7 +255,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable ou fichier non téléchargé sur S3"
+            "description": "Fichier non trouvé ou fichier non téléchargé sur S3"
           },
           "500": {
             "description": "Erreur interne du serveur"
@@ -328,7 +328,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable"
+            "description": "Fichier non trouvé"
           },
           "500": {
             "description": "Erreur interne du serveur"
@@ -383,7 +383,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable"
+            "description": "Fichier non trouvé"
           },
           "500": {
             "description": "Erreur interne du serveur"
@@ -470,7 +470,7 @@
             "description": "Clé API invalide"
           },
           "404": {
-            "description": "Fichier introuvable"
+            "description": "Fichier non trouvé"
           },
           "500": {
             "description": "Erreur interne du serveur"

@@ -44,7 +44,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "URL-padpatronen om op te nemen in de crawl met behulp van glob-syntaxis.  Standaard ingesteld op `/**` wat alle URLs omvat. Gebruik patronen zoals `/blog/**` om specifieke secties te crawlen (bijv. alleen blogpagina's), `/products/*.html` voor productpagina's, of meerdere patronen voor verschillende secties. Ondersteunt standaard glob-functies zoals * (willekeurige tekens) en ** (recursieve matching)."
+                    "description": "URL-padpatronen om op te nemen in de crawl met behulp van glob-syntaxis.  Standaard is `/**` wat alle URLs omvat. Gebruik patronen zoals `/blog/**` om specifieke secties te crawlen (bijv. alleen blogpagina's), `/products/*.html` voor productpagina's, of meerdere patronen voor verschillende secties. Ondersteunt standaard glob-functies zoals * (alle tekens) en ** (recursieve matching)."
                   },
                   "exclude_urls": {
                     "type": "array",
@@ -63,7 +63,7 @@
                   },
                   "include_external": {
                     "type": "boolean",
-                    "description": "Crawl externe links van de eerste graad."
+                    "description": "Crawl eerste-graads externe links."
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -88,7 +88,7 @@
                   },
                   "follow_robots_txt": {
                     "type": "boolean",
-                    "description": "Of de robots.txt-regels gerespecteerd moeten worden. Als ingesteld op `false`, zal de crawler de website scrapen ongeacht robots.txt disallow-richtlijnen. Standaard `true`.",
+                    "description": "Of robots.txt-regels gerespecteerd moeten worden. Als ingesteld op `false`, zal de crawler de website scrapen ongeacht robots.txt disallow-richtlijnen. Standaard `true`.",
                     "default": true
                   },
                   "scrape_options": {
@@ -107,7 +107,7 @@
                             "screenshot"
                           ]
                         },
-                        "description": "Uitvoerformaten om aan te vragen voor elke gescrapete pagina. Standaard ingesteld op `[\"html\", \"markdown\"]` wanneer weggelaten. `html` wordt altijd automatisch opgenomen. `json` wordt automatisch toegevoegd wanneer een `parser` is opgegeven. Let op: `raw_pdf` wordt niet ondersteund — PDF's kunnen niet gecrawld worden.",
+                        "description": "Uitvoerformaten om aan te vragen voor elke gescrapete pagina. Standaard `[\"html\", \"markdown\"]` wanneer weggelaten. `html` wordt altijd automatisch opgenomen. `json` wordt automatisch toegevoegd wanneer een `parser` is opgegeven. Let op: `raw_pdf` wordt niet ondersteund — PDF's kunnen niet gecrawld worden.",
                         "example": [
                           "markdown",
                           "screenshot"
@@ -237,7 +237,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met crawl-informatie.",
+            "description": "Succesvolle reactie met crawl-informatie.",
             "content": {
               "application/json": {
                 "schema": {
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Optionele integer die de index vertegenwoordigt om te beginnen met het ophalen van inhoud. Handig om te pagineren totdat alle URLs zijn opgehaald. Begin met 0, geef dan de waarde van `response['cursor']` van het laatste verzoek."
+            "description": "Optionele integer die de index vertegenwoordigt om te beginnen met het ophalen van inhoud. Handig om te pagineren totdat alle URLs zijn opgehaald. Begin met 0, en geef dan de waarde van `response['cursor']` van het laatste verzoek."
           },
           {
             "name": "limit",
@@ -389,7 +389,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met de lijst van URLs.",
+            "description": "Succesvolle reactie met de lijst van URLs.",
             "content": {
               "application/json": {
                 "schema": {

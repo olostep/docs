@@ -1,19 +1,19 @@
 ---
 sidebarTitle: "Dateien"
 title: "Dateien"
-description: "Laden Sie JSON-Dateien hoch und verwalten Sie sie zur Verwendung als Kontext in API-Anfragen"
+description: "Lade JSON-Dateien hoch und verwalte sie zur Verwendung als Kontext in API-Anfragen"
 icon: "file-upload"
 ---
 
-Über den Olostep `/v1/files` Endpunkt können Sie JSON-Dateien hochladen, die als Kontext in Ihren API-Anfragen verwendet werden können. Dies ermöglicht es Ihnen, strukturierte Daten bereitzustellen, um Ihre Scrapes, Antworten und andere Operationen zu verbessern.
+Über den Olostep `/v1/files` Endpunkt kannst du JSON-Dateien hochladen, die als Kontext in deinen API-Anfragen verwendet werden können. Dies ermöglicht es dir, strukturierte Daten bereitzustellen, um deine Scrapes, Antworten und andere Operationen zu verbessern.
 
-- Laden Sie JSON-Dateien bis zu 200MB hoch
+- Lade JSON-Dateien bis zu 200MB hoch
 - Dateien werden automatisch auf korrektes JSON-Format validiert
-- Verwenden Sie Dateien als Kontext in Scrapes, Antworten und anderen Endpunkten
+- Verwende Dateien als Kontext in Scrapes, Antworten und anderen Endpunkten
 - Dateien verfallen nach 30 Tagen
 - Sicherer Upload-Prozess mit vorab signierten URLs
 
-Für API-Details siehe die [Files Endpoint API Referenz](/api-reference/files/create).
+Für API-Details siehe die [Files Endpoint API Reference](/api-reference/files/create).
 
 ## Installation
 
@@ -36,20 +36,20 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: builtin curl ist ausreichend
+# macOS: eingebaute curl ist ausreichend
 ```
 
 </CodeGroup>
 
-## Datei hochladen
+## Eine Datei hochladen
 
 Der Datei-Upload-Prozess besteht aus zwei Schritten:
-1. **Upload-URL erstellen**: Fordern Sie eine vorab signierte URL zum Hochladen Ihrer Datei an
-2. **Upload abschließen**: Laden Sie Ihre Datei zur vorab signierten URL hoch und rufen Sie dann den Complete-Endpunkt auf, um zu validieren und abzuschließen
+1. **Upload-URL erstellen**: Fordere eine vorab signierte URL zum Hochladen deiner Datei an
+2. **Upload abschließen**: Lade deine Datei zur vorab signierten URL hoch und rufe dann den Complete-Endpunkt auf, um zu validieren und abzuschließen
 
 ### Schritt 1: Upload-URL erstellen
 
-Erstellen Sie zuerst eine Upload-URL, indem Sie den Dateinamen und den optionalen Zweck angeben. Der `purpose` Parameter unterstützt nur zwei Werte: `"context"` (Standard) oder `"batch"`.
+Erstelle zuerst eine Upload-URL, indem du den Dateinamen und optional den Zweck angibst. Der `purpose` Parameter unterstützt nur zwei Werte: `"context"` (Standard) oder `"batch"`.
 
 <CodeGroup>
 
@@ -128,7 +128,7 @@ Die Antwort enthält eine vorab signierte `upload_url`, die in 10 Minuten abläu
 
 ### Schritt 2: Datei hochladen und abschließen
 
-Laden Sie Ihre JSON-Datei zur vorab signierten URL hoch und rufen Sie dann den Complete-Endpunkt auf, um den Upload zu validieren und abzuschließen.
+Lade deine JSON-Datei zur vorab signierten URL hoch und rufe dann den Complete-Endpunkt auf, um den Upload zu validieren und abzuschließen.
 
 <CodeGroup>
 
@@ -139,11 +139,11 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Nachdem Sie die upload_url aus Schritt 1 erhalten haben
+# Nachdem du upload_url aus Schritt 1 erhalten hast
 file_id = upload_data["id"]
 upload_url = upload_data["upload_url"]
 
-# Bereiten Sie Ihre JSON-Daten vor
+# Bereite deine JSON-Daten vor
 json_data = {
     "users": [
         {"name": "John Doe", "email": "john@example.com"},
@@ -172,11 +172,11 @@ print(json.dumps(file_info, indent=2))
 ```js Node
 const API_URL = 'https://api.olostep.com/v1'
 
-// Nachdem Sie die upload_url aus Schritt 1 erhalten haben
+// Nachdem du upload_url aus Schritt 1 erhalten hast
 const fileId = uploadData.id
 const uploadUrl = uploadData.upload_url
 
-// Bereiten Sie Ihre JSON-Daten vor
+// Bereite deine JSON-Daten vor
 const jsonData = {
   users: [
     { name: 'John Doe', email: 'john@example.com' },
@@ -213,7 +213,7 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 
 </CodeGroup>
 
-Der Complete-Endpunkt validiert die JSON-Datei und gibt Dateimetadaten zurück:
+Der Complete-Endpunkt validiert die JSON-Datei und gibt die Dateimetadaten zurück:
 
 ```json
 {
@@ -229,7 +229,7 @@ Der Complete-Endpunkt validiert die JSON-Datei und gibt Dateimetadaten zurück:
 
 ## Dateimetadaten nach ID abrufen
 
-Rufen Sie Metadaten für eine Datei anhand ihrer ID ab.
+Rufe Metadaten für eine Datei anhand ihrer ID ab.
 
 <CodeGroup>
 
@@ -261,13 +261,13 @@ curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
 
 ## Dateiobjekt nach ID abrufen
 
-Erhalten Sie eine vorab signierte URL, um den JSON-Inhalt einer abgeschlossenen Datei herunterzuladen. Optional können Sie die Ablaufzeit für die Download-URL mit dem `expires_in` Abfrageparameter angeben (Standard sind 600 Sekunden / 10 Minuten).
+Erhalte eine vorab signierte URL, um den JSON-Inhalt einer abgeschlossenen Datei herunterzuladen. Optional kannst du die Ablaufzeit für die Download-URL mit dem `expires_in` Query-Parameter angeben (Standard sind 600 Sekunden / 10 Minuten).
 
 <CodeGroup>
 
 ```python Python
 file_id = "file_abc123xyz789"
-# Download-URL abrufen (Standardablauf: 600 Sekunden)
+# Download-URL erhalten (Standardablauf: 600 Sekunden)
 response = requests.get(
     f"{API_URL}/files/{file_id}/content",
     headers={"Authorization": f"Bearer {API_KEY}"}
@@ -275,7 +275,7 @@ response = requests.get(
 download_info = response.json()
 download_url = download_info["download_url"]
 
-# Laden Sie den Dateiinhalte mit der vorab signierten URL herunter
+# Lade den Dateiinhalte über die vorab signierte URL herunter
 file_response = requests.get(download_url)
 file_content = file_response.json()
 print(json.dumps(file_content, indent=2))
@@ -292,14 +292,14 @@ print(f"Download-URL läuft ab in: {download_info['expires_in']} Sekunden")
 ```js Node
 const fileId = 'file_abc123xyz789'
 
-// Download-URL abrufen (Standardablauf: 600 Sekunden)
+// Download-URL erhalten (Standardablauf: 600 Sekunden)
 const res = await fetch(`${API_URL}/files/${fileId}/content`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
 const downloadInfo = await res.json()
 const downloadUrl = downloadInfo.download_url
 
-// Laden Sie den Dateiinhalte mit der vorab signierten URL herunter
+// Lade den Dateiinhalte über die vorab signierte URL herunter
 const fileRes = await fetch(downloadUrl)
 const fileContent = await fileRes.json()
 console.log(fileContent)
@@ -313,15 +313,15 @@ console.log(`Download-URL läuft ab in: ${customDownloadInfo.expires_in} Sekunde
 ```
 
 ```bash cURL
-# Download-URL abrufen (Standardablauf: 600 Sekunden)
+# Download-URL erhalten (Standardablauf: 600 Sekunden)
 curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# Download-URL mit benutzerdefiniertem Ablauf abrufen (3600 Sekunden = 1 Stunde)
+# Download-URL mit benutzerdefiniertem Ablauf erhalten (3600 Sekunden = 1 Stunde)
 curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content?expires_in=3600" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# Laden Sie die Datei mit der vorab signierten URL herunter
+# Lade die Datei über die vorab signierte URL herunter
 curl -s "$DOWNLOAD_URL"
 ```
 
@@ -343,7 +343,7 @@ Die Antwort enthält eine vorab signierte `download_url`, die nach der angegeben
 
 ## Dateien auflisten
 
-Listen Sie alle abgeschlossenen Dateien für Ihr Team auf. Optional können Sie nach Zweck filtern (unterstützte Werte: `"context"` oder `"batch"`).
+Liste alle abgeschlossenen Dateien für dein Team auf. Optional kannst du nach Zweck filtern (unterstützte Werte: `"context"` oder `"batch"`).
 
 <CodeGroup>
 
@@ -414,7 +414,7 @@ Die Antwort enthält eine Liste von Dateien:
 
 ## Eine Datei löschen
 
-Löschen Sie eine Datei und ihre zugehörigen Daten aus dem Speicher.
+Lösche eine Datei und ihre zugehörigen Daten aus dem Speicher.
 
 <CodeGroup>
 
@@ -445,7 +445,7 @@ curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## Beispiel für vollständigen Upload (Zweck Kontext)
+## Komplettes Upload-Beispiel (Zweck: Kontext)
 
 Hier ist ein vollständiges Beispiel, das eine JSON-Datei mit `purpose="context"` hochlädt:
 
@@ -662,7 +662,7 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 
 </CodeGroup>
 
-Die hochgeladene Batch-Datei enthält eine gültige JSON-Struktur, die dem `/v1/batches` Endpunktformat entspricht:
+Die hochgeladene Batch-Datei enthält eine gültige JSON-Struktur, die dem `/v1/batches` Endpunkt-Format entspricht:
 - `items`: Array von Objekten mit `custom_id` und `url` Feldern
 - `parser`: Optionale Parser-Konfiguration
 - `country`: Optionaler Ländercode
@@ -675,8 +675,8 @@ Diese Datei kann als Eingabe für Batch-Verarbeitungsoperationen verwendet werde
 - **Dateigröße**: Maximal 200MB pro Datei
 - **Ablauf**: Dateien verfallen nach 30 Tagen
 - **Upload-URL**: Vorab signierte URLs verfallen nach 10 Minuten
-- **Purpose-Parameter**: Unterstützt nur die Werte `"context"` oder `"batch"` (Standard ist `"context"`)
+- **Purpose-Parameter**: Unterstützt nur `"context"` oder `"batch"` Werte (Standard ist `"context"`)
 
 ## Preisgestaltung
 
-Das Hochladen von Dateien ist kostenlos. Dateien werden sicher gespeichert und verfallen automatisch nach 30 Tagen.
+Datei-Uploads sind kostenlos. Dateien werden sicher gespeichert und verfallen automatisch nach 30 Tagen.

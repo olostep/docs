@@ -3,7 +3,7 @@
   "info": {
     "title": "AirOps 批处理 API",
     "version": "1.0.0",
-    "description": "用于 AirOps 专用批量抓取的内部 API，具有用于页面元数据提取的自动化 LLM 增强功能。"
+    "description": "用于 AirOps 专用批量抓取的内部 API，带有自动化 LLM 增强功能以提取页面元数据。"
   },
   "servers": [
     {
@@ -15,7 +15,7 @@
       "post": {
         "operationId": "createAirOpsBatch",
         "summary": "创建 AirOps 批处理",
-        "description": "启动一个批处理过程，将抓取与基于 LLM 的页面元数据提取增强相结合。工作流程：抓取 URLs → 提取元数据 → 差距分析 → LLM 增强缺失字段。",
+        "description": "启动一个批处理过程，将抓取与基于 LLM 的页面元数据提取相结合。工作流程：抓取 URLs → 提取元数据 → 差距分析 → LLM 增强缺失字段。",
         "security": [
           {
             "Authorization": []
@@ -310,7 +310,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Bearer 身份验证头格式为 Bearer <token>，其中 <token> 是你的身份验证令牌。"
+        "description": "Bearer 身份验证头格式为 Bearer <token>，其中 <token> 是你的认证令牌。"
       }
     },
     "schemas": {
@@ -342,7 +342,7 @@
           "country": {
             "type": "string",
             "default": "RANDOM",
-            "description": "用于地理定位抓取的国家。使用 ISO 3166-1 alpha-2 代码（US, GB, DE 等）或 'RANDOM' 进行自动选择。"
+            "description": "用于地理定位抓取的国家。使用 ISO 3166-1 alpha-2 代码（US, GB, DE 等）或使用 'RANDOM' 进行自动选择。"
           },
           "webhook": {
             "type": "string",
@@ -371,7 +371,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 255,
-            "description": "你对该项目的唯一标识符。"
+            "description": "你为此项目的唯一标识符。"
           }
         }
       },
@@ -562,7 +562,7 @@
             "items": {
               "type": "string"
             },
-            "description": "页面上发现的品牌。"
+            "description": "页面上找到的品牌。"
           },
           "failed_stage": {
             "type": "string",
@@ -664,7 +664,7 @@
               "completed",
               "failed"
             ],
-            "description": "聚合工作流状态。"
+            "description": "汇总的工作流状态。"
           },
           "scraping": {
             "$ref": "#/components/schemas/ScrapingStatus"

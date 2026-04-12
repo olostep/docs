@@ -165,7 +165,7 @@
                   "code": "invalid_api_key",
                   "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
                   "status": 401,
-                  "title": "Niet geautoriseerd",
+                  "title": "Niet gemachtigd",
                   "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
                   "created": 1704067200,
                   "metadata": {}
@@ -233,7 +233,7 @@
                               "$ref": "#/components/schemas/Metadata"
                             }
                           ],
-                          "description": "Item-niveau metadata. Voeg sleutel-waarde paren toe aan individuele items voor tracking, filtering of correlatie met je interne systemen."
+                          "description": "Item-niveau metadata. Voeg sleutel-waarde paren toe aan individuele items voor tracking, filtering, of correlatie met je interne systemen."
                         }
                       },
                       "required": [
@@ -258,7 +258,7 @@
                     "required": [
                       "id"
                     ],
-                    "description": "Je kunt deze parameter gebruiken om de parser te specificeren die je wilt gebruiken. Parsers zijn handig om gestructureerde inhoud uit webpagina's te halen. Olostep heeft een paar ingebouwde parsers voor de meest voorkomende webpagina's, en je kunt ook je eigen parsers maken."
+                    "description": "Je kunt deze parameter gebruiken om de parser te specificeren die je wilt gebruiken. Parsers zijn handig om gestructureerde inhoud van webpagina's te extraheren. Olostep heeft een paar ingebouwde parsers voor de meest voorkomende webpagina's, en je kunt ook je eigen parsers maken."
                   },
                   "links_on_page": {
                     "type": "object",
@@ -283,7 +283,7 @@
                         "description": "Filter geëxtraheerde links met behulp van glob-patronen."
                       }
                     },
-                    "description": "Haal alle links op die aanwezig zijn op elke pagina in de batch."
+                    "description": "Verkrijg alle links die aanwezig zijn op elke pagina in de batch."
                   },
                   "metadata": {
                     "$ref": "#/components/schemas/Metadata"
@@ -336,7 +336,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "Het soort object. \"batch\" voor dit endpoint."
+                      "description": "Het soort object. \"batch\" voor dit eindpunt."
                     },
                     "status": {
                       "type": "string",
@@ -419,7 +419,7 @@
                   "code": "invalid_api_key",
                   "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
                   "status": 401,
-                  "title": "Niet geautoriseerd",
+                  "title": "Niet gemachtigd",
                   "detail": "Your API key is invalid. Try double-checking it or reaching out to info@olostep.com if you're facing issues.",
                   "created": 1704067200,
                   "metadata": {}
@@ -428,7 +428,7 @@
             }
           },
           "402": {
-            "description": "Betaling vereist - tegoed op. Zie [Payment Required](/api-reference/errors/payment_required) voor details.",
+            "description": "Betaling vereist - tegoeden uitgeput. Zie [Payment Required](/api-reference/errors/payment_required) voor details.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -557,7 +557,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met batchinformatie.",
+            "description": "Succesvolle reactie met batchinformatie.",
             "content": {
               "application/json": {
                 "schema": {
@@ -569,7 +569,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "Het soort object. \"batch\" voor dit endpoint."
+                      "description": "Het soort object. \"batch\" voor dit eindpunt."
                     },
                     "status": {
                       "type": "string",
@@ -618,7 +618,7 @@
                   "code": "invalid_api_key",
                   "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
                   "status": 401,
-                  "title": "Niet geautoriseerd",
+                  "title": "Niet gemachtigd",
                   "detail": "Your API key is invalid",
                   "created": 1704067200,
                   "metadata": {}
@@ -727,7 +727,7 @@
                     },
                     "object": {
                       "type": "string",
-                      "description": "Het soort object. \"batch\" voor dit endpoint."
+                      "description": "Het soort object. \"batch\" voor dit eindpunt."
                     },
                     "status": {
                       "type": "string",
@@ -767,7 +767,7 @@
             }
           },
           "400": {
-            "description": "Foutieve aanvraag - ontbrekende of ongeldige metadata. Zie [Foutieve Aanvraag](/api-reference/errors/bad_request) voor details.",
+            "description": "Foute aanvraag - ontbrekende of ongeldige metadata. Zie [Foute Aanvraag](/api-reference/errors/bad_request) voor details.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -800,7 +800,7 @@
                   "code": "invalid_api_key",
                   "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
                   "status": 401,
-                  "title": "Niet geautoriseerd",
+                  "title": "Niet gemachtigd",
                   "detail": "Your API key is invalid",
                   "created": 1704067200,
                   "metadata": {}
@@ -883,7 +883,7 @@
                 "failed"
               ]
             },
-            "description": "Status van de URL's om op te halen (voltooid of mislukt)."
+            "description": "Status van de URLs om op te halen (voltooid of mislukt)."
           },
           {
             "name": "cursor",
@@ -892,7 +892,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Paginering cursor. Laat deze parameter weg bij de eerste aanvraag. Gebruik voor volgende aanvragen de `cursor` waarde van de vorige respons. Zie [Paginering](/api-reference/common/pagination) voor details."
+            "description": "Paginering cursor. Laat deze parameter weg bij het eerste verzoek. Voor volgende verzoeken, gebruik de `cursor` waarde van de vorige reactie. Zie [Paginering](/api-reference/common/pagination) voor details."
           },
           {
             "name": "limit",
@@ -901,12 +901,12 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Aantal resultaten om te retourneren (aanbevolen 10-50)."
+            "description": "Aantal resultaten om terug te geven (aanbevolen 10-50)."
           }
         ],
         "responses": {
           "200": {
-            "description": "Succesvolle respons met batchitems.",
+            "description": "Succesvolle reactie met batchitems.",
             "content": {
               "application/json": {
                 "schema": {
@@ -987,7 +987,7 @@
             }
           },
           "400": {
-            "description": "Foutieve aanvraag door onjuiste parameters. Zie [Foutieve Aanvraag](/api-reference/errors/bad_request) voor details.",
+            "description": "Foute aanvraag door onjuiste parameters. Zie [Foute Aanvraag](/api-reference/errors/bad_request) voor details.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1020,7 +1020,7 @@
                   "code": "invalid_api_key",
                   "type": "https://docs.olostep.com/api-reference/errors/unauthorized",
                   "status": 401,
-                  "title": "Niet geautoriseerd",
+                  "title": "Niet gemachtigd",
                   "detail": "Your API key is invalid",
                   "created": 1704067200,
                   "metadata": {}
@@ -1109,7 +1109,7 @@
           },
           "status": {
             "type": "integer",
-            "description": "HTTP-statuscode"
+            "description": "HTTP statuscode"
           },
           "title": {
             "type": "string",

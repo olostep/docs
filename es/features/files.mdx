@@ -1,11 +1,11 @@
 ---
 sidebarTitle: "Archivos"
 title: "Archivos"
-description: "Sube y gestiona archivos JSON para usarlos como contexto en solicitudes API"
+description: "Sube y gestiona archivos JSON para usarlos como contexto en solicitudes de API"
 icon: "file-upload"
 ---
 
-A través del endpoint de Olostep `/v1/files` puedes subir archivos JSON que pueden ser utilizados como contexto en tus solicitudes API. Esto te permite proporcionar datos estructurados para mejorar tus scrapes, respuestas y otras operaciones.
+A través del endpoint `/v1/files` de Olostep puedes subir archivos JSON que se pueden utilizar como contexto en tus solicitudes de API. Esto te permite proporcionar datos estructurados para mejorar tus scrapes, respuestas y otras operaciones.
 
 - Sube archivos JSON de hasta 200MB
 - Los archivos se validan automáticamente para asegurar el formato JSON correcto
@@ -13,7 +13,7 @@ A través del endpoint de Olostep `/v1/files` puedes subir archivos JSON que pue
 - Los archivos expiran después de 30 días
 - Proceso de subida seguro con URL pre-firmada
 
-Para detalles del API, consulta la [Referencia del API del Endpoint de Archivos](/api-reference/files/create).
+Para detalles de la API, consulta la [Referencia de la API del Endpoint de Archivos](/api-reference/files/create).
 
 ## Instalación
 
@@ -45,11 +45,11 @@ const fetch = require('node-fetch')
 
 El proceso de subida de archivos consta de dos pasos:
 1. **Crear URL de subida**: Solicita una URL pre-firmada para subir tu archivo
-2. **Completar subida**: Sube tu archivo a la URL pre-firmada y luego llama al endpoint de completar para validar y finalizar
+2. **Completar subida**: Sube tu archivo a la URL pre-firmada, luego llama al endpoint de completar para validar y finalizar
 
 ### Paso 1: Crear URL de subida
 
-Primero, crea una URL de subida proporcionando el nombre del archivo y un propósito opcional. El parámetro `purpose` solo admite dos valores: `"context"` (por defecto) o `"batch"`.
+Primero, crea una URL de subida proporcionando el nombre del archivo y un propósito opcional. El parámetro `purpose` solo admite dos valores: `"context"` (predeterminado) o `"batch"`.
 
 <CodeGroup>
 
@@ -128,7 +128,7 @@ La respuesta incluye una `upload_url` pre-firmada que expira en 10 minutos:
 
 ### Paso 2: Subir archivo y completar
 
-Sube tu archivo JSON a la URL pre-firmada y luego llama al endpoint de completar para validar y finalizar la subida.
+Sube tu archivo JSON a la URL pre-firmada, luego llama al endpoint de completar para validar y finalizar la subida.
 
 <CodeGroup>
 
@@ -261,7 +261,7 @@ curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
 
 ## Recuperar objeto de archivo por ID
 
-Obtén una URL pre-firmada para descargar el contenido JSON de un archivo completado. Opcionalmente, especifica el tiempo de expiración para la URL de descarga usando el parámetro de consulta `expires_in` (por defecto es 600 segundos / 10 minutos).
+Obtén una URL pre-firmada para descargar el contenido JSON de un archivo completado. Opcionalmente, especifica el tiempo de expiración para la URL de descarga usando el parámetro de consulta `expires_in` (por defecto 600 segundos / 10 minutos).
 
 <CodeGroup>
 
@@ -445,7 +445,7 @@ curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## Ejemplo de subida completa (propósito context)
+## Ejemplo de subida completa (propósito de contexto)
 
 Aquí tienes un ejemplo completo que sube un archivo JSON con `purpose="context"`:
 
@@ -490,8 +490,8 @@ complete_response = requests.post(
 )
 file_info = complete_response.json()
 
-print(f"Archivo subido exitosamente: {file_info['id']}")
-print(f"Tamaño del archivo: {file_info['bytes']} bytes")
+print(f"File uploaded successfully: {file_info['id']}")
+print(f"File size: {file_info['bytes']} bytes")
 ```
 
 ```js Node
@@ -528,15 +528,15 @@ const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
 })
 const fileInfo = await completeRes.json()
 
-console.log(`Archivo subido exitosamente: ${fileInfo.id}`)
-console.log(`Tamaño del archivo: ${fileInfo.bytes} bytes`)
+console.log(`File uploaded successfully: ${fileInfo.id}`)
+console.log(`File size: ${fileInfo.bytes} bytes`)
 ```
 
 </CodeGroup>
 
 ## Ejemplo de subida de archivo batch
 
-Aquí tienes un ejemplo que sube un archivo JSON con `purpose="batch"` que contiene datos batch válidos que pueden ser usados con el endpoint `/v1/batches`:
+Aquí tienes un ejemplo que sube un archivo JSON con `purpose="batch"` que contiene datos batch válidos que se pueden usar con el endpoint `/v1/batches`:
 
 <CodeGroup>
 
@@ -582,9 +582,9 @@ complete_response = requests.post(
 )
 file_info = complete_response.json()
 
-print(f"Archivo batch subido exitosamente: {file_info['id']}")
-print(f"Tamaño del archivo: {file_info['bytes']} bytes")
-print(f"Propósito: {file_info['purpose']}")
+print(f"Batch file uploaded successfully: {file_info['id']}")
+print(f"File size: {file_info['bytes']} bytes")
+print(f"Purpose: {file_info['purpose']}")
 ```
 
 ```js Node
@@ -624,9 +624,9 @@ const completeRes = await fetch(`${API_URL}/files/${fileId}/complete`, {
 })
 const fileInfo = await completeRes.json()
 
-console.log(`Archivo batch subido exitosamente: ${fileInfo.id}`)
-console.log(`Tamaño del archivo: ${fileInfo.bytes} bytes`)
-console.log(`Propósito: ${fileInfo.purpose}`)
+console.log(`Batch file uploaded successfully: ${fileInfo.id}`)
+console.log(`File size: ${fileInfo.bytes} bytes`)
+console.log(`Purpose: ${fileInfo.purpose}`)
 ```
 
 ```bash cURL
@@ -667,7 +667,7 @@ El archivo batch subido contiene una estructura JSON válida que coincide con el
 - `parser`: Configuración opcional del parser
 - `country`: Código de país opcional
 
-Este archivo puede ser usado como entrada para operaciones de procesamiento batch.
+Este archivo se puede usar como entrada para operaciones de procesamiento batch.
 
 ## Requisitos de archivo
 

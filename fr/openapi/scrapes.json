@@ -183,7 +183,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "Pays résidentiel à partir duquel charger la requête.  Valeurs supportées : - US (États-Unis) - CA (Canada) - IT (Italie) - IN (Inde) - GB (Angleterre) - JP (Japon) - MX (Mexique) - AU (Australie) - ID (Indonésie) - UA (Émirats Arabes Unis) - RU (Russie) - RANDOM  Certaines opérations, comme le scraping de Google Search et Google News, supportent tous les pays."
+                    "description": "Pays résidentiel à partir duquel charger la requête.  Les valeurs prises en charge sont : - US (États-Unis) - CA (Canada) - IT (Italie) - IN (Inde) - GB (Angleterre) - JP (Japon) - MX (Mexique) - AU (Australie) - ID (Indonésie) - UA (Émirats Arabes Unis) - RU (Russie) - RANDOM  Certaines opérations, comme le scraping de Google Search et Google News, prennent en charge tous les pays."
                   },
                   "transformer": {
                     "type": "string",
@@ -191,7 +191,7 @@
                       "postlight",
                       "none"
                     ],
-                    "description": "Spécifie le transformateur HTML à utiliser, le cas échéant. La bibliothèque Mercury Parser de Postlight est utilisée pour supprimer les publicités et autres contenus indésirables du contenu scrappé."
+                    "description": "Spécifie le transformateur HTML à utiliser, si nécessaire. La bibliothèque Mercury Parser de Postlight est utilisée pour supprimer les publicités et autres contenus indésirables du contenu scrappé."
                   },
                   "remove_images": {
                     "type": "boolean",
@@ -216,7 +216,7 @@
                     "required": [
                       "id"
                     ],
-                    "description": "Lors de la définition de json comme format, tu peux utiliser ce paramètre pour spécifier le parseur à utiliser. Les parseurs sont utiles pour extraire du contenu structuré des pages web. Olostep a quelques parseurs intégrés pour les pages web les plus courantes, et tu peux aussi créer tes propres parseurs."
+                    "description": "Lors de la définition de json comme format, tu peux utiliser ce paramètre pour spécifier le parseur à utiliser. Les parseurs sont utiles pour extraire du contenu structuré des pages web. Olostep a quelques parseurs intégrés pour les pages web les plus courantes, et tu peux également créer tes propres parseurs."
                   },
                   "llm_extract": {
                     "type": "object",
@@ -237,21 +237,21 @@
                       },
                       "query_to_order_links_by": {
                         "type": "string",
-                        "description": "Ordonne les liens retournés par leur similarité avec le texte de requête fourni, en priorisant les correspondances les plus pertinentes en premier."
+                        "description": "Trie les liens retournés par leur similarité avec le texte de requête fourni, en priorisant les correspondances les plus pertinentes en premier."
                       },
                       "include_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "Filtre les liens extraits en utilisant des motifs glob avec `include_links`. Utilise des motifs comme \"*.pdf\" pour correspondre aux extensions de fichiers, \"/blog/*\" pour des chemins spécifiques, ou des URLs complètes comme \"https://example.com/*\". Supporte les jokers (*), les classes de caractères ([a-z]), et l'alternance ({pattern1,pattern2})."
+                        "description": "Filtre les liens extraits en utilisant des motifs glob avec `include_links`. Utilise des motifs comme \"*.pdf\" pour correspondre aux extensions de fichiers, \"/blog/*\" pour des chemins spécifiques, ou des URLs complètes comme \"https://example.com/*\". Prend en charge les jokers (*), les classes de caractères ([a-z]), et l'alternance ({pattern1,pattern2})."
                       },
                       "exclude_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "Filtre les liens extraits en utilisant des motifs glob avec `exclude_links`. Utilise des motifs comme \"*.pdf\" pour correspondre aux extensions de fichiers, \"/blog/*\" pour des chemins spécifiques, ou des URLs complètes comme \"https://example.com/*\". Supporte les jokers (*), les classes de caractères ([a-z]), et l'alternance ({pattern1,pattern2})."
+                        "description": "Filtre les liens extraits en utilisant des motifs glob avec `exclude_links`. Utilise des motifs comme \"*.pdf\" pour correspondre aux extensions de fichiers, \"/blog/*\" pour des chemins spécifiques, ou des URLs complètes comme \"https://example.com/*\". Prend en charge les jokers (*), les classes de caractères ([a-z]), et l'alternance ({pattern1,pattern2})."
                       }
                     },
                     "description": "Avec cette option, tu peux obtenir tous les liens présents sur la page que tu scrapes."

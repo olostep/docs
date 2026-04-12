@@ -2,26 +2,26 @@
 icon: "file-lines"
 sidebarTitle: "获取网站的Markdown"
 title: "获取网站的Markdown"
-description: "学习如何从任何网页提取内容为LLM友好的markdown格式。"
+description: "学习如何从任何网页中提取适合LLM的markdown内容。"
 ---
 
 ## 概述
 
-Olostep的[scrape](../../features/scrapes)端点允许从任何网站提取内容。如果你想将内容传递给LLM而不需要所有的HTML，markdown格式的内容非常有用。
+Olostep的[scrape](../../features/scrapes)端点允许从任何网站提取内容。如果你想将内容提供给LLM而不包含所有HTML，markdown格式的内容非常有用。
 
-在本指南中，我们将看到如何从像`https://www.nea.com/team`这样的网站提取markdown。
+在本指南中，我们将看到如何从像`https://www.nea.com/team`这样的网站中提取markdown。
 
 ## 前提条件
 
 在开始之前，请确保你具备以下条件：
 
-- 有效的Olostep API密钥。你可以通过在[Olostep](https://www.olostep.com/dashboard)注册来获取。
-- 你的系统上安装了Python
-- `requests`和`json`库（这些库随Python预装，但如果需要，可以使用`pip install requests`来安装）
+- 一个有效的Olostep API密钥。你可以通过在[Olostep](https://www.olostep.com/dashboard)注册来获取。
+- 系统上安装了Python
+- `requests`和`json`库（这些库随Python预安装，但如果需要，你可以使用`pip install requests`来安装它们）
 
 ## 从网站提取文本
 
-以下Python脚本演示了如何使用Olostep的API从网站提取文本和markdown内容。
+以下Python脚本演示了如何使用Olostep的API从网站中提取文本和markdown内容。
 
 ```python
 import requests
@@ -81,11 +81,11 @@ print(json.dumps(response.json(), indent=4))
 
 ## 解释
 
-- `url_to_scrape`：指定要提取内容的网站URL。
-- `formats`：定义输出格式（在此情况下为文本）。
-- `Authorization`：包含你的API密钥以验证请求。
+- `url_to_scrape`: 指定要提取内容的网站URL。
+- `formats`: 定义输出格式（在此情况下为文本）。
+- `Authorization`: 包含你的API密钥以验证请求。
 - 响应格式化为JSON并打印以便于阅读。
 
 ## 结论
 
-使用Olostep，你可以轻松地从任何网站提取markdown内容。如果你想从网站获取内容并将其传递给LLM进行数据提取和分析，这非常有用。如果你想从同一网站反复大规模提取内容（例如监控数据、价格跟踪等），我们建议使用[自定义解析器](../../features/structured-content/parsers)以JSON格式获取内容。
+使用Olostep，你可以轻松地从任何网站提取markdown内容。如果你想从网站获取内容并将其提供给LLM进行数据提取和分析，这非常有用。如果你想从同一网站大规模地反复提取内容（例如监控数据、价格跟踪等），我们建议使用[自定义解析器](../../features/structured-content/parsers)以JSON格式获取内容。

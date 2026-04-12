@@ -1,7 +1,6 @@
 ---
-sidebarTitle: "LangChain"
-icon: "link"
-title: "Intégration LangChain"
+sidebarTitle: "Olostep + LangChain"
+title: "Intégration Olostep + LangChain"
 description: "Construisez des agents IA intelligents avec des capacités de scraping web et de recherche en utilisant LangChain"
 ---
 
@@ -9,19 +8,19 @@ L'intégration Olostep LangChain fournit des outils complets pour construire des
 
 ## Fonctionnalités
 
-L'intégration donne accès à toutes les 5 capacités de l'API Olostep :
+L'intégration donne accès aux 5 capacités de l'API Olostep :
 
 <CardGroup cols={2}>
   <Card title="Scrapes" icon="file-lines">
-    Extraire du contenu à partir de n'importe quelle URL unique dans plusieurs formats (Markdown, HTML, JSON, texte)
+    Extraire le contenu de n'importe quelle URL unique dans plusieurs formats (Markdown, HTML, JSON, texte)
   </Card>
   
   <Card title="Batches" icon="layer-group">
-    Traiter jusqu'à 10 000 URLs en parallèle. Les travaux par lots se terminent en 5-8 minutes
+    Traiter jusqu'à 10 000 URLs en parallèle. Les tâches par lot se terminent en 5-8 minutes
   </Card>
   
   <Card title="Answers" icon="question">
-    Recherche web alimentée par IA avec des requêtes en langage naturel et sortie structurée
+    Recherche web alimentée par l'IA avec des requêtes en langage naturel et un résultat structuré
   </Card>
   
   <Card title="Maps" icon="map">
@@ -53,13 +52,13 @@ Définis ta clé API Olostep comme une variable d'environnement :
 export OLOSTEP_API_KEY="your_olostep_api_key_here"
 ```
 
-Obtiens ta clé API depuis le [Tableau de bord Olostep](https://olostep.com/dashboard).
+Récupère ta clé API depuis le [Tableau de bord Olostep](https://olostep.com/dashboard).
 
 ## Outils Disponibles
 
 ### scrape_website
 
-Extraire du contenu à partir d'une URL unique. Prend en charge plusieurs formats et le rendu JavaScript.
+Extraire le contenu d'une URL unique. Prend en charge plusieurs formats et le rendu JavaScript.
 
 <ParamField path="url" type="string" required>
   URL du site web à scraper (doit inclure http:// ou https://)
@@ -70,7 +69,7 @@ Extraire du contenu à partir d'une URL unique. Prend en charge plusieurs format
 </ParamField>
 
 <ParamField path="country" type="string">
-  Code pays pour le contenu spécifique à la localisation (par exemple, "US", "GB", "CA")
+  Code du pays pour le contenu spécifique à la localisation (par ex., "US", "GB", "CA")
 </ParamField>
 
 <ParamField path="wait_before_scraping" type="integer">
@@ -78,7 +77,7 @@ Extraire du contenu à partir d'une URL unique. Prend en charge plusieurs format
 </ParamField>
 
 <ParamField path="parser" type="string">
-  ID de parseur optionnel pour l'extraction spécialisée (par exemple, "@olostep/amazon-product")
+  ID de parser optionnel pour l'extraction spécialisée (par ex., "@olostep/amazon-product")
 </ParamField>
 
 <CodeGroup>
@@ -105,7 +104,7 @@ content = asyncio.run(scrape_website.ainvoke({
 ```
 
 ```python With Parser
-# Utiliser un parseur spécialisé
+# Utiliser un parser spécialisé
 content = asyncio.run(scrape_website.ainvoke({
     "url": "https://www.amazon.com/dp/PRODUCT_ID",
     "parser": "@olostep/amazon-product",
@@ -127,7 +126,7 @@ Traiter plusieurs URLs en parallèle (jusqu'à 10 000 à la fois).
 </ParamField>
 
 <ParamField path="country" type="string">
-  Code pays pour le contenu spécifique à la localisation
+  Code du pays pour le contenu spécifique à la localisation
 </ParamField>
 
 <ParamField path="wait_before_scraping" type="integer">
@@ -135,7 +134,7 @@ Traiter plusieurs URLs en parallèle (jusqu'à 10 000 à la fois).
 </ParamField>
 
 <ParamField path="parser" type="string">
-  ID de parseur optionnel pour l'extraction spécialisée
+  ID de parser optionnel pour l'extraction spécialisée
 </ParamField>
 
 <CodeGroup>
@@ -160,7 +159,7 @@ print(result)
 
 ### answer_question
 
-Rechercher sur le web et obtenir des réponses alimentées par IA avec des sources. Parfait pour l'enrichissement de données et la recherche.
+Rechercher sur le web et obtenir des réponses alimentées par l'IA avec des sources. Parfait pour l'enrichissement de données et la recherche.
 
 <ParamField path="task" type="string" required>
   Question ou tâche à rechercher
@@ -177,7 +176,7 @@ import asyncio
 
 # Poser une question simple
 result = asyncio.run(answer_question.ainvoke({
-    "task": "What is the capital of France?"
+    "task": "Quelle est la capitale de la France ?"
 }))
 
 print(result)
@@ -187,7 +186,7 @@ print(result)
 ```python Structured Output
 # Obtenir des données structurées avec un schéma JSON
 result = asyncio.run(answer_question.ainvoke({
-    "task": "What is the latest book by J.K. Rowling?",
+    "task": "Quel est le dernier livre de J.K. Rowling ?",
     "json_schema": {
         "book_title": "",
         "author": "",
@@ -200,9 +199,9 @@ print(result)
 ```
 
 ```python Data Enrichment
-# Enrichir les données d'une entreprise
+# Enrichir les données d'entreprise
 result = asyncio.run(answer_question.ainvoke({
-    "task": "Find the CEO and headquarters of Stripe",
+    "task": "Trouver le PDG et le siège social de Stripe",
     "json_schema": {
         "ceo_name": "",
         "headquarters": "",
@@ -231,11 +230,11 @@ Extraire toutes les URLs d'un site web pour l'analyse de la structure du site.
 </ParamField>
 
 <ParamField path="include_urls" type="array">
-  Modèles globaux à inclure (par exemple, ["/blog/**"])
+  Modèles globaux à inclure (par ex., ["/blog/**"])
 </ParamField>
 
 <ParamField path="exclude_urls" type="array">
-  Modèles globaux à exclure (par exemple, ["/admin/**"])
+  Modèles globaux à exclure (par ex., ["/admin/**"])
 </ParamField>
 
 <CodeGroup>
@@ -277,15 +276,15 @@ Découvrir et scraper de manière autonome des sites web entiers en suivant les 
 </ParamField>
 
 <ParamField path="include_urls" type="array">
-  Modèles globaux à inclure (par exemple, ["/**"] pour tout)
+  Modèles globaux à inclure (par ex., ["/**"] pour tout)
 </ParamField>
 
 <ParamField path="exclude_urls" type="array">
-  Modèles globaux à exclure (par exemple, ["/admin/**"])
+  Modèles globaux à exclure (par ex., ["/admin/**"])
 </ParamField>
 
 <ParamField path="max_depth" type="integer">
-  Profondeur maximale à crawler à partir de start_url
+  Profondeur maximale à crawler depuis start_url
 </ParamField>
 
 <ParamField path="include_external" type="boolean" default="false">
@@ -319,9 +318,9 @@ result = asyncio.run(crawl_website.ainvoke({
 ```
 </CodeGroup>
 
-## Intégration d'Agent LangChain
+## Intégration de l'Agent LangChain
 
-Construire des agents intelligents capables de rechercher et scraper le web :
+Construisez des agents intelligents capables de rechercher et scraper le web :
 
 <CodeGroup>
 ```python Basic Agent
@@ -346,10 +345,10 @@ agent = initialize_agent(
 
 # Utiliser l'agent
 result = agent.run("""
-Research the company at https://company.com:
-1. Scrape their about page
-2. Search for their latest funding round
-3. Extract all their product pages
+Recherche l'entreprise sur https://company.com :
+1. Scraper leur page à propos
+2. Rechercher leur dernier tour de financement
+3. Extraire toutes leurs pages produits
 """)
 
 print(result)
@@ -358,7 +357,7 @@ print(result)
 
 ## Intégration LangGraph
 
-Construire des workflows complexes en plusieurs étapes avec LangGraph :
+Construisez des workflows complexes en plusieurs étapes avec LangGraph :
 
 <CodeGroup>
 ```python Research Agent
@@ -418,7 +417,7 @@ def create_research_agent():
 agent = create_research_agent()
 result = agent.invoke({
     "target_url": "https://store.com",
-    "research_question": "What are the top 5 most expensive products?",
+    "research_question": "Quels sont les 5 produits les plus chers ?",
     "desired_format": {
         "products": [{"name": "", "price": "", "url": ""}]
     }
@@ -439,7 +438,7 @@ companies = ["Stripe", "Shopify", "Square"]
 
 for company in companies:
     result = answer_question.invoke({
-        "task": f"Find information about {company}",
+        "task": f"Trouver des informations sur {company}",
         "json_schema": {
             "ceo": "",
             "headquarters": "",
@@ -452,7 +451,7 @@ for company in companies:
 
 ### Scraping de Produits E-commerce
 
-Scraper des données de produits avec des parseurs spécialisés :
+Scraper les données de produits avec des parsers spécialisés :
 
 ```python
 from langchain_olostep import scrape_website
@@ -490,7 +489,7 @@ batch_result = scrape_batch.invoke({
 
 ### Scraping de Documentation
 
-Crawler et extraire de la documentation :
+Crawler et extraire la documentation :
 
 ```python
 from langchain_olostep import crawl_website
@@ -504,13 +503,13 @@ result = crawl_website.invoke({
 })
 ```
 
-## Parseurs Spécialisés
+## Parsers Spécialisés
 
-Olostep fournit des parseurs pré-construits pour les sites web populaires :
+Olostep fournit des parsers pré-construits pour les sites populaires :
 
 - `@olostep/google-search` - Résultats de recherche Google
 
-Utilise-les avec le paramètre `parser` :
+Utilisez-les avec le paramètre `parser` :
 
 ```python
 scrape_website.invoke({
@@ -529,26 +528,26 @@ try:
         "url": "https://example.com"
     })
 except LangChainException as e:
-    print(f"Scraping failed: {e}")
+    print(f"Échec du scraping : {e}")
 ```
 
 ## Bonnes Pratiques
 
 <AccordionGroup>
   <Accordion title="Utiliser le Traitement par Lots pour Plusieurs URLs">
-    Lorsque tu scrapes plus de 3-5 URLs, utilise `scrape_batch` au lieu de plusieurs appels `scrape_website`. Le traitement par lots est beaucoup plus rapide et plus économique.
+    Lorsque tu scrapes plus de 3-5 URLs, utilise `scrape_batch` au lieu de multiples appels `scrape_website`. Le traitement par lots est beaucoup plus rapide et plus rentable.
   </Accordion>
 
   <Accordion title="Définir des Délais Appropriés">
     Pour les sites riches en JavaScript, utilise le paramètre `wait_before_scraping` (2000-5000ms est typique). Cela garantit que le contenu dynamique est entièrement chargé.
   </Accordion>
 
-  <Accordion title="Utiliser des Parseurs Spécialisés">
-    Pour les sites web populaires (Amazon, LinkedIn, Google), utilise nos parseurs pré-construits pour obtenir automatiquement des données structurées.
+  <Accordion title="Utiliser des Parsers Spécialisés">
+    Pour les sites populaires (Amazon, LinkedIn, Google), utilise nos parsers pré-construits pour obtenir automatiquement des données structurées.
   </Accordion>
 
   <Accordion title="Filtrer les URLs Efficacement">
-    Lors de l'utilisation de `extract_urls` ou `crawl_website`, utilise des modèles globaux pour te concentrer sur les pages pertinentes et éviter un traitement inutile.
+    Lorsque tu utilises `extract_urls` ou `crawl_website`, utilise des modèles globaux pour te concentrer sur les pages pertinentes et éviter un traitement inutile.
   </Accordion>
 
   <Accordion title="Gérer les Limites de Taux">
@@ -567,26 +566,30 @@ except LangChainException as e:
 
 <CardGroup cols={2}>
   <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    En savoir plus sur le point de terminaison Scrapes
+    En savoir plus sur l'endpoint Scrapes
   </Card>
   
   <Card title="Batches API" icon="layer-group" href="/features/batches">
-    En savoir plus sur le point de terminaison Batches
+    En savoir plus sur l'endpoint Batches
   </Card>
   
   <Card title="Answers API" icon="question" href="/features/answers">
-    En savoir plus sur le point de terminaison Answers
+    En savoir plus sur l'endpoint Answers
   </Card>
   
   <Card title="Maps API" icon="map" href="/features/maps">
-    En savoir plus sur le point de terminaison Maps
+    En savoir plus sur l'endpoint Maps
   </Card>
   
   <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    En savoir plus sur le point de terminaison Crawls
+    En savoir plus sur l'endpoint Crawls
   </Card>
   
   <Card title="Python SDK" icon="python" href="/sdks/python">
     Explorer le SDK Python
+  </Card>
+  
+  <Card title="LangChain Website" icon="link" href="https://www.langchain.com">
+    Plateforme LangChain
   </Card>
 </CardGroup>

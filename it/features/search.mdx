@@ -4,14 +4,14 @@ title: "API di Ricerca"
 icon: "magnifying-glass"
 ---
 
-L'endpoint Olostep `/v1/searches` ti permette di cercare sul web con una query in linguaggio naturale e ottenere un elenco deduplicato di link rilevanti con titoli e descrizioni.
+L’endpoint Olostep `/v1/searches` ti consente di cercare sul web con una query in linguaggio naturale e ottenere un elenco deduplicato di link rilevanti con titoli e descrizioni.
 
 - Invia una query in inglese semplice
 - Ricevi link strutturati da tutto il web
 
 Effettuerà una ricerca semantica della query sul web e restituirà i risultati.
 
-Per i dettagli sull'API, consulta il [Riferimento API dell'Endpoint di Ricerca](/api-reference/searches/create).
+Per i dettagli dell’API, consulta la [Riferimento API dell’Endpoint di Ricerca](/api-reference/searches/create).
 
 ## Installazione
 
@@ -82,7 +82,7 @@ curl -s -X POST "https://api.olostep.com/v1/searches" \
 
 ## Risposta
 
-Riceverai un oggetto `search` in risposta. L'oggetto `search` contiene un `id`, la tua `query` originale e un `result` con un elenco di `links`.
+Riceverai un oggetto `search` in risposta. L’oggetto `search` contiene un `id`, la tua `query` originale e un `result` con un elenco di `links`.
 
 ```json
 {
@@ -117,11 +117,11 @@ Riceverai un oggetto `search` in risposta. L'oggetto `search` contiene un `id`, 
 
 Ogni link in `result.links` contiene:
 
-| Campo         | Tipo   | Descrizione                               |
-|---------------|--------|-------------------------------------------|
-| `url`         | string | L'URL del risultato della ricerca         |
-| `title`       | string | Il titolo della pagina del risultato      |
-| `description` | string | Un breve snippet che descrive il risultato|
+| Campo         | Tipo   | Descrizione                              |
+|---------------|--------|------------------------------------------|
+| `url`         | string | L’URL del risultato della ricerca        |
+| `title`       | string | Il titolo della pagina del risultato     |
+| `description` | string | Un breve frammento che descrive il risultato |
 
 Il risultato completo è anche disponibile come file JSON ospitato su `result.json_hosted_url`.
 

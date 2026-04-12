@@ -200,7 +200,7 @@
     "/v1/batches": {
       "post": {
         "summary": "启动新批处理",
-        "description": "使用指定的参数启动新的批处理过程。",
+        "description": "使用指定参数启动新的批处理过程。",
         "security": [
           {
             "Authorization": []
@@ -245,7 +245,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "批处理执行的国家。请使用 ISO 3166-1 alpha-2 代码，如 US（美国）、IN（印度）等。"
+                    "description": "批处理执行的国家。请以 ISO 3166-1 alpha-2 代码提供，如 US（美国）、IN（印度）等。"
                   },
                   "parser": {
                     "type": "object",
@@ -428,7 +428,7 @@
             }
           },
           "402": {
-            "description": "需要付款 - 额度已用完。详情请参阅 [Payment Required](/api-reference/errors/payment_required)。",
+            "description": "需要付款 - 额度已用尽。详情请参阅 [Payment Required](/api-reference/errors/payment_required)。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -470,7 +470,7 @@
             }
           },
           "409": {
-            "description": "幂等性冲突 - 带有此键的请求正在进行中。详情请参阅 [Idempotency Error](/api-reference/errors/idempotency_error)。",
+            "description": "幂等性冲突 - 使用此键的请求正在进行中。详情请参阅 [Idempotency Error](/api-reference/errors/idempotency_error)。",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -557,7 +557,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功响应批次信息。",
+            "description": "成功响应，包含批次信息。",
             "content": {
               "application/json": {
                 "schema": {
@@ -672,7 +672,7 @@
       },
       "patch": {
         "summary": "更新批次元数据",
-        "description": "更新特定批次的元数据。只有 `metadata` 字段可以更新。遵循Stripe的合并语义：新键被添加，现有键被更新，设置为空字符串的键被删除。",
+        "description": "更新特定批次的元数据。只有 `metadata` 字段可以更新。遵循Stripe的合并语义：新键会被添加，现有键会被更新，设置为空字符串的键会被删除。",
         "security": [
           {
             "Authorization": []
@@ -883,7 +883,7 @@
                 "failed"
               ]
             },
-            "description": "要检索的URL状态（已完成或失败）。"
+            "description": "要获取的URL状态（已完成或失败）。"
           },
           {
             "name": "cursor",
@@ -906,7 +906,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功响应批次项目。",
+            "description": "成功响应，包含批次项目。",
             "content": {
               "application/json": {
                 "schema": {
@@ -941,7 +941,7 @@
                                 "$ref": "#/components/schemas/Metadata"
                               }
                             ],
-                            "description": "如果在批量创建时提供了项目级元数据。"
+                            "description": "如果在批量创建期间提供了项目级元数据。"
                           },
                           "links_on_page": {
                             "type": "array",
@@ -1128,7 +1128,7 @@
           },
           "errors": {
             "type": "array",
-            "description": "可选的附加错误详情数组",
+            "description": "可选的额外错误详情数组",
             "items": {}
           }
         },

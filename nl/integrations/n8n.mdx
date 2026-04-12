@@ -1,970 +1,270 @@
 ---
-sidebarTitle: "n8n"
-icon: "code"
-title: "n8n Integratie"
-description: "Automatiseer webzoekopdrachten, scraping en crawling met n8n’s zelf-gehoste workflow automatiseringsplatform"
+sidebarTitle: "Olostep + n8n"
+title: "Olostep + n8n"
+description: "Voeg webscraping, zoeken, batchtaken, crawls en sitemaps toe aan elke n8n-workflow, zonder code."
 ---
 
-De Olostep n8n integratie brengt krachtige webzoek-, scraping- en crawlingmogelijkheden naar n8n-workflows. Bouw geautomatiseerde workflows die webgegevens van elke website zoeken, extraheren en structureren zonder code te schrijven.
+De geverifieerde [Olostep Web Scraper-node](https://n8n.io/integrations/olostep-web-scraper/) biedt je zes operaties binnen de visuele builder van n8n: een URL scrapen, het web doorzoeken, AI-antwoorden krijgen, duizenden URL's batch-scrapen, een site crawlen of al zijn links in kaart brengen.
 
-[Begin met Olostep op n8n →](https://www.npmjs.com/package/n8n-nodes-olostep)
+[Bekijk op n8n →](https://n8n.io/integrations/olostep-web-scraper/)
 
-## Functies
+## Voordat je begint
 
-De integratie biedt 6 krachtige operaties voor geautomatiseerde webgegevens-extractie:
+- **Een Olostep-account met een API-sleutel:** [krijg er gratis een](https://olostep.com/dashboard), geen creditcard vereist. Je eerste 500 credits zijn inbegrepen.
+- **n8n draait:** ofwel [n8n Cloud](https://n8n.io/cloud/) of een zelf-gehoste instantie. Community-nodes moeten ingeschakeld zijn (ze zijn standaard ingeschakeld op de meeste installaties).
+- **Geen codering vereist:** alles in deze gids wordt gedaan via de visuele editor van n8n.
 
-<CardGroup cols={2}>
-  <Card title="Website Scrapen" icon="file-lines">
-    Extraheer inhoud van elke enkele URL in meerdere formaten (Markdown, HTML, JSON, tekst)
-  </Card>
-  
-  <Card title="Zoeken" icon="search">
-    Doorzoek het web en krijg gestructureerde resultaten
-  </Card>
-  
-  <Card title="Antwoorden (AI)" icon="globe-pointer">
-    Zoek op het web met AI en krijg gestructureerde antwoorden met bronnen en citaten
-  </Card>
-  
-  <Card title="Batch Scrape URLs" icon="layer-group">
-    Scrape tot 10k urls tegelijkertijd. Perfect voor grootschalige data-extractie
-  </Card>
-  
-  <Card title="Crawl Maken" icon="spider-web">
-    Verkrijg de inhoud van subpagina's van een URL. Ontdek en scrape autonoom volledige websites
-  </Card>
-  
-  <Card title="Kaart Maken" icon="map">
-    Verkrijg alle URLs op een website voor site-structuuranalyse en inhoudsontdekking
-  </Card>
-</CardGroup>
+---
 
 ## Installatie
 
-### 1. Installeer de Node
-
-Installeer het Olostep node-pakket via npm:
-
-```bash
-npm install n8n-nodes-olostep
-```
-
-Herstart vervolgens n8n om de nieuwe node te laden.
-
-Volg anders de [n8n community nodes installatiehandleiding](https://docs.n8n.io/integrations/community-nodes/installation/) voor gedetailleerde instructies.
-
-### 2. Verbind Je Account
-
-Wanneer je de Olostep node voor het eerst in een workflow gebruikt, moet je referenties configureren:
-
-1. Voeg de "Olostep Scrape" node toe aan je workflow
-2. Klik op de node om de instellingen te openen
-3. Klik op "Nieuwe Referentie Maken" of selecteer bestaande referenties
-4. Voer je Olostep API-sleutel in
-5. Klik op "Opslaan" om de referentie op te slaan
-
-Verkrijg je API-sleutel van het [Olostep Dashboard](https://olostep.com/dashboard).
-
-## Beschikbare Acties
-
-### Website Scrapen
-
-Extraheer inhoud van een enkele URL. Ondersteunt meerdere formaten en JavaScript-rendering.
-
-**Gebruiksscenario's:**
-- Monitor specifieke pagina's op wijzigingen
-- Extraheer productinformatie van e-commerce sites
-- Verzamel gegevens van nieuwsartikelen of blogposts
-- Haal inhoud op voor contentaggregatie
-
-**Configuratie:**
-
-<ParamField path="URL om te Scrapen" type="string" required>
-  Website URL om te scrapen (moet http:// of https:// bevatten)
-</ParamField>
-
-<ParamField path="Uitvoerformaat" type="dropdown" default="Markdown">
-  Kies formaat: Markdown, HTML, JSON, of Plain Text
-</ParamField>
-
-<ParamField path="Landcode" type="string">
-  Landcode voor locatie-specifieke inhoud (bijv. "US", "GB", "CA")
-</ParamField>
-
-<ParamField path="Wacht Voor Scraping" type="integer">
-  Wachttijd in milliseconden voor JavaScript-rendering (0-10000)
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  Optionele parser ID voor gespecialiseerde extractie (bijv. "@olostep/amazon-product")
-</ParamField>
-
-**Uitvoer Velden:**
-- Scrape ID
-- Gescrapete URL
-- Markdown Inhoud
-- HTML Inhoud
-- JSON Inhoud
-- Tekst Inhoud
-- Status
-- Tijdstempel
-- Screenshot URL (indien beschikbaar)
-- Paginametadata
-
-**Voorbeeld Workflows:**
-
-<AccordionGroup>
-  <Accordion title="Monitor Concurrentieprijzen">
-    **Trigger:** Schema (Elke dag om 9 uur)
-
-    **Actie:** Olostep - Scrape Website
-    - URL: Concurrent productpagina
-    - Formaat: JSON
-    - Parser: @olostep/amazon-product
-    
-    **Actie:** Google Sheets - Rij Toevoegen
-    - Voeg prijsgegevens toe aan volgbestand
-    
-    **Actie:** E-mail - Stuur E-mail (Als prijs daalt)
-    - Waarschuw team over prijswijzigingen
-  </Accordion>
-
-  <Accordion title="Blogposts Extraheren en Opslaan">
-    **Trigger:** RSS Feed - Nieuw Item
-    
-    **Actie:** Olostep - Scrape Website
-    - URL: \{\{$json.link\}\}
-    - Formaat: Markdown
-    
-    **Actie:** Notion - Pagina Maken
-    - Sla artikelinhoud op in Notion database
-  </Accordion>
-
-  <Accordion title="Lead Verrijking">
-    **Trigger:** Google Sheets - Nieuwe Rij
-    
-    **Actie:** Olostep - Scrape Website
-    - URL: Bedrijfswebsite uit sheet
-    - Formaat: Markdown
-    
-    **Actie:** OpenAI - Tekst Voltooien
-    - Extraheer bedrijfsinformatie met AI
-    
-    **Actie:** Google Sheets - Rij Bijwerken
-    - Voeg verrijkte gegevens terug aan sheet
-  </Accordion>
-</AccordionGroup>
-
-### Zoeken
-
-Doorzoek het web voor een gegeven zoekopdracht en krijg gestructureerde resultaten (niet-AI, parser-gebaseerde zoekresultaten).
-
-**Gebruiksscenario's:**
-- Geautomatiseerde onderzoeksworkflows
-- Lead ontdekking en verrijking
-- Concurrentieanalyse
-- Inhoudsonderzoek
-
-**Configuratie:**
-
-<ParamField path="Zoekopdracht" type="string" required>
-  Zoekopdracht
-</ParamField>
-
-**Uitvoer:** Geeft gestructureerde zoekresultaten als JSON met titels, URLs, fragmenten en metadata.
-
-**Voorbeeld Workflows:**
-
-<AccordionGroup>
-  <Accordion title="Geautomatiseerd Onderzoek">
-    **Trigger:** Schema (Dagelijks om 8 uur)
-
-    **Actie:** Olostep - Zoeken
-    - Zoekopdracht: "laatste AI-ontwikkelingen"
-    
-    **Actie:** Code - Verwerk Resultaten
-    - Extraheer en formatteer kerninformatie
-    
-    **Actie:** Notion - Pagina's Maken
-    - Sla onderzoeksbevindingen op
-  </Accordion>
-
-  <Accordion title="Lead Ontdekking">
-    **Trigger:** Handmatig (Knop)
-    
-    **Actie:** Olostep - Zoeken
-    - Zoekopdracht: "\{\{$json.searchTerm\}\}"
-    
-    **Actie:** Airtable - Records Maken
-    - Sla leads op met contactinformatie
-  </Accordion>
-</AccordionGroup>
-
-### Batch Scrape URLs
-
-Scrape tot 10k urls tegelijkertijd. Perfect voor grootschalige data-extractie.
-
-**Gebruiksscenario's:**
-- Scrape volledige productcatalogi
-- Extraheer gegevens van meerdere zoekresultaten
-- Verwerk lijsten van URLs uit spreadsheets
-- Bulk inhoudsextractie
-
-**Configuratie:**
-
-<ParamField path="URLs om te Scrapen" type="text" required>
-  JSON array van objecten met url en custom_id velden. 
-  
-  Voorbeeld: `[{"url":"https://example.com","custom_id":"site1"}]`
-</ParamField>
-
-<ParamField path="Uitvoerformaat" type="dropdown" default="Markdown">
-  Kies formaat voor alle URLs: Markdown, HTML, JSON, of Plain Text
-</ParamField>
-
-<ParamField path="Landcode" type="string">
-  Landcode voor locatie-specifieke scraping
-</ParamField>
-
-<ParamField path="Wacht Voor Scraping" type="integer">
-  Wachttijd in milliseconden voor JavaScript-rendering
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  Optionele parser ID voor gespecialiseerde extractie
-</ParamField>
-
-**Uitvoer Velden:**
-- Batch ID (gebruik dit om later resultaten op te halen)
-- Status
-- Totaal URLs
-- Aangemaakt Op
-- Aangevraagd Formaat
-- Landcode
-- Gebruikte Parser
-
-**Voorbeeld Workflows:**
-
-<AccordionGroup>
-  <Accordion title="Scrape Productcatalogus">
-    **Trigger:** Webhook - Ontvang POST Verzoek
-    
-    **Actie:** Code - Formatteer URLs
-    - Converteer CSV/lijst naar JSON array formaat
-    
-    **Actie:** Olostep - Batch Scrape URLs
-    - URLs: \{\{$json.urlArray\}\}
-    - Formaat: JSON
-    - Parser: @olostep/amazon-product
-    
-    **Actie:** Webhook - POST
-    - Stuur batch ID naar je systeem voor ophalen
-  </Accordion>
-
-  <Accordion title="Dagelijkse Inhoudsmonitoring">
-    **Trigger:** Schema - Elke dag om 6 uur
-    
-    **Actie:** Google Sheets - Lees Rijen
-    - Haal URLs op om te monitoren
-    
-    **Actie:** Code - Formatteer URLs
-    - Converteer naar batch array formaat
-    
-    **Actie:** Olostep - Batch Scrape URLs
-    - Verwerk alle URLs tegelijk
-    
-    **Actie:** Slack - Stuur Bericht
-    - Informeer team dat scraping voltooid is
-  </Accordion>
-</AccordionGroup>
-
-### Crawl Maken
-
-Verkrijg de inhoud van subpagina's van een URL. Ontdek en scrape autonoom volledige websites door links te volgen. Perfect voor documentatiesites, blogs en inhoudsrepositories.
-
-**Gebruiksscenario's:**
-- Crawl en archiveer volledige documentatiesites
-- Extraheer alle blogposts van een website
-- Bouw kennisbanken van webinhoud
-- Monitor wijzigingen in websitestructuur
-
-**Configuratie:**
-
-<ParamField path="Start URL" type="string" required>
-  Start-URL voor de crawl (moet http:// of https:// bevatten)
-</ParamField>
-
-<ParamField path="Maximaal Aantal Pagina's" type="integer" default="10">
-  Maximum aantal pagina's om te crawlen
-</ParamField>
-
-<ParamField path="Volg Links" type="boolean" default="true">
-  Of links op pagina's gevolgd moeten worden
-</ParamField>
-
-<ParamField path="Uitvoerformaat" type="dropdown" default="Markdown">
-  Formaat voor gescrapete inhoud
-</ParamField>
-
-<ParamField path="Landcode" type="string">
-  Optionele landcode voor locatie-specifieke crawling
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  Optionele parser ID voor gespecialiseerde inhoudsextractie
-</ParamField>
-
-**Uitvoer Velden:**
-- Crawl ID (gebruik dit om later resultaten op te halen)
-- Object Type
-- Status
-- Start URL
-- Maximum Aantal Pagina's
-- Volg Links
-- Aangemaakt Tijdstempel
-- Formaten
-
-**Voorbeeld Workflows:**
-
-<AccordionGroup>
-  <Accordion title="Archiveer Documentatiesite">
-    **Trigger:** Schema - Maandelijks op de 1e om 12 uur
-
-    **Actie:** Olostep - Crawl Maken
-    - Start URL: https://docs.example.com
-    - Max Pagina's: 500
-    - Volg Links: true
-    - Formaat: Markdown
-    
-    **Actie:** Webhook - POST
-    - Stuur crawl ID naar je archiefsysteem
-    
-    **Actie:** Slack - Stuur Bericht
-    - Informeer team dat crawl bezig is
-  </Accordion>
-
-  <Accordion title="Concurrentie Inhoudsanalyse">
-    **Trigger:** Schema - Wekelijks op maandag om 9 uur
-    
-    **Actie:** Olostep - Crawl Maken
-    - Start URL: Concurrent blog URL
-    - Max Pagina's: 100
-    - Formaat: Markdown
-    
-    **Actie:** Wacht - Voor 10 minuten
-    - Wacht tot crawl voltooid is
-    
-    **Actie:** Airtable - Records Maken
-    - Sla crawlgegevens op voor analyse
-  </Accordion>
-</AccordionGroup>
-
-### Kaart Maken
-
-Verkrijg alle URLs op een website. Extraheer alle URLs van een website voor inhoudsontdekking en site-structuuranalyse.
-
-**Gebruiksscenario's:**
-- Bouw sitemaps en site-structuurdiagrammen
-- Ontdek alle pagina's voordat je batch scraping doet
-- Vind gebroken of ontbrekende pagina's
-- SEO audits en analyse
-
-**Configuratie:**
-
-<ParamField path="Website URL" type="string" required>
-  Website URL om links uit te extraheren (moet http:// of https:// bevatten)
-</ParamField>
-
-<ParamField path="Zoekopdracht" type="string">
-  Optionele zoekopdracht om URLs te filteren (bijv. "blog")
-</ParamField>
-
-<ParamField path="Top N URLs" type="integer">
-  Beperk het aantal geretourneerde URLs
-</ParamField>
-
-<ParamField path="Inclusief URL Patronen" type="string">
-  Glob patronen om specifieke paden op te nemen (bijv. "/blog/**")
-</ParamField>
-
-<ParamField path="Uitsluit URL Patronen" type="string">
-  Glob patronen om specifieke paden uit te sluiten (bijv. "/admin/**")
-</ParamField>
-
-**Uitvoer Velden:**
-- Kaart ID
-- Object Type
-- Website URL
-- Totaal Aantal Gevonden URLs
-- URLs (JSON array)
-- Zoekopdracht
-- Top N Limiet
-
-**Voorbeeld Workflows:**
-
-<AccordionGroup>
-  <Accordion title="Ontdek en Scrape">
-    **Trigger:** Handmatig (Knop)
-    
-    **Actie:** Olostep - Kaart Maken
-    - URL: https://example.com
-    - Inclusief Patronen: /products/**
-    - Top N: 500
-    
-    **Actie:** Code - Extraheer URLs
-    - Parseer URLs uit kaartresultaat
-    
-    **Actie:** Olostep - Batch Scrape URLs
-    - URLs: \{\{$json.urls\}\}
-    - Formaat: JSON
-    
-    **Actie:** Google Sheets - Rijen Toevoegen
-    - Voeg alle productgegevens toe aan spreadsheet
-  </Accordion>
-
-  <Accordion title="SEO Site Audit">
-    **Trigger:** Schema - Maandelijks
-    
-    **Actie:** Olostep - Kaart Maken
-    - URL: Je website
-    - Top N: 1000
-    
-    **Actie:** Airtable - Records Maken
-    - Sla alle URLs op voor tracking
-    
-    **Actie:** Slack - Stuur Bericht
-    - Rapporteer totaal aantal gevonden pagina's
-  </Accordion>
-</AccordionGroup>
-
-## Populaire Workflow Voorbeelden
-
-### E-commerce Prijs Monitoring
-
-Monitor concurrentieprijzen en krijg directe meldingen:
-
-```
-Trigger: Schema (Elk uur)
-↓
-Actie: Olostep - Scrape Website
-  - URL: Concurrent productpagina
-  - Formaat: JSON
-  - Parser: @olostep/amazon-product
-↓
-Actie: IF - Controleer of prijs is veranderd
-↓
-Actie: Slack - Stuur Bericht
-  - Waarschuwing: "Prijs veranderd naar $\{\{price\}\}"
-```
-
-### Inhoudsaggregatie
-
-Aggregate inhoud van meerdere bronnen:
-
-```
-Trigger: Google Sheets - Nieuwe Rij
-↓
-Actie: Olostep - Scrape Website
-  - URL: \{\{$json.url\}\}
-  - Formaat: Markdown
-↓
-Actie: OpenAI - Samenvatten
-  - Vat de inhoud samen
-↓
-Actie: Airtable - Record Maken
-  - Sla artikel met samenvatting op
-```
-
-### Lead Verrijking Pipeline
-
-Verrijk leadgegevens met webinformatie:
-
-```
-Trigger: HubSpot - Nieuwe Contactpersoon
-↓
-Actie: Olostep - Scrape Website
-  - URL: \{\{$json.companyWebsite\}\}
-  - Formaat: Markdown
-↓
-Actie: OpenAI - Gegevens Extraheren
-  - Extraheer: bedrijfsomvang, industrie, producten
-↓
-Actie: HubSpot - Contact Bijwerken
-  - Voeg verrijkte gegevens toe aan contact
-```
-
-### Onderzoek Automatisering
-
-Automatiseer onderzoek van meerdere bronnen:
-
-```
-Trigger: Airtable - Nieuw Record
-↓
-Actie: Olostep - Kaart Maken
-  - URL: Onderzoek doelwebsite
-  - Inclusief: /research/**
-↓
-Actie: Code - Parseer URLs
-↓
-Actie: Olostep - Batch Scrape URLs
-  - URLs: \{\{$json.discoveredUrls\}\}
-  - Formaat: Markdown
-↓
-Actie: Notion - Pagina's Maken
-  - Maak onderzoeksdatabase
-```
-
-### Sociale Media Monitoring
-
-Volg vermeldingen en inhoud:
-
-```
-Trigger: Schema (Elke 6 uur)
-↓
-Actie: Olostep - Scrape Website
-  - URL: Nieuws site zoekpagina
-  - Formaat: HTML
-↓
-Actie: Code - Extraheer Vermeldingen
-  - Vind merkvermeldingen
-↓
-Actie: Google Sheets - Rij Toevoegen
-  - Log vermeldingen met tijdstempel
-```
-
-## Multi-Step Workflows
-
-### Volledige Product Scraping Pipeline
-
-Bouw een uitgebreide productgegevenspipeline:
-
 <Steps>
-  <Step title="Ontdek Product URLs">
-    Gebruik **Kaart Maken** om alle productpagina's op de doelwebsite te vinden
-    - Inclusief patronen: `/products/**`
-    - Uitsluit patronen: `/cart/**`, `/checkout/**`
+  <Step title="Zoek naar de Olostep-node">
+    Open een workflow, klik op **+**, en zoek naar **Olostep**. Selecteer **Olostep Web Scraper** uit de resultaten.
+
+    ![Zoek naar Olostep in de n8n-nodekiezer](/images/integrations/n8n/step-1.png)
   </Step>
-  
-  <Step title="Batch Verwerk Producten">
-    Gebruik **Batch Scrape URLs** om alle productgegevens te extraheren
-    - Formaat: JSON
-    - Parser: Product-specifieke parser indien beschikbaar
+
+  <Step title="Installeer de node">
+    Klik op het resultaat om het Node-details paneel te openen en klik vervolgens op **Node installeren**. n8n zal `n8n-nodes-olostep` installeren en je vragen om opnieuw op te starten. Doe dat voordat je verder gaat.
+
+    ![Olostep Web Scraper node details met Install node knop](/images/integrations/n8n/step-2.png)
+
+    <Note>
+      Als **Community Nodes** is uitgeschakeld voor je werkruimte, moet een beheerder het eerst inschakelen. Zie de [n8n community nodes gids](https://docs.n8n.io/integrations/community-nodes/installation/).
+    </Note>
   </Step>
-  
-  <Step title="Opslaan in Database">
-    Stuur batch ID naar je systeem of wacht en haal resultaten op
-    - Gebruik Airtable, Google Sheets, of je database
+
+  <Step title="Voeg je API-sleutel toe">
+  Open de Olostep-node in je workflow, klik op **Credential instellen** (in het Parameters-tabblad), voeg je API-sleutel toe en klik op **Opslaan**.
+
+    ![Olostep credentials formulier in n8n met API Key veld](/images/integrations/n8n/step-3.png)
+
+    Haal je sleutel op van het [Olostep dashboard →](https://olostep.com/dashboard)
   </Step>
-  
-  <Step title="Monitor voor Wijzigingen">
-    Plan dagelijkse scrapes om prijs/beschikbaarheidswijzigingen te volgen
-    - Vergelijk met bestaande gegevens
-    - Waarschuw bij significante wijzigingen
+
+  <Step title="Verbind en voer uit">
+    Verbind de Olostep-node met een trigger en eventuele downstream-stappen, en voer vervolgens je workflow uit.
+
+    ![n8n workflow canvas met Schedule Trigger verbonden met Olostep-node](/images/integrations/n8n/step-4.png)
   </Step>
 </Steps>
 
-### SEO Inhoudsstrategie
+---
 
-Analyseer concurrenten en plan inhoud:
-
-<Steps>
-  <Step title="Kaart Concurrent Sites">
-    Gebruik **Kaart Maken** op concurrent websites
-    - Extraheer alle blogposts en inhoudspagina's
-  </Step>
-  
-  <Step title="Scrape Inhoud">
-    Gebruik **Batch Scrape URLs** om volledige inhoud te krijgen
-    - Formaat: Markdown voor eenvoudige analyse
-  </Step>
-  
-  <Step title="AI Analyse">
-    Gebruik OpenAI om onderwerpen en trefwoorden te analyseren
-    - Identificeer inhoudsgaten
-    - Vind trending onderwerpen
-  </Step>
-  
-  <Step title="Creëer Inhoudskalender">
-    Voeg inzichten toe aan Notion of Airtable
-    - Plan je inhoudsstrategie
-  </Step>
-</Steps>
-
-## Gespecialiseerde Parsers
-
-Olostep biedt vooraf gebouwde parsers voor populaire websites. Gebruik ze met het `Parser` veld:
+## Acties
 
 <CardGroup cols={2}>
-  <Card title="Amazon Product" icon="amazon">
-    `@olostep/amazon-product`
-    
-    Extraheer: titel, prijs, beoordeling, reviews, afbeeldingen, varianten
-  </Card>
-  
-  <Card title="Google Zoeken" icon="google">
-    `@olostep/google-search`
-    
-    Extraheer: zoekresultaten, titels, fragmenten, URLs
-  </Card>
-  
-  <Card title="Google Maps" icon="map">
-    `@olostep/google-maps`
-    
-    Extraheer: bedrijfsinfo, reviews, beoordelingen, locatie
+  <Card title="Website Scrapen" icon="file-lines">
+    Haal inhoud van elke URL als Markdown, HTML, JSON of platte tekst. Behandelt JS-gerenderde pagina's met optionele wachttijden en landgerichte targeting.
   </Card>
 
-  <Card title="E-mails Extraheren" icon="envelope">
-    `@olostep/extract-emails`
-    
-    Extraheer: e-mails van pagina's, contactlijsten en voetnoten
+  <Card title="Zoeken" icon="magnifying-glass">
+    Voer een webzoekopdracht uit en krijg gestructureerde resultaten (titels, URL's en fragmenten) als JSON.
   </Card>
 
-  <Card title="Socials Extraheren" icon="users">
-    `@olostep/extract-socials`
-    
-    Extraheer: sociale profiel links (X/Twitter, GitHub, etc.)
+  <Card title="Antwoorden (AI)" icon="sparkles">
+    Stel een vraag in natuurlijke taal en krijg een antwoord met geciteerde bronnen. Handig voor LLM-nodes wanneer je onderbouwde antwoorden nodig hebt.
   </Card>
 
-  <Card title="Kalenders Extraheren" icon="calendar">
-    `@olostep/extract-calendars`
-    
-    Extraheer: kalenderlinks (Google Calendar, ICS) van pagina's
+  <Card title="Batch Scrape URL's" icon="layer-group">
+    Dien tot 10.000 URL's in één taak in, verwerkt in parallel. Geeft een `batch_id` terug; haal resultaten asynchroon op.
+  </Card>
+
+  <Card title="Crawl Maken" icon="spider-web">
+    Begin vanaf een URL, volg links en scrape alle subpagina's. Goed voor documentatiesites, blogs of volledige site-inname. Geeft een `crawl_id` terug.
+  </Card>
+
+  <Card title="Kaart Maken" icon="map">
+    Verkrijg elke URL op een site zonder inhoud te scrapen. Gebruik het voor ontdekking vóór een batchtaak. Geeft een `map_id` terug.
   </Card>
 </CardGroup>
 
-### Parsers Gebruiken
+<Note>
+  **Batch, Crawl, en Map zijn asynchroon.** Bewaar de geretourneerde ID en gebruik een Wacht-node of een tweede workflow om resultaten op te halen zodra de verwerking is voltooid.
+</Note>
 
-Voeg eenvoudig de parser ID toe aan het Parser veld. Twee voorbeelden:
+---
 
-```
-Actie: Olostep - Scrape Website
-  - URL: https://www.amazon.com/dp/PRODUCT_ID
-  - Formaat: JSON
-  - Parser: @olostep/amazon-product
-```
+## Voorbeeldworkflow: Lead verrijking vanuit Google Sheets
 
-```
-Actie: Olostep - Scrape Website
-  - URL: https://example.com/contact
-  - Formaat: JSON
-  - Parser: @olostep/extract-emails
-```
+**Wat het doet:** Wanneer je een bedrijfs-URL in een Google Sheet plakt, scrapt deze workflow automatisch de website van het bedrijf, extraheert belangrijke informatie met een AI-node en schrijft de resultaten terug naar dezelfde rij, waardoor een lege spreadsheet wordt omgezet in een ingevulde lead-database.
 
-De parser extraheert automatisch gestructureerde gegevens die specifiek zijn voor de taak.
+**Gebruikte nodes:** Google Sheets trigger → Olostep Scrape Website → OpenAI → Code → Google Sheets update
 
-## Integratie met Populaire Apps
+![Lead verrijking workflow in n8n: Google Sheets trigger verbonden met Olostep, OpenAI, Code, en Google Sheets update nodes](/images/integrations/n8n/workflow-example.png)
 
-### Google Sheets
+---
 
-Perfect voor gegevensverzameling en tracking:
+### Stap 1: Stel je Google Sheet in
 
-```
-1. Olostep scrapes website
-2. Filter of transformeer gegevens
-3. Google Sheets - Rij Toevoegen
-```
+Maak een sheet met deze kolommen: `Company URL`, `Industry`, `Description`, `Company Size`, `Enriched`. De workflow leest van `Company URL` en vult de rest in.
 
-**Gebruiksscenario's:**
-- Prijsvolgspreadsheets
-- Leadverrijkingsdatabases
-- Inhoudsinventaris
-- Concurrentieanalysesheets
+### Stap 2: Voeg een Google Sheets trigger toe
 
-### Airtable
+Voeg in n8n een **Google Sheets** trigger-node toe. Stel de gebeurtenis in op **Row Added**, wijs het naar je sheet en stel het in om de `Company URL` kolom te bekijken. Nu, elke keer dat je een nieuwe URL in de sheet plakt, wordt deze workflow geactiveerd.
 
-Bouw krachtige databases met gescrapete gegevens:
+### Stap 3: Voeg Olostep Scrape Website toe
+
+Verbind een **Olostep Web Scraper** node na de trigger. Stel in:
+- **Actie:** Website Scrapen
+- **URL:** `{{ $json["Company URL"] }}` (haalt de URL uit de nieuwe rij)
+- **Uitvoerformaat:** Markdown
+
+Markdown werkt hier het beste omdat het navigatie, advertenties en boilerplate verwijdert. De AI-node in de volgende stap krijgt schone proza over het bedrijf in plaats van ruwe HTML-ruis.
+
+### Stap 4: Voeg een OpenAI-node toe
+
+Verbind een **OpenAI** node. Stel het model in op `gpt-4o-mini` (snel en goedkoop voor extractietaken) en gebruik deze prompt:
 
 ```
-1. Olostep scrapes of crawls
-2. Code - Formatteer gegevens
-3. Airtable - Records Maken
+Je bent een verkooponderzoeker. Op basis van de onderstaande inhoud van de bedrijfswebsite, extraheer:
+1. Industrie (één zin, bijv. "B2B SaaS", "E-commerce", "Gezondheidszorg")
+2. Eén-zin bedrijfsbeschrijving (max 20 woorden)
+3. Geschatte bedrijfsgrootte (Startup / SMB / Mid-market / Enterprise)
+
+Geef alleen een JSON-object terug met sleutels: industry, description, company_size.
+
+Website-inhoud:
+{{ $json.markdownContent }}
 ```
 
-**Gebruiksscenario's:**
-- Productcatalogi
-- Onderzoeksdatabases
-- Inhoudskalenders
-- Linkdatabases
+Het `markdownContent` veld is wat Olostep retourneert van de scrape, als schone platte tekst.
 
-### Slack
+### Stap 5: Parseer de AI-reactie en schrijf terug
 
-Krijg directe meldingen:
+Voeg een **Code** node toe om de JSON van OpenAI te parseren:
 
-```
-1. Olostep monitort pagina
-2. IF - Controleer op wijzigingen
-3. Slack - Stuur Bericht
+```js
+const parsed = JSON.parse($input.first().json.message.content);
+return [{ json: parsed }];
 ```
 
-**Gebruiksscenario's:**
-- Prijsdaling waarschuwingen
-- Inhoudsupdate meldingen
-- Foutmonitoring
-- Dagelijkse samenvattingen
+Verbind vervolgens een **Google Sheets** node ingesteld op **Update Row**. Map de kolommen:
+- `Industry` → `{{ $json.industry }}`
+- `Description` → `{{ $json.description }}`
+- `Company Size` → `{{ $json.company_size }}`
+- `Enriched` → `Yes`
 
-### HubSpot / Salesforce
+### Wat je krijgt
 
-Verrijk CRM-gegevens automatisch:
+Plak een URL zoals `https://notion.so` in je sheet, en binnen ~10 seconden vult de rij zich in:
 
-```
-1. Nieuwe contactpersoon toegevoegd
-2. Olostep scrapes bedrijfswebsite
-3. OpenAI extraheert kerninformatie
-4. CRM - Contact bijwerken
-```
+| Company URL | Industry | Description | Company Size | Enriched |
+|---|---|---|---|---|
+| https://notion.so | Productivity SaaS | All-in-one werkruimte voor notities, documenten en databases | Mid-market | Yes |
 
-**Gebruiksscenario's:**
-- Leadverrijking
-- Bedrijfsonderzoek
-- Concurrentie-intelligentie
-- Accountmapping
+Vanaf hier kun je deze workflow uitbreiden: voeg een Slack-melding toe wanneer verrijking is voltooid, filter op industrie voordat je terugschrijft, of vervang Google Sheets door HubSpot om contacten direct bij te werken.
 
-### Notion
+---
 
-Bouw kennisbanken:
+## Templates
 
-```
-1. Olostep crawlt documentatie
-2. Code - Parseer inhoud
-3. Notion - Pagina's Maken
-```
+Klaar om te importeren n8n-workflows gebouwd met Olostep:
 
-**Gebruiksscenario's:**
-- Documentatiespiegels
-- Onderzoeksrepositories
-- Inhoudsbibliotheken
-- Teamwiki's
+<CardGroup cols={2}>
+  <Card title="Crawl docs → AI kennisbank" icon="book" href="https://www.n8n.io/workflows/13436-crawl-documentation-sites-and-build-an-ai-knowledge-base-with-olostep/">
+    Crawl documentatiesites met Olostep en structureer de output in een AI-klare kennisbank.
+  </Card>
 
-## Best Practices
+  <Card title="Google Maps leads → beslisserverrijking" icon="map-location-dot" href="https://n8n.io/workflows/11086-scrape-business-leads-from-google-maps-and-extract-decision-maker-info-with-olostep/">
+    Scrape zakelijke leads van Google Maps en verrijk ze met details van beslissers.
+  </Card>
 
-<AccordionGroup>
-  <Accordion title="Gebruik Batchverwerking voor Meerdere URLs">
-    Wanneer je meer dan 3-5 URLs scrapt, gebruik **Batch Scrape URLs** in plaats van meerdere **Scrape Website** acties. Batchverwerking is:
-    - Veel sneller (parallelle verwerking)
-    - Kosteneffectiever
-    - Makkelijker te beheren
-    - Beter voor snelheidslimieten
-  </Accordion>
+  <Card title="Gebruikersklachten minen → inzichtrapport" icon="chart-line" href="https://www.n8n.io/workflows/13435-mine-user-complaints-and-generate-insight-reports-with-olostep-gemini-and-google-docs/">
+    Analyseer klachten met Olostep + Gemini en genereer gestructureerde inzichtrapporten in Google Docs.
+  </Card>
 
-  <Accordion title="Stel Geschikte Wachttijden In">
-    Voor JavaScript-zware sites, gebruik de "Wacht Voor Scraping" parameter:
-    - Eenvoudige sites: 0-1000ms
-    - Dynamische sites: 2000-3000ms
-    - Zware JavaScript: 5000-8000ms
-    
-    Test met verschillende waarden om de optimale wachttijd te vinden.
-  </Accordion>
+  <Card title="Amazon productextractie → Google Sheets" icon="table" href="https://n8n.io/workflows/11158-extract-amazon-product-data-to-sheets-with-olostep-api/">
+    Extraheer Amazon-product-URL's en metadata met Olostep, en synchroniseer de resultaten naar Sheets.
+  </Card>
+</CardGroup>
 
-  <Accordion title="Gebruik Gespecialiseerde Parsers">
-    Gebruik vooraf gebouwde parsers (bijv. Amazon, Google, en taak-specifieke parsers uit de Olostep Store zoals e-mails, socials, kalenders):
-    - Krijg automatisch gestructureerde gegevens
-    - Betrouwbaardere extractie
-    - Geen behoefte aan aangepaste parsing
-    - Onderhouden door Olostep
-  </Accordion>
+[Blader door alle Olostep-workflows op n8n.io →](https://n8n.io/workflows/?q=olostep)
 
-  <Accordion title="Filter Voor Scraping">
-    Gebruik n8n's IF node om onnodige scrapes te vermijden:
-    - Controleer of URL is veranderd
-    - Verifieer dat gegevens niet recent zijn gescrapet
-    - Pas bedrijfslogica toe voor scraping
-    
-    Dit bespaart API-credits en uitvoeringstijd.
-  </Accordion>
+---
 
-  <Accordion title="Behandel Asynchrone Operaties">
-    Batch, Crawl, en Map operaties zijn asynchroon:
-    - Sla de geretourneerde ID op (batch_id, crawl_id, map_id)
-    - Gebruik een Wacht node als je direct ophaalt
-    - Overweeg webhook callbacks voor voltooiing
-    - Stel aparte workflows in voor ophalen
-  </Accordion>
+## Parsers
 
-  <Accordion title="Sla Resultaten Correct Op">
-    Kies de juiste opslag op basis van je behoeften:
-    - **Google Sheets**: Eenvoudige tracking, team samenwerking
-    - **Airtable**: Relationele gegevens, rijke opmaak
-    - **Database**: Grootschalig, complexe queries
-    - **Notion**: Kennisbank, documentatie
-  </Accordion>
+Voeg een parser-ID toe aan het **Parser** veld bij elke Scrape of Batch-actie om gestructureerde data te krijgen in plaats van ruwe inhoud:
 
-  <Accordion title="Monitor en Waarschuw">
-    Stel monitoring in voor je scraping workflows:
-    - Gebruik Foutworkflows in n8n
-    - Stuur waarschuwingen naar Slack/E-mail bij fouten
-    - Volg API-gebruik in Olostep dashboard
-    - Log belangrijke statistieken
-  </Accordion>
-</AccordionGroup>
+| Parser | Extraheert |
+|--------|------------|
+| `@olostep/amazon-product` | Titel, prijs, beoordeling, recensies, afbeeldingen, varianten |
+| `@olostep/google-search` | Resultaten titels, URL's, fragmenten |
+| `@olostep/google-maps` | Bedrijfsnaam, adres, beoordeling, recensies |
+| `@olostep/extract-emails` | E-mailadressen van elke pagina |
+| `@olostep/extract-socials` | Sociale profiel links (X, GitHub, LinkedIn, etc.) |
+| `@olostep/extract-calendars` | Google Calendar en ICS-links |
 
-## Veelvoorkomende Gebruiksscenario's per Industrie
+Bekijk de volledige lijst in de [Olostep parser store →](https://www.olostep.com/store)
 
-### E-commerce
-- **Prijs Monitoring**: Volg concurrentieprijzen in real-time
-- **Product Onderzoek**: Ontdek trending producten en marktkansen
-- **Voorraad Volgen**: Monitor voorraadbeschikbaarheid
-- **Review Analyse**: Verzamel en analyseer klantbeoordelingen
-
-### Marketing & SEO
-- **Inhoudsontdekking**: Vind inhoudskansen
-- **Concurrentieanalyse**: Volg concurrentiestrategieën
-- **Backlink Onderzoek**: Ontdek linkkansen
-- **Trefwoord Onderzoek**: Extraheer trefwoordgegevens uit zoekresultaten
-
-### Verkoop & Leadgeneratie
-- **Lead Verrijking**: Verrijk CRM-gegevens met webinformatie
-- **Bedrijfsonderzoek**: Verzamel bedrijfsintelligentie
-- **Contact Ontdekking**: Vind beslissers
-- **Concurrentie-intelligentie**: Volg concurrentiebewegingen
-
-### Onderzoek & Analyse
-- **Gegevensverzameling**: Verzamel gegevens van meerdere bronnen
-- **Marktonderzoek**: Volg industrietrends
-- **Academisch Onderzoek**: Verzamel onderzoeksgegevens
-- **Prijsintelligentie**: Analyseer prijsstrategieën
-
-### Media & Publicatie
-- **Inhoudsaggregatie**: Curate inhoud van meerdere sites
-- **Nieuwsmonitoring**: Volg nieuws en vermeldingen
-- **Sociale Media**: Monitor sociale platforms
-- **Trenddetectie**: Identificeer trending onderwerpen
+---
 
 ## Probleemoplossing
 
 <AccordionGroup>
-  <Accordion title="Authenticatie Mislukt">
-    **Fout**: "Ongeldige API-sleutel"
-    
-    **Oplossingen**:
-    - Controleer API-sleutel van [dashboard](https://olostep.com/dashboard)
-    - Zorg ervoor dat er geen extra spaties in de API-sleutel staan
-    - Maak de referentie opnieuw aan in n8n
-    - Verifieer dat de API-sleutel actief is
+  <Accordion title="API-sleutel geweigerd">
+    Kopieer de sleutel direct van [olostep.com/dashboard](https://olostep.com/dashboard) zonder spaties aan het einde. Verwijder en maak de credential opnieuw aan in n8n als de fout aanhoudt.
   </Accordion>
 
-  <Accordion title="Scrape Geeft Lege Inhoud Terug">
-    **Fout**: Inhoudsvelden zijn leeg
-    
-    **Oplossingen**:
-    - Verhoog "Wacht Voor Scraping" tijd
-    - Controleer of website inloggen vereist
-    - Probeer een ander formaat (HTML vs Markdown)
-    - Verifieer dat URL toegankelijk is
-    - Controleer of site geautomatiseerde toegang blokkeert
+  <Accordion title="Gescrapete inhoud is leeg">
+    Verhoog **Wacht Voor Scrapen** (probeer 2000–5000ms voor JS-zware pagina's). Bevestig dat de URL openbaar toegankelijk is zonder inlog. Als een specifiek domein consequent faalt, neem contact op met [info@olostep.com](mailto:info@olostep.com).
   </Accordion>
 
-  <Accordion title="Batch Array Formaat Fout">
-    **Fout**: "Ongeldig JSON-formaat voor batch array"
-    
-    **Oplossingen**:
-    - Gebruik formaat: `[{"url":"https://example.com","custom_id":"id1"}]`
-    - Zorg voor correcte JSON-syntaxis
-    - Gebruik Code node om URLs correct te formatteren
-    - Test JSON met online validator
+  <Accordion title="Batch URL formaatfout">
+    Het **URL's om te Scrapen** veld verwacht een JSON-array:
+    ```json
+    [
+      { "url": "https://example.com/page-1", "custom_id": "p1" },
+      { "url": "https://example.com/page-2", "custom_id": "p2" }
+    ]
+    ```
+    Gebruik een Code-node stroomopwaarts om deze array uit je data te bouwen indien nodig.
   </Accordion>
 
-  <Accordion title="Snelheidslimiet Overschreden">
-    **Fout**: "Snelheidslimiet overschreden"
-    
-    **Oplossingen**:
-    - Spreid workflow-uitvoeringen met Wacht nodes
-    - Gebruik batchverwerking in plaats van individuele scrapes
-    - Upgrade je Olostep-plan
-    - Controleer snelheidslimiet in dashboard
+  <Accordion title="Rate limit bereikt">
+    Voeg een **Wacht** node toe tussen scrape-stappen, of schakel over naar **Batch Scrape URL's** in plaats van enkele scrapes te herhalen. Controleer het huidige gebruik in het [dashboard](https://olostep.com/dashboard).
   </Accordion>
 
-  <Accordion title="URL Niet Gescrapet">
-    **Fout**: Specifieke URLs falen bij scrapen
-    
-    **Oplossingen**:
-    - Verifieer URL-formaat (inclusief http:// of https://)
-    - Controleer of URL authenticatie vereist
-    - Test URL eerst in browser
-    - Probeer met landparameter
-    - Neem contact op met ondersteuning voor geblokkeerde domeinen
+  <Accordion title="Community Nodes niet zichtbaar in Instellingen">
+    Op n8n Cloud moeten community-nodes worden ingeschakeld door een werkruimte-eigenaar. Op zelf-gehoste, zorg ervoor dat `N8N_COMMUNITY_PACKAGES_ENABLED=true` is ingesteld in je omgeving. Zie [n8n's installatiegids](https://docs.n8n.io/integrations/community-nodes/installation/).
   </Accordion>
 </AccordionGroup>
 
-## n8n Voordelen
+---
 
-### Zelf-Gehost
-n8n is zelf-gehost, waardoor je volledige controle hebt over je workflows en gegevens. Geen vendor lock-in, geen gegevens die je infrastructuur verlaten.
-
-### Geen Taaklimieten
-In tegenstelling tot cloud-gebaseerde automatiseringsplatforms, legt n8n geen taaklimieten op. Voer zoveel workflows uit als je nodig hebt zonder extra kosten.
-
-### Open Source
-n8n is open source, waardoor je het kunt aanpassen en uitbreiden om aan je specifieke behoeften te voldoen.
-
-### Kosteneffectief
-Zelf-gehoste n8n is gratis, met optionele cloudhosting beschikbaar. Betaal alleen voor het gebruik van de Olostep API.
-
-## Prijzen
-
-Olostep rekent op basis van API-gebruik, onafhankelijk van n8n:
-
-- **Scrapes**: Betaal per scrape
-- **Batches**: Betaal per URL in batch
-- **Crawls**: Betaal per gecrawlde pagina
-- **Kaarten**: Betaal per kaartoperatie
-
-Bekijk de huidige prijzen op [olostep.com/pricing](https://olostep.com/pricing).
-
-**n8n**: Zelf-gehoste n8n is gratis. Cloudhosting beschikbaar met optionele betaalde plannen.
-
-## Ondersteuning
-
-Hulp nodig met de n8n integratie?
-
-<CardGroup cols={2}>
-  <Card title="Documentatie" icon="book" href="https://docs.olostep.com">
-    Blader door volledige API-documentatie
-  </Card>
-  
-  <Card title="Ondersteuning E-mail" icon="envelope" href="mailto:info@olostep.com">
-    E-mail: info@olostep.com
-  </Card>
-  
-  <Card title="n8n Community" icon="users" href="https://community.n8n.io">
-    Vraag in de n8n Community
-  </Card>
-  
-</CardGroup>
-
-## Gerelateerde Bronnen
+## Gerelateerd
 
 <CardGroup cols={2}>
   <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    Leer over de Scrapes endpoint
+    Volledige referentie voor het scrape-eindpunt
   </Card>
-  
+
   <Card title="Batches API" icon="layer-group" href="/features/batches">
-    Leer over de Batches endpoint
+    Hoe batchtaken werken en hoe resultaten op te halen
   </Card>
-  
+
   <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    Leer over de Crawls endpoint
+    Crawlconfiguratie en resultaatophaling
   </Card>
-  
+
   <Card title="Maps API" icon="map" href="/features/maps">
-    Leer over de Maps endpoint
-  </Card>
-  
-  <Card title="Python SDK" icon="python" href="/sdks/python">
-    Gebruik Olostep met Python
-  </Card>
-  
-  <Card title="LangChain Integratie" icon="link" href="/integrations/langchain">
-    Bouw AI-agenten met LangChain
+    URL-ontdekking en filteropties
   </Card>
 </CardGroup>
 
-## Aan de Slag
+## Aan de slag
 
-Klaar om je webzoek-, scraping- en crawlingworkflows te automatiseren?
+Klaar om je webzoek-, scraping- en crawling-workflows te automatiseren?
 
-<Card title="Installeer de Node" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
-  Installeer n8n-nodes-olostep en begin met het bouwen van geautomatiseerde workflows
-</Card>
+<CardGroup cols={2}>
+  <Card title="n8n Website" icon="link" href="https://n8n.io">
+    n8n platform
+  </Card>
+  <Card title="Installeer de Node" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
+    Installeer n8n-nodes-olostep en begin met het bouwen van geautomatiseerde workflows
+  </Card>
+</CardGroup>
 
-Verbind Olostep met n8n en automatiseer vandaag nog je webgegevens-extractie!
+Verbind Olostep met n8n en automatiseer vandaag nog je webdata-extractie!

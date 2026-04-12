@@ -22,7 +22,7 @@
     "/v1/files": {
       "post": {
         "summary": "Datei-Upload erstellen",
-        "description": "Generiere eine vorab signierte URL zum Hochladen einer JSON-Datei. Nach dem Hochladen musst du den Complete-Endpunkt aufrufen, um den Upload abzuschließen. Die Upload-URL läuft in 10 Minuten ab.",
+        "description": "Generiere eine vorab signierte URL zum Hochladen einer JSON-Datei. Nach dem Hochladen musst du den Complete-Endpunkt aufrufen, um den Upload abzuschließen. Die Upload-URL läuft nach 10 Minuten ab.",
         "security": [
           {
             "Authorization": []
@@ -80,7 +80,7 @@
                     "upload_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "Vorab signierte URL zum Hochladen der Datei. Läuft in 10 Minuten ab."
+                      "description": "Vorab signierte URL zum Hochladen der Datei. Läuft nach 10 Minuten ab."
                     },
                     "expires_in": {
                       "type": "integer",
@@ -201,7 +201,7 @@
             "name": "file_id",
             "in": "path",
             "required": true,
-            "description": "Eindeutiger Bezeichner für die Datei, die abgeschlossen werden soll.",
+            "description": "Eindeutiger Bezeichner für die abzuschließende Datei.",
             "schema": {
               "type": "string"
             }
@@ -241,7 +241,7 @@
                     },
                     "status": {
                       "type": "string",
-                      "description": "Dateistatus. Wird nach erfolgreichem Abschluss 'completed' sein."
+                      "description": "Dateistatus. Wird 'completed' sein nach erfolgreichem Abschluss."
                     }
                   }
                 }
@@ -277,7 +277,7 @@
             "name": "file_id",
             "in": "path",
             "required": true,
-            "description": "Eindeutiger Bezeichner für die Datei, die abgerufen werden soll.",
+            "description": "Eindeutiger Bezeichner für die abzurufende Datei.",
             "schema": {
               "type": "string"
             }
@@ -348,7 +348,7 @@
             "name": "file_id",
             "in": "path",
             "required": true,
-            "description": "Eindeutiger Bezeichner für die Datei, die gelöscht werden soll.",
+            "description": "Eindeutiger Bezeichner für die zu löschende Datei.",
             "schema": {
               "type": "string"
             }
@@ -394,7 +394,7 @@
     "/v1/files/{file_id}/content": {
       "get": {
         "summary": "Dateiobjekt nach ID abrufen",
-        "description": "Erhalte eine vorab signierte URL, um den Inhalt einer abgeschlossenen Datei herunterzuladen. Optional kannst du die Ablaufzeit für die Download-URL mit dem expires_in-Abfrageparameter angeben (Standard ist 600 Sekunden / 10 Minuten).",
+        "description": "Hol dir eine vorab signierte URL, um den Inhalt einer \"completed\" Datei herunterzuladen. Optional kannst du die Ablaufzeit für die Download-URL mit dem `expires_in` Query-Parameter angeben (Standard ist 600 Sekunden / 10 Minuten).",
         "security": [
           {
             "Authorization": []
@@ -405,7 +405,7 @@
             "name": "file_id",
             "in": "path",
             "required": true,
-            "description": "Eindeutiger Bezeichner für die Datei, die heruntergeladen werden soll.",
+            "description": "Eindeutiger Bezeichner für die Datei zum Herunterladen.",
             "schema": {
               "type": "string"
             }
@@ -452,7 +452,7 @@
                     "download_url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "Vorab signierte URL zum Herunterladen der Datei. Läuft nach der angegebenen expires_in-Zeit ab."
+                      "description": "Vorab signierte URL zum Herunterladen der Datei. Läuft nach der angegebenen `expires_in` Zeit ab."
                     },
                     "expires_in": {
                       "type": "integer",
@@ -464,7 +464,7 @@
             }
           },
           "400": {
-            "description": "Ungültige Anfrage. Datei nicht abgeschlossen."
+            "description": "Ungültige Anfrage. Datei nicht \"completed\"."
           },
           "401": {
             "description": "Ungültiger API-Schlüssel"

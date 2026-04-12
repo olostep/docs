@@ -46,7 +46,7 @@
                         "url"
                       ]
                     },
-                    "description": "Array di elementi da processare nel batch."
+                    "description": "Array di elementi da elaborare nel batch."
                   }
                 },
                 "required": [
@@ -233,7 +233,7 @@
                               "$ref": "#/components/schemas/Metadata"
                             }
                           ],
-                          "description": "Metadata a livello di elemento. Allega coppie chiave-valore a singoli elementi per tracciamento, filtraggio o correlazione con i tuoi sistemi interni."
+                          "description": "Metadata a livello di elemento. Allegare coppie chiave-valore agli elementi individuali per tracciamento, filtraggio o correlazione con i tuoi sistemi interni."
                         }
                       },
                       "required": [
@@ -241,7 +241,7 @@
                         "url"
                       ]
                     },
-                    "description": "Array di elementi da processare nel batch."
+                    "description": "Array di elementi da elaborare nel batch."
                   },
                   "country": {
                     "type": "string",
@@ -258,7 +258,7 @@
                     "required": [
                       "id"
                     ],
-                    "description": "Puoi usare questo parametro per specificare il parser da utilizzare. I parser sono utili per estrarre contenuti strutturati dalle pagine web. Olostep ha alcuni parser integrati per le pagine web più comuni, e puoi anche creare i tuoi parser."
+                    "description": "Puoi usare questo parametro per specificare il parser da usare. I parser sono utili per estrarre contenuti strutturati dalle pagine web. Olostep ha alcuni parser integrati per le pagine web più comuni, e puoi anche creare i tuoi parser."
                   },
                   "links_on_page": {
                     "type": "object",
@@ -672,7 +672,7 @@
       },
       "patch": {
         "summary": "Aggiorna i metadati del batch",
-        "description": "Aggiorna i metadati per un batch specifico. Solo il campo `metadata` può essere aggiornato. Segue la semantica di merge di Stripe: le nuove chiavi vengono aggiunte, le chiavi esistenti vengono aggiornate e le chiavi impostate su stringa vuota vengono eliminate.",
+        "description": "Aggiorna i metadati per un batch specifico. Solo il campo `metadata` può essere aggiornato. Segue la semantica di unione di Stripe: le nuove chiavi vengono aggiunte, le chiavi esistenti vengono aggiornate e le chiavi impostate su stringa vuota vengono eliminate.",
         "security": [
           {
             "Authorization": []
@@ -957,7 +957,7 @@
                     },
                     "cursor": {
                       "type": "integer",
-                      "description": "Cursore di paginazione. Presente quando ci sono più risultati disponibili. Usa questo valore nel parametro `cursor` della richiesta successiva. Vedi [Paginazione](/api-reference/common/pagination) per i dettagli."
+                      "description": "Cursore di paginazione. Presente quando ci sono più risultati disponibili. Usa questo valore nel parametro `cursor` della prossima richiesta. Vedi [Paginazione](/api-reference/common/pagination) per i dettagli."
                     }
                   }
                 },
@@ -1079,7 +1079,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+        "description": "Intestazione di autenticazione Bearer della forma Bearer <token>, dove <token> è il tuo token di autenticazione."
       }
     },
     "schemas": {

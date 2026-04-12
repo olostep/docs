@@ -21,7 +21,7 @@
   "paths": {
     "/v1/maps/{map_id}": {
       "get": {
-        "summary": "Haal Kaart op",
+        "summary": "Haal Kaart Op",
         "description": "Haal een eerder voltooide kaart op met zijn ID.",
         "security": [
           {
@@ -111,7 +111,7 @@
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "Een optioneel nummer om te beperken tot alleen de top n links voor een zoekopdracht."
+                    "description": "Een optioneel aantal om alleen de top n links voor een zoekopdracht te beperken."
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -129,7 +129,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "URL-padpatronen om uit te sluiten met behulp van glob-syntaxis. Bijvoorbeeld: `/careers/**`. Uitgesloten URLs zullen de opgenomen URLs overschrijven."
+                    "description": "URL-padpatronen om uit te sluiten met behulp van glob-syntaxis. Bijvoorbeeld: `/careers/**`. Uitgesloten URLs hebben voorrang op opgenomen URLs."
                   },
                   "cursor": {
                     "type": "string",
@@ -195,7 +195,7 @@
                     },
                     "cursor": {
                       "type": "string",
-                      "description": "Paginatiecursor om de volgende set URLs op te halen die beperkt zijn door de 10MB grootte limiet. Als deze null is of niet aanwezig, zijn alle URLs opgehaald."
+                      "description": "Paginatiecursor om de volgende set URLs op te halen die beperkt zijn vanwege de 10MB grootte limiet. Als deze null is of niet aanwezig, zijn alle URLs opgehaald."
                     }
                   }
                 },
@@ -243,7 +243,7 @@
             "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
           },
           "401": {
-            "description": "Ongeautoriseerde toegang vanwege ontbrekende of ongeldige API-token."
+            "description": "Ongeautoriseerde toegang door ontbrekende of ongeldige API-token."
           },
           "500": {
             "description": "Interne serverfout."

@@ -1,0 +1,144 @@
+---
+title: "Partner-Benutzer-Schnellverbindung"
+description: "Stelle sicher, dass deine Kunden mit einem Anruf Zugang zum Web haben: verifizierte E-Mail plus Partner-Header (siehe OpenAPI); Konten-IDs, Promo-Guthaben, wenn berechtigt, und einen API-Schlüssel, wenn wir einen erstellen. Neue und bestehende Olostep-Nutzer."
+icon: "link"
+openapi: "de/openapi/partnerships.json POST /partnerships/quick-connect/user"
+---
+
+## Überblick
+
+Partner-Benutzer-Schnellverbindung ist ein einzelner `POST`, der ein Olostep-Konto bereitstellt oder anhängt, basierend auf einer E-Mail, die du bereits verifiziert hast.
+
+**Was du sendest**
+1. **`X-Partner-Key`** — das Partnerschaftsgeheimnis, das Olostep dir gegeben hat (authentifiziert deine Integration).
+2. **`Idempotency-Key`** — ein von dir gewählter Wert, damit Wiederholungen und Wiedergaben sicher sind (siehe die OpenAPI **Beschreibung** für vollständige Regeln).
+3. **JSON-Körper** mit **`verified_email`** — die Adresse des Endnutzers, als `Content-Type: application/json`.
+
+**Was auf unserer Seite passieren kann**
+
+- **`200` Erfolg** — Wir lösen oder erstellen den Benutzer, führen die einmalige Partner-Promo-Zuteilung durch, wenn berechtigt, und geben IDs, in diesem Anruf angewendete Guthaben, Nachrichten und API-Schlüssel-Metadaten zurück, wenn relevant. Das umfasst **Erstzuteilungen** (positive **`applied_quick_connect_credits`**), **bereits beansprucht** (Guthaben `0`, keine doppelte Zuteilung) und **idempotente Wiedergabe** (gleicher Schlüssel + gleiche E-Mail gibt den gespeicherten Erfolgsinhalt zurück).
+- **Client-Fehler** — Zum Beispiel **`401`**, wenn der Partnerschlüssel falsch oder fehlt, **`400`** für Validierungsprobleme, **`409`**, während derselbe Idempotenzschlüssel noch in Bearbeitung ist, und **`422`**, wenn du einen Idempotenzschlüssel mit einer **anderen** E-Mail als bei der ersten Anfrage wiederverwendest.
+- **Serverfehler** — **`500`**, wenn etwas fehlschlägt, nachdem wir die Arbeit akzeptiert haben (z. B. Guthabenzuteilung); Wiederholungen mit demselben `Idempotency-Key` sind angebracht, wenn die Antwort unklar ist.
+
+Sieh dir das OpenAPI-Panel auf dieser Seite an, um Beispielanfragen, Antworten und einen interaktiven Spielplatz zu sehen, um den Schnellverbindungs-Endpunkt auszuprobieren.
+
+---
+
+## Was der Benutzer sieht
+
+Nach einem erfolgreichen **`200`**, verwende das JSON, um dem Kunden einen API-Schlüssel zu geben, wenn wir einen erstellen, und um zu wissen, **ob Olostep ihnen bei diesem Anruf eine Transaktions-E-Mail gesendet hat** (und welches Template).
+
+### API-Zugriff und Dashboard
+
+Kunden können Olosteps APIs **sofort aufrufen, sobald du den Schlüssel hast**—keine Olostep-Website oder Dashboard erforderlich für die API-Nutzung. Gib ihnen **`user.api_key.auto_generated_api_key`**, wenn er **nicht null** ist (wir haben ein Standard-Token bei dieser Zuteilung erstellt); wenn er **`null`** ist, hatten sie bereits Tokens oder es wurde hier kein neues Standard-Token erstellt—sie können einen anderen Schlüssel verwenden oder Schlüssel im Dashboard verwalten (siehe OpenAPI-Beispiele).
+
+Schnellverbindungs-Nutzer **erhalten kein anfängliches Dashboard-Passwort**. Transaktions-E-Mails beinhalten **Setze dein Dashboard-Passwort** (Auth „Passwort vergessen“-Flow) nur für **Anmeldung im Dashboard**—getrennt vom API-Zugriff über den Schlüssel, den du von deinem Backend weitergibst.
+
+### Lesen des `200`-Körpers
+
+| Feld | Was es dir sagt |
+|------|-----------------|
+| **`applied_quick_connect_credits`** | **Positiv** — erste Partnerzuteilung für diesen Benutzer bei diesem Anruf: Promo-Guthaben angewendet und **genau eine** Transaktions-E-Mail gesendet (siehe **Transaktions-E-Mail** unten). **`0`** — keine neue Zuteilung (normalerweise **bereits beansprucht**): **keine** Willkommens- oder **Partner-Guthaben hinzugefügt**-E-Mail bei **dieser** Antwort; **`user_message`** beschreibt es; **`user.api_key.auto_generated_api_key`** ist **`null`**. |
+| **`user.is_new_user`** | Bedeutend, wenn Guthaben **positiv** sind: **`true`** → **Willkommen bei Olostep**; **`false`** → **Partner-Guthaben hinzugefügt**. |
+| **`user.api_key.auto_generated_api_key`** | An den Kunden weitergeben, wenn gesetzt; andernfalls auf vorhandene Tokens / Dashboard verlassen. |
+| **`user_message`** | Kurzer Ergebnistext für deine Benutzeroberfläche. |
+| **Idempotente Wiedergabe** | Gleicher **`Idempotency-Key`** + **`verified_email`** gibt den **gespeicherten** Erfolgsinhalt der ursprünglichen Zuteilung zurück—E-Mails und Schlüssel aus dieser Nutzlast auf die gleiche Weise ableiten. |
+
+### Transaktions-E-Mail
+
+Nur wenn **`applied_quick_connect_credits`** **positiv** ist. **`user.is_new_user`** wählt das Template:
+
+```mermaid
+flowchart LR
+  S[200 — erste Zuteilung erfolgreich]
+  S --> Q{Neues Olostep-Login bei diesem Anruf erstellt?}
+
+  Q -->|Ja — is_new_user: true| N[Wir senden Willkommens-E-Mail]
+  Q -->|Nein — is_new_user: false| X[Wir senden Guthaben-hinzugefügt-E-Mail]
+
+  N --> R[Typische Nachricht: Konto erstellt + Guthaben]
+  X --> T[Typische Nachricht: Guthaben auf bestehendem Konto]
+
+  R --> K[user.api_key]
+  T --> K
+  K --> Note[auto_generated_api_key nur, wenn wir hier ein neues Standard-Token erstellt haben; andernfalls null]
+```
+
+Beide Templates informieren den Kunden, dass **du** den Olostep API-Schlüssel bereitstellst, damit sie starten können, ohne Olostep zuerst zu besuchen, und sie beinhalten die Einrichtung des Dashboard-Passworts für den UI-Zugang.
+
+| Template | Wann (`is_new_user`) | Was der Kunde sieht |
+|----------|----------------------|---------------------|
+| **Willkommen bei Olostep** | **`true`** | Partnername, Guthabenzeile, **Wie man zugreift** (Schlüssel vom Partner), optionaler Dashboard-Link, Passwort-Setzen-CTA. |
+| **Partner-Guthaben hinzugefügt** | **`false`** | Gleiches Guthaben- und Zugriffsmuster für ein **bestehendes** Olostep-Login. |
+
+**Willkommen bei Olostep** (neuer Benutzer):
+
+<img
+  src="/images/partnerships/quick-connect-email-new-user.png"
+  alt="Olostep Willkommens-E-Mail: Partner hat den Benutzer angemeldet, Guthaben gewährt, wie man über den Partner-API-Schlüssel zugreift, Passwort für das Dashboard setzen Button und Link"
+  style={{
+    height: 'auto',
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: 720,
+    objectFit: 'contain',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px'
+  }}
+/>
+
+**Partner-Guthaben hinzugefügt** (bestehender Benutzer):
+
+<img
+  src="/images/partnerships/quick-connect-email-existing-user.png"
+  alt="Olostep Partner-Guthaben-E-Mail: Guthaben zu bestehendem Konto hinzugefügt, API-Schlüssel vom Partner, Dashboard-Link, Passwort für UI-Zugang setzen"
+  style={{
+    height: 'auto',
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: 720,
+    objectFit: 'contain',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px'
+  }}
+/>
+
+---
+
+## Anhang
+
+### Vollständiger End-to-End-Fluss
+
+Entscheidungspfade vom Eingang über Idempotenz, Bereitstellung, Affiliate-Anspruch und Guthabenzuteilung (gleiches Verhalten wie der OpenAPI-Vertrag).
+
+```mermaid
+flowchart TB
+  subgraph ingress [Deine Anfrage]
+    R[POST + verified_email]
+    H[X-Partner-Key + Idempotency-Key]
+  end
+
+  ingress --> V{Partner-Schlüssel gültig?}
+  V -->|Nein| E401[401 invalid_partner_key]
+  V -->|Ja| I{Idempotenz-Slot}
+  I -->|Wiedergabe gleiche Parameter| REP[Gespeicherten 200-Körper zurückgeben]
+  I -->|Wiedergabe andere E-Mail| E422[422 idempotency_key_reuse]
+  I -->|In Bearbeitung| E409[409 idempotency_key_in_progress]
+  I -->|Neuer Slot| P[Benutzer + App-Daten + Token bei Bedarf bereitstellen]
+
+  P --> C{Promo bereits für diesen Kunden beansprucht?}
+  C -->|Ja| Z[200 — Guthaben 0, bereits beansprucht]
+  C -->|Nein| W{Anspruchsrennen gewonnen?}
+  W -->|Rennen verloren| Z
+  W -->|Rennen gewonnen| CR[Partner-Promo-Guthaben gewähren]
+  CR -->|Fehler| E500[500 — erneut versuchen]
+  CR -->|OK| OK[200 — erste Zuteilung]
+
+  REP --> DONE([Dein Backend])
+  Z --> DONE
+  OK --> DONE
+  E401 --> DONE
+  E422 --> DONE
+  E409 --> DONE
+  E500 --> DONE
+```

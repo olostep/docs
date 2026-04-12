@@ -3,7 +3,7 @@ sidebarTitle: "Batch"
 title: "Batch Eindpunt"
 icon: "layer-group"
 ---
-Via het Olostep `/v1/batches` eindpunt kun je duizenden URL's in één taak verwerken. Gebruik het om inhoud of gestructureerde data op grote schaal te extraheren.
+Via het Olostep `/v1/batches` eindpunt kun je duizenden URL's in één taak verwerken. Gebruik het om inhoud of gestructureerde gegevens op grote schaal te extraheren.
 
 - Dien tot 10k URL's per batch in; voer meerdere batches parallel uit
 - Constante verwerkingstijd (~5–8 minuten) ongeacht de batchgrootte
@@ -28,7 +28,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl is standaard beschikbaar op macOS, Linux en Windows
 ```
 
 ```javascript Node (API)
@@ -45,7 +45,7 @@ pip install requests
 
 Geef een array van `items` met een `custom_id` en `url`. Dit zijn de URL's die in de batch worden verwerkt, de `custom_id` is een interne unieke identificatie voor de URL.
 
-Optioneel kun je `parser` of `country` doorgeven. Met de `parser` parameter kun je de parser specificeren die voor de batch moet worden gebruikt, dit zal gestructureerde JSON van de pagina's retourneren.
+Optioneel kun je `parser` of `country` doorgeven. Via de `parser` parameter kun je de parser specificeren die voor de batch moet worden gebruikt, dit zal gestructureerde JSON van de pagina's retourneren.
 
 <CodeGroup>
 
@@ -64,7 +64,7 @@ batch = client.batches.create(
 
 print(batch.id, batch.status)
 
-# Wait and iterate results (auto-waits for completion)
+# Wacht en doorloop resultaten (wacht automatisch op voltooiing)
 for item in batch.items():
     content = item.retrieve(["json"])
     print(item.url, item.custom_id)
@@ -85,7 +85,7 @@ const batch = await client.batches.create([
 
 console.log(batch.id, batch.total_urls)
 
-// Wait and iterate results (auto-waits for completion)
+// Wacht en doorloop resultaten (wacht automatisch op voltooiing)
 for await (const item of batch.items()) {
   const content = await item.retrieve(['json'])
   console.log(item.url, item.custom_id)
@@ -98,11 +98,11 @@ import requests
 import hashlib
 import time
 
-API_KEY = "<YOUR_API_KEY>"  # Replace with your actual API key
+API_KEY = "<YOUR_API_KEY>"  # Vervang door je echte API-sleutel
 API_URL = "https://api.olostep.com/v1"
 
 
-# Step 1: Utilities
+# Stap 1: Hulpprogramma's
 def create_hash_id(url):
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
@@ -121,7 +121,7 @@ def compose_items_array():
         "https://www.google.com/search?q=braintree&gl=us&hl=en"
     ]
 
-    # Add the parser configuration to each item
+    # Voeg de parserconfiguratie toe aan elk item
     items = []
     for url in urls:
         items.append({
@@ -146,7 +146,7 @@ def start_batch(items):
     return response.json()["id"]
 
 
-# Step 3: Wait for completion
+# Stap 3: Wacht op voltooiing
 def check_batch_status(batch_id):
     headers = {"Authorization": f"Bearer {API_KEY}"}
     response = requests.get(
@@ -158,17 +158,17 @@ def check_batch_status(batch_id):
 
 
 def wait_until_complete(batch_id):
-    print("Waiting for batch to complete...")
+    print("Wachten tot batch voltooid is...")
     while True:
         status = check_batch_status(batch_id)
         print("Status:", status)
         if status == "completed":
-            print("Batch completed!")
+            print("Batch voltooid!")
             return
         time.sleep(10)
 
 
-# Step 4: Get items
+# Stap 4: Haal items op
 def get_completed_items(batch_id):
     headers = {"Authorization": f"Bearer {API_KEY}"}
     response = requests.get(f"{API_URL}/batches/{batch_id}/items", headers=headers)
@@ -176,7 +176,7 @@ def get_completed_items(batch_id):
     return response.json()["items"]
 
 
-# Step 5: Retrieve content with format specified
+# Stap 5: Haal inhoud op met opgegeven formaat
 def retrieve_content(retrieve_id):
     url = f"{API_URL}/retrieve"
     headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -189,33 +189,33 @@ def retrieve_content(retrieve_id):
     return response.json()
 
 
-# Step 6: Run end-to-end flow
+# Stap 6: Voer end-to-end flow uit
 if __name__ == "__main__":
-    print("Composing batch...")
+    print("Batch samenstellen...")
     items = compose_items_array()
 
-    print("Starting batch...")
+    print("Batch starten...")
     batch_id = start_batch(items)
     print("Batch ID:", batch_id)
-    print(f"You can check the status of the batch at: {API_URL}/batches/{batch_id}?token={API_KEY}")
+    print(f"Je kunt de status van de batch controleren op: {API_URL}/batches/{batch_id}?token={API_KEY}")
 
     wait_until_complete(batch_id)
 
-    print("Fetching completed items...")
+    print("Voltooide items ophalen...")
     completed_items = get_completed_items(batch_id)
 
-    print("Retrieving content...")
+    print("Inhoud ophalen...")
     for item in completed_items:
         retrieve_id = item["retrieve_id"]
-        print(f"\nRetrieving content for item {item['retrieve_id']}...")
+        print(f"\nInhoud ophalen voor item {item['retrieve_id']}...")
         content = retrieve_content(retrieve_id)
         print(f"\n---\nURL: {item['url']}\nCustom ID: {item['custom_id']}\n")
-        #print("Markdown:\n", content.get("markdown_content", "[No markdown found]"))
-        print("JSON:\n", content.get("json_content", "[No JSON found]"))
+        #print("Markdown:\n", content.get("markdown_content", "[Geen markdown gevonden]"))
+        print("JSON:\n", content.get("json_content", "[Geen JSON gevonden]"))
 
-        # If you want to see the parsed content specifically
+        # Als je de specifiek geparseerde inhoud wilt zien
         if "parsed_content" in content:
-            print("\nParsed Content:")
+            print("\nGeparseerde Inhoud:")
             print(content["parsed_content"])
 ```
 
@@ -275,20 +275,20 @@ Poll totdat `status` `completed` is. Je kunt ook de eigenschap `completed_urls` 
 <CodeGroup>
 
 ```python Python
-# Using the batch object from the previous step
+# Gebruikmakend van het batchobject van de vorige stap
 info = batch.info()
 print(info.status, info.completed_urls, info.total_urls)
 
-# Or wait until completed
+# Of wacht tot voltooid
 batch.wait_till_done(check_every_n_secs=10)
 ```
 
 ```js Node
-// Using the batch object from the previous step
+// Gebruikmakend van het batchobject van de vorige stap
 const info = await batch.info()
 console.log(info.status, info.completed_urls, info.total_urls)
 
-// Or wait until completed
+// Of wacht tot voltooid
 await batch.waitTillDone({ checkEveryNSecs: 10 })
 ```
 
@@ -321,14 +321,14 @@ print(info['status'])
 
 </CodeGroup>
 
-## Inhoud ophalen
+## Haal inhoud op
 
 Gebruik de `retrieve_id` van elk item met `/v1/retrieve` om `html_content`, `markdown_content` of `json_content` op te halen.
 
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each batch item
+# Haal inhoud op voor elk batchitem
 for item in batch.items():
     content = item.retrieve(["json"])
     print(item.url, item.custom_id)
@@ -336,7 +336,7 @@ for item in batch.items():
 ```
 
 ```js Node
-// Retrieve content for each batch item
+// Haal inhoud op voor elk batchitem
 for await (const item of batch.items()) {
   const content = await item.retrieve(['json'])
   console.log(item.url, item.custom_id)
@@ -371,18 +371,18 @@ for item in items:
 
 ## Lijst items (pagineren met cursor)
 
-Haal items op met behulp van `cursor` en `limit`. Gebruik bij voorkeur `/v1/retrieve` met `retrieve_id` voor inhoud.
+Haal items op met `cursor` en `limit`. Gebruik bij voorkeur `/v1/retrieve` met `retrieve_id` voor inhoud.
 
 <CodeGroup>
 
 ```python Python
-# Iterate all items (auto-waits for completion, handles pagination)
+# Doorloop alle items (wacht automatisch op voltooiing, behandelt paginering)
 for item in batch.items():
     print(item.custom_id, item.url, item.retrieve_id)
 ```
 
 ```js Node
-// Iterate all items (auto-waits for completion, handles pagination)
+// Doorloop alle items (wacht automatisch op voltooiing, behandelt paginering)
 for await (const item of batch.items()) {
   console.log(item.custom_id, item.url, item.retrieve_id)
 }
@@ -533,41 +533,71 @@ Aangezien we de parser hebben doorgegeven om de gestructureerde JSON op te halen
 - **json_content** met gestructureerde zoekresultaten inclusief:
 - `searchParameters`: Informatie over de zoekopdracht
 - `knowledgeGraph`: Gedetailleerde informatie over het zoekonderwerp (indien beschikbaar)
-- `organic`: Lijst van zoekresultaten met titel, link, positie en snippet
+- `organic`: Lijst met zoekresultaten met titel, link, positie en snippet
 - `peopleAlsoAsk`: Gerelateerde vragen die gebruikers vaak zoeken
 - `relatedSearches`: Voorgestelde gerelateerde zoekopdrachten
 
-Als je niet de gestructureerde JSON wilt maar simpelweg de markdown of html, kun je die ophalen van het retrieve-eindpunt.
+Als je niet de gestructureerde JSON wilt maar gewoon de markdown of html, kun je die ophalen van het retrieve eindpunt.
+
+## Webhooks
+
+In plaats van de batchstatus te polleren, kun je een **`webhook`** URL doorgeven wanneer je de batch aanmaakt. Olostep stuurt een **HTTP POST** naar die URL wanneer de batch is voltooid (alle items voltooid of mislukt).
+
+Je webhook eindpunt moet **openbaar bereikbaar** zijn via **`http://` of `https://`**. Het kan niet wijzen naar localhost of privé IP-adressen. Voor de volledige payloadvorm, retry-gedrag en best practices (snel reageren met `2xx`, dedupliceren met behulp van het event `id`), zie [Webhooks](/api-reference/common/webhooks).
+
+<Tip>
+**Parameternaam:** Het canonieke veld is `webhook`. Voor achterwaartse compatibiliteit wordt **`webhook_url`** ook geaccepteerd als alias.
+</Tip>
+
+Voor batches bevat het **`batch.completed`** event de batch id, status en itemaantallen. Mislukte leveringen worden automatisch opnieuw geprobeerd (tot **5 pogingen** over ongeveer **30 minuten** met exponentiële backoff). Je handler moet binnen **30 seconden** per poging een **2xx** status retourneren.
 
 ## Metadata
 
-Je kunt aangepaste sleutel-waardeparen aan batches toevoegen met de `metadata` parameter. Dit is handig voor het bijhouden, filteren en organiseren van je batches door ze te koppelen aan interne systemen zoals order-ID's, klant-ID's of projectnamen.
+Voeg aangepaste **string key-value** metadata toe aan batches voor tracking, filtering en het correleren van taken met je eigen systemen (order-ID's, projectnamen, pijplijnstadium, enzovoort). Metadata volgt dezelfde regels als in onze [Metadata](/api-reference/common/metadata) referentie.
 
-Voor validatieregels en gebruiksvoorbeelden, zie [Metadata](/api-reference/common/metadata).
+Je kunt metadata instellen op **twee niveaus** bij het aanmaken van een batch:
+
+- **Batch-niveau** — `metadata` op de **request body** (van toepassing op de hele batch)
+- **Item-niveau** — `metadata` op **elk object** in de `items` array (per URL)
+
+Metadata wordt **teruggegeven** bij volgende **GET** reacties voor die batch. Je kunt batchmetadata later **samenvoegen-updaten** met [Update Batch](/api-reference/batches/update) (`PATCH`); zie de metadata gids voor toevoegen, overschrijven en verwijdergedrag.
+
+| Beperking | Limiet |
+| --- | --- |
+| Maximale sleutels | 50 |
+| Sleutellengte | 40 tekens |
+| Sleutelformaat | Geen vierkante haakjes (`[` of `]`) |
+| Waardelengte | 500 tekens (opgeslagen als strings) |
+
+<Note>
+**Type coercion:** Nummers en booleans worden omgezet naar strings (bijvoorbeeld `42` → `"42"`, `true` → `"true"`). Geneste objecten en arrays worden afgewezen.
+</Note>
+
+Voor volledige voorbeelden en PATCH-semantiek, zie [Metadata](/api-reference/common/metadata).
 
 ## Belangrijke Opmerkingen
 
-Als je gestructureerde JSON wilt, moet je de specifieke parser doorgeven aan de API voordat je de verzoeken doet. Bijvoorbeeld, als je de JSON van Google Search wilt krijgen, geef je deze parser door `"parser": {"id": "@olostep/google-search"}`
+Als je gestructureerde JSON wilt, moet je de specifieke parser naar de API sturen voordat je de verzoeken doet. Bijvoorbeeld, als je de JSON van Google Search wilt krijgen, stuur je deze parser `"parser": {"id": "@olostep/google-search"}`
 Je kunt je eigen parsers maken om de gegevens op te halen die je wilt van elke pagina. Neem contact op met `info@olostep.com` om meer te leren.
 
 ## Conclusie
 
-Het batch-eindpunt is nuttig als je gegevens van veel URL's in een korte tijd wilt verkrijgen. Je moet al de lijst met URL's hebben die je wilt ophalen.
+Het batch eindpunt is nuttig als je gegevens van veel URL's in een korte tijd wilt ophalen. Je moet al de lijst met URL's hebben waarvan je de gegevens wilt ophalen.
 
 Veelvoorkomende toepassingen kunnen zijn:
 
 - Prijsvolgdiensten die meerdere e-commerce sites monitoren voor prijswijzigingen op producten
-- Website monitoring tools die controleren op inhoudsupdates op talrijke pagina's
-- Gegevensaggregatie voor concertorganisatoren die ticketbeschikbaarheid bijhouden op meerdere locaties
-- Zoekmachines die inhoud verzamelen en indexeren van vele websites tegelijkertijd
+- Website monitoring tools die controleren op inhoudsupdates over talrijke pagina's
+- Gegevensaggregatie voor concertorganisatoren die ticketbeschikbaarheid bijhouden over meerdere locaties
+- Zoekmachines die inhoud van veel websites tegelijk verzamelen en indexeren
 - Nieuwsaggregatoren die artikelen verzamelen van verschillende publicaties
-- Vastgoedplatforms die vastgoedvermeldingen monitoren op meerdere sites
-- Vacaturebanken die vacatures verzamelen van bedrijfscarrièrepagina's
-- Financiële dataservices die aandelenkoersen en marktinformatie bijhouden
-- Social media monitoring tools die vermeldingen analyseren op verschillende platforms
+- Vastgoedplatforms die vastgoedaanbiedingen monitoren over meerdere sites
+- Vacaturebanken die vacatures van bedrijfscarrièrepagina's verzamelen
+- Financiële gegevensdiensten die aandelenkoersen en marktinformatie bijhouden
+- Social media monitoring tools die vermeldingen analyseren over verschillende platforms
 - Academisch onderzoek dat gegevens verzamelt van meerdere bronnen voor analyse
 
-Het is beter om het batch-eindpunt te gebruiken als je inhoud van 100 tot 10k URL's tegelijk wilt. Als je minder dan 50 URL's tegelijk moet scrapen, raden we aan om het scrape-eindpunt te gebruiken en de URL's parallel in te dienen, omdat dit sneller is dan het batch-eindpunt.
+Het is beter om het batch eindpunt te gebruiken als je de inhoud van 100 tot 10k URL's tegelijk wilt. Als je minder dan 50 URL's tegelijk moet scrapen, raden we aan het scrape eindpunt te gebruiken en de URL's parallel in te dienen, omdat dit sneller is dan het batch eindpunt.
 
 ## Prijzen
 

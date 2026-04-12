@@ -49,7 +49,7 @@
                   },
                   "payload": {
                     "type": "object",
-                    "description": "La carga útil a enviar con la llamada de API. Puede contener cualquier estructura JSON que necesites. Para solicitudes GET, esto suele estar vacío. Para solicitudes POST, esto debe contener los datos que quieres enviar al endpoint.",
+                    "description": "La carga útil para enviar con la llamada de API. Puede contener cualquier estructura JSON que necesites. Para solicitudes GET, esto suele estar vacío. Para solicitudes POST, esto debe contener los datos que quieres enviar al endpoint.",
                     "default": {}
                   },
                   "cron_expression": {
@@ -117,7 +117,7 @@
                     "execute_at": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "Fecha y hora de ejecución (solo presente para horarios de una sola vez)"
+                      "description": "Fecha y hora de ejecución (solo presente para horarios únicos)"
                     },
                     "expression_timezone": {
                       "type": "string",
@@ -126,7 +126,7 @@
                     "created": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "Fecha y hora ISO 8601 cuando se creó el horario"
+                      "description": "Fecha y hora ISO 8601 cuando el horario fue creado"
                     }
                   }
                 }
@@ -212,7 +212,7 @@
                           "execute_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Fecha y hora de ejecución (solo presente para horarios de una sola vez)"
+                            "description": "Fecha y hora de ejecución (solo presente para horarios únicos)"
                           },
                           "expression_timezone": {
                             "type": "string",
@@ -233,7 +233,7 @@
                           "created_at": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Fecha y hora ISO 8601 cuando se creó el horario"
+                            "description": "Fecha y hora ISO 8601 cuando el horario fue creado"
                           },
                           "updated_at": {
                             "type": "string",
@@ -258,7 +258,7 @@
                           }
                         }
                       },
-                      "description": "Arreglo de objetos de horario"
+                      "description": "Array de objetos de horario"
                     },
                     "count": {
                       "type": "integer",
@@ -349,7 +349,7 @@
                         "execute_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "Fecha y hora de ejecución (solo presente para horarios de una sola vez)"
+                          "description": "Fecha y hora de ejecución (solo presente para horarios únicos)"
                         },
                         "expression_timezone": {
                           "type": "string",
@@ -370,7 +370,7 @@
                         "created_at": {
                           "type": "string",
                           "format": "date-time",
-                          "description": "Fecha y hora ISO 8601 cuando se creó el horario"
+                          "description": "Fecha y hora ISO 8601 cuando el horario fue creado"
                         },
                         "updated_at": {
                           "type": "string",
@@ -393,7 +393,7 @@
             }
           },
           "400": {
-            "description": "Solicitud incorrecta debido a un formato de schedule_id no válido. El ID del horario debe comenzar con 'schedule_'."
+            "description": "Solicitud incorrecta debido a un formato inválido de schedule_id. El ID del horario debe comenzar con 'schedule_'."
           },
           "401": {
             "description": "Clave de API inválida."
@@ -448,7 +448,7 @@
             }
           },
           "400": {
-            "description": "Solicitud incorrecta debido a un formato de schedule_id no válido o el horario ya fue eliminado. El ID del horario debe comenzar con 'schedule_'."
+            "description": "Solicitud incorrecta debido a un formato inválido de schedule_id o el horario ya fue eliminado. El ID del horario debe comenzar con 'schedule_'."
           },
           "401": {
             "description": "Clave de API inválida."

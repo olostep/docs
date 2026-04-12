@@ -1,0 +1,198 @@
+---
+sidebarTitle: "回答"
+title: "回答 API"
+icon: "globe-pointer"
+---
+
+Olostepの`/v1/answers`エンドポイントを通じて、自然言語でウェブ検索を行い、AIによる回答とデータを希望するJSON形式で返すことができます。これにより、製品を実世界のデータと情報源に基づかせ、データポイントやスプレッドシートを充実させることができます。
+
+- 質問をしたり、AIに充実させたいデータポイントを提供したりする
+- オプション: 戻り値として希望するJSON構造を指定する
+
+これにより:
+- ウェブ上で見つけたデータを検索、クリーン、検証し、返します
+- 回答を生成するために使用した情報源を返します
+- データが検証できない場合は`NOT_FOUND`値で不確実性を処理します
+
+APIの詳細については、[回答エンドポイントAPIリファレンス](/api-reference/answers/create)を参照してください。
+
+デフォルトでは、一般的なウェブインデックスとコスト効率の良いLLMバリデーターを使用しています。
+
+エンタープライズ顧客は、専用の業界特化型ウェブインデックス、独占的なプライベートデータ（電話番号やメールアドレスを含む）、およびユースケースに最も適したカスタムLLMモデルにアクセスできます。アクセスについてはお問い合わせください: info@olostep.com
+
+
+
+## ユースケース
+回答エンドポイントは以下の用途に使用できます:
+ - AIアプリケーションを実世界のデータと事実に基づかせる
+ - 採用、金融、コンサルティング、営業のためにスプレッドシートやデータポイントを充実させる
+
+こちらは、回答エンドポイントによって強化されたAI駆動のスプレッドシートのデモです:
+https://www.olostep.com/demos/spreadsheet-enrich
+
+
+
+## インストール
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: 組み込みのcurlで問題ありません
+```
+
+</CodeGroup>
+
+## 使用法
+
+質問をして、出力をガイドするためのJSONスキーマを渡します。`json`パラメータを渡さない場合、APIは`result`フィールド内に回答テキストを含むjsonオブジェクトを返します。
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "J.K.ローリングの最新の本は何ですか？",
+  "json": {"book_title": "", "author": "", "release_date": ""}
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/answers', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    task: 'J.K.ローリングの最新の本は何ですか？',
+    json: { book_title: '', author: '', release_date: '' }
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/answers" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "J.K.ローリングの最新の本は何ですか？",
+    "json": {"book_title": "", "author": "", "release_date": ""}
+  }'
+```
+
+</CodeGroup>
+
+## レスポンス
+
+他のOlostepエンドポイントと同様に、`answer`オブジェクトをレスポンスとして受け取ります。`answer`オブジェクトには`id`や`result`といったいくつかのプロパティがあります。
+
+```json
+{
+  "id": "answer_9bi0sbj9xa",
+  "object": "answer",
+  "created": 1760327323,
+  "metadata": {},
+  "task": "J.K.ローリングの最新の本は何ですか？",
+  "result": {
+    "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
+    "sources": [
+      "https://strikefans.com/the-books/",
+      "https://www.facebook.com/groups/496943608606523/posts/1136830134617864/",
+      "https://robert-galbraith.com/strike-books/",
+      "https://www.novelsuspects.com/series-list/robert-galbraith-cormoran-strike-series-in-order/",
+      "https://www.reddit.com/r/books/comments/1na833a/jk_rowlings_new_strike_novel_900_pages_of_romance/",
+      "https://www.harrypotter.com/writing-by-jk-rowling",
+      "https://stories.jkrowling.com/book-news/",
+      "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+      "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+      "https://www.jkrowling.com/news/"
+    ]
+  }
+}
+```
+
+`json`パラメータに従ってフォーマットされた回答は`response.result.json_content`にあり、情報源のリストは`response.result.sources`にあります。文字列化されたJSONを解析して構造化データにアクセスできます。
+
+```json
+{
+  "book_title": "The Hallmarked Man",
+  "author": "J.K. Rowling",
+  "release_date": "2025年9月2日"
+}
+```
+
+情報源の例:
+
+```json
+[
+    "https://www.harrypotter.com/writing-by-jk-rowling",
+    "https://stories.jkrowling.com/book-news/",
+    "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+    "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+    "https://www.jkrowling.com/news/"
+]
+```
+
+`json`パラメータを渡さない場合、APIは`result`フィールド内に回答テキストを含むjsonオブジェクトを返します。
+
+```json
+{
+  "result": "J.K.ローリングの最新の本はThe Hallmarked Manです。"
+}
+```
+
+### 柔軟な`json`パラメータ
+
+- 空の値を持つJSONオブジェクトをスキーマとして提供するか、希望するデータを記述する文字列を提供します。
+- エージェントが自信を持てない場合、そのフィールドに対して`NOT_FOUND`を返します。
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "Olostepはどれくらい資金を調達しましたか？", 
+  "json": {
+    "amount": ""
+  }
+}
+headers = {
+  "Authorization": "Bearer <YOUR_API_KEY>",
+  "Content-Type": "application/json"
+}
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+これにより以下が返されます:
+
+```json
+{
+  "amount": "NOT_FOUND"
+}
+```
+
+## 料金
+
+回答はリクエストごとに20クレジットかかります。

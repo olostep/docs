@@ -2,16 +2,16 @@
 icon: "file-lines"
 sidebarTitle: "Obtener Markdown de un Sitio Web"
 title: "Obtener el Markdown de un Sitio Web"
-description: "Aprende cómo extraer contenido en formato markdown amigable para LLM desde cualquier página web."
+description: "Aprende cómo extraer contenido como markdown compatible con LLM de cualquier página web."
 ---
 
-## Descripción General
+## Descripción general
 
 El endpoint [scrape](../../features/scrapes) de Olostep permite extraer contenido de cualquier sitio web. El contenido en markdown es útil si quieres proporcionarlo a un LLM sin todo el HTML.
 
 En esta guía veremos cómo extraer markdown de un sitio web como `https://www.nea.com/team`.
 
-## Requisitos Previos
+## Prerrequisitos
 
 Antes de comenzar, asegúrate de tener lo siguiente:
 
@@ -19,9 +19,9 @@ Antes de comenzar, asegúrate de tener lo siguiente:
 - Python instalado en tu sistema
 - Las bibliotecas `requests` y `json` (estas vienen preinstaladas con Python, pero puedes instalarlas usando `pip install requests` si es necesario)
 
-## Extrayendo Texto de un Sitio Web
+## Extracción de Texto de un Sitio Web
 
-El siguiente script de Python demuestra cómo extraer texto y contenido en markdown de un sitio web usando la API de Olostep.
+El siguiente script de Python demuestra cómo extraer texto y contenido markdown de un sitio web usando la API de Olostep.
 
 ```python
 import requests
@@ -81,11 +81,11 @@ Una respuesta exitosa se verá algo así:
 
 ## Explicación
 
-- `url_to_scrape`: especifica la URL del sitio web del que se extraerá el contenido.
+- `url_to_scrape`: especifica la URL del sitio web del cual extraer contenido.
 - `formats`: define los formatos de salida (texto en este caso).
 - `Authorization`: contiene tu clave de API para autenticar la solicitud.
 - La respuesta está formateada como JSON y se imprime para facilitar la lectura.
 
 ## Conclusión
 
-Usando Olostep, puedes extraer fácilmente contenido en markdown de cualquier sitio web. Esto es útil si deseas obtener contenido de un sitio web y proporcionarlo a un LLM para extracción y análisis de datos. Si quieres extraer contenido a gran escala del mismo sitio web repetidamente (por ejemplo, monitoreo de datos, seguimiento de precios, etc.) te recomendamos usar un [parser personalizado](../../features/structured-content/parsers) para obtener el contenido en formato JSON.
+Usando Olostep, puedes extraer fácilmente contenido markdown de cualquier sitio web. Esto es útil si deseas obtener contenido de un sitio web y proporcionarlo a un LLM para extracción y análisis de datos. Si deseas extraer contenido a gran escala del mismo sitio web repetidamente (por ejemplo, monitoreo de datos, seguimiento de precios, etc.), te recomendamos usar un [parser personalizado](../../features/structured-content/parsers) para obtener el contenido en formato JSON.

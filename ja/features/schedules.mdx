@@ -1,21 +1,21 @@
 ---
 sidebarTitle: "スケジュール"
 title: "スケジュール"
-description: "指定した時間に自動的に実行されるようにAPIコールをスケジュールする"
+description: "指定された時間に自動的に実行されるようにAPIコールをスケジュールします"
 icon: "clock"
 ---
 
-Olostepの`/v1/schedules`エンドポイントを通じて、指定した時間に自動的に実行されるようにAPIコールをスケジュールできます。cron式や自然言語を使用して、一度だけの実行や定期的なタスクをスケジュールします。
+Olostepの`/v1/schedules`エンドポイントを通じて、指定された時間に自動的に実行されるようにAPIコールをスケジュールできます。cron式や自然言語を使用して、一度だけの実行や定期的なタスクをスケジュールします。
 
 - 特定の日時に一度だけの実行をスケジュール
 - cron式を使用して定期的なスケジュールを作成
-- 自然言語テキストを使用してcron式を自動生成
+- 自然言語テキストを使用して自動的にcron式を生成
 - HTTPエンドポイント（GETまたはPOST）をスケジュール
-- POSTリクエストの場合、短縮形のOlostepエンドポイント（自動的にプレフィックスが付与される）または完全なURLを使用
+- POSTリクエストの場合、短縮形式のOlostepエンドポイント（自動的にプレフィックスされる）またはフルURLを使用
 - 任意のペイロードを渡すことが可能 - ペイロードは指定した通りに送信されます
-- スケジュールのライフサイクルを自動管理
+- スケジュールのライフサイクルを自動的に管理
 
-APIの詳細については、[スケジュールエンドポイントAPIリファレンス](/api-reference/schedules/create)を参照してください。
+APIの詳細については、[Schedule Endpoint API Reference](/api-reference/schedules/create)を参照してください。
 
 ## インストール
 
@@ -38,18 +38,18 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: ビルトインのcurlで問題ありません
+# macOS: builtin curl is fine
 ```
 
 </CodeGroup>
 
-## スケジュールを作成する
+## スケジュールを作成
 
-APIコールを自動的に実行するスケジュールを作成します。一度だけのスケジュールやcron式を使用した定期的なスケジュールを作成できます。`endpoint`は任意のURL（Olostepエンドポイントに限定されません）であり、`payload`には送信したい任意のデータを含めることができます。
+APIコールを自動的に実行するスケジュールを作成します。一度だけのスケジュールやcron式を使用した定期的なスケジュールを作成できます。`endpoint`は任意のURLに設定可能で（Olostepエンドポイントに限定されません）、`payload`には送信したい任意のデータを含めることができます。
 
 ### 一度だけのスケジュール
 
-特定の日時に一度だけ実行するAPIコールをスケジュールします。
+特定の日時に一度だけ実行されるAPIコールをスケジュールします。
 
 <CodeGroup>
 
@@ -61,7 +61,7 @@ from datetime import datetime, timedelta
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# 1時間後にスクレイプを実行するようにスケジュール
+# 1時間後にスクレイプを実行するスケジュール
 execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
 
 payload = {
@@ -125,7 +125,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ### cron式を使用した定期的なスケジュール
 
-cron式を使用して定期的なスケジュールを作成します。cron式は6つのフィールド形式を使用します：分 時間 日 月 曜日 年。
+cron式を使用して定期的なスケジュールを作成します。cron式は6つのフィールド形式を使用します: 分 時 日 月 曜日 年。
 
 <CodeGroup>
 
@@ -136,7 +136,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# 毎日10時にスクレイプを実行するようにスケジュール
+# 毎日午前10時にスクレイプを実行するスケジュール
 payload = {
     "method": "POST",
     "endpoint": "v1/scrapes",
@@ -170,7 +170,7 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    cron_expression: '0 10 * * ? *', // 毎日10時
+    cron_expression: '0 10 * * ? *', // 毎日午前10時
     expression_timezone: 'UTC'
   })
 })
@@ -197,7 +197,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ### 自然言語によるスケジューリング
 
-自然言語テキストを使用してcron式を自動生成します。システムはあなたのテキストを有効なcron式に変換します。
+自然言語テキストを使用してcron式を自動的に生成します。システムはあなたのテキストを有効なcron式に変換します。
 
 <CodeGroup>
 
@@ -208,7 +208,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# 自然言語を使用してスケジュール
+# 自然言語を使用したスケジュール
 payload = {
     "method": "POST",
     "endpoint": "v1/scrapes",
@@ -269,7 +269,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ## レスポンス形式
 
-スケジュールを作成すると、以下のプロパティを持つスケジュールオブジェクトを受け取ります：
+スケジュールを作成すると、次のプロパティを持つスケジュールオブジェクトが返されます：
 
 ```json
 {
@@ -299,9 +299,9 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 }
 ```
 
-## スケジュールを一覧表示
+## スケジュール一覧
 
-チームのすべてのスケジュールを取得します。デフォルトでは、削除されたスケジュールはフィルタリングされます。`include_deleted`クエリパラメータを使用して、削除されたスケジュールを含めることができます。
+チームのすべてのスケジュールを取得します。デフォルトでは、削除されたスケジュールは除外されます。`include_deleted`クエリパラメータを使用してそれらを含めることができます。
 
 <CodeGroup>
 
@@ -322,7 +322,7 @@ print(f"Total schedules: {result['count']}")
 for schedule in result['schedules']:
     print(json.dumps(schedule, indent=2))
 
-# 削除されたスケジュールを含めるには:
+# 削除されたスケジュールを含めるには：
 # response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
 ```
 
@@ -336,7 +336,7 @@ const result = await res.json()
 console.log(`Total schedules: ${result.count}`)
 result.schedules.forEach(s => console.log(s))
 
-// 削除されたスケジュールを含めるには:
+// 削除されたスケジュールを含めるには：
 // const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
 ```
 
@@ -344,7 +344,7 @@ result.schedules.forEach(s => console.log(s))
 curl -s -X GET "https://api.olostep.com/v1/schedules" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# 削除されたスケジュールを含めるには:
+# 削除されたスケジュールを含めるには：
 # curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
 #   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
@@ -353,7 +353,7 @@ curl -s -X GET "https://api.olostep.com/v1/schedules" \
 
 ## スケジュールを取得
 
-IDで単一のスケジュールを取得します。
+IDによって単一のスケジュールを取得します。
 
 <CodeGroup>
 
@@ -392,7 +392,7 @@ curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ## スケジュールを削除
 
-IDでスケジュールを削除します。これにより、将来の実行が停止します。
+IDによってスケジュールを削除します。これにより、将来の実行が停止されます。
 
 <CodeGroup>
 
@@ -430,21 +430,21 @@ curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 </CodeGroup>
 
-## サポートされているエンドポイント
+## 対応エンドポイント
 
-### Olostepエンドポイント（短縮形）
+### Olostepエンドポイント（短縮形式）
 
-POSTリクエストの場合、Olostepエンドポイントの短縮形を使用できます。システムはこれらに自動的に`https://api.olostep.com/`をプレフィックスします：
+POSTリクエストの場合、Olostepエンドポイントの短縮形式を使用できます。システムはこれらに自動的に`https://api.olostep.com/`をプレフィックスします：
 
 - `v1/scrapes` - ウェブスクレイピングタスクをスケジュール
 - `v1/batches` - バッチ処理ジョブをスケジュール
 - `v1/crawls` - ウェブサイトクロール操作をスケジュール
-- `v1/maps` - マップデータ抽出をスケジュール
+- `v1/maps` - 地図データ抽出をスケジュール
 - `v1/answers` - 回答生成をスケジュール
 
-### 完全なURL
+### フルURL
 
-エンドポイントに完全なURLを提供することもできます。これは外部APIやWebhookに必要です：
+エンドポイントにフルURLを提供することもできます。これは外部APIやWebhookに必要です：
 
 <CodeGroup>
 
@@ -528,17 +528,17 @@ Cron式は6つのフィールド形式を使用します：
 minute hour day month day-of-week year
 ```
 
-例:
+例：
 - `0/3 * * * ? *` - 3分ごと
-- `0 10 * * ? *` - 毎日10:00 AM
-- `0 9 ? * MON *` - 毎週月曜日の9:00 AM
-- `0 0 1 * ? *` - 毎月の最初の日の真夜中
+- `0 10 * * ? *` - 毎日午前10時
+- `0 9 ? * MON *` - 毎週月曜日午前9時
+- `0 0 1 * ? *` - 毎月1日の午前0時
 
-指定されていない場合は、日または曜日に`?`を使用します。
+指定されていない場合、day-of-monthまたはday-of-weekには`?`を使用します。
 
 ## 自然言語の例
 
-スケジュールを記述するために自然言語を使用できます。システムはそれらを自動的にcron式に変換します：
+自然言語を使用してスケジュールを記述できます。システムは自動的にそれをcron式に変換します：
 
 - "every 3 minutes" → `0/3 * * * ? *`
 - "every day at 10am" → `0 10 * * ? *`
@@ -549,17 +549,17 @@ minute hour day month day-of-week year
 ## 重要な注意事項
 
 - 一度だけのスケジュールは実行後に自動的に削除されます
-- 定期的なスケジュールは手動で削除されるまで続行します
-- タイムゾーンは有効なIANAタイムゾーン識別子でなければなりません（例："UTC", "America/New_York", "Europe/London"）
-- `execute_at`の日時は未来でなければなりません
-- 自然言語の変換には再試行が必要な場合があります。システムは最大3回試行します
+- 定期的なスケジュールは手動で削除されるまで続行されます
+- タイムゾーンは有効なIANAタイムゾーン識別子である必要があります（例："UTC"、"America/New_York"、"Europe/London"）
+- `execute_at`日時は未来でなければなりません
+- 自然言語変換は再試行が必要な場合があります。システムは最大3回試行します
 - 自然言語テキスト（`text`パラメータ）を使用する場合、タイムゾーンはデフォルトで"UTC"になります
-- スケジュールは指定されたペイロードでAPIコールを正確に実行します - 必要な任意のJSON構造を渡すことができます
-- POSTリクエストの場合、短縮形のOlostepエンドポイント（`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`）は自動的に`https://api.olostep.com/`がプレフィックスされます
-- 他のエンドポイントの場合、完全なURLを提供してください
-- `payload`は任意のデータ構造を含むことができます - ターゲットエンドポイントにそのまま送信されます
+- スケジュールは指定されたペイロードでAPIコールを正確に実行します - 必要なJSON構造を渡すことができます
+- POSTリクエストの場合、短縮形式のOlostepエンドポイント（`v1/scrapes`、`v1/batches`、`v1/crawls`、`v1/maps`、`v1/answers`）には自動的に`https://api.olostep.com/`がプレフィックスされます
+- 他のエンドポイントの場合、フルURLを提供してください
+- `payload`には任意のデータ構造を含めることができます - ターゲットエンドポイントにそのまま送信されます
 - 既に削除されたスケジュールを削除すると400エラーが返されます
 
 ## 料金
 
-スケジュール自体は無料です。スケジュールが実行されたときに実行されるAPIコールに対してのみ料金が発生します。例えば、スクレイプをスケジュールした場合、実行ごとに1クレジット（またはパーサーやLLM抽出を使用する場合はそれ以上）が課金されます。
+スケジュール自体は無料です。スケジュールが実行されるときに実行されるAPIコールに対してのみ料金が発生します。例えば、スクレイプをスケジュールした場合、実行ごとに1クレジット（またはパーサーやLLM抽出を使用する場合はそれ以上）が課金されます。

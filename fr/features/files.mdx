@@ -5,15 +5,15 @@ description: "Téléchargez et gérez des fichiers JSON à utiliser comme contex
 icon: "file-upload"
 ---
 
-Via le point de terminaison Olostep `/v1/files`, tu peux télécharger des fichiers JSON qui peuvent être utilisés comme contexte dans tes requêtes API. Cela te permet de fournir des données structurées pour améliorer tes extractions, réponses et autres opérations.
+Grâce à l'endpoint Olostep `/v1/files`, tu peux télécharger des fichiers JSON qui peuvent être utilisés comme contexte dans tes requêtes API. Cela te permet de fournir des données structurées pour améliorer tes extractions, réponses et autres opérations.
 
 - Télécharge des fichiers JSON jusqu'à 200 Mo
 - Les fichiers sont automatiquement validés pour un format JSON correct
-- Utilise les fichiers comme contexte dans les extractions, réponses et autres points de terminaison
+- Utilise les fichiers comme contexte dans les extractions, réponses et autres endpoints
 - Les fichiers expirent après 30 jours
 - Processus de téléchargement sécurisé via URL pré-signée
 
-Pour les détails de l'API, consulte la [Référence de l'API du point de terminaison Fichiers](/api-reference/files/create).
+Pour les détails de l'API, consulte la [Référence de l'API de l'Endpoint Fichiers](/api-reference/files/create).
 
 ## Installation
 
@@ -36,7 +36,7 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS : curl intégré est suffisant
+# macOS : le curl intégré suffit
 ```
 
 </CodeGroup>
@@ -45,11 +45,11 @@ const fetch = require('node-fetch')
 
 Le processus de téléchargement de fichier se compose de deux étapes :
 1. **Créer une URL de téléchargement** : Demande une URL pré-signée pour télécharger ton fichier
-2. **Compléter le téléchargement** : Télécharge ton fichier sur l'URL pré-signée, puis appelle le point de terminaison de complétion pour valider et finaliser
+2. **Compléter le téléchargement** : Télécharge ton fichier à l'URL pré-signée, puis appelle l'endpoint de complétion pour valider et finaliser
 
 ### Étape 1 : Créer une URL de téléchargement
 
-Tout d'abord, crée une URL de téléchargement en fournissant le nom du fichier et le but optionnel. Le paramètre `purpose` ne prend en charge que deux valeurs : `"context"` (par défaut) ou `"batch"`.
+Tout d'abord, crée une URL de téléchargement en fournissant le nom du fichier et un objectif optionnel. Le paramètre `purpose` ne prend en charge que deux valeurs : `"context"` (par défaut) ou `"batch"`.
 
 <CodeGroup>
 
@@ -102,7 +102,7 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
     "purpose": "context"
   }'
 
-# Exemple avec le but "batch" :
+# Exemple avec l'objectif "batch" :
 curl -s -X POST "https://api.olostep.com/v1/files" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
@@ -128,7 +128,7 @@ La réponse inclut une `upload_url` pré-signée qui expire dans 10 minutes :
 
 ### Étape 2 : Télécharger le fichier et compléter
 
-Télécharge ton fichier JSON sur l'URL pré-signée, puis appelle le point de terminaison de complétion pour valider et finaliser le téléchargement.
+Télécharge ton fichier JSON à l'URL pré-signée, puis appelle l'endpoint de complétion pour valider et finaliser le téléchargement.
 
 <CodeGroup>
 
@@ -139,7 +139,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Après avoir obtenu upload_url de l'Étape 1
+# Après avoir obtenu upload_url de l'étape 1
 file_id = upload_data["id"]
 upload_url = upload_data["upload_url"]
 
@@ -151,7 +151,7 @@ json_data = {
     ]
 }
 
-# Étape 2a : Télécharger le fichier sur l'URL pré-signée
+# Étape 2a : Télécharger le fichier à l'URL pré-signée
 upload_response = requests.put(
     upload_url,
     data=json.dumps(json_data),
@@ -172,7 +172,7 @@ print(json.dumps(file_info, indent=2))
 ```js Node
 const API_URL = 'https://api.olostep.com/v1'
 
-// Après avoir obtenu upload_url de l'Étape 1
+// Après avoir obtenu upload_url de l'étape 1
 const fileId = uploadData.id
 const uploadUrl = uploadData.upload_url
 
@@ -184,7 +184,7 @@ const jsonData = {
   ]
 }
 
-// Étape 2a : Télécharger le fichier sur l'URL pré-signée
+// Étape 2a : Télécharger le fichier à l'URL pré-signée
 await fetch(uploadUrl, {
   method: 'PUT',
   headers: { 'Content-Type': 'application/json' },
@@ -201,7 +201,7 @@ console.log(fileInfo)
 ```
 
 ```bash cURL
-# Étape 2a : Télécharger le fichier sur l'URL pré-signée
+# Étape 2a : Télécharger le fichier à l'URL pré-signée
 curl -X PUT "$UPLOAD_URL" \
   -H "Content-Type: application/json" \
   -d @my-data.json
@@ -213,7 +213,7 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 
 </CodeGroup>
 
-Le point de terminaison de complétion valide le fichier JSON et renvoie les métadonnées du fichier :
+L'endpoint de complétion valide le fichier JSON et renvoie les métadonnées du fichier :
 
 ```json
 {
@@ -261,7 +261,7 @@ curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
 
 ## Récupérer l'objet fichier par ID
 
-Obtiens une URL pré-signée pour télécharger le contenu JSON d'un fichier complété. Spécifie éventuellement le temps d'expiration pour l'URL de téléchargement en utilisant le paramètre de requête `expires_in` (par défaut à 600 secondes / 10 minutes).
+Obtiens une URL pré-signée pour télécharger le contenu JSON d'un fichier complété. Tu peux éventuellement spécifier le temps d'expiration pour l'URL de téléchargement en utilisant le paramètre de requête `expires_in` (par défaut à 600 secondes / 10 minutes).
 
 <CodeGroup>
 
@@ -343,7 +343,7 @@ La réponse inclut une `download_url` pré-signée qui expire après le temps sp
 
 ## Lister les fichiers
 
-Liste tous les fichiers complétés pour ton équipe. Filtre éventuellement par but (valeurs prises en charge : `"context"` ou `"batch"`).
+Liste tous les fichiers complétés pour ton équipe. Tu peux éventuellement filtrer par objectif (valeurs prises en charge : `"context"` ou `"batch"`).
 
 <CodeGroup>
 
@@ -356,7 +356,7 @@ response = requests.get(
 files = response.json()
 print(json.dumps(files, indent=2))
 
-# Lister les fichiers filtrés par but
+# Lister les fichiers filtrés par objectif
 response = requests.get(
     f"{API_URL}/files?purpose=context",
     headers={"Authorization": f"Bearer {API_KEY}"}
@@ -373,7 +373,7 @@ const res = await fetch(`${API_URL}/files`, {
 const files = await res.json()
 console.log(files)
 
-// Lister les fichiers filtrés par but
+// Lister les fichiers filtrés par objectif
 const contextRes = await fetch(`${API_URL}/files?purpose=context`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
@@ -386,7 +386,7 @@ console.log(contextFiles)
 curl -s -X GET "https://api.olostep.com/v1/files" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# Lister les fichiers filtrés par but
+# Lister les fichiers filtrés par objectif
 curl -s -X GET "https://api.olostep.com/v1/files?purpose=context" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
@@ -445,7 +445,7 @@ curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## Exemple de téléchargement complet (but context)
+## Exemple de téléchargement complet (objectif context)
 
 Voici un exemple complet qui télécharge un fichier JSON avec `purpose="context"` :
 
@@ -536,7 +536,7 @@ console.log(`Taille du fichier : ${fileInfo.bytes} octets`)
 
 ## Exemple de téléchargement de fichier batch
 
-Voici un exemple qui télécharge un fichier JSON avec `purpose="batch"` contenant des données batch valides pouvant être utilisées avec le point de terminaison `/v1/batches` :
+Voici un exemple qui télécharge un fichier JSON avec `purpose="batch"` contenant des données batch valides pouvant être utilisées avec l'endpoint `/v1/batches` :
 
 <CodeGroup>
 
@@ -557,7 +557,7 @@ upload_data = create_response.json()
 file_id = upload_data["id"]
 upload_url = upload_data["upload_url"]
 
-# Étape 2 : Préparer les données JSON batch (format valide pour le point de terminaison /v1/batches)
+# Étape 2 : Préparer les données JSON batch (format valide pour l'endpoint /v1/batches)
 batch_data = {
     "items": [
         {"custom_id": "item-1", "url": "https://www.google.com/search?q=stripe&gl=us&hl=en"},
@@ -584,7 +584,7 @@ file_info = complete_response.json()
 
 print(f"Fichier batch téléchargé avec succès : {file_info['id']}")
 print(f"Taille du fichier : {file_info['bytes']} octets")
-print(f"But : {file_info['purpose']}")
+print(f"Objectif : {file_info['purpose']}")
 ```
 
 ```js Node
@@ -600,7 +600,7 @@ const uploadData = await createRes.json()
 const fileId = uploadData.id
 const uploadUrl = uploadData.upload_url
 
-// Étape 2 : Préparer les données JSON batch (format valide pour le point de terminaison /v1/batches)
+// Étape 2 : Préparer les données JSON batch (format valide pour l'endpoint /v1/batches)
 const batchData = {
   items: [
     { custom_id: 'item-1', url: 'https://www.google.com/search?q=stripe&gl=us&hl=en' },
@@ -626,7 +626,7 @@ const fileInfo = await completeRes.json()
 
 console.log(`Fichier batch téléchargé avec succès : ${fileInfo.id}`)
 console.log(`Taille du fichier : ${fileInfo.bytes} octets`)
-console.log(`But : ${fileInfo.purpose}`)
+console.log(`Objectif : ${fileInfo.purpose}`)
 ```
 
 ```bash cURL
@@ -662,7 +662,7 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 
 </CodeGroup>
 
-Le fichier batch téléchargé contient une structure JSON valide qui correspond au format du point de terminaison `/v1/batches` :
+Le fichier batch téléchargé contient une structure JSON valide qui correspond au format de l'endpoint `/v1/batches` :
 - `items` : Tableau d'objets avec les champs `custom_id` et `url`
 - `parser` : Configuration optionnelle du parser
 - `country` : Code de pays optionnel
@@ -675,8 +675,8 @@ Ce fichier peut être utilisé comme entrée pour les opérations de traitement 
 - **Taille de fichier** : Maximum 200 Mo par fichier
 - **Expiration** : Les fichiers expirent après 30 jours
 - **URL de téléchargement** : Les URL pré-signées expirent après 10 minutes
-- **Paramètre purpose** : Prend uniquement en charge les valeurs `"context"` ou `"batch"` (par défaut à `"context"`)
+- **Paramètre purpose** : Ne prend en charge que les valeurs `"context"` ou `"batch"` (par défaut `"context"`)
 
 ## Tarification
 
-Les téléchargements de fichiers sont gratuits. Les fichiers sont stockés de manière sécurisée et expirent automatiquement après 30 jours.
+Les téléchargements de fichiers sont gratuits. Les fichiers sont stockés en toute sécurité et expirent automatiquement après 30 jours.

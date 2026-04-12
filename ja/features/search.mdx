@@ -4,14 +4,14 @@ title: "検索 API"
 icon: "magnifying-glass"
 ---
 
-Olostep の `/v1/searches` エンドポイントを使用すると、自然言語のクエリでウェブを検索し、重複のない関連リンクのリストをタイトルと説明付きで取得できます。
+Olostep の `/v1/searches` エンドポイントを使用すると、自然言語クエリでウェブを検索し、重複を排除した関連リンクのリストをタイトルと説明付きで取得できます。
 
-- クエリを平易な英語で送信
+- クエリを英語で送信
 - ウェブ全体から構造化されたリンクを取得
 
 クエリをウェブ全体で意味的に検索し、結果を返します。
 
-API の詳細については、[Search Endpoint API Reference](/api-reference/searches/create) を参照してください。
+API の詳細については、[検索エンドポイント API リファレンス](/api-reference/searches/create)を参照してください。
 
 ## インストール
 
@@ -117,13 +117,13 @@ curl -s -X POST "https://api.olostep.com/v1/searches" \
 
 `result.links` の各リンクには以下が含まれます：
 
-| フィールド     | タイプ | 説明                                   |
+| フィールド     | タイプ | 説明                                      |
 |---------------|--------|------------------------------------------|
-| `url`         | string | 検索結果の URL                          |
-| `title`       | string | 結果ページのタイトル                    |
-| `description` | string | 結果を説明する短いスニペット            |
+| `url`         | string | 検索結果の URL                           |
+| `title`       | string | 結果ページのタイトル                     |
+| `description` | string | 結果を説明する短いスニペット             |
 
-完全な結果は `result.json_hosted_url` にホストされた JSON ファイルとしても利用可能です。
+完全な結果は、`result.json_hosted_url` でホストされた JSON ファイルとしても利用可能です。
 
 ## 料金
 

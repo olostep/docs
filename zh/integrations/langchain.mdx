@@ -1,35 +1,34 @@
 ---
-sidebarTitle: "LangChain"
-icon: "link"
-title: "LangChain 集成"
+sidebarTitle: "Olostep + LangChain"
+title: "Olostep + LangChain 集成"
 description: "使用 LangChain 构建具有网页抓取和搜索功能的智能 AI 代理"
 ---
 
-Olostep 的 LangChain 集成提供了全面的工具，帮助构建可以搜索、抓取、分析和结构化任何网站数据的 AI 代理。非常适合 LangChain 和 LangGraph 应用。
+Olostep LangChain 集成提供了全面的工具，用于构建可以搜索、抓取、分析和结构化任何网站数据的 AI 代理。非常适合 LangChain 和 LangGraph 应用。
 
 ## 功能
 
-该集成提供对所有 5 个 Olostep API 功能的访问：
+该集成提供访问所有 5 个 Olostep API 功能的权限：
 
 <CardGroup cols={2}>
   <Card title="抓取" icon="file-lines">
-    从任何单个 URL 提取内容，支持多种格式（Markdown、HTML、JSON、文本）
+    从任何单一 URL 提取内容，支持多种格式（Markdown、HTML、JSON、文本）
   </Card>
   
   <Card title="批处理" icon="layer-group">
-    并行处理最多 10,000 个 URL。批处理作业在 5-8 分钟内完成
+    并行处理多达 10,000 个 URL。批处理作业在 5-8 分钟内完成
   </Card>
   
-  <Card title="回答" icon="question">
+  <Card title="答案" icon="question">
     支持自然语言查询和结构化输出的 AI 驱动网页搜索
   </Card>
   
   <Card title="地图" icon="map">
-    提取网站的所有 URL 以进行站点结构分析
+    提取网站的所有 URL 以进行网站结构分析
   </Card>
   
   <Card title="爬取" icon="spider-web">
-    通过跟随链接自主发现并抓取整个网站
+    通过跟随链接自动发现并抓取整个网站
   </Card>
 </CardGroup>
 
@@ -70,7 +69,7 @@ export OLOSTEP_API_KEY="your_olostep_api_key_here"
 </ParamField>
 
 <ParamField path="country" type="string">
-  用于位置特定内容的国家代码（例如 "US", "GB", "CA"）
+  用于特定位置内容的国家代码（例如，“US”、“GB”、“CA”）
 </ParamField>
 
 <ParamField path="wait_before_scraping" type="integer">
@@ -78,7 +77,7 @@ export OLOSTEP_API_KEY="your_olostep_api_key_here"
 </ParamField>
 
 <ParamField path="parser" type="string">
-  用于特殊提取的可选解析器 ID（例如 "@olostep/amazon-product"）
+  用于专门提取的可选解析器 ID（例如，“@olostep/amazon-product”）
 </ParamField>
 
 <CodeGroup>
@@ -86,7 +85,7 @@ export OLOSTEP_API_KEY="your_olostep_api_key_here"
 from langchain_olostep import scrape_website
 import asyncio
 
-# 抓取一个网站
+# 抓取网站
 content = asyncio.run(scrape_website.ainvoke({
     "url": "https://example.com",
     "format": "markdown"
@@ -105,7 +104,7 @@ content = asyncio.run(scrape_website.ainvoke({
 ```
 
 ```python With Parser
-# 使用专用解析器
+# 使用专门的解析器
 content = asyncio.run(scrape_website.ainvoke({
     "url": "https://www.amazon.com/dp/PRODUCT_ID",
     "parser": "@olostep/amazon-product",
@@ -127,7 +126,7 @@ content = asyncio.run(scrape_website.ainvoke({
 </ParamField>
 
 <ParamField path="country" type="string">
-  用于位置特定内容的国家代码
+  用于特定位置内容的国家代码
 </ParamField>
 
 <ParamField path="wait_before_scraping" type="integer">
@@ -135,7 +134,7 @@ content = asyncio.run(scrape_website.ainvoke({
 </ParamField>
 
 <ParamField path="parser" type="string">
-  用于特殊提取的可选解析器 ID
+  用于专门提取的可选解析器 ID
 </ParamField>
 
 <CodeGroup>
@@ -160,14 +159,14 @@ print(result)
 
 ### answer_question
 
-通过网络搜索获取 AI 驱动的答案和来源。非常适合数据丰富和研究。
+搜索网络并获取 AI 驱动的答案和来源。非常适合数据丰富和研究。
 
 <ParamField path="task" type="string" required>
   要搜索的问题或任务
 </ParamField>
 
 <ParamField path="json_schema" type="object">
-  描述所需输出格式的可选 JSON 模式字典/字符串
+  描述所需输出格式的可选 JSON 架构字典/字符串
 </ParamField>
 
 <CodeGroup>
@@ -175,7 +174,7 @@ print(result)
 from langchain_olostep import answer_question
 import asyncio
 
-# 提问一个简单问题
+# 提问简单问题
 result = asyncio.run(answer_question.ainvoke({
     "task": "What is the capital of France?"
 }))
@@ -185,7 +184,7 @@ print(result)
 ```
 
 ```python Structured Output
-# 使用 JSON 模式获取结构化数据
+# 使用 JSON 架构获取结构化数据
 result = asyncio.run(answer_question.ainvoke({
     "task": "What is the latest book by J.K. Rowling?",
     "json_schema": {
@@ -210,13 +209,13 @@ result = asyncio.run(answer_question.ainvoke({
     }
 }))
 
-# 使用 "NOT_FOUND" 值处理不确定性
+# 处理不确定性时使用 "NOT_FOUND" 值
 ```
 </CodeGroup>
 
 ### extract_urls
 
-从网站提取所有 URL 以进行站点结构分析。
+提取网站的所有 URL 以进行网站结构分析。
 
 <ParamField path="url" type="string" required>
   要提取 URL 的网站 URL
@@ -231,11 +230,11 @@ result = asyncio.run(answer_question.ainvoke({
 </ParamField>
 
 <ParamField path="include_urls" type="array">
-  包含的 Glob 模式（例如 ["/blog/**"]）
+  要包含的 Glob 模式（例如，["/blog/**"]）
 </ParamField>
 
 <ParamField path="exclude_urls" type="array">
-  排除的 Glob 模式（例如 ["/admin/**"]）
+  要排除的 Glob 模式（例如，["/admin/**"]）
 </ParamField>
 
 <CodeGroup>
@@ -243,7 +242,7 @@ result = asyncio.run(answer_question.ainvoke({
 from langchain_olostep import extract_urls
 import asyncio
 
-# 从网站获取所有 URL
+# 获取网站的所有 URL
 result = asyncio.run(extract_urls.ainvoke({
     "url": "https://example.com",
     "top_n": 100
@@ -266,7 +265,7 @@ result = asyncio.run(extract_urls.ainvoke({
 
 ### crawl_website
 
-通过跟随链接自主发现并抓取整个网站。
+通过跟随链接自动发现并抓取整个网站。
 
 <ParamField path="start_url" type="string" required>
   爬取的起始 URL
@@ -277,11 +276,11 @@ result = asyncio.run(extract_urls.ainvoke({
 </ParamField>
 
 <ParamField path="include_urls" type="array">
-  包含的 Glob 模式（例如 ["/**"] 表示全部）
+  要包含的 Glob 模式（例如，["/**"] 表示全部）
 </ParamField>
 
 <ParamField path="exclude_urls" type="array">
-  排除的 Glob 模式（例如 ["/admin/**"]）
+  要排除的 Glob 模式（例如，["/admin/**"]）
 </ParamField>
 
 <ParamField path="max_depth" type="integer">
@@ -289,7 +288,7 @@ result = asyncio.run(extract_urls.ainvoke({
 </ParamField>
 
 <ParamField path="include_external" type="boolean" default="false">
-  包括外部 URL
+  包含外部 URL
 </ParamField>
 
 <CodeGroup>
@@ -297,7 +296,7 @@ result = asyncio.run(extract_urls.ainvoke({
 from langchain_olostep import crawl_website
 import asyncio
 
-# 爬取整个文档站点
+# 爬取整个文档网站
 result = asyncio.run(crawl_website.ainvoke({
     "start_url": "https://docs.example.com",
     "max_pages": 100
@@ -376,7 +375,7 @@ def create_research_agent():
     workflow = StateGraph(dict)
     
     def discover_pages(state):
-        # 从目标站点提取所有 URL
+        # 从目标网站提取所有 URL
         result = extract_urls.invoke({
             "url": state["target_url"],
             "include_urls": ["/product/**"],
@@ -452,7 +451,7 @@ for company in companies:
 
 ### 电商产品抓取
 
-使用专用解析器抓取产品数据：
+使用专门的解析器抓取产品数据：
 
 ```python
 from langchain_olostep import scrape_website
@@ -463,12 +462,12 @@ result = scrape_website.invoke({
     "parser": "@olostep/amazon-product",
     "format": "json"
 })
-# 返回结构化产品数据：价格、标题、评分等
+# 返回结构化的产品数据：价格、标题、评分等
 ```
 
 ### SEO 审核
 
-分析整个网站以进行 SEO：
+分析整个网站的 SEO：
 
 ```python
 from langchain_olostep import extract_urls, scrape_batch
@@ -490,12 +489,12 @@ batch_result = scrape_batch.invoke({
 
 ### 文档抓取
 
-爬取和提取文档：
+爬取并提取文档：
 
 ```python
 from langchain_olostep import crawl_website
 
-# 爬取整个文档站点
+# 爬取整个文档网站
 result = crawl_website.invoke({
     "start_url": "https://docs.example.com",
     "max_pages": 500,
@@ -506,11 +505,11 @@ result = crawl_website.invoke({
 
 ## 专用解析器
 
-Olostep 提供了针对热门网站的预构建解析器：
+Olostep 提供了针对流行网站的预构建解析器：
 
 - `@olostep/google-search` - Google 搜索结果
 
-使用 `parser` 参数：
+使用 `parser` 参数使用它们：
 
 ```python
 scrape_website.invoke({
@@ -535,16 +534,16 @@ except LangChainException as e:
 ## 最佳实践
 
 <AccordionGroup>
-  <Accordion title="使用批处理处理多个 URL">
-    当抓取超过 3-5 个 URL 时，使用 `scrape_batch` 而不是多次调用 `scrape_website`。批处理更快且更具成本效益。
+  <Accordion title="为多个 URL 使用批处理">
+    当抓取超过 3-5 个 URL 时，使用 `scrape_batch` 而不是多个 `scrape_website` 调用。批处理速度更快且更具成本效益。
   </Accordion>
 
-  <Accordion title="设置适当的超时时间">
+  <Accordion title="设置适当的超时">
     对于 JavaScript 密集型网站，使用 `wait_before_scraping` 参数（2000-5000ms 是典型值）。这确保动态内容完全加载。
   </Accordion>
 
   <Accordion title="使用专用解析器">
-    对于热门网站（如亚马逊、LinkedIn、Google），使用我们的预构建解析器自动获取结构化数据。
+    对于流行网站（亚马逊、LinkedIn、Google），使用我们的预构建解析器以自动获取结构化数据。
   </Accordion>
 
   <Accordion title="高效过滤 URL">
@@ -552,7 +551,7 @@ except LangChainException as e:
   </Accordion>
 
   <Accordion title="处理速率限制">
-    对于速率限制错误，实施指数退避。API 内部自动处理大多数速率限制。
+    对于速率限制错误，实施指数退避。API 自动处理大多数速率限制。
   </Accordion>
 </AccordionGroup>
 
@@ -574,8 +573,8 @@ except LangChainException as e:
     了解批处理端点
   </Card>
   
-  <Card title="回答 API" icon="question" href="/features/answers">
-    了解回答端点
+  <Card title="答案 API" icon="question" href="/features/answers">
+    了解答案端点
   </Card>
   
   <Card title="地图 API" icon="map" href="/features/maps">
@@ -588,5 +587,9 @@ except LangChainException as e:
   
   <Card title="Python SDK" icon="python" href="/sdks/python">
     探索 Python SDK
+  </Card>
+  
+  <Card title="LangChain 网站" icon="link" href="https://www.langchain.com">
+    LangChain 平台
   </Card>
 </CardGroup>

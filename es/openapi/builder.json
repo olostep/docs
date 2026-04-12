@@ -25,7 +25,7 @@
     "/olostep-p2p-incomingAPI": {
       "get": {
         "summary": "Inicia el scraping de páginas web con varias configuraciones",
-        "description": "Este endpoint permite a los usuarios hacer scraping de páginas web con varias opciones como establecer tiempos de espera, tiempo de espera antes de hacer scraping, preferencias de formato de datos y más.",
+        "description": "Este endpoint permite a los usuarios hacer scraping de páginas web con varias opciones como establecer tiempos de espera, tiempo de espera antes del scraping, preferencias de formato de datos y más.",
         "servers": [
           {
             "url": "https://agent.olostep.com"
@@ -91,7 +91,7 @@
             "name": "removeCSSselectors",
             "in": "query",
             "required": false,
-            "description": "Opción para eliminar ciertos selectores CSS del contenido. Opcionalmente, también puedes pasar un array en formato JSON stringified de selectores específicos que deseas eliminar. Los selectores CSS eliminados cuando esta opción está configurada en `default` son `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "description": "Opción para eliminar ciertos selectores CSS del contenido. Opcionalmente, también puedes pasar un array en formato JSON stringificado de selectores específicos que deseas eliminar. Los selectores CSS eliminados cuando esta opción está configurada en `default` son `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
             "schema": {
               "type": "string",
               "default": "default",
@@ -204,7 +204,7 @@
                   },
                   {
                     "type": "object",
-                    "title": "Llenar Entrada",
+                    "title": "Rellenar Entrada",
                     "required": [
                       "type",
                       "selector",
@@ -216,7 +216,7 @@
                         "enum": [
                           "fill_input"
                         ],
-                        "description": "Llena un elemento de entrada con un valor"
+                        "description": "Rellenar un elemento de entrada con un valor"
                       },
                       "selector": {
                         "type": "string",
@@ -242,7 +242,7 @@
                         "enum": [
                           "scroll"
                         ],
-                        "description": "Desplaza la página"
+                        "description": "Desplazar la página"
                       },
                       "direction": {
                         "type": "string",

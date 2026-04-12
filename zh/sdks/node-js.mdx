@@ -2,34 +2,49 @@
 sidebarTitle: "NodeJS"
 title: "Olostep NodeJS SDK"
 icon: "node-js"
-description: "官方 NodeJS SDK，用于从网络中搜索、提取和结构化数据"
+description: "官方 NodeJS SDK，用于从网络搜索、提取和结构化数据"
 ---
 
 **NPM 包**: [olostep](https://www.npmjs.com/package/olostep) 
 
-## 入门指南
+## 快速开始
 
 ```bash
 npm install olostep
 ```
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
 
-// 最简抓取示例
+// 最小化抓取示例
 const result = await client.scrapes.create('https://example.com');
 console.log(result.id, result.html_content);
 ```
+```ts snake_case
+import Olostep from 'olostep';
 
+const client = new Olostep({api_key: process.env.OLOSTEP_API_KEY});
+
+// 最小化抓取示例
+const result = await client.scrapes.create('https://example.com');
+console.log(result.id, result.html_content);
+```
+</CodeGroup>
+
+<Note>
+NodeJS SDK 接受所有参数的 **camelCase** 和 **snake_case**。如果你正在为 AI 代理构建，请使用 **snake_case**，它与 API 的原生字段名称匹配。
+</Note>
 ## 使用方法
 
 ### 抓取
 
 使用各种选项抓取单个 URL：
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Format} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -52,12 +67,37 @@ console.log(scrape.markdown_content);
 // 通过 ID 获取抓取结果
 const fetched = await client.scrapes.get(scrape.id);
 ```
+```ts snake_case
+import Olostep, {Format} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// 简单抓取
+const scrape = await client.scrapes.create('https://example.com');
+
+// 使用多种格式
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  formats: [Format.HTML, Format.MARKDOWN, Format.TEXT],
+  wait_before_scraping: 1000,
+  remove_images: true
+});
+
+// 访问内容
+console.log(scrape.html_content);
+console.log(scrape.markdown_content);
+
+// 通过 ID 获取抓取结果
+const fetched = await client.scrapes.get(scrape.id);
+```
+</CodeGroup>
 
 ### 批量处理
 
 在一个批次中处理多个 URL：
 
-```ts
+<CodeGroup>
+```ts camelCase
 // 使用 URL 字符串（自动生成自定义 ID）
 const batch = await client.batches.create([
   'https://example.com',
@@ -65,13 +105,13 @@ const batch = await client.batches.create([
   'https://example.net'
 ]);
 
-// 或者使用明确的自定义 ID
+// 或使用明确的自定义 ID
 const batch = await client.batches.create([
   {url: 'https://example.com', customId: 'site-1'},
   {url: 'https://example.org', customId: 'site-2'}
 ]);
 
-console.log(`批次 ${batch.id} 已创建，包含 ${batch.total_urls} 个 URL`);
+console.log(`Batch ${batch.id} created with ${batch.total_urls} URLs`);
 
 // 等待完成
 await batch.waitTillDone({
@@ -88,12 +128,45 @@ for await (const item of batch.items()) {
   console.log(item.custom_id);
 }
 ```
+```ts snake_case
+// 使用 URL 字符串（自动生成自定义 ID）
+const batch = await client.batches.create([
+  'https://example.com',
+  'https://example.org',
+  'https://example.net'
+]);
+
+// 或使用明确的自定义 ID
+const batch = await client.batches.create([
+  {url: 'https://example.com', custom_id: 'site-1'},
+  {url: 'https://example.org', custom_id: 'site-2'}
+]);
+
+console.log(`Batch ${batch.id} created with ${batch.total_urls} URLs`);
+
+// 等待完成
+await batch.waitTillDone({
+  check_every_n_secs: 5,
+  timeout_seconds: 120
+});
+
+// 获取批次信息
+const info = await batch.info();
+console.log(info);
+
+// 流式处理单个结果
+for await (const item of batch.items()) {
+  console.log(item.custom_id);
+}
+```
+</CodeGroup>
 
 ### 爬取
 
 爬取整个网站：
 
-```ts
+<CodeGroup>
+```ts camelCase
 const crawl = await client.crawls.create({
   url: 'https://example.com',
   maxPages: 100,
@@ -102,7 +175,7 @@ const crawl = await client.crawls.create({
   excludeUrls: ['*/admin/*']
 });
 
-console.log(`爬取 ${crawl.id} 已开始`);
+console.log(`Crawl ${crawl.id} started`);
 
 // 等待完成
 await crawl.waitTillDone({
@@ -112,19 +185,47 @@ await crawl.waitTillDone({
 
 // 获取爬取信息
 const info = await crawl.info();
-console.log(`已爬取 ${info.pages_crawled} 个页面`);
+console.log(`Crawled ${info.pages_crawled} pages`);
 
 // 流式处理爬取的页面
 for await (const page of crawl.pages()) {
   console.log(page.url, page.status_code);
 }
 ```
+```ts snake_case
+const crawl = await client.crawls.create({
+  url: 'https://example.com',
+  max_pages: 100,
+  max_depth: 3,
+  include_urls: ['*/blog/*'],
+  exclude_urls: ['*/admin/*']
+});
 
-### 网站映射
+console.log(`Crawl ${crawl.id} started`);
+
+// 等待完成
+await crawl.waitTillDone({
+  check_every_n_secs: 10,
+  timeout_seconds: 300
+});
+
+// 获取爬取信息
+const info = await crawl.info();
+console.log(`Crawled ${info.pages_crawled} pages`);
+
+// 流式处理爬取的页面
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.status_code);
+}
+```
+</CodeGroup>
+
+### 网站地图
 
 生成网站 URL 的站点地图：
 
-```ts
+<CodeGroup>
+```ts camelCase
 const map = await client.maps.create({
   url: 'https://example.com',
   topN: 100,
@@ -132,7 +233,7 @@ const map = await client.maps.create({
   searchQuery: 'blog posts'
 });
 
-console.log(`地图 ${map.id} 已创建`);
+console.log(`Map ${map.id} created`);
 
 // 流式处理 URL
 for await (const url of map.urls()) {
@@ -142,10 +243,86 @@ for await (const url of map.urls()) {
 // 获取地图信息
 const info = await map.info();
 ```
+```ts snake_case
+const map = await client.maps.create({
+  url: 'https://example.com',
+  top_n: 100,
+  include_subdomain: true,
+  search_query: 'blog posts'
+});
+
+console.log(`Map ${map.id} created`);
+
+// 流式处理 URL
+for await (const url of map.urls()) {
+  console.log(url);
+}
+
+// 获取地图信息
+const info = await map.info();
+```
+</CodeGroup>
+
+### AI 驱动的答案
+
+使用 AI 从网页获取答案：
+
+<CodeGroup>
+```ts camelCase
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// 简单任务：直接传递字符串
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// 使用结构化 JSON 输出
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  jsonFormat: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// 通过 ID 检索先前创建的答案
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// 简单任务：直接传递字符串
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// 使用结构化 JSON 输出
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  json_format: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// 通过 ID 检索先前创建的答案
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+</CodeGroup>
 
 ### 内容检索
 
-检索之前抓取的内容：
+检索先前抓取的内容：
 
 ```ts
 // 获取特定格式的内容
@@ -163,7 +340,7 @@ const content = await client.retrieve(retrieveId, [
 
 #### 自定义操作
 
-在抓取前执行浏览器操作：
+在抓取之前执行浏览器操作：
 
 ```ts
 const scrape = await client.scrapes.create({
@@ -181,7 +358,8 @@ const scrape = await client.scrapes.create({
 
 使用预定义的国家代码或任何有效的国家代码字符串从不同国家抓取：
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Country} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -198,12 +376,31 @@ const scrape2 = await client.scrapes.create({
   country: 'jp'  // 日本
 });
 ```
+```ts snake_case
+import Olostep, {Country} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// 使用预定义的枚举值（US, DE, FR, GB, SG）
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  country: Country.DE  // 德国
+});
+
+// 或使用任何有效的国家代码作为字符串
+const scrape2 = await client.scrapes.create({
+  url: 'https://example.com',
+  country: 'jp'  // 日本
+});
+```
+</CodeGroup>
 
 #### LLM 提取
 
 使用 LLM 提取结构化数据：
 
-```ts
+<CodeGroup>
+```ts camelCase
 const scrape = await client.scrapes.create({
   url: 'https://example.com',
   llmExtract: {
@@ -212,15 +409,29 @@ const scrape = await client.scrapes.create({
       price: 'number',
       description: 'string'
     },
-    // 可选地提供提示以指导提取
-    prompt: '从此页面提取产品信息'
+    prompt: 'Extract product information from this page'
   }
 });
 ```
+```ts snake_case
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  llm_extract: {
+    schema: {
+      title: 'string',
+      price: 'number',
+      description: 'string'
+    },
+    prompt: 'Extract product information from this page'
+  }
+});
+```
+</CodeGroup>
 
 ### 客户端配置
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({
@@ -234,11 +445,26 @@ const client = new Olostep({
   userAgent: 'MyApp/1.0'  // 可选
 });
 ```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({
+  api_key: 'your_api_key',
+  api_base_url: 'https://api.olostep.com/v1',  // 可选
+  timeout_ms: 150000,  // 150 秒（可选）
+  retry: {
+    max_retries: 3,
+    initial_delay_ms: 1000
+  },
+  user_agent: 'MyApp/1.0'  // 可选
+});
+```
+</CodeGroup>
 
 ### 功能亮点
 
-- 以异步为主的客户端，全面支持 TypeScript。
-- 使用 TypeScript 枚举和接口进行类型安全输入（Formats, Countries, Actions 等）。
+- 以异步为优先的客户端，全面支持 TypeScript。
+- 使用 TypeScript 枚举和接口进行类型安全输入（格式、国家、操作等）。
 - 丰富的资源命名空间，提供简写调用（`client.scrapes.create()`）和显式方法（`client.scrapes.get()`）。
 - 共享传输层，支持重试、超时和 JSON 解码。
 - 全面的错误层次结构。

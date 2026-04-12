@@ -14,7 +14,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+        "description": "Intestazione di autenticazione Bearer della forma Bearer <token>, dove <token> è il tuo token di autenticazione."
       }
     }
   },
@@ -22,7 +22,7 @@
     "/v1/schedules": {
       "post": {
         "summary": "Crea Orario",
-        "description": "Crea un nuovo orario per eseguire chiamate API a tempi specificati. Supporta sia esecuzioni una tantum che orari ricorrenti usando espressioni cron. Puoi anche usare testo in linguaggio naturale per generare automaticamente espressioni cron. Per le richieste POST, puoi usare gli endpoint Olostep in forma breve (es. 'v1/scrapes') che saranno automaticamente prefissati, oppure fornire un URL completo. Il payload può contenere qualsiasi struttura JSON che vuoi inviare.",
+        "description": "Crea un nuovo orario per eseguire chiamate API a tempi specificati. Supporta sia esecuzioni una tantum che orari ricorrenti usando espressioni cron. Puoi anche usare testo in linguaggio naturale per generare automaticamente espressioni cron. Per le richieste POST, puoi usare gli endpoint in forma breve di Olostep (es. 'v1/scrapes') che verranno automaticamente prefissati, o fornire un URL completo. Il payload può contenere qualsiasi struttura JSON che vuoi inviare.",
         "security": [
           {
             "Authorization": []
@@ -45,7 +45,7 @@
                   },
                   "endpoint": {
                     "type": "string",
-                    "description": "L'URL dell'endpoint da chiamare quando l'orario viene eseguito. Per le richieste POST con endpoint Olostep, puoi usare la forma breve (es. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') che sarà automaticamente prefissata con 'https://api.olostep.com/'. Per altri endpoint, fornisci l'URL completo."
+                    "description": "L'URL dell'endpoint da chiamare quando l'orario viene eseguito. Per le richieste POST con endpoint Olostep, puoi usare la forma breve (es. 'v1/scrapes', 'v1/batches', 'v1/crawls', 'v1/maps', 'v1/answers') che verrà automaticamente prefissata con 'https://api.olostep.com/'. Per altri endpoint, fornisci l'URL completo."
                   },
                   "payload": {
                     "type": "object",
@@ -54,20 +54,20 @@
                   },
                   "cron_expression": {
                     "type": "string",
-                    "description": "Espressione cron in formato a 6 campi (minuto ora giorno mese giorno-della-settimana anno) per orari ricorrenti. Necessario per orari ricorrenti. Mutuamente esclusivo con execute_at e text."
+                    "description": "Espressione cron nel formato a 6 campi (minuto ora giorno mese giorno-della-settimana anno) per orari ricorrenti. Necessaria per orari ricorrenti. Mutuamente esclusiva con execute_at e text."
                   },
                   "execute_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Stringa datetime ISO 8601 per l'esecuzione di un orario una tantum. Deve essere un datetime futuro valido. Necessario per orari una tantum. Mutuamente esclusivo con cron_expression."
+                    "description": "Stringa datetime ISO 8601 per l'esecuzione di un orario una tantum. Deve essere un datetime futuro valido. Necessaria per orari una tantum. Mutuamente esclusiva con cron_expression."
                   },
                   "expression_timezone": {
                     "type": "string",
-                    "description": "Identificatore del fuso orario IANA (es. 'UTC', 'America/New_York', 'Europe/London') per l'orario. Necessario per orari ricorrenti, opzionale per orari una tantum. Quando si usa testo in linguaggio naturale, questo predefinito è 'UTC'."
+                    "description": "Identificatore del fuso orario IANA (es. 'UTC', 'America/New_York', 'Europe/London') per l'orario. Necessario per orari ricorrenti, opzionale per orari una tantum. Quando si usa testo in linguaggio naturale, questo predefinisce 'UTC'."
                   },
                   "text": {
                     "type": "string",
-                    "description": "Testo in linguaggio naturale per generare automaticamente un'espressione cron. Il sistema convertirà il tuo testo in un'espressione cron valida. Esempi: 'ogni 3 minuti', 'ogni giorno alle 10am', 'ogni lunedì alle 9am'. Mutuamente esclusivo con cron_expression e execute_at. Quando usato, expression_timezone predefinito è 'UTC'."
+                    "description": "Testo in linguaggio naturale per generare automaticamente un'espressione cron. Il sistema convertirà il tuo testo in un'espressione cron valida. Esempi: 'ogni 3 minuti', 'ogni giorno alle 10am', 'ogni lunedì alle 9am'. Mutuamente esclusivo con cron_expression e execute_at. Quando usato, expression_timezone predefinisce 'UTC'."
                   }
                 },
                 "required": [
@@ -108,7 +108,7 @@
                     },
                     "endpoint": {
                       "type": "string",
-                      "description": "L'URL dell'endpoint che sarà chiamato"
+                      "description": "L'URL dell'endpoint che verrà chiamato"
                     },
                     "cron_expression": {
                       "type": "string",

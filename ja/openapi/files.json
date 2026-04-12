@@ -190,7 +190,7 @@
     "/v1/files/{file_id}/complete": {
       "post": {
         "summary": "ファイルアップロードを完了する",
-        "description": "ファイルアップロードプロセスを完了し、アップロードされたJSONファイルを検証する。このエンドポイントはファイルの存在を確認し、JSON形式を検証し、ファイルサイズ（最大200MB）をチェックし、ファイルステータスをcompletedに更新する。",
+        "description": "ファイルアップロードプロセスを完了し、アップロードされたJSONファイルを検証する。このエンドポイントはファイルの存在を確認し、JSON形式を検証し、ファイルサイズ（最大200MB）をチェックし、ファイルのステータスをcompletedに更新する。",
         "security": [
           {
             "Authorization": []
@@ -209,7 +209,7 @@
         ],
         "responses": {
           "200": {
-            "description": "ファイルのアップロードが正常に完了しました。",
+            "description": "ファイルアップロードが正常に完了しました。",
             "content": {
               "application/json": {
                 "schema": {
@@ -241,7 +241,7 @@
                     },
                     "status": {
                       "type": "string",
-                      "description": "ファイルのステータス。正常に完了した後は 'completed' になる。"
+                      "description": "ファイルのステータス。正常に完了した後は 'completed' になります。"
                     }
                   }
                 }
@@ -255,7 +255,7 @@
             "description": "無効なAPIキー"
           },
           "404": {
-            "description": "ファイルが見つからないか、S3にアップロードされていない"
+            "description": "ファイルが見つからないか、ファイルがS3にアップロードされていない"
           },
           "500": {
             "description": "内部サーバーエラー"
@@ -266,7 +266,7 @@
     "/v1/files/{file_id}": {
       "get": {
         "summary": "IDでファイルメタデータを取得",
-        "description": "ファイルのIDでメタデータを取得する。",
+        "description": "ファイルのIDによってメタデータを取得する。",
         "security": [
           {
             "Authorization": []
@@ -328,7 +328,7 @@
             "description": "無効なAPIキー"
           },
           "404": {
-            "description": "ファイルが見つからない"
+            "description": "ファイルが見つかりません"
           },
           "500": {
             "description": "内部サーバーエラー"
@@ -372,7 +372,7 @@
                     },
                     "deleted": {
                       "type": "boolean",
-                      "description": "ファイルが正常に削除されたことを示します。"
+                      "description": "ファイルが正常に削除されたことを示します"
                     }
                   }
                 }
@@ -383,7 +383,7 @@
             "description": "無効なAPIキー"
           },
           "404": {
-            "description": "ファイルが見つからない"
+            "description": "ファイルが見つかりません"
           },
           "500": {
             "description": "内部サーバーエラー"
@@ -470,7 +470,7 @@
             "description": "無効なAPIキー"
           },
           "404": {
-            "description": "ファイルが見つからない"
+            "description": "ファイルが見つかりません"
           },
           "500": {
             "description": "内部サーバーエラー"

@@ -1,21 +1,21 @@
 ---
 sidebarTitle: "计划"
 title: "计划"
-description: "计划 API 调用在指定时间自动运行"
+description: "自动在指定时间运行计划 API 调用"
 icon: "clock"
 ---
 
-通过 Olostep 的 `/v1/schedules` 端点，你可以安排 API 调用在指定时间自动执行。使用 cron 表达式或自然语言安排一次性执行或定期任务。
+通过 Olostep 的 `/v1/schedules` 端点，你可以安排 API 调用在指定时间自动执行。使用 cron 表达式或自然语言安排一次性执行或重复任务。
 
 - 在特定日期时间安排一次性执行
-- 使用 cron 表达式创建定期计划
+- 使用 cron 表达式创建重复计划
 - 使用自然语言文本自动生成 cron 表达式
 - 安排 HTTP 端点（GET 或 POST）
-- 对于 POST 请求，使用简短形式的 Olostep 端点（自动加前缀）或完整 URL
-- 传递你想要的任何负载 - 负载会按你指定的方式发送
+- 对于 POST 请求，使用简短形式的 Olostep 端点（自动添加前缀）或完整 URL
+- 传递你想要的任何负载 - 负载将按你指定的方式发送
 - 自动管理计划生命周期
 
-有关 API 详细信息，请参见 [计划端点 API 参考](/api-reference/schedules/create)。
+有关 API 详细信息，请参阅 [计划端点 API 参考](/api-reference/schedules/create)。
 
 ## 安装
 
@@ -38,14 +38,14 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: 内置的 curl 就可以
+# macOS: 内置 curl 即可
 ```
 
 </CodeGroup>
 
 ## 创建计划
 
-创建一个计划以自动执行 API 调用。你可以使用 cron 表达式创建一次性计划或定期计划。`endpoint` 可以是任何 URL（不限于 Olostep 端点），`payload` 可以包含你想发送的任何数据。
+创建一个计划以自动执行 API 调用。你可以使用 cron 表达式创建一次性计划或重复计划。`endpoint` 可以是任何 URL（不限于 Olostep 端点），`payload` 可以包含你想发送的任何数据。
 
 ### 一次性计划
 
@@ -61,7 +61,7 @@ from datetime import datetime, timedelta
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# 安排抓取任务在 1 小时后运行
+# 安排在 1 小时后运行抓取
 execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
 
 payload = {
@@ -123,9 +123,9 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-### 使用 cron 表达式的定期计划
+### 使用 cron 表达式的重复计划
 
-使用 cron 表达式创建一个定期计划。Cron 表达式使用 6 个字段格式：分钟 小时 日 月 星期几 年。
+使用 cron 表达式创建一个重复计划。Cron 表达式使用 6 个字段格式：分钟 小时 日 月 星期几 年。
 
 <CodeGroup>
 
@@ -136,7 +136,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# 安排抓取任务每天上午 10 点 UTC 运行
+# 安排每天 UTC 时间上午 10 点运行抓取
 payload = {
     "method": "POST",
     "endpoint": "v1/scrapes",
@@ -170,7 +170,7 @@ const res = await fetch(`${API_URL}/schedules`, {
       url_to_scrape: 'https://example.com',
       formats: ['markdown']
     },
-    cron_expression: '0 10 * * ? *', // 每天上午 10 点 UTC
+    cron_expression: '0 10 * * ? *', // 每天 UTC 时间上午 10 点
     expression_timezone: 'UTC'
   })
 })
@@ -269,7 +269,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ## 响应格式
 
-当你创建一个计划时，你会收到一个包含以下属性的计划对象：
+当你创建一个计划时，你将收到一个包含以下属性的计划对象：
 
 ```json
 {
@@ -284,7 +284,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 }
 ```
 
-对于一次性计划，响应中包含 `execute_at` 而不是 `cron_expression`：
+对于一次性计划，响应包括 `execute_at` 而不是 `cron_expression`：
 
 ```json
 {
@@ -301,7 +301,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ## 列出计划
 
-检索你团队的所有计划。默认情况下，已删除的计划会被过滤掉。使用 `include_deleted` 查询参数来包含它们。
+检索团队的所有计划。默认情况下，已删除的计划会被过滤掉。使用 `include_deleted` 查询参数可以包含它们。
 
 <CodeGroup>
 
@@ -322,7 +322,7 @@ print(f"Total schedules: {result['count']}")
 for schedule in result['schedules']:
     print(json.dumps(schedule, indent=2))
 
-# 要包含已删除的计划：
+# 要包括已删除的计划：
 # response = requests.get(f"{API_URL}/schedules?include_deleted=true", headers=headers)
 ```
 
@@ -336,7 +336,7 @@ const result = await res.json()
 console.log(`Total schedules: ${result.count}`)
 result.schedules.forEach(s => console.log(s))
 
-// 要包含已删除的计划：
+// 要包括已删除的计划：
 // const res = await fetch(`${API_URL}/schedules?include_deleted=true`, { ... })
 ```
 
@@ -344,16 +344,16 @@ result.schedules.forEach(s => console.log(s))
 curl -s -X GET "https://api.olostep.com/v1/schedules" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# 要包含已删除的计划：
+# 要包括已删除的计划：
 # curl -s -X GET "https://api.olostep.com/v1/schedules?include_deleted=true" \
 #   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
 
 </CodeGroup>
 
-## 获取一个计划
+## 获取计划
 
-通过其 ID 检索单个计划。
+通过 ID 检索单个计划。
 
 <CodeGroup>
 
@@ -390,9 +390,9 @@ curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 </CodeGroup>
 
-## 删除一个计划
+## 删除计划
 
-通过其 ID 删除一个计划。这将停止任何未来的执行。
+通过 ID 删除计划。这将停止任何未来的执行。
 
 <CodeGroup>
 
@@ -434,7 +434,7 @@ curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ### Olostep 端点（简短形式）
 
-对于 POST 请求，你可以使用 Olostep 端点的简短形式。系统会自动为这些加上 `https://api.olostep.com/` 前缀：
+对于 POST 请求，你可以使用 Olostep 端点的简短形式。系统会自动为这些添加前缀 `https://api.olostep.com/`：
 
 - `v1/scrapes` - 安排网页抓取任务
 - `v1/batches` - 安排批处理作业
@@ -538,7 +538,7 @@ minute hour day month day-of-week year
 
 ## 自然语言示例
 
-你可以使用自然语言来描述计划。系统会自动将它们转换为 cron 表达式：
+你可以使用自然语言描述计划。系统会自动将其转换为 cron 表达式：
 
 - "every 3 minutes" → `0/3 * * * ? *`
 - "every day at 10am" → `0 10 * * ? *`
@@ -546,20 +546,20 @@ minute hour day month day-of-week year
 - "every hour" → `0 * * * ? *`
 - "every week on Monday" → `0 0 ? * MON *`
 
-## 重要说明
+## 重要提示
 
 - 一次性计划在执行后会自动删除
-- 定期计划会持续运行，直到手动删除
+- 重复计划会持续执行，直到手动删除
 - 时区必须是有效的 IANA 时区标识符（例如 "UTC", "America/New_York", "Europe/London"）
 - `execute_at` 日期时间必须是未来的时间
-- 自然语言转换可能需要重试；系统最多会尝试 3 次
+- 自然语言转换可能需要重试；系统会尝试最多 3 次
 - 使用自然语言文本（`text` 参数）时，时区默认为 "UTC"
-- 计划会使用提供的负载精确执行 API 调用 - 你可以传递任何需要的 JSON 结构
-- 对于 POST 请求，简短形式的 Olostep 端点（`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`）会自动加上 `https://api.olostep.com/` 前缀
+- 计划按指定的方式执行 API 调用并传递提供的负载 - 你可以传递任何需要的 JSON 结构
+- 对于 POST 请求，简短形式的 Olostep 端点（`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`）会自动添加前缀 `https://api.olostep.com/`
 - 对于其他端点，请提供完整的 URL
 - `payload` 可以包含任何数据结构 - 它会按原样发送到你的目标端点
 - 删除已删除的计划将返回 400 错误
 
 ## 价格
 
-计划本身是免费的。你只需为计划运行时执行的 API 调用付费。例如，如果你安排一次抓取，你将为每次执行支付 1 个信用（如果使用解析器或 LLM 提取则更多）。
+计划本身是免费的。你只需为计划运行时执行的 API 调用付费。例如，如果你安排一个抓取任务，每次执行将收取 1 个信用（如果使用解析器或 LLM 提取则更多）。

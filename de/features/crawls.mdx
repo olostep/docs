@@ -1,13 +1,13 @@
 ---
 sidebarTitle: "Crawl"
 title: "Crawl"
-description: "Crawle eine URL und erhalte den Inhalt von allen Unterseiten"
+description: "Crawle eine URL und erhalte den Inhalt aller Unterseiten"
 icon: "spider"
 ---
 
-Über den Olostep `/v1/crawls` Endpunkt kannst du eine Website crawlen und den Inhalt von allen Seiten erhalten.
+Über den Olostep `/v1/crawls` Endpunkt kannst du eine Website crawlen und den Inhalt aller Seiten abrufen.
 
-- Crawle eine Website und erhalte den Inhalt von allen Unterseiten (oder begrenze die Tiefe des Crawls)
+- Crawle eine Website und erhalte den Inhalt aller Unterseiten (oder begrenze die Tiefe des Crawls)
 - Verwende spezielle Muster, um bestimmte Seiten zu crawlen (z.B. `/blog/**`)
 - Übermittle eine `webhook_url`, um benachrichtigt zu werden, wenn der Crawl abgeschlossen ist
 - Suchanfrage, um nur bestimmte Seiten zu finden und nach Relevanz zu sortieren
@@ -27,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl ist standardmäßig auf macOS, Linux und Windows verfügbar
 ```
 
 ```javascript Node (API)
@@ -139,20 +139,20 @@ Poll den Crawl, um den Fortschritt zu verfolgen, bis `status` `completed` ist.
 <CodeGroup>
 
 ```python Python
-# Using the crawl object from the previous step
+# Verwende das Crawl-Objekt aus dem vorherigen Schritt
 info = crawl.info()
 print(info.status, info.pages_count)
 
-# Or wait until completed
+# Oder warte, bis es abgeschlossen ist
 crawl.wait_till_done(check_every_n_secs=5)
 ```
 
 ```js Node
-// Using the crawl object from the previous step
+// Verwende das Crawl-Objekt aus dem vorherigen Schritt
 const info = await crawl.info()
 console.log(info.status, info.pages_count)
 
-// Or wait until completed
+// Oder warte, bis es abgeschlossen ist
 await crawl.waitTillDone({ checkEveryNSecs: 5 })
 ```
 
@@ -190,18 +190,18 @@ Alternativ kannst du eine `webhook_url` übergeben, wenn du den Crawl startest, 
 
 ## Seiten auflisten (paginieren/streamen mit Cursor)
 
-Hole Seiten und iteriere mit `cursor` und `limit`. Funktioniert, während der Crawl `in_progress` oder `completed` ist.
+Rufe Seiten ab und iteriere mit `cursor` und `limit`. Funktioniert, während der Crawl `in_progress` oder `completed` ist.
 
 <CodeGroup>
 
 ```python Python
-# Iterate all pages (auto-waits for crawl completion, handles pagination)
+# Iteriere über alle Seiten (wartet automatisch auf Abschluss des Crawls, behandelt Paginierung)
 for page in crawl.pages():
     print(page.url, page.retrieve_id)
 ```
 
 ```js Node
-// Iterate all pages (auto-waits for crawl completion, handles pagination)
+// Iteriere über alle Seiten (wartet automatisch auf Abschluss des Crawls, behandelt Paginierung)
 for await (const page of crawl.pages()) {
   console.log(page.url, page.retrieve_id)
 }
@@ -249,7 +249,7 @@ while True:
 
 ## Suchanfrage (auf die Top N relevant beschränken)
 
-Verwende `search_query` beim Start und filtere optional die Auflistung mit `search_query`. Begrenze die Erkundung pro Seite mit `top_n`.
+Verwende `search_query` beim Start und filtere optional die Liste mit `search_query`. Begrenze die Erkundung pro Seite mit `top_n`.
 
 <CodeGroup>
 
@@ -327,14 +327,14 @@ Verwende die `retrieve_id` jeder Seite mit `/v1/retrieve`, um `html_content` und
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each crawled page
+# Inhalt für jede gecrawlte Seite abrufen
 for page in crawl.pages():
     content = page.retrieve(["markdown"])
     print(content.markdown_content)
 ```
 
 ```js Node
-// Retrieve content for each crawled page
+// Inhalt für jede gecrawlte Seite abrufen
 for await (const page of crawl.pages()) {
   const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
   console.log(content.markdown_content)
@@ -366,9 +366,9 @@ for page in get_pages(crawl['id'], limit=5)['pages']:
 ## Hinweise
 
 - Die Paginierung basiert auf einem Cursor; wiederhole Anfragen, bis `cursor` nicht mehr vorhanden ist.
-- Inhaltsfelder auf `/v1/crawls/{crawl_id}/pages` sind veraltet; verwende lieber `/v1/retrieve`.
+- Inhaltsfelder auf `/v1/crawls/{crawl_id}/pages` sind veraltet; bevorzuge `/v1/retrieve`.
 - Webhooks: Setze `webhook_url`, um eine POST-Benachrichtigung zu erhalten, wenn der Crawl abgeschlossen ist.
 
 ## Preisgestaltung
 
-Der Crawl kostet 1 Kredit pro gecrawlter Seite.
+Crawlen kostet 1 Credit pro gecrawlter Seite.

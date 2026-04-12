@@ -1,0 +1,198 @@
+---
+sidebarTitle: "Risposte"
+title: "API Risposte"
+icon: "globe-pointer"
+---
+
+Attraverso l'endpoint Olostep `/v1/answers` puoi cercare sul web utilizzando il linguaggio naturale e ottenere risposte e dati potenziati dall'AI nel formato JSON che desideri. Questo ti consente di basare i tuoi prodotti su dati e fonti reali, arricchire punti dati o fogli di calcolo.
+
+- Fai una domanda o fornisci un punto dati che desideri arricchire all'AI
+- Opzionale: specifica la struttura JSON che desideri ricevere
+
+L'API:
+- Cerca, pulisce, valida e restituisce i dati trovati sul Web
+- Restituisce le fonti utilizzate per generare la risposta
+- Gestisce l'incertezza con valori `NOT_FOUND` quando i dati non possono essere verificati
+
+Per i dettagli dell'API, consulta il [Riferimento API dell'Endpoint Risposte](/api-reference/answers/create).
+
+Per impostazione predefinita, utilizziamo un indice web generico e un validatore LLM economico.
+
+I clienti aziendali hanno accesso a indici web specifici per settore proprietari, dati privati esclusivi (inclusi numeri di telefono ed email) e modelli LLM personalizzati più adatti al loro caso d'uso. Contattaci per l'accesso: info@olostep.com
+
+
+
+## Casi d'uso
+L'endpoint delle risposte può essere utilizzato per:
+ - Basare applicazioni AI su dati e fatti del mondo reale
+ - Arricchire fogli di calcolo e punti dati per Reclutamento, Finanza, Consulenza e Vendite
+
+Ecco una demo di un foglio di calcolo potenziato dall'AI alimentato dall'endpoint Risposte:
+https://www.olostep.com/demos/spreadsheet-enrich
+
+
+
+## Installazione
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: il curl integrato va bene
+```
+
+</CodeGroup>
+
+## Utilizzo
+
+Fai una domanda e passa uno schema JSON per guidare l'output. Puoi anche non passare il parametro `json` e l'API restituirà un oggetto json con il testo della risposta all'interno del campo `result`.
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "Qual è l'ultimo libro di J.K. Rowling?",
+  "json": {"book_title": "", "author": "", "release_date": ""}
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/answers', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    task: 'Qual è l'ultimo libro di J.K. Rowling?',
+    json: { book_title: '', author: '', release_date: '' }
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/answers" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Qual è l'ultimo libro di J.K. Rowling?",
+    "json": {"book_title": "", "author": "", "release_date": ""}
+  }'
+```
+
+</CodeGroup>
+
+## Risposta
+
+Come altri endpoint Olostep, riceverai un oggetto `answer` in risposta. L'oggetto `answer` ha alcune proprietà come `id` e `result`.
+
+```json
+{
+  "id": "answer_9bi0sbj9xa",
+  "object": "answer",
+  "created": 1760327323,
+  "metadata": {},
+  "task": "Qual è l'ultimo libro di J.K. Rowling?",
+  "result": {
+    "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
+    "sources": [
+      "https://strikefans.com/the-books/",
+      "https://www.facebook.com/groups/496943608606523/posts/1136830134617864/",
+      "https://robert-galbraith.com/strike-books/",
+      "https://www.novelsuspects.com/series-list/robert-galbraith-cormoran-strike-series-in-order/",
+      "https://www.reddit.com/r/books/comments/1na833a/jk_rowlings_new_strike_novel_900_pages_of_romance/",
+      "https://www.harrypotter.com/writing-by-jk-rowling",
+      "https://stories.jkrowling.com/book-news/",
+      "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+      "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+      "https://www.jkrowling.com/news/"
+    ]
+  }
+}
+```
+
+La risposta richiesta, formattata secondo il parametro `json`, si trova in `response.result.json_content` e l'elenco delle fonti in `response.result.sources`. Puoi analizzare il JSON stringato per accedere ai dati strutturati.
+
+```json
+{
+  "book_title": "The Hallmarked Man",
+  "author": "J.K. Rowling",
+  "release_date": "2 settembre 2025"
+}
+```
+
+Esempio di fonti:
+
+```json
+[
+    "https://www.harrypotter.com/writing-by-jk-rowling",
+    "https://stories.jkrowling.com/book-news/",
+    "https://deadline.com/2024/09/jk-rowling-writing-futuristic-novel-1236093909/",
+    "https://www.reddit.com/r/FantasticBeasts/comments/1cl1shn/jk_rowling_may_2024_ive_got_six_more_books_in_my/",
+    "https://www.jkrowling.com/news/"
+]
+```
+
+Quando non passi il parametro `json`, l'API restituirà un oggetto json con il testo della risposta all'interno del campo `result`.
+
+```json
+{
+  "result": "L'ultimo libro di J.K. Rowling è The Hallmarked Man."
+}
+```
+
+### Parametro `json` flessibile
+
+- Fornisci un oggetto JSON con valori vuoti come schema, o una stringa che descrive i dati che desideri.
+- Se l'agente non è sicuro, restituisce `NOT_FOUND` per quel campo.
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/answers"
+payload = {
+  "task": "quanto ha raccolto Olostep?", 
+  "json": {
+    "amount": ""
+  }
+}
+headers = {
+  "Authorization": "Bearer <YOUR_API_KEY>",
+  "Content-Type": "application/json"
+}
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+Questo restituirebbe:
+
+```json
+{
+  "amount": "NOT_FOUND"
+}
+```
+
+## Prezzi
+
+Le risposte costano 20 crediti per richiesta.

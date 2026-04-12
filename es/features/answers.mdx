@@ -4,30 +4,30 @@ title: "API de Respuestas"
 icon: "globe-pointer"
 ---
 
-A través del endpoint de Olostep `/v1/answers` puedes buscar en la web con lenguaje natural y devolver respuestas y datos impulsados por IA en la forma JSON que desees. Esto te permite basar tus productos en datos y fuentes del mundo real, enriquecer puntos de datos o hojas de cálculo.
+A través del endpoint de Olostep `/v1/answers` puedes buscar en la web con lenguaje natural y devolver respuestas impulsadas por IA y datos en el formato JSON que desees. Esto te permite basar tus productos en datos y fuentes del mundo real, enriquecer puntos de datos o hojas de cálculo.
 
-- Haz una pregunta o proporciona a la IA un punto de datos que quieras enriquecer
+- Haz una pregunta o proporciona a la IA un punto de datos que deseas enriquecer
 - Opcional: especifica la estructura JSON que deseas recibir
 
-Esto hará que:
-- Busque, limpie, valide y devuelva los datos encontrados en la Web
-- Devuelva las fuentes utilizadas para generar la respuesta
-- Maneje la incertidumbre con valores `NOT_FOUND` cuando los datos no puedan ser verificados
+Esto hará:
+- Buscar, limpiar, validar y devolver los datos encontrados en la Web
+- Devolver las fuentes utilizadas para generar la respuesta
+- Manejar la incertidumbre con valores `NOT_FOUND` cuando los datos no pueden ser verificados
 
 Para detalles de la API, consulta la [Referencia de la API del Endpoint de Respuestas](/api-reference/answers/create).
 
-Por defecto, usamos un índice web genérico y un validador LLM rentable.
+Por defecto, utilizamos un índice web genérico y un validador LLM rentable.
 
 Los clientes empresariales tienen acceso a índices web específicos de la industria, datos privados exclusivos (incluyendo números de teléfono y correos electrónicos) y modelos LLM personalizados más adecuados para su caso de uso. Contáctanos para obtener acceso: info@olostep.com
 
 
 
 ## Casos de uso
-El endpoint de respuestas se puede usar para:
+El endpoint de respuestas se puede utilizar para:
  - Basar aplicaciones de IA en datos y hechos del mundo real
  - Enriquecer hojas de cálculo y puntos de datos para Reclutamiento, Finanzas, Consultoría y Ventas
 
-Aquí tienes una demostración de una hoja de cálculo impulsada por IA gracias al endpoint de Respuestas:
+Aquí tienes una demostración de una hoja de cálculo impulsada por IA utilizando el endpoint de Respuestas:
 https://www.olostep.com/demos/spreadsheet-enrich
 
 
@@ -45,7 +45,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl está disponible por defecto en macOS, Linux y Windows
 ```
 
 ```javascript Node (API)
@@ -70,7 +70,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="What is the latest book by J.K. Rowling?",
+    task="¿Cuál es el último libro de J.K. Rowling?",
     json_format={"book_title": "", "author": "", "release_date": ""},
 )
 
@@ -84,7 +84,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'What is the latest book by J.K. Rowling?',
+  task: '¿Cuál es el último libro de J.K. Rowling?',
   jsonFormat: { book_title: '', author: '', release_date: '' },
 })
 
@@ -97,7 +97,7 @@ curl -s -X POST "https://api.olostep.com/v1/answers" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "What is the latest book by J.K. Rowling?",
+    "task": "¿Cuál es el último libro de J.K. Rowling?",
     "json": {"book_title": "", "author": "", "release_date": ""}
   }'
 ```
@@ -107,7 +107,7 @@ const res = await fetch('https://api.olostep.com/v1/answers', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    task: 'What is the latest book by J.K. Rowling?',
+    task: '¿Cuál es el último libro de J.K. Rowling?',
     json: { book_title: '', author: '', release_date: '' }
   })
 })
@@ -119,7 +119,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "What is the latest book by J.K. Rowling?",
+  "task": "¿Cuál es el último libro de J.K. Rowling?",
   "json": {"book_title": "", "author": "", "release_date": ""}
 }
 headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
@@ -142,7 +142,7 @@ Como otros endpoints de Olostep, recibirás un objeto `answer` en respuesta. El 
   "metadata": {},
   "task": "¿Cuál es el último libro de J.K. Rowling?",
   "result": {
-    "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (como Robert Galbraith)\",\"release_date\":\"2 de septiembre de 2025\"}",
+    "json_content": "{\"book_title\":\"The Hallmarked Man\",\"author\":\"J.K. Rowling (as Robert Galbraith)\",\"release_date\":\"2 September 2025\"}",
     "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/answer_9bi0sbj9xa.json",
     "sources": [
       "https://strikefans.com/the-books/",
@@ -160,7 +160,7 @@ Como otros endpoints de Olostep, recibirás un objeto `answer` en respuesta. El 
 }
 ```
 
-Tu respuesta solicitada, formateada de acuerdo con el parámetro `json`, está en `response.result.json_content` y la lista de fuentes en `response.result.sources`. Puedes analizar el JSON en forma de cadena para acceder a los datos estructurados.
+La respuesta solicitada, formateada según el parámetro `json`, está en `response.result.json_content` y la lista de fuentes en `response.result.sources`. Puedes analizar el JSON en forma de cadena para acceder a los datos estructurados.
 
 ```json
 {
@@ -192,7 +192,7 @@ Cuando no pasas el parámetro `json`, la API devolverá un objeto json con el te
 
 ### Parámetro `json` flexible
 
-- Proporciona un objeto JSON con valores vacíos como esquema, o una cadena que describa los datos que deseas.
+- Proporciona un objeto JSON con valores vacíos como esquema, o una cadena describiendo los datos que deseas.
 - Si el agente no está seguro, devuelve `NOT_FOUND` para ese campo.
 
 <CodeGroup>
@@ -203,7 +203,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="how much did Olostep raise?",
+    task="¿Cuánto recaudó Olostep?",
     json_format={"amount": ""},
 )
 
@@ -216,7 +216,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'how much did Olostep raise?',
+  task: '¿Cuánto recaudó Olostep?',
   jsonFormat: { amount: '' },
 })
 
@@ -228,7 +228,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "how much did Olostep raise?", 
+  "task": "¿Cuánto recaudó Olostep?", 
   "json": {
     "amount": ""
   }

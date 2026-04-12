@@ -1,970 +1,270 @@
 ---
-sidebarTitle: "n8n"
-icon: "code"
-title: "Intégration n8n"
-description: "Automatisez la recherche web, le scraping et le crawling avec la plateforme d’automatisation de flux de travail auto-hébergée de n8n"
+sidebarTitle: "Olostep + n8n"
+title: "Olostep + n8n"
+description: "Ajoutez le scraping web, la recherche, les tâches par lots, les crawls et les plans de site à n’importe quel workflow n8n, sans code requis."
 ---
 
-L'intégration Olostep n8n apporte des capacités puissantes de recherche web, de scraping et de crawling aux flux de travail n8n. Construisez des flux de travail automatisés qui recherchent, extraient et structurent des données web à partir de n'importe quel site sans écrire de code.
+Le [nœud Olostep Web Scraper](https://n8n.io/integrations/olostep-web-scraper/) vérifié vous offre six opérations dans le constructeur visuel de n8n : scraper une URL, rechercher sur le web, obtenir des réponses IA, scraper par lots des milliers d'URLs, crawler un site ou cartographier tous ses liens.
 
-[Commencez avec Olostep sur n8n →](https://www.npmjs.com/package/n8n-nodes-olostep)
+[Voir sur n8n →](https://n8n.io/integrations/olostep-web-scraper/)
 
-## Fonctionnalités
+## Avant de commencer
 
-L'intégration offre 6 opérations puissantes pour l'extraction automatisée de données web :
+- **Un compte Olostep avec une clé API :** [obtenez-en une gratuitement](https://olostep.com/dashboard), pas de carte de crédit requise. Vos 500 premiers crédits sont inclus.
+- **n8n en cours d'exécution :** soit [n8n Cloud](https://n8n.io/cloud/) soit une instance auto-hébergée. Les nœuds communautaires doivent être activés (ils le sont par défaut sur la plupart des configurations).
+- **Aucune programmation requise :** tout dans ce guide se fait via l'éditeur visuel de n8n.
+
+---
+
+## Configuration
+
+<Steps>
+  <Step title="Recherchez le nœud Olostep">
+    Ouvrez n'importe quel workflow, cliquez sur **+**, et recherchez **Olostep**. Sélectionnez **Olostep Web Scraper** dans les résultats.
+
+    ![Recherchez Olostep dans le sélecteur de nœuds n8n](/images/integrations/n8n/step-1.png)
+  </Step>
+
+  <Step title="Installez le nœud">
+    Cliquez sur le résultat pour ouvrir le panneau de détails du nœud, puis cliquez sur **Installer le nœud**. n8n installera `n8n-nodes-olostep` et vous demandera de redémarrer. Faites-le avant de continuer.
+
+    ![Détails du nœud Olostep Web Scraper avec le bouton Installer le nœud](/images/integrations/n8n/step-2.png)
+
+    <Note>
+      Si **Nœuds Communautaires** est désactivé pour votre espace de travail, un administrateur doit l'activer d'abord. Consultez le [guide des nœuds communautaires n8n](https://docs.n8n.io/integrations/community-nodes/installation/).
+    </Note>
+  </Step>
+
+  <Step title="Ajoutez votre clé API">
+  Ouvrez le nœud Olostep dans votre workflow, cliquez sur **Configurer l'identifiant** (dans l'onglet Paramètres), ajoutez votre clé API, et cliquez sur **Enregistrer**.
+
+    ![Formulaire d'identifiants Olostep dans n8n avec le champ Clé API](/images/integrations/n8n/step-3.png)
+
+    Obtenez votre clé depuis le [tableau de bord Olostep →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="Connectez-le et exécutez">
+    Connectez le nœud Olostep à un déclencheur et à toutes les étapes en aval, puis exécutez votre workflow.
+
+    ![Canvas de workflow n8n avec le déclencheur de planification connecté au nœud Olostep](/images/integrations/n8n/step-4.png)
+  </Step>
+</Steps>
+
+---
+
+## Actions
 
 <CardGroup cols={2}>
   <Card title="Scraper un site web" icon="file-lines">
-    Extraire le contenu de n'importe quelle URL unique dans plusieurs formats (Markdown, HTML, JSON, texte)
+    Extraire le contenu de n'importe quelle URL en tant que Markdown, HTML, JSON ou texte brut. Gère les pages rendues en JS avec des temps d'attente optionnels et un ciblage par pays.
   </Card>
-  
-  <Card title="Recherche" icon="search">
-    Recherchez sur le Web et obtenez des résultats structurés
+
+  <Card title="Rechercher" icon="magnifying-glass">
+    Effectuer une recherche web et obtenir des résultats structurés (titres, URLs et extraits) en JSON.
   </Card>
-  
-  <Card title="Réponses (IA)" icon="globe-pointer">
-    Recherchez sur le Web avec l'IA et obtenez des réponses structurées avec sources et citations
+
+  <Card title="Réponses (IA)" icon="sparkles">
+    Poser une question en langage naturel et obtenir une réponse avec des sources citées. Utile avant les nœuds LLM lorsque vous avez besoin de réponses fondées.
   </Card>
-  
-  <Card title="Scraper des URLs en lot" icon="layer-group">
-    Scraper jusqu'à 10k URLs en même temps. Parfait pour l'extraction de données à grande échelle
+
+  <Card title="Scraper des URLs par lots" icon="layer-group">
+    Soumettre jusqu'à 10 000 URLs en un seul travail, traitées en parallèle. Retourne un `batch_id`; récupérez les résultats de manière asynchrone.
   </Card>
-  
-  <Card title="Créer un Crawl" icon="spider-web">
-    Obtenez le contenu des sous-pages d'une URL. Découvrez et scrapez de manière autonome des sites entiers
+
+  <Card title="Créer un crawl" icon="spider-web">
+    Partir d'une URL, suivre les liens et scraper toutes les sous-pages. Idéal pour les sites de documentation, les blogs ou l'ingestion complète de sites. Retourne un `crawl_id`.
   </Card>
-  
-  <Card title="Créer une Carte" icon="map">
-    Obtenez toutes les URLs d'un site web pour l'analyse de la structure du site et la découverte de contenu
+
+  <Card title="Créer une carte" icon="map">
+    Obtenez chaque URL sur un site sans scraper le contenu. Utilisez-le pour la découverte avant un travail par lots. Retourne un `map_id`.
   </Card>
 </CardGroup>
 
-## Installation
+<Note>
+  **Batch, Crawl, et Map sont asynchrones.** Stockez l'ID retourné et utilisez un nœud d'attente ou un second workflow pour récupérer les résultats une fois le traitement terminé.
+</Note>
 
-### 1. Installer le Node
+---
 
-Installez le package de node Olostep via npm :
+## Exemple de workflow : enrichissement de prospects depuis Google Sheets
 
-```bash
-npm install n8n-nodes-olostep
-```
+**Ce qu'il fait :** Lorsque vous collez une URL d'entreprise dans une feuille Google, ce workflow scrape automatiquement le site web de l'entreprise, extrait les informations clés avec un nœud IA, et écrit les résultats dans la même ligne, transformant une feuille de calcul vide en une base de données de prospects remplie.
 
-Ensuite, redémarrez n8n pour charger le nouveau node.
+**Nœuds utilisés :** Déclencheur Google Sheets → Olostep Scrape Website → OpenAI → Code → Mise à jour Google Sheets
 
-Alternativement, suivez le [guide d'installation des nodes communautaires de n8n](https://docs.n8n.io/integrations/community-nodes/installation/) pour des instructions détaillées.
+![Workflow d'enrichissement de prospects dans n8n : déclencheur Google Sheets connecté aux nœuds Olostep, OpenAI, Code et mise à jour Google Sheets](/images/integrations/n8n/workflow-example.png)
 
-### 2. Connectez votre compte
+---
 
-Lorsque vous utilisez pour la première fois le node Olostep dans un flux de travail, vous devrez configurer les identifiants :
+### Étape 1 : Configurez votre feuille Google
 
-1. Ajoutez le node "Olostep Scrape" à votre flux de travail
-2. Cliquez sur le node pour ouvrir ses paramètres
-3. Cliquez sur "Créer un nouvel identifiant" ou sélectionnez un identifiant existant
-4. Entrez votre clé API Olostep
-5. Cliquez sur "Enregistrer" pour stocker l'identifiant
+Créez une feuille avec ces colonnes : `Company URL`, `Industry`, `Description`, `Company Size`, `Enriched`. Le workflow lit depuis `Company URL` et remplit le reste.
 
-Obtenez votre clé API depuis le [Tableau de bord Olostep](https://olostep.com/dashboard).
+### Étape 2 : Ajoutez un déclencheur Google Sheets
 
-## Actions disponibles
+Dans n8n, ajoutez un nœud de déclencheur **Google Sheets**. Réglez l'événement sur **Row Added**, pointez-le vers votre feuille, et configurez-le pour surveiller la colonne `Company URL`. Maintenant, chaque fois que vous collez une nouvelle URL dans la feuille, ce workflow se déclenche.
 
-### Scraper un site web
+### Étape 3 : Ajoutez Olostep Scrape Website
 
-Extraire le contenu d'une URL unique. Prend en charge plusieurs formats et le rendu JavaScript.
+Connectez un nœud **Olostep Web Scraper** après le déclencheur. Configurez :
+- **Action :** Scraper un site web
+- **URL :** `{{ $json["Company URL"] }}` (récupère l'URL de la nouvelle ligne)
+- **Format de sortie :** Markdown
 
-**Cas d'utilisation :**
-- Surveiller les changements de pages spécifiques
-- Extraire des informations produit de sites e-commerce
-- Rassembler des données d'articles de presse ou de blogs
-- Extraire du contenu pour l'agrégation de contenu
+Markdown fonctionne mieux ici car il élimine la navigation, les publicités et les modèles. Le nœud IA à l'étape suivante obtient un texte propre sur l'entreprise au lieu de bruit HTML brut.
 
-**Configuration :**
+### Étape 4 : Ajoutez un nœud OpenAI
 
-<ParamField path="URL à scraper" type="string" required>
-  URL du site web à scraper (doit inclure http:// ou https://)
-</ParamField>
-
-<ParamField path="Format de sortie" type="dropdown" default="Markdown">
-  Choisissez le format : Markdown, HTML, JSON ou Texte brut
-</ParamField>
-
-<ParamField path="Code pays" type="string">
-  Code pays pour le contenu spécifique à un lieu (ex : "US", "GB", "CA")
-</ParamField>
-
-<ParamField path="Attendre avant de scraper" type="integer">
-  Temps d'attente en millisecondes pour le rendu JavaScript (0-10000)
-</ParamField>
-
-<ParamField path="Parseur" type="string">
-  ID de parseur optionnel pour une extraction spécialisée (ex : "@olostep/amazon-product")
-</ParamField>
-
-**Champs de sortie :**
-- ID de scrape
-- URL scrappée
-- Contenu Markdown
-- Contenu HTML
-- Contenu JSON
-- Contenu texte
-- Statut
-- Horodatage
-- URL de capture d'écran (si disponible)
-- Métadonnées de la page
-
-**Exemples de flux de travail :**
-
-<AccordionGroup>
-  <Accordion title="Surveiller les prix des concurrents">
-    **Déclencheur :** Planification (Tous les jours à 9h)
-    
-    **Action :** Olostep - Scraper un site web
-    - URL : Page produit du concurrent
-    - Format : JSON
-    - Parseur : @olostep/amazon-product
-    
-    **Action :** Google Sheets - Ajouter une ligne
-    - Ajouter les données de prix au tableau de suivi
-    
-    **Action :** Email - Envoyer un email (si le prix baisse)
-    - Alerter l'équipe des changements de prix
-  </Accordion>
-
-  <Accordion title="Extraire et enregistrer des articles de blog">
-    **Déclencheur :** Flux RSS - Nouvel élément
-    
-    **Action :** Olostep - Scraper un site web
-    - URL : \{\{$json.link\}\}
-    - Format : Markdown
-    
-    **Action :** Notion - Créer une page
-    - Enregistrer le contenu de l'article dans la base de données Notion
-  </Accordion>
-
-  <Accordion title="Enrichissement de prospects">
-    **Déclencheur :** Google Sheets - Nouvelle ligne
-    
-    **Action :** Olostep - Scraper un site web
-    - URL : Site web de l'entreprise depuis la feuille
-    - Format : Markdown
-    
-    **Action :** OpenAI - Compléter le texte
-    - Extraire des informations sur l'entreprise à l'aide de l'IA
-    
-    **Action :** Google Sheets - Mettre à jour la ligne
-    - Ajouter les données enrichies à la feuille
-  </Accordion>
-</AccordionGroup>
-
-### Recherche
-
-Recherchez sur le Web pour une requête donnée et obtenez des résultats structurés (résultats de recherche basés sur un parseur, non IA).
-
-**Cas d'utilisation :**
-- Flux de travail de recherche automatisée
-- Découverte et enrichissement de prospects
-- Analyse concurrentielle
-- Recherche de contenu
-
-**Configuration :**
-
-<ParamField path="Requête" type="string" required>
-  Requête de recherche
-</ParamField>
-
-**Sortie :** Renvoie des résultats de recherche structurés sous forme de JSON avec titres, URLs, extraits et métadonnées.
-
-**Exemples de flux de travail :**
-
-<AccordionGroup>
-  <Accordion title="Recherche automatisée">
-    **Déclencheur :** Planification (Tous les jours à 8h)
-    
-    **Action :** Olostep - Recherche
-    - Requête : "derniers développements en IA"
-    
-    **Action :** Code - Traiter les résultats
-    - Extraire et formater les informations clés
-    
-    **Action :** Notion - Créer des pages
-    - Stocker les résultats de recherche
-  </Accordion>
-
-  <Accordion title="Découverte de prospects">
-    **Déclencheur :** Manuel (Bouton)
-    
-    **Action :** Olostep - Recherche
-    - Requête : "\{\{$json.searchTerm\}\}"
-    
-    **Action :** Airtable - Créer des enregistrements
-    - Stocker les prospects avec les informations de contact
-  </Accordion>
-</AccordionGroup>
-
-### Scraper des URLs en lot
-
-Scraper jusqu'à 10k URLs en même temps. Parfait pour l'extraction de données à grande échelle.
-
-**Cas d'utilisation :**
-- Scraper des catalogues de produits entiers
-- Extraire des données de plusieurs résultats de recherche
-- Traiter des listes d'URLs à partir de feuilles de calcul
-- Extraction de contenu en masse
-
-**Configuration :**
-
-<ParamField path="URLs à scraper" type="text" required>
-  Tableau JSON d'objets avec les champs url et custom_id. 
-  
-  Exemple : `[{"url":"https://example.com","custom_id":"site1"}]`
-</ParamField>
-
-<ParamField path="Format de sortie" type="dropdown" default="Markdown">
-  Choisissez le format pour toutes les URLs : Markdown, HTML, JSON ou Texte brut
-</ParamField>
-
-<ParamField path="Code pays" type="string">
-  Code pays pour le scraping spécifique à un lieu
-</ParamField>
-
-<ParamField path="Attendre avant de scraper" type="integer">
-  Temps d'attente en millisecondes pour le rendu JavaScript
-</ParamField>
-
-<ParamField path="Parseur" type="string">
-  ID de parseur optionnel pour une extraction spécialisée
-</ParamField>
-
-**Champs de sortie :**
-- ID de lot (utilisez ceci pour récupérer les résultats plus tard)
-- Statut
-- Total des URLs
-- Créé à
-- Format demandé
-- Code pays
-- Parseur utilisé
-
-**Exemples de flux de travail :**
-
-<AccordionGroup>
-  <Accordion title="Scraper un catalogue de produits">
-    **Déclencheur :** Webhook - Recevoir une requête POST
-    
-    **Action :** Code - Formater les URLs
-    - Convertir CSV/liste en format tableau JSON
-    
-    **Action :** Olostep - Scraper des URLs en lot
-    - URLs : \{\{$json.urlArray\}\}
-    - Format : JSON
-    - Parseur : @olostep/amazon-product
-    
-    **Action :** Webhook - POST
-    - Envoyer l'ID de lot à votre système pour récupération
-  </Accordion>
-
-  <Accordion title="Surveillance quotidienne de contenu">
-    **Déclencheur :** Planification - Tous les jours à 6h
-    
-    **Action :** Google Sheets - Lire les lignes
-    - Récupérer les URLs à surveiller
-    
-    **Action :** Code - Formater les URLs
-    - Convertir en format tableau de lot
-    
-    **Action :** Olostep - Scraper des URLs en lot
-    - Traiter toutes les URLs en une fois
-    
-    **Action :** Slack - Envoyer un message
-    - Notifier l'équipe que le scraping est terminé
-  </Accordion>
-</AccordionGroup>
-
-### Créer un Crawl
-
-Obtenez le contenu des sous-pages d'une URL. Découvrez et scrapez de manière autonome des sites entiers en suivant les liens. Parfait pour les sites de documentation, les blogs et les dépôts de contenu.
-
-**Cas d'utilisation :**
-- Crawler et archiver des sites de documentation entiers
-- Extraire tous les articles de blog d'un site web
-- Construire des bases de connaissances à partir de contenu web
-- Surveiller les changements de structure de site
-
-**Configuration :**
-
-<ParamField path="URL de départ" type="string" required>
-  URL de départ pour le crawl (doit inclure http:// ou https://)
-</ParamField>
-
-<ParamField path="Nombre maximum de pages" type="integer" default="10">
-  Nombre maximum de pages à crawler
-</ParamField>
-
-<ParamField path="Suivre les liens" type="boolean" default="true">
-  Indique si les liens trouvés sur les pages doivent être suivis
-</ParamField>
-
-<ParamField path="Format de sortie" type="dropdown" default="Markdown">
-  Format pour le contenu scrappé
-</ParamField>
-
-<ParamField path="Code pays" type="string">
-  Code pays optionnel pour le crawling spécifique à un lieu
-</ParamField>
-
-<ParamField path="Parseur" type="string">
-  ID de parseur optionnel pour une extraction de contenu spécialisée
-</ParamField>
-
-**Champs de sortie :**
-- ID de crawl (utilisez ceci pour récupérer les résultats plus tard)
-- Type d'objet
-- Statut
-- URL de départ
-- Nombre maximum de pages
-- Suivre les liens
-- Horodatage de création
-- Formats
-
-**Exemples de flux de travail :**
-
-<AccordionGroup>
-  <Accordion title="Archiver un site de documentation">
-    **Déclencheur :** Planification - Mensuel le 1er à minuit
-    
-    **Action :** Olostep - Créer un Crawl
-    - URL de départ : https://docs.example.com
-    - Pages max : 500
-    - Suivre les liens : true
-    - Format : Markdown
-    
-    **Action :** Webhook - POST
-    - Envoyer l'ID de crawl à votre système d'archivage
-    
-    **Action :** Slack - Envoyer un message
-    - Notifier l'équipe que le crawl est en cours
-  </Accordion>
-
-  <Accordion title="Analyse de contenu concurrent">
-    **Déclencheur :** Planification - Hebdomadaire le lundi à 9h
-    
-    **Action :** Olostep - Créer un Crawl
-    - URL de départ : URL du blog du concurrent
-    - Pages max : 100
-    - Format : Markdown
-    
-    **Action :** Attendre - Pendant 10 minutes
-    - Attendre que le crawl soit terminé
-    
-    **Action :** Airtable - Créer des enregistrements
-    - Stocker les données de crawl pour analyse
-  </Accordion>
-</AccordionGroup>
-
-### Créer une Carte
-
-Obtenez toutes les URLs d'un site web. Extraire toutes les URLs d'un site pour la découverte de contenu et l'analyse de la structure du site.
-
-**Cas d'utilisation :**
-- Construire des sitemaps et des diagrammes de structure de site
-- Découvrir toutes les pages avant le scraping en lot
-- Trouver des pages cassées ou manquantes
-- Audits et analyses SEO
-
-**Configuration :**
-
-<ParamField path="URL du site web" type="string" required>
-  URL du site web pour extraire les liens (doit inclure http:// ou https://)
-</ParamField>
-
-<ParamField path="Requête de recherche" type="string">
-  Requête de recherche optionnelle pour filtrer les URLs (ex : "blog")
-</ParamField>
-
-<ParamField path="Top N URLs" type="integer">
-  Limiter le nombre d'URLs retournées
-</ParamField>
-
-<ParamField path="Inclure les motifs d'URL" type="string">
-  Motifs globaux pour inclure des chemins spécifiques (ex : "/blog/**")
-</ParamField>
-
-<ParamField path="Exclure les motifs d'URL" type="string">
-  Motifs globaux pour exclure des chemins spécifiques (ex : "/admin/**")
-</ParamField>
-
-**Champs de sortie :**
-- ID de carte
-- Type d'objet
-- URL du site web
-- Total des URLs trouvées
-- URLs (tableau JSON)
-- Requête de recherche
-- Limite Top N
-
-**Exemples de flux de travail :**
-
-<AccordionGroup>
-  <Accordion title="Découvrir et scraper">
-    **Déclencheur :** Manuel (Bouton)
-    
-    **Action :** Olostep - Créer une Carte
-    - URL : https://example.com
-    - Inclure les motifs : /products/**
-    - Top N : 500
-    
-    **Action :** Code - Extraire les URLs
-    - Analyser les URLs à partir du résultat de la carte
-    
-    **Action :** Olostep - Scraper des URLs en lot
-    - URLs : \{\{$json.urls\}\}
-    - Format : JSON
-    
-    **Action :** Google Sheets - Ajouter des lignes
-    - Ajouter toutes les données produit à la feuille de calcul
-  </Accordion>
-
-  <Accordion title="Audit SEO du site">
-    **Déclencheur :** Planification - Mensuel
-    
-    **Action :** Olostep - Créer une Carte
-    - URL : Votre site web
-    - Top N : 1000
-    
-    **Action :** Airtable - Créer des enregistrements
-    - Stocker toutes les URLs pour le suivi
-    
-    **Action :** Slack - Envoyer un message
-    - Rapporter le total des pages trouvées
-  </Accordion>
-</AccordionGroup>
-
-## Exemples de flux de travail populaires
-
-### Surveillance des prix e-commerce
-
-Surveillez les prix des concurrents et recevez des alertes instantanées :
+Connectez un nœud **OpenAI**. Réglez le modèle sur `gpt-4o-mini` (rapide et économique pour les tâches d'extraction) et utilisez cette invite :
 
 ```
-Déclencheur : Planification (Toutes les heures)
-↓
-Action : Olostep - Scraper un site web
-  - URL : Page produit du concurrent
-  - Format : JSON
-  - Parseur : @olostep/amazon-product
-↓
-Action : IF - Vérifier si le prix a changé
-↓
-Action : Slack - Envoyer un message
-  - Alerte : "Le prix a changé à $\{\{price\}\}"
+Vous êtes un chercheur commercial. Basé sur le contenu du site web de l'entreprise ci-dessous, extrayez :
+1. Industrie (une phrase, par ex. "B2B SaaS", "E-commerce", "Santé")
+2. Description de l'entreprise en une phrase (max 20 mots)
+3. Taille estimée de l'entreprise (Startup / PME / Mid-market / Entreprise)
+
+Retournez uniquement un objet JSON avec les clés : industry, description, company_size.
+
+Contenu du site web :
+{{ $json.markdownContent }}
 ```
 
-### Agrégation de contenu
+Le champ `markdownContent` est ce que Olostep retourne du scrape, sous forme de texte brut propre.
 
-Agrégatez du contenu à partir de plusieurs sources :
+### Étape 5 : Analysez la réponse IA et écrivez-la
 
-```
-Déclencheur : Google Sheets - Nouvelle ligne
-↓
-Action : Olostep - Scraper un site web
-  - URL : \{\{$json.url\}\}
-  - Format : Markdown
-↓
-Action : OpenAI - Résumer
-  - Résumer le contenu
-↓
-Action : Airtable - Créer un enregistrement
-  - Stocker l'article avec le résumé
+Ajoutez un nœud **Code** pour analyser le JSON d'OpenAI :
+
+```js
+const parsed = JSON.parse($input.first().json.message.content);
+return [{ json: parsed }];
 ```
 
-### Pipeline d'enrichissement de prospects
+Puis connectez un nœud **Google Sheets** réglé sur **Update Row**. Mappez les colonnes :
+- `Industry` → `{{ $json.industry }}`
+- `Description` → `{{ $json.description }}`
+- `Company Size` → `{{ $json.company_size }}`
+- `Enriched` → `Yes`
 
-Enrichissez les données de prospects avec des informations web :
+### Ce que vous obtenez
 
-```
-Déclencheur : HubSpot - Nouveau contact
-↓
-Action : Olostep - Scraper un site web
-  - URL : \{\{$json.companyWebsite\}\}
-  - Format : Markdown
-↓
-Action : OpenAI - Extraire les données
-  - Extraire : taille de l'entreprise, secteur, produits
-↓
-Action : HubSpot - Mettre à jour le contact
-  - Ajouter les données enrichies au contact
-```
+Collez une URL comme `https://notion.so` dans votre feuille, et en ~10 secondes la ligne se remplit :
 
-### Automatisation de la recherche
+| Company URL | Industry | Description | Company Size | Enriched |
+|---|---|---|---|---|
+| https://notion.so | Productivity SaaS | Espace de travail tout-en-un pour notes, docs et bases de données | Mid-market | Yes |
 
-Automatisez la recherche à partir de plusieurs sources :
+À partir de là, vous pouvez étendre ce workflow : ajoutez une notification Slack lorsque l'enrichissement est terminé, filtrez par industrie avant d'écrire, ou remplacez Google Sheets par HubSpot pour mettre à jour directement les contacts.
 
-```
-Déclencheur : Airtable - Nouvel enregistrement
-↓
-Action : Olostep - Créer une Carte
-  - URL : Site cible de recherche
-  - Inclure : /research/**
-↓
-Action : Code - Analyser les URLs
-↓
-Action : Olostep - Scraper des URLs en lot
-  - URLs : \{\{$json.discoveredUrls\}\}
-  - Format : Markdown
-↓
-Action : Notion - Créer des pages
-  - Créer une base de données de recherche
-```
+---
 
-### Surveillance des réseaux sociaux
+## Modèles
 
-Suivez les mentions et le contenu :
-
-```
-Déclencheur : Planification (Toutes les 6 heures)
-↓
-Action : Olostep - Scraper un site web
-  - URL : Page de recherche du site d'actualités
-  - Format : HTML
-↓
-Action : Code - Extraire les mentions
-  - Trouver les mentions de la marque
-↓
-Action : Google Sheets - Ajouter une ligne
-  - Enregistrer les mentions avec horodatage
-```
-
-## Flux de travail multi-étapes
-
-### Pipeline complet de scraping de produits
-
-Construisez un pipeline complet de données produit :
-
-<Steps>
-  <Step title="Découvrir les URLs de produits">
-    Utilisez **Créer une Carte** pour trouver toutes les pages produit sur le site cible
-    - Inclure les motifs : `/products/**`
-    - Exclure les motifs : `/cart/**`, `/checkout/**`
-  </Step>
-  
-  <Step title="Traiter les produits en lot">
-    Utilisez **Scraper des URLs en lot** pour extraire toutes les données produit
-    - Format : JSON
-    - Parseur : Parseur spécifique au produit si disponible
-  </Step>
-  
-  <Step title="Stocker dans la base de données">
-    Envoyez l'ID de lot à votre système ou attendez et récupérez les résultats
-    - Utilisez Airtable, Google Sheets ou votre base de données
-  </Step>
-  
-  <Step title="Surveiller les changements">
-    Planifiez des scrapes quotidiens pour suivre les changements de prix/disponibilité
-    - Comparez avec les données existantes
-    - Alertez sur les changements significatifs
-  </Step>
-</Steps>
-
-### Stratégie de contenu SEO
-
-Analysez les concurrents et planifiez le contenu :
-
-<Steps>
-  <Step title="Cartographier les sites concurrents">
-    Utilisez **Créer une Carte** sur les sites concurrents
-    - Extraire tous les articles de blog et pages de contenu
-  </Step>
-  
-  <Step title="Scraper le contenu">
-    Utilisez **Scraper des URLs en lot** pour obtenir le contenu complet
-    - Format : Markdown pour une analyse facile
-  </Step>
-  
-  <Step title="Analyse par IA">
-    Utilisez OpenAI pour analyser les sujets et mots-clés
-    - Identifier les lacunes de contenu
-    - Trouver les sujets tendance
-  </Step>
-  
-  <Step title="Créer un calendrier de contenu">
-    Ajoutez les insights à Notion ou Airtable
-    - Planifiez votre stratégie de contenu
-  </Step>
-</Steps>
-
-## Parseurs spécialisés
-
-Olostep fournit des parseurs pré-construits pour les sites populaires. Utilisez-les avec le champ `Parseur` :
+Workflows n8n prêts à importer construits avec Olostep :
 
 <CardGroup cols={2}>
-  <Card title="Produit Amazon" icon="amazon">
-    `@olostep/amazon-product`
-    
-    Extraire : titre, prix, note, avis, images, variantes
-  </Card>
-  
-  <Card title="Recherche Google" icon="google">
-    `@olostep/google-search`
-    
-    Extraire : résultats de recherche, titres, extraits, URLs
-  </Card>
-  
-  <Card title="Google Maps" icon="map">
-    `@olostep/google-maps`
-    
-    Extraire : infos entreprise, avis, notes, emplacement
+  <Card title="Crawl docs → base de connaissances IA" icon="book" href="https://www.n8n.io/workflows/13436-crawl-documentation-sites-and-build-an-ai-knowledge-base-with-olostep/">
+    Crawler des sites de documentation avec Olostep et structurer la sortie en une base de connaissances prête pour l'IA.
   </Card>
 
-  <Card title="Extraire les emails" icon="envelope">
-    `@olostep/extract-emails`
-    
-    Extraire : emails des pages, listes de contact, et pieds de page
+  <Card title="Leads Google Maps → enrichissement décideur" icon="map-location-dot" href="https://n8n.io/workflows/11086-scrape-business-leads-from-google-maps-and-extract-decision-maker-info-with-olostep/">
+    Scraper des leads commerciaux depuis Google Maps et les enrichir avec des détails sur les décideurs.
   </Card>
 
-  <Card title="Extraire les réseaux sociaux" icon="users">
-    `@olostep/extract-socials`
-    
-    Extraire : liens de profils sociaux (X/Twitter, GitHub, etc.)
+  <Card title="Exploiter les plaintes utilisateurs → rapport d'analyse" icon="chart-line" href="https://www.n8n.io/workflows/13435-mine-user-complaints-and-generate-insight-reports-with-olostep-gemini-and-google-docs/">
+    Analyser les plaintes avec Olostep + Gemini et générer des rapports d'analyse structurés dans Google Docs.
   </Card>
 
-  <Card title="Extraire les calendriers" icon="calendar">
-    `@olostep/extract-calendars`
-    
-    Extraire : liens de calendriers (Google Calendar, ICS) des pages
+  <Card title="Extraction de produits Amazon → Google Sheets" icon="table" href="https://n8n.io/workflows/11158-extract-amazon-product-data-to-sheets-with-olostep-api/">
+    Extraire les URLs et métadonnées de produits Amazon avec Olostep, puis synchroniser les résultats avec Sheets.
   </Card>
 </CardGroup>
 
-### Utilisation des parseurs
+[Parcourez tous les workflows Olostep sur n8n.io →](https://n8n.io/workflows/?q=olostep)
 
-Ajoutez simplement l'ID du parseur au champ Parseur. Deux exemples :
+---
 
-```
-Action : Olostep - Scraper un site web
-  - URL : https://www.amazon.com/dp/PRODUCT_ID
-  - Format : JSON
-  - Parseur : @olostep/amazon-product
-```
+## Parseurs
 
-```
-Action : Olostep - Scraper un site web
-  - URL : https://example.com/contact
-  - Format : JSON
-  - Parseur : @olostep/extract-emails
-```
+Ajoutez un ID de parseur au champ **Parser** sur toute action Scrape ou Batch pour obtenir des données structurées au lieu de contenu brut :
 
-Le parseur extrait automatiquement les données structurées spécifiques à la tâche.
+| Parser | Extraits |
+|--------|----------|
+| `@olostep/amazon-product` | Titre, prix, note, avis, images, variantes |
+| `@olostep/google-search` | Titres des résultats, URLs, extraits |
+| `@olostep/google-maps` | Nom de l'entreprise, adresse, note, avis |
+| `@olostep/extract-emails` | Adresses email de n'importe quelle page |
+| `@olostep/extract-socials` | Liens de profils sociaux (X, GitHub, LinkedIn, etc.) |
+| `@olostep/extract-calendars` | Liens Google Calendar et ICS |
 
-## Intégration avec des applications populaires
+Voir la liste complète dans le [store de parseurs Olostep →](https://www.olostep.com/store)
 
-### Google Sheets
-
-Parfait pour la collecte et le suivi des données :
-
-```
-1. Olostep scrape le site web
-2. Filtrer ou transformer les données
-3. Google Sheets - Ajouter une ligne
-```
-
-**Cas d'utilisation :**
-- Tableaux de suivi des prix
-- Bases de données d'enrichissement de prospects
-- Inventaire de contenu
-- Fiches d'analyse concurrentielle
-
-### Airtable
-
-Construisez des bases de données puissantes avec des données scrappées :
-
-```
-1. Olostep scrape ou crawl
-2. Code - Formater les données
-3. Airtable - Créer des enregistrements
-```
-
-**Cas d'utilisation :**
-- Catalogues de produits
-- Bases de données de recherche
-- Calendriers de contenu
-- Bases de données de liens
-
-### Slack
-
-Recevez des notifications instantanées :
-
-```
-1. Olostep surveille la page
-2. IF - Vérifier les changements
-3. Slack - Envoyer un message
-```
-
-**Cas d'utilisation :**
-- Alertes de baisse de prix
-- Notifications de mise à jour de contenu
-- Surveillance des erreurs
-- Digests quotidiens
-
-### HubSpot / Salesforce
-
-Enrichissez automatiquement les données CRM :
-
-```
-1. Nouveau contact ajouté
-2. Olostep scrape le site web de l'entreprise
-3. OpenAI extrait les informations clés
-4. CRM - Mettre à jour le contact
-```
-
-**Cas d'utilisation :**
-- Enrichissement de prospects
-- Recherche d'entreprise
-- Intelligence concurrentielle
-- Cartographie des comptes
-
-### Notion
-
-Construisez des bases de connaissances :
-
-```
-1. Olostep crawl la documentation
-2. Code - Analyser le contenu
-3. Notion - Créer des pages
-```
-
-**Cas d'utilisation :**
-- Miroirs de documentation
-- Dépôts de recherche
-- Bibliothèques de contenu
-- Wikis d'équipe
-
-## Bonnes pratiques
-
-<AccordionGroup>
-  <Accordion title="Utiliser le traitement par lot pour plusieurs URLs">
-    Lors du scraping de plus de 3-5 URLs, utilisez **Scraper des URLs en lot** au lieu de plusieurs actions **Scraper un site web**. Le traitement par lot est :
-    - Beaucoup plus rapide (traitement parallèle)
-    - Plus économique
-    - Plus facile à gérer
-    - Meilleur pour les limites de taux
-  </Accordion>
-
-  <Accordion title="Définir des temps d'attente appropriés">
-    Pour les sites lourds en JavaScript, utilisez le paramètre "Attendre avant de scraper" :
-    - Sites simples : 0-1000ms
-    - Sites dynamiques : 2000-3000ms
-    - JavaScript lourd : 5000-8000ms
-    
-    Testez avec différentes valeurs pour trouver le temps d'attente optimal.
-  </Accordion>
-
-  <Accordion title="Utiliser des parseurs spécialisés">
-    Utilisez des parseurs pré-construits (ex : Amazon, Google, et parseurs spécifiques aux tâches du Store Olostep comme emails, réseaux sociaux, calendriers) :
-    - Obtenez des données structurées automatiquement
-    - Extraction plus fiable
-    - Pas besoin de parsing personnalisé
-    - Maintenu par Olostep
-  </Accordion>
-
-  <Accordion title="Filtrer avant de scraper">
-    Utilisez le nœud IF de n8n pour éviter les scrapes inutiles :
-    - Vérifiez si l'URL a changé
-    - Vérifiez que les données n'ont pas été scrappées récemment
-    - Appliquez la logique métier avant de scraper
-    
-    Cela économise des crédits API et du temps d'exécution.
-  </Accordion>
-
-  <Accordion title="Gérer les opérations asynchrones">
-    Les opérations Batch, Crawl et Map sont asynchrones :
-    - Stockez l'ID retourné (batch_id, crawl_id, map_id)
-    - Utilisez un nœud Wait si vous récupérez immédiatement
-    - Envisagez des rappels webhook pour la complétion
-    - Configurez des flux de travail séparés pour la récupération
-  </Accordion>
-
-  <Accordion title="Stocker correctement les résultats">
-    Choisissez le bon stockage en fonction de vos besoins :
-    - **Google Sheets** : Suivi simple, collaboration d'équipe
-    - **Airtable** : Données relationnelles, formatage riche
-    - **Base de données** : Grande échelle, requêtes complexes
-    - **Notion** : Base de connaissances, documentation
-  </Accordion>
-
-  <Accordion title="Surveiller et alerter">
-    Configurez la surveillance de vos flux de travail de scraping :
-    - Utilisez les flux de travail d'erreur dans n8n
-    - Envoyez des alertes à Slack/Email en cas d'échecs
-    - Suivez l'utilisation de l'API dans le tableau de bord Olostep
-    - Enregistrez les métriques importantes
-  </Accordion>
-</AccordionGroup>
-
-## Cas d'utilisation courants par industrie
-
-### E-commerce
-- **Surveillance des prix** : Suivre les prix des concurrents en temps réel
-- **Recherche de produits** : Découvrir des produits tendance et des lacunes sur le marché
-- **Suivi des stocks** : Surveiller la disponibilité des stocks
-- **Analyse des avis** : Agréger et analyser les avis clients
-
-### Marketing & SEO
-- **Découverte de contenu** : Trouver des opportunités de contenu
-- **Analyse concurrentielle** : Suivre les stratégies des concurrents
-- **Recherche de backlinks** : Découvrir des opportunités de liens
-- **Recherche de mots-clés** : Extraire des données de mots-clés à partir des résultats de recherche
-
-### Ventes & Génération de leads
-- **Enrichissement de prospects** : Améliorer les données CRM avec des informations web
-- **Recherche d'entreprise** : Rassembler des informations sur les entreprises
-- **Découverte de contacts** : Trouver les décideurs
-- **Intelligence concurrentielle** : Suivre les mouvements des concurrents
-
-### Recherche & Analyse
-- **Collecte de données** : Rassembler des données de plusieurs sources
-- **Études de marché** : Suivre les tendances de l'industrie
-- **Recherche académique** : Collecter des données de recherche
-- **Intelligence des prix** : Analyser les stratégies de tarification
-
-### Médias & Édition
-- **Agrégation de contenu** : Curater du contenu à partir de plusieurs sites
-- **Surveillance des actualités** : Suivre les actualités et les mentions
-- **Réseaux sociaux** : Surveiller les plateformes sociales
-- **Détection de tendances** : Identifier les sujets tendance
+---
 
 ## Dépannage
 
 <AccordionGroup>
-  <Accordion title="Échec de l'authentification">
-    **Erreur** : "Clé API invalide"
-    
-    **Solutions** :
-    - Vérifiez la clé API depuis le [tableau de bord](https://olostep.com/dashboard)
-    - Assurez-vous qu'il n'y a pas d'espaces supplémentaires dans la clé API
-    - Recréez l'identifiant dans n8n
-    - Vérifiez que la clé API est active
+  <Accordion title="Clé API rejetée">
+    Copiez la clé directement depuis [olostep.com/dashboard](https://olostep.com/dashboard) sans espaces de fin. Supprimez et recréez l'identifiant dans n8n si l'erreur persiste.
   </Accordion>
 
-  <Accordion title="Le scrape renvoie un contenu vide">
-    **Erreur** : Les champs de contenu sont vides
-    
-    **Solutions** :
-    - Augmentez le temps "Attendre avant de scraper"
-    - Vérifiez si le site web nécessite une connexion
-    - Essayez un format différent (HTML vs Markdown)
-    - Vérifiez que l'URL est accessible
-    - Vérifiez si le site bloque l'accès automatisé
+  <Accordion title="Contenu scrappé vide">
+    Augmentez **Attendre avant de scraper** (essayez 2000–5000ms pour les pages lourdes en JS). Confirmez que l'URL est accessible publiquement sans connexion. Si un domaine spécifique échoue constamment, contactez [info@olostep.com](mailto:info@olostep.com).
   </Accordion>
 
-  <Accordion title="Erreur de format de tableau de lot">
-    **Erreur** : "Format JSON invalide pour le tableau de lot"
-    
-    **Solutions** :
-    - Utilisez le format : `[{"url":"https://example.com","custom_id":"id1"}]`
-    - Assurez-vous de la syntaxe JSON correcte
-    - Utilisez le nœud Code pour formater correctement les URLs
-    - Testez le JSON avec un validateur en ligne
+  <Accordion title="Erreur de format d'URL par lot">
+    Le champ **URLs à scraper** attend un tableau JSON :
+    ```json
+    [
+      { "url": "https://example.com/page-1", "custom_id": "p1" },
+      { "url": "https://example.com/page-2", "custom_id": "p2" }
+    ]
+    ```
+    Utilisez un nœud Code en amont pour construire ce tableau à partir de vos données si nécessaire.
   </Accordion>
 
-  <Accordion title="Limite de taux dépassée">
-    **Erreur** : "Limite de taux dépassée"
-    
-    **Solutions** :
-    - Espacer les exécutions de flux de travail avec des nœuds Wait
-    - Utilisez le traitement par lot au lieu de scrapes individuels
-    - Mettez à niveau votre plan Olostep
-    - Vérifiez la limite de taux dans le tableau de bord
+  <Accordion title="Limite de débit atteinte">
+    Ajoutez un nœud **Attendre** entre les étapes de scraping, ou passez à **Scraper des URLs par lots** au lieu de boucler des scrapes uniques. Vérifiez l'utilisation actuelle dans le [tableau de bord](https://olostep.com/dashboard).
   </Accordion>
 
-  <Accordion title="URL non scrappée">
-    **Erreur** : Certaines URLs échouent à être scrappées
-    
-    **Solutions** :
-    - Vérifiez le format de l'URL (inclure http:// ou https://)
-    - Vérifiez si l'URL nécessite une authentification
-    - Testez l'URL dans le navigateur d'abord
-    - Essayez avec le paramètre de pays
-    - Contactez le support pour les domaines bloqués
+  <Accordion title="Nœuds communautaires non visibles dans les paramètres">
+    Sur n8n Cloud, les nœuds communautaires doivent être activés par un propriétaire d'espace de travail. Sur auto-hébergé, assurez-vous que `N8N_COMMUNITY_PACKAGES_ENABLED=true` est défini dans votre environnement. Voir le [guide d'installation de n8n](https://docs.n8n.io/integrations/community-nodes/installation/).
   </Accordion>
 </AccordionGroup>
 
-## Avantages de n8n
+---
 
-### Auto-hébergé
-n8n est auto-hébergé, vous donnant un contrôle total sur vos flux de travail et vos données. Pas de verrouillage fournisseur, pas de données quittant votre infrastructure.
-
-### Pas de limites de tâches
-Contrairement aux plateformes d'automatisation basées sur le cloud, n8n n'impose pas de limites de tâches. Exécutez autant de flux de travail que vous le souhaitez sans coûts supplémentaires.
-
-### Open Source
-n8n est open source, vous permettant de le personnaliser et de l'étendre pour répondre à vos besoins spécifiques.
-
-### Rentable
-n8n auto-hébergé est gratuit, avec un hébergement cloud optionnel disponible. Payez uniquement pour l'utilisation de l'API Olostep.
-
-## Tarification
-
-Olostep facture en fonction de l'utilisation de l'API, indépendamment de n8n :
-
-- **Scrapes** : Payez par scrape
-- **Lots** : Payez par URL dans le lot
-- **Crawls** : Payez par page crawlée
-- **Cartes** : Payez par opération de carte
-
-Consultez la tarification actuelle sur [olostep.com/pricing](https://olostep.com/pricing).
-
-**n8n** : n8n auto-hébergé est gratuit. Hébergement cloud disponible avec des plans payants optionnels.
-
-## Support
-
-Besoin d'aide avec l'intégration n8n ?
+## Connexes
 
 <CardGroup cols={2}>
-  <Card title="Documentation" icon="book" href="https://docs.olostep.com">
-    Parcourez la documentation complète de l'API
+  <Card title="API de Scrapes" icon="file-lines" href="/features/scrapes">
+    Référence complète pour le point de terminaison de scrape
   </Card>
-  
-  <Card title="Email de support" icon="envelope" href="mailto:info@olostep.com">
-    Email : info@olostep.com
-  </Card>
-  
-  <Card title="Communauté n8n" icon="users" href="https://community.n8n.io">
-    Demandez dans la communauté n8n
-  </Card>
-  
-</CardGroup>
 
-## Ressources associées
+  <Card title="API de Batches" icon="layer-group" href="/features/batches">
+    Comment fonctionnent les tâches par lots et comment récupérer les résultats
+  </Card>
 
-<CardGroup cols={2}>
-  <Card title="API Scrapes" icon="file-lines" href="/features/scrapes">
-    En savoir plus sur le point de terminaison Scrapes
+  <Card title="API de Crawls" icon="spider-web" href="/features/crawls">
+    Configuration de crawl et récupération des résultats
   </Card>
-  
-  <Card title="API Batches" icon="layer-group" href="/features/batches">
-    En savoir plus sur le point de terminaison Batches
-  </Card>
-  
-  <Card title="API Crawls" icon="spider-web" href="/features/crawls">
-    En savoir plus sur le point de terminaison Crawls
-  </Card>
-  
-  <Card title="API Maps" icon="map" href="/features/maps">
-    En savoir plus sur le point de terminaison Maps
-  </Card>
-  
-  <Card title="SDK Python" icon="python" href="/sdks/python">
-    Utilisez Olostep avec Python
-  </Card>
-  
-  <Card title="Intégration LangChain" icon="link" href="/integrations/langchain">
-    Construisez des agents IA avec LangChain
+
+  <Card title="API de Maps" icon="map" href="/features/maps">
+    Découverte d'URL et options de filtrage
   </Card>
 </CardGroup>
 
-## Commencer
+## Commencez
 
-Prêt à automatiser vos flux de travail de recherche web, de scraping et de crawling ?
+Prêt à automatiser vos workflows de recherche web, de scraping et de crawling ?
 
-<Card title="Installer le Node" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
-  Installez n8n-nodes-olostep et commencez à construire des flux de travail automatisés
-</Card>
+<CardGroup cols={2}>
+  <Card title="Site Web n8n" icon="link" href="https://n8n.io">
+    Plateforme n8n
+  </Card>
+  <Card title="Installez le nœud" icon="workflow" href="https://www.npmjs.com/package/n8n-nodes-olostep">
+    Installez n8n-nodes-olostep et commencez à créer des workflows automatisés
+  </Card>
+</CardGroup>
 
 Connectez Olostep avec n8n et automatisez dès aujourd'hui votre extraction de données web !

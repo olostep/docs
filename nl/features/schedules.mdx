@@ -1,6 +1,6 @@
 ---
-sidebarTitle: "Schema"
-title: "Schema"
+sidebarTitle: "Schema’s"
+title: "Schema’s"
 description: "Plan API-aanroepen om automatisch op gespecificeerde tijden uit te voeren"
 icon: "clock"
 ---
@@ -8,14 +8,14 @@ icon: "clock"
 Via het Olostep `/v1/schedules` eindpunt kun je API-aanroepen plannen om automatisch op gespecificeerde tijden uit te voeren. Plan eenmalige uitvoeringen of terugkerende taken met behulp van cron-expressies of natuurlijke taal.
 
 - Plan eenmalige uitvoeringen op een specifieke datum en tijd
-- Maak terugkerende schema's met cron-expressies
+- Maak terugkerende schema's met behulp van cron-expressies
 - Gebruik natuurlijke taal om automatisch cron-expressies te genereren
 - Plan HTTP-eindpunten (GET of POST)
 - Voor POST-verzoeken, gebruik korte Olostep-eindpunten (automatisch voorvoegsel) of volledige URL's
-- Verstuur elke gewenste payload - de payload wordt precies verzonden zoals je deze specificeert
+- Verstuur elke gewenste payload - de payload wordt precies zoals je het specificeert verzonden
 - Beheer automatisch de levenscyclus van het schema
 
-Voor API-details zie de [Schema Eindpunt API Referentie](/api-reference/schedules/create).
+Voor API-details zie de [Schedule Endpoint API Reference](/api-reference/schedules/create).
 
 ## Installatie
 
@@ -49,7 +49,7 @@ Maak een schema om API-aanroepen automatisch uit te voeren. Je kunt eenmalige sc
 
 ### Eenmalig schema
 
-Plan een API-aanroep om één keer uit te voeren op een specifieke datum en tijd.
+Plan een API-aanroep om eenmaal op een specifieke datum en tijd uit te voeren.
 
 <CodeGroup>
 
@@ -61,7 +61,7 @@ from datetime import datetime, timedelta
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Plan een scraping om over 1 uur uit te voeren
+# Plan een scrape om over 1 uur uit te voeren
 execute_at = (datetime.now() + timedelta(hours=1)).isoformat()
 
 payload = {
@@ -125,7 +125,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ### Terugkerend schema met cron-expressie
 
-Maak een terugkerend schema met een cron-expressie. Cron-expressies gebruiken een formaat van 6 velden: minuut uur dag maand dag-van-de-week jaar.
+Maak een terugkerend schema met behulp van een cron-expressie. Cron-expressies gebruiken een formaat van 6 velden: minuut uur dag maand dag-van-de-week jaar.
 
 <CodeGroup>
 
@@ -136,7 +136,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# Plan een scraping om elke dag om 10 uur UTC uit te voeren
+# Plan een scrape om elke dag om 10 uur UTC uit te voeren
 payload = {
     "method": "POST",
     "endpoint": "v1/scrapes",
@@ -197,7 +197,7 @@ curl -s -X POST "https://api.olostep.com/v1/schedules" \
 
 ### Planning met natuurlijke taal
 
-Gebruik natuurlijke taal om automatisch cron-expressies te genereren. Het systeem zal je tekst omzetten in een geldige cron-expressie.
+Gebruik natuurlijke taal om automatisch cron-expressies te genereren. Het systeem zet je tekst om in een geldige cron-expressie.
 
 <CodeGroup>
 
@@ -299,9 +299,9 @@ Voor eenmalige schema's bevat de respons `execute_at` in plaats van `cron_expres
 }
 ```
 
-## Lijst schema's
+## Schema's opvragen
 
-Haal alle schema's voor je team op. Standaard worden verwijderde schema's eruit gefilterd. Gebruik de `include_deleted` queryparameter om ze op te nemen.
+Haal alle schema's voor je team op. Standaard worden verwijderde schema's uitgefilterd. Gebruik de `include_deleted` query parameter om ze op te nemen.
 
 <CodeGroup>
 
@@ -351,7 +351,7 @@ curl -s -X GET "https://api.olostep.com/v1/schedules" \
 
 </CodeGroup>
 
-## Haal een schema op
+## Een schema opvragen
 
 Haal een enkel schema op via zijn ID.
 
@@ -390,9 +390,9 @@ curl -s -X GET "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 </CodeGroup>
 
-## Verwijder een schema
+## Een schema verwijderen
 
-Verwijder een schema via zijn ID. Dit stopt toekomstige uitvoeringen.
+Verwijder een schema via zijn ID. Dit stopt alle toekomstige uitvoeringen.
 
 <CodeGroup>
 
@@ -434,12 +434,12 @@ curl -s -X DELETE "https://api.olostep.com/v1/schedules/schedule_abc123xyz" \
 
 ### Olostep eindpunten (korte vorm)
 
-Voor POST-verzoeken kun je korte vormen gebruiken voor Olostep-eindpunten. Het systeem zal automatisch `https://api.olostep.com/` voorvoegen voor deze:
+Voor POST-verzoeken kun je korte vormen gebruiken voor Olostep-eindpunten. Het systeem voegt automatisch `https://api.olostep.com/` toe voor deze:
 
 - `v1/scrapes` - Plan web scraping taken
 - `v1/batches` - Plan batchverwerkingstaken
 - `v1/crawls` - Plan website crawling operaties
-- `v1/maps` - Plan kaartdata-extractie
+- `v1/maps` - Plan kaartgegevens extractie
 - `v1/answers` - Plan antwoordgeneratie
 
 ### Volledige URL's
@@ -538,7 +538,7 @@ Gebruik `?` voor dag-van-de-maand of dag-van-de-week wanneer niet gespecificeerd
 
 ## Voorbeelden van natuurlijke taal
 
-Je kunt natuurlijke taal gebruiken om schema's te beschrijven. Het systeem zal ze automatisch omzetten naar cron-expressies:
+Je kunt natuurlijke taal gebruiken om schema's te beschrijven. Het systeem zet ze automatisch om in cron-expressies:
 
 - "elke 3 minuten" → `0/3 * * * ? *`
 - "elke dag om 10 uur" → `0 10 * * ? *`
@@ -552,14 +552,14 @@ Je kunt natuurlijke taal gebruiken om schema's te beschrijven. Het systeem zal z
 - Terugkerende schema's gaan door totdat ze handmatig worden verwijderd
 - Tijdzone moet een geldige IANA-tijdzone-identificator zijn (bijv. "UTC", "America/New_York", "Europe/London")
 - De `execute_at` datum en tijd moet in de toekomst liggen
-- Natuurlijke taalomzetting kan herhalingen vereisen; het systeem zal tot 3 keer proberen
-- Bij gebruik van natuurlijke taaltekst (`text` parameter), is de tijdzone standaard "UTC"
+- Natuurlijke taalconversie kan herhalingen vereisen; het systeem zal tot 3 keer proberen
+- Bij gebruik van natuurlijke taaltekst (`text` parameter), is de standaard tijdzone "UTC"
 - Schema's voeren de API-aanroep uit met de opgegeven payload precies zoals gespecificeerd - je kunt elke JSON-structuur doorgeven die je nodig hebt
-- Voor POST-verzoeken worden korte Olostep-eindpunten (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) automatisch voorzien van `https://api.olostep.com/`
+- Voor POST-verzoeken worden korte Olostep-eindpunten (`v1/scrapes`, `v1/batches`, `v1/crawls`, `v1/maps`, `v1/answers`) automatisch voorvoegsel met `https://api.olostep.com/`
 - Voor andere eindpunten, geef de volledige URL op
 - De `payload` kan elke datastructuur bevatten - het wordt zoals het is verzonden naar je doeleindpunt
-- Het verwijderen van een al verwijderd schema zal een 400 fout opleveren
+- Het verwijderen van een al verwijderd schema zal een 400-fout opleveren
 
-## Prijzen
+## Prijsstelling
 
-Schema's zelf zijn gratis. Je betaalt alleen voor de API-aanroepen die worden uitgevoerd wanneer het schema wordt uitgevoerd. Bijvoorbeeld, als je een scraping plant, wordt er 1 credit per uitvoering in rekening gebracht (of meer als je parsers of LLM-extractie gebruikt).
+Schema's zelf zijn gratis. Je betaalt alleen voor de API-aanroepen die worden uitgevoerd wanneer het schema wordt uitgevoerd. Bijvoorbeeld, als je een scrape plant, betaal je 1 credit per uitvoering (of meer bij gebruik van parsers of LLM-extractie).

@@ -1,0 +1,324 @@
+---
+title: "実用的な比較"
+icon: "bolt-lightning"
+---
+
+Gumloopの[AI Web Researchノード](https://docs.gumloop.com/nodes/using_ai/ai_web_research)における現在のLite、Base、Coreプロセッサと、Olostepの[Answers API](/features/answers)をGumloopの顧客向けに実用的に比較します。
+
+### TL;DR
+- **レイテンシー**: `/answers`は平均約5-15秒; 既存プロセッサは平均60-120秒以上
+- **新鮮さ**: `/answers`はライブスクレイピング/クロールを使用（古いインデックスなし） - より最新の情報。
+- **正確性**: `/answers`は既存のプロセッサよりも正確で精密である傾向があり、特に事実に基づくクエリにおいて。
+- **範囲**: `lite`/`base`/`core`の事実確認に最適（深い研究には不向き - `pro`/`ultra`）。
+- **出力**: 引用元付きの構造化JSON; 後処理が容易。
+- **統合アイデア**: `/answers`にルーティングする新しいプロセッサ（例: `core-fast`）を追加。
+
+### テスト方法
+- Gumloopドキュメントからの例のプロンプトをLite、Base、Coreの3つのカテゴリで再利用。
+- 最初の完全な回答までの時間を測定し、例の出力とソースをキャプチャ。
+- 回答が実際のウェブデータに基づいていることを確認。
+- Gumloopの[AI Web Researchノード](https://docs.gumloop.com/nodes/using_ai/ai_web_research)で既存のプロセッサと出力を比較。
+
+---
+
+## Gumloopドキュメント
+
+<AccordionGroup>
+  <Accordion title="Lite">
+  
+  使用例:
+  - 会社の住所と電話番号
+  - ウェブサイトURLとソーシャルメディアのハンドル
+  - 基本的なビジネス情報（設立日、CEO名）
+  - 簡単なはい/いいえの確認
+  
+  例のプロンプト:
+  - “会社名を指定して、本社の住所を見つける”
+  - “ウェブサイトを指定して、連絡先メールを抽出する”
+  - “ビジネス名を指定して、モバイルアプリがあるかどうかを確認する”
+  
+  </Accordion>
+  
+  <Accordion title="Base">
+  
+  使用例:
+  - 製品提供とサービスの説明
+  - チームサイズとオフィスの所在地
+  - 業界分類とビジネスモデル
+  - 最近の発表や更新
+  
+  例のプロンプト:
+  - “会社のウェブサイトを指定して、主要な製品と価格帯を抽出する”
+  - “スタートアップ名を指定して、ターゲット市場と価値提案を見つける”
+  - “ビジネスドメインを指定して、主要なパートナーシップを特定する”
+  
+  </Accordion>
+  
+  <Accordion title="Core">
+  
+  使用例:
+  - 資金調達の履歴、投資家、評価額
+  - 競合他社の価格戦略と差別化要因
+  - 業界の主要プレーヤーと市場の動向
+  
+  例のプロンプト:
+  - “会社を指定して、資金調達の履歴、投資家、評価額を調査する”
+  - “競合リストを指定して、価格戦略と差別化要因を分析する”
+  - “業界を指定して、主要プレーヤーと市場の動向を特定する”
+  
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 詳細な例（Lite）
+
+プロンプト:
+```
+会社名（Zecento）を指定して、本社の住所を見つける
+```
+
+**既存プロセッサ**:
+- **レイテンシー**: 34.57秒
+- **出力**:
+```json
+{
+  "Headquarters Address": {
+    "Value #1": "Sassuolo, Emilia-Romagna, Italy"
+  }
+}
+```
+<img 
+  src="/images/gmlp_lite.png" 
+  alt="Gumloop Liteプロセッサの出力"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/> 
+- **試してみる**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=w5WiM7rdqw88JtDGBxu5X3)
+
+**Olosep `/answers`の結果**:
+- **レイテンシー**: 2.12-15秒
+- **出力**:
+
+```json
+{
+  "headquarters_address": "Viale San Carlo n.28 Primo Piano, 41049 Sassuolo, Modena, Italy"
+}
+```
+<img 
+  src="/images/olstp_lite_answer.png" 
+  alt="Olostep Liteプロセッサの出力"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+
+**試してみる**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20name%20%28Zecento%29,%20find%20their%20headquarters%20address&schema=%7B"headquarters_address":"The%20full,%20official%20street%20address%20of%20the%20company's%20primary%20headquarters,%20including%20street%20number,%20street%20name,%20city,%20state/province,%20postal%20code,%20and%20country.%20If%20the%20exact%20address%20cannot%20be%20determined,%20provide%20the%20most%20specific%20location%20available%20%28e.g.,%20city,%20state,%20country%29.%20If%20unavailable,%20return%20'Address%20unavailable'."%7D)
+
+### Gumloopユーザーにとって何が改善されたか？
+
+- **正確性**: 回答には、通りの住所、都市、州、国も含まれています。
+- **レイテンシー**
+
+---
+
+## 詳細な例（Base）
+
+プロンプト:
+```
+会社のウェブサイト（https://zecento.com/）を指定して、主要な製品と価格帯を抽出する
+```
+
+**既存プロセッサ**:
+- **レイテンシー**: 44.22秒
+- **出力**:
+```json
+{
+  "Main Product Descriptions": {
+    "Value #1": "Zecentoは、Amazonの購入決定を支援するAI搭載のChrome拡張機能です。過去の製品データを分析して、今買うべきか、より良い価格を待つべきかをユーザーにアドバイスし、価格の下落をメールやWhatsAppで通知します。この拡張機能は、価格を追跡し、タイムリーなアラートを提供することで、ユーザーが可能な限り最高の取引を得ることを目指しています。"
+  },
+  "Main Product Names": {
+    "Value #1": "Zecento Chrome Extension"
+  },
+  "Pricing Tier Details": {
+    "Value #1": "このティアは、おそらく基本的な価格追跡とアラートを提供し、ユーザーが費用をかけずに価格を監視できるようにします。",
+    "Value #2": "この有料ティアは、より速い製品監視（4時間ごと）、Amazonウィッシュリストの自動インポート、Droplist内の高度なフィルタリング機能、メールに加えてWhatsAppでの通知を提供することで、ユーザーエクスペリエンスを向上させます。"
+  },
+  "Pricing Tier Names": {
+    "Value #1": "Free",
+    "Value #2": "Zecento Premium"
+  },    
+}
+```
+<img 
+  src="/images/gmlp_base_node.png" 
+  alt="Gumloop Baseプロセッサの出力"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**試してみる**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=fcaRfMfZQt7ityXHPR1cNT)
+
+**Olosep `/answers`の結果**:
+- **レイテンシー**: 11.37秒
+- **出力**:
+
+```json
+{
+  "main_product_names": [
+    "Zecento"
+  ],
+  "main_product_descriptions": [
+    "Zecentoは、eコマースショッパーがAmazonでの購入決定をより良くするために、購入の適切なタイミングを明らかにし、価格を追跡し、価格の下落を警告するAI搭載のChrome拡張機能です。また、リアルタイムのAmazon推奨を提供するChatGPTプラグインも含まれています。"
+  ],
+  "pricing_tier_names": [
+    "Gratuito",
+    "Basic",
+    "Standard"
+  ],
+  "pricing_tier_details": [
+    "Gratuitoは、ZecentoのAIコメントを数百万の製品に提供し、月に最大2回のWhatsApp通知、8時間ごとのアイテム追跡、無制限のメール通知、Droplist内の無制限の製品を提供する無料プランです。",
+    "Basicは月額€3.99または年間€23.88で、30日間の無料トライアル後にWhatsApp通知、4時間ごとのより速い追跡、Amazonウィッシュリストの自動インポートを追加します。",
+    "Standardは月額€6.99または年間€59.88で、30日間の無料トライアル後に2時間ごとの追跡更新、優先リスト、今後の機能への早期アクセス（クーポン付きの出荷/アラート、定期的な製品のリマインダー、グループ収集ツール）を提供します。"
+  ]
+}
+```
+<img 
+  src="/images/olostep_base_answer.png" 
+  alt="Olostep Baseプロセッサの出力"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **試してみる**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20company%20website%20%28https://zecento.com/%29,%20extract%20their%20main%20products%20and%20pricing%20tiers&schema=%7B"main_product_names":"A%20list%20of%20the%20names%20of%20the%20primary%20products%20offered%20by%20the%20company.%20If%20no%20products%20are%20found,%20return%20an%20empty%20array.","main_product_descriptions":"A%20list%20of%201-3%20sentence%20descriptions%20for%20each%20corresponding%20product%20listed%20in%20'main_product_names'.%20The%20order%20of%20descriptions%20must%20match%20the%20order%20of%20product%20names.%20If%20a%20description%20is%20unavailable%20for%20a%20product,%20return%20'Description%20unavailable'%20for%20that%20specific%20index.","pricing_tier_names":"A%20list%20of%20the%20names%20of%20the%20pricing%20tiers%20or%20plans%20offered%20for%20the%20company's%20products%20or%20services.%20If%20no%20pricing%20tiers%20are%20found,%20return%20an%20empty%20array.","pricing_tier_details":"A%20list%20of%201-3%20sentence%20summaries%20of%20the%20key%20features,%20pricing,%20or%20benefits%20for%20each%20corresponding%20pricing%20tier%20listed%20in%20'pricing_tier_names'.%20The%20order%20of%20details%20must%20match%20the%20order%20of%20pricing%20tier%20names.%20If%20details%20are%20unavailable%20for%20a%20tier,%20return%20'Details%20unavailable'%20for%20that%20specific%20index."%7D)
+
+### Gumloopユーザーにとって何が改善されたか？
+
+- **正確性**: 回答には、実際のZecento Premiumの価格帯（zecento.com/zecento-premium）が反映されており、正しい価格帯の名前と詳細が含まれています。
+- **レイテンシー**
+
+---
+
+## 詳細な例（Core）
+
+プロンプト:
+```
+競合リスト（Gumloop、Make、N8N、Zapier）を指定して、価格戦略と差別化要因を分析する
+```
+
+**既存プロセッサ**:
+- **レイテンシー**: 2分47秒
+- **出力**:
+```json
+{
+  "Competitor Differentiators": {
+    "Value #1": "GumloopはAIネイティブの自動化を特徴とし、AIファーストのノード（要約/抽出/分類）とビジュアルフローキャンバスに焦点を当てています。クレジットモデルを強調し、主にサードパーティ/AIコールに対して課金し、各内部ステップには課金しません。BYOモデルサポート、ネイティブモデル制御、エンタープライズセキュリティ機能を備えたAIワークフローを統合したいチームを対象としています。",
+    "Value #2": "Makeの強みは、強力なビジュアルシナリオビルダーと強力なデータ変換機能で、中程度の複雑さのワークフローに対して優れたコスト対機能性を提供します。アクセシビリティと高度な機能のバランスを取り、タスクベースの競合他社に対する価値重視の代替手段として位置付けられています。",
+    "Value #3": "n8nの主な差別化要因は、ソース利用可能なライセンスとセルフホスティング（完全な制御）、広範なコーディング/カスタマイズ（JS/Pythonコードノード）、およびワークフロー実行ごとに請求される価格モデルです。セルフホスティング時に複雑で高ボリュームのワークフローに対してコスト効率が高く、データ主権と深いカスタマイズを必要とする技術チームと組織を対象としています。",
+    "Value #4": "Zapierの利点は、シンプルさ、統合の幅（最大のアプリカタログ）、非技術ユーザー向けの迅速なオンボーディングです。簡単なアプリ間自動化とカスタマイズよりも使いやすさを重視するチームに適しており、タスクベースの価格設定と巨大なコネクターエコシステムにより、広範なSaaSカバレッジのデフォルトとなっています。",
+  },
+  "Competitor Pricing Strategies": {
+    "Value #1": "Gumloopはクレジットベースのサブスクリプションモデルを使用しており、フリーミアムエントリティアと階層化された有料プラン（Solo、Team、Enterprise）を提供しています。ワークフローが実行されるときやAI/サードパーティコールに対してクレジットが消費され、多くのネイティブノードは無料です。エンタープライズ顧客はカスタムクレジットとVPC/SSOオプションを購入できます。",
+    "Value #2": "Makeはオペレーション/クレジットスタイルのサブスクリプションモデルを運営しており（制限されたオペレーションの無料ティア、その後の有料オペレーションブロック）。価格は月間オペレーション割当とチーム/エンタープライズ機能によって階層化されており、使用が増えるとオーバージやアドオンブロックを購入できます。",
+    "Value #3": "n8nはハイブリッドモデルを提供しており、オープンソースのセルフホスティングオプション（無料）とクラウドオファリングのためのホストされたサブスクリプションティアを提供しています。主な価格差別化要因は、セルフホスティングユーザーが無制限の実行を行えること（インフラコストに従う）であり、n8nクラウドは実行ごとに課金され、追加のSLAとセキュリティ機能を備えたエンタープライズホストプランを提供しています。",
+    "Value #4": "Zapierはタスクベースの階層化されたサブスクリプションモデルを使用しており、控えめな無料ティア（制限されたタスクとシンプルなZap）とタスクごとに課金される有料プランを提供しています。エンタープライズプランはカスタムボリューム、SSO、および高度なサポートを提供し、処理されるタスク/ステップの数に応じてコストが増加します。これにより、Zapierは低ボリュームのシンプルな自動化には予測可能ですが、規模が大きくなると高価になる可能性があります。",
+  }
+}
+```
+<img 
+  src="/images/gmlp_core.png" 
+  alt="Gumloop Coreプロセッサの出力"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+**試してみる**: [Gumloop Workbook Link](https://www.gumloop.com/pipeline?workbook_id=mZ16mVvuqSgtLQNaKq55oF)
+
+**Olosep `/answers`の結果**:
+- **レイテンシー**: 26.83秒
+- **出力**:
+
+```json
+{
+  "competitor_pricing_strategies": [
+    "Gumloopはクレジットベースのフリーミアムモデルを使用しています: 無料ティアは月に2,000クレジットを提供し、Soloは月額$37で10k以上のクレジットと無制限のアクティブワークフローを解放し、Teamは月額$244で60k以上のクレジットと10席を提供し、小規模から中規模のチームにとって手頃でスケーラブルなオプションとして位置付けられています。",
+    "Makeはクレジットごとの請求を伴うフリーミアムサブスクリプションを採用しています: 1,000クレジット無料、Coreは月額$9で10kクレジット、Proは月額$16で10kクレジットを提供し、優先実行と変数を備え、Teamsは月額$29で10kクレジットを提供し、チームの役割とテンプレートを備えています。低エントリ価格と段階的なペイアズユーゴーのスケーリングで競争します。",
+    "N8Nはオープンソースのセルフホスティングとクラウドティアの両方を提供しています: スタータークラウドは月額€20で2.5kの実行、Proは月額€50で10kの実行（無制限のステップ）、Businessは月額€667で40kの実行を提供し、SSO/Git/バージョニングを備え、エンタープライズはカスタムで、実行ベースの請求をステップベースの請求ではなく利用し、透明性と制御を求める技術チームを引き付けます。",
+    "Zapierはクラシックなフリーミアムサブスクリプションモデルを運営しています: 100タスク無料、Professionalは月額$19.99でマルチステップワークフローを提供し、Teamは月額$69で25ユーザーと共有フォルダーを提供し、エンタープライズはカスタムでSSOと管理コントロールを提供します。大規模なアプリエコシステム、予測可能なタスク価格設定、プレミアムサポートを強調して市場リーダーシップを維持します。"
+  ],
+  "competitor_differentiators": [
+    "Gumloopは、ノーコードのAIエージェントと直感的なビジュアルビルダーを組み合わせ、独自のAPIキーを持ち込むオプションを提供し、高コストやロックインなしでAI駆動のワークフローを望むマーケターや小規模チームにアピールします。",
+    "Makeは3,000以上のアプリ統合、強力なマルチステップシナリオロジック、詳細なスケジューリングオプション、強力なEUデータホスティングプレゼンス、手頃なエントリ価格で際立ち、フリーランサーやヨーロッパの中小企業を引き付けます。",
+    "N8Nの主な差別化要因はオープンソースのDNAです: ユーザーは無料でセルフホストでき、コードを検査/拡張し、Gitベースのバージョン管理を使用し、エンドツーエンドの実行にのみ支払います。開発者やプライバシーを重視する組織に最適です。",
+    "Zapierの主な差別化要因はスケールとエコシステムです: 8,000以上のアプリ統合、最大の事前構築Zapマーケットプレイス、エンタープライズグレードのガバナンスツール、AIオーケストレーションレイヤー（Tables、Interfaces、Agents、MCP）を備え、非技術ユーザーがエンドツーエンドのソリューションを迅速に構築できるようにします。"
+  ]
+}
+```
+<img 
+  src="/images/olstp_core_answer.png" 
+  alt="Olostep Coreプロセッサの出力"
+  style={{
+    height: "auto", 
+    width: "100%", 
+    maxHeight: 420, 
+    objectFit: 'contain', 
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px'
+  }}
+  className="rounded-lg"
+/>
+- **試してみる**: [Olostep Playground Link](https://www.olostep.com/playground?q=answer&text=Given%20a%20competitor%20list%20%28Gumloop,%20Make,%20N8N,%20Zapier%29,%20analyze%20their%20pricing%20strategies%20and%20Differentiators&schema=%7B"competitor_pricing_strategies":"A%20list%20of%20pricing%20strategies%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20primary%20pricing%20strategy%20%28e.g.,%20premium,%20competitive,%20value-based,%20freemium,%20subscription%29.%20If%20a%20pricing%20strategy%20cannot%20be%20determined,%20return%20'Pricing%20strategy%20unavailable'.","competitor_differentiators":"A%20list%20of%20key%20differentiators%20for%20each%20competitor,%20corresponding%20to%20the%20order%20of%20competitors%20in%20the%20input.%20Each%20item%20in%20the%20list%20should%20be%20a%202-3%20sentence%20summary%20of%20the%20competitor's%20main%20competitive%20advantages%20or%20unique%20selling%20propositions.%20If%20differentiators%20cannot%20be%20determined,%20return%20'Differentiators%20unavailable'."%7D)
+
+### Gumloopユーザーにとって何が改善されたか？
+
+- **正確性**: 回答には価格帯の数字（例: "Free 100 tasks; Starter 750 at $19.99..."）が含まれ、より正確です（例: "8000+ apps" vs "largest app catalog"）。
+- **レイテンシー**
+
+---
+
+## 自分で試してみる
+- Playground: [`https://www.olostep.com/playground?q=answer`](https://www.olostep.com/playground?q=answer)
+
+
+## これの背後にある理由は何ですか？
+Olostep Answers APIは、単にウェブインデックスを使用してそれを参照するのではなく、リアルタイムでデータを検索、クロール、抽出するように最適化されたOlostepインフラストラクチャを利用しているため、この種のタスクに対してより正確で精密です。
+
+深い研究タスクには適していませんが、Lite、Base、Coreカテゴリでは既存のプロセッサをしばしば上回ります。
+
+
+## 次のステップの提案
+
+これがGumloopとその顧客にとって関連性がある場合は、Gumloopに新しいプロセッサを追加することを検討してください: **`core-fast`** `/answers`をバックにした事実に基づく、ソースに基づいたクエリでレイテンシーが重要な場合。
+
+何かお手伝いできることがあればお知らせください。ありがとうございます！

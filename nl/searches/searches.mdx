@@ -1,0 +1,130 @@
+---
+sidebarTitle: "Zoeken"
+title: "Zoek-API"
+icon: "vergrootglas"
+---
+
+De Olostep `/v1/searches` endpoint stelt je in staat om het web te doorzoeken met een natuurlijke taalquery en een gededupliceerde lijst van relevante links met titels en beschrijvingen terug te krijgen.
+
+- Stuur een query in gewoon Engels
+- Ontvang gestructureerde links van over het hele web
+
+Het zal de query semantisch over het web doorzoeken en resultaten retourneren.
+
+Voor API-details, zie de [Zoek Endpoint API Referentie](/api-reference/searches/create).
+
+## Installatie
+
+<CodeGroup>
+
+```python Python
+# pip install requests
+
+import requests
+```
+
+```js Node
+// npm install node-fetch
+
+// ESM
+import fetch from 'node-fetch'
+
+// CommonJS
+const fetch = require('node-fetch')
+```
+
+```bash cURL
+# macOS: ingebouwde curl is prima
+```
+
+</CodeGroup>
+
+## Gebruik
+
+Stuur een query in natuurlijke taal en ontvang een lijst van relevante links.
+
+<CodeGroup>
+
+```python Python
+import requests, json
+
+endpoint = "https://api.olostep.com/v1/searches"
+payload = {
+  "query": "Best Answer Engine Optimization startups"
+}
+headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
+
+response = requests.post(endpoint, json=payload, headers=headers)
+print(json.dumps(response.json(), indent=2))
+```
+
+```js Node
+const res = await fetch('https://api.olostep.com/v1/searches', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'Best Answer Engine Optimization startups'
+  })
+})
+console.log(await res.json())
+```
+
+```bash cURL
+curl -s -X POST "https://api.olostep.com/v1/searches" \
+  -H "Authorization: Bearer $OLOSTEP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Best Answer Engine Optimization startups"
+  }'
+```
+
+</CodeGroup>
+
+## Reactie
+
+Je ontvangt een `search` object als reactie. Het `search` object bevat een `id`, je originele `query`, en een `result` met een lijst van `links`.
+
+```json
+{
+  "id": "search_9bi0sbj9xa",
+  "object": "search",
+  "created": 1760327323,
+  "metadata": {},
+  "query": "Best Answer Engine Optimization startups",
+  "result": {
+    "json_content": "...",
+    "json_hosted_url": "https://olostep-storage.s3.us-east-1.amazonaws.com/search_9bi0sbj9xa.json",
+    "links": [
+      {
+        "url": "https://www.adweek.com/media/hottest-startups-shaping-the-future-of-ai-search-optimization-aeo-geo/",
+        "title": "Meet the 7 Hottest Startups Shaping the Future of AI SEO",
+        "description": "1. Profound · 2. Bluefish · 3. Scrunch · 4. Evertune · 5. Peec AI · 6. Brandlight · 7. AthenaHQ."
+      },
+      {
+        "url": "https://www.failory.com/startups/search-engine",
+        "title": "Top 48 Search Engine Startups to Watch in 2026",
+        "description": "Een diepgaande blik op de 48 meest veelbelovende zoekmachine startups..."
+      },
+      {
+        "url": "https://clutch.co/seo-firms/startups",
+        "title": "Top 30 SEO Companies for Startups - Mar 2026 Rankings",
+        "description": "Verbind met de beste SEO bedrijven..."
+      }
+    ]
+  }
+}
+```
+
+Elke link in `result.links` bevat:
+
+| Veld          | Type   | Beschrijving                              |
+|---------------|--------|-------------------------------------------|
+| `url`         | string | De URL van het zoekresultaat              |
+| `title`       | string | De titel van de resultaatpagina           |
+| `description` | string | Een korte beschrijving van het resultaat  |
+
+Het volledige resultaat is ook beschikbaar als een gehost JSON-bestand op `result.json_hosted_url`.
+
+## Prijsstelling
+
+Zoeken kost 5 credits per verzoek.

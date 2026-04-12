@@ -6,7 +6,7 @@ description: "Gebruik Olostep via het Model Context Protocol voor snelle, effici
 ---
 
 Olostep MCP Server biedt webtoegangstools voor je AI-apps. Hiermee kan je AI:
-1. Het web doorzoeken om AI te baseren op echte wereldgegevens (feiten, documenten, gebeurtenissen)
+1. Het web doorzoeken om AI te baseren op real-world data (feiten, documenten, gebeurtenissen)
 2. De markdown-inhoud van elke webpagina ophalen
 3. Relevante URL's binnen een website ontdekken en filteren.
 
@@ -21,7 +21,7 @@ Je kunt onze extern gehoste URL gebruiken of de server lokaal draaien.
 https://mcp.olostep.com/mcp
 ```
 
-### Draaien met npx
+### Uitvoeren met npx
 
 ```bash
 env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp
@@ -33,7 +33,7 @@ env OLOSTEP_API_KEY=your-api-key npx -y olostep-mcp
 npm install -g olostep-mcp
 ```
 
-### Draaien op Claude Desktop
+### Uitvoeren op Claude Desktop
 
 Voeg dit toe aan je claude_desktop_config.json:
 
@@ -55,7 +55,7 @@ Voeg dit toe aan je claude_desktop_config.json:
 npx -y @smithery/cli install @olostep/olostep-mcp-server --client claude
 ```
 
-### Draaien op Claude Code
+### Uitvoeren op Claude Code
 
 Voer dit uit in je terminal
 
@@ -70,20 +70,20 @@ claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
   -- npx -y olostep-mcp
 ```
 
-### Draaien op Cursor
+### Uitvoeren op Cursor
 
 <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=olostep-web&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIm9sb3N0ZXAtbWNwIl0sImVudiI6eyJPTE9TVEVQX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D">
-  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Voeg Olostep MCP server toe aan Cursor" style={{ maxHeight: 32 }} />
+  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Voeg Olostep MCP-server toe aan Cursor" style={{ maxHeight: 32 }} />
 </a>
 
-#### Handmatige setup
+#### Handmatige configuratie
 
 Om Olostep MCP in Cursor te configureren:
 
-- Open Cursor-instellingen (klik op het instellingenpictogram rechtsboven in de IDE)
+- Open Cursor-instellingen (klik op het instellingenicoon rechtsboven in de IDE)
 - Klik op MCP
-- Klik op "+ Nieuwe globale MCP Server toevoegen"
-- Voer het volgende in het mcp.json-bestand in:
+- Klik op "+ Voeg nieuwe globale MCP Server toe"
+ - Voer het volgende in het mcp.json-bestand in:
 ```bash
 {
   "mcpServers": {
@@ -111,14 +111,14 @@ Alternatief (lokaal / stdio)
   }
 }
 ```
-- Vergeet niet `YOUR_API_KEY` te vervangen door je daadwerkelijke API-sleutel die je kunt krijgen van het [Olostep dashboard](https://www.olostep.com/dashboard)
-- Je kunt nu het instellingen tabblad sluiten. Indien nodig, vernieuw de MCP serverlijst om de nieuwe tools te zien.
+- Vergeet niet `YOUR_API_KEY` te vervangen door je eigen API-sleutel die je kunt verkrijgen van het [Olostep dashboard](https://www.olostep.com/dashboard)
+- Je kunt nu het instellingen tabblad sluiten. Indien nodig, vernieuw de MCP-serverlijst om de nieuwe tools te zien.
 
 > Als je Windows gebruikt en problemen ondervindt, probeer dan `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
 
-De volgende keer dat je Cursor gebruikt, zal het automatisch de Olostep MCP gebruiken wanneer nodig. Je kunt ook expliciet verzoeken om de Olostep MCP te gebruiken wanneer je actuele informatie van het web nodig hebt.
+De volgende keer dat je Cursor gebruikt, zal het automatisch de Olostep MCP gebruiken wanneer dat nodig is. Je kunt ook expliciet vragen om de Olostep MCP te gebruiken wanneer je actuele informatie van het web nodig hebt.
 
-### Draaien op Windsurf
+### Uitvoeren op Windsurf
 Voeg dit toe aan je ./codeium/windsurf/model_config.json:
 
 ```bash
@@ -151,15 +151,14 @@ Alternatief (lokaal / stdio)
 
 ## Beschikbare Tools
 - **scrape_website**: Haal inhoud op van een enkele URL. Ondersteunt meerdere formaten en JavaScript-rendering.
-- **search_web**: Doorzoek het web voor een bepaalde query en retourneer gestructureerde resultaten (niet-AI, parser-gebaseerd).
-- **answers**: Doorzoek het web en geef AI-gestuurde antwoorden in de gewenste JSON-structuur, met bronnen en citaten.
+- **search_web**: Doorzoek het web voor een bepaalde zoekopdracht en geef gestructureerde resultaten terug (niet-AI, parser-gebaseerd).
+- **answers**: Doorzoek het web en geef AI-gestuurde antwoorden terug in de JSON-structuur die je wilt, met bronnen en citaten.
 - **batch_scrape_urls**: Scrape tot 10k URL's tegelijkertijd. Perfect voor grootschalige data-extractie.
-- **get_batch_results**: Haal de status en gescrapete inhoud op voor een batchtaak. Als voltooid, haalt items op en verkrijgt inhoud voor elke URL.
-- **create_crawl**: Ontdek en scrape zelfstandig hele websites door links te volgen vanaf een start-URL.
+- **get_batch_results**: Haal de status en gescrapete inhoud op voor een batchtaak. Als voltooid, haalt het items op en haalt inhoud op voor elke URL.
+- **create_crawl**: Ontdek en scrape zelfstandig volledige websites door links te volgen vanaf een start-URL.
 - **create_map**: Verkrijg alle URL's op een website. Haal URL's op voor ontdekking en site-analyse.
 - **get_webpage_content**: Haal de inhoud van een webpagina op in markdown-formaat.
-- **get_website_urls**: Zoek en verkrijg relevante URL's van een website.
-- **google_search**: Haal gestructureerde data op uit Google-zoekresultaten.
+- **get_website_urls**: Zoek en haal relevante URL's op van een website.
 
 ## Conclusie
-Je kunt volledige details over Olostep MCP vinden [hier](https://github.com/olostep/olostep-mcp-server).
+Je kunt volledige details over Olostep MCP [hier](https://github.com/olostep/olostep-mcp-server) vinden.

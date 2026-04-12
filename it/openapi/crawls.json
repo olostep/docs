@@ -14,7 +14,7 @@
       "Authorization": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Intestazione di autenticazione Bearer del tipo Bearer <token>, dove <token> è il tuo token di autenticazione."
+        "description": "Intestazione di autenticazione Bearer della forma Bearer <token>, dove <token> è il tuo token di autenticazione."
       }
     }
   },
@@ -44,26 +44,26 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Modelli di percorso URL da includere nel crawl utilizzando la sintassi glob.  Di default è `/**` che include tutti gli URL. Usa modelli come `/blog/**` per eseguire il crawl di sezioni specifiche (ad esempio, solo pagine del blog), `/products/*.html` per le pagine dei prodotti, o modelli multipli per sezioni diverse. Supporta le funzionalità standard glob come * (qualsiasi carattere) e ** (corrispondenza ricorsiva)."
+                    "description": "Modelli di percorso URL da includere nel crawl usando la sintassi glob.  Di default è `/**` che include tutti gli URL. Usa modelli come `/blog/**` per fare il crawl di sezioni specifiche (ad esempio, solo le pagine del blog), `/products/*.html` per le pagine dei prodotti, o modelli multipli per sezioni diverse. Supporta le funzionalità standard glob come * (qualsiasi carattere) e ** (corrispondenza ricorsiva)."
                   },
                   "exclude_urls": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "Nomi di percorso URL in modello glob da escludere. Ad esempio: `/careers/**`. Gli URL esclusi avranno la precedenza sugli URL inclusi."
+                    "description": "Nomi di percorso URL nel modello glob da escludere. Ad esempio: `/careers/**`. Gli URL esclusi avranno la precedenza sugli URL inclusi."
                   },
                   "max_pages": {
                     "type": "number",
-                    "description": "Numero massimo di pagine da eseguire il crawl. Consigliato per la maggior parte dei casi d'uso come il crawl di un intero sito web."
+                    "description": "Numero massimo di pagine da fare il crawl. Consigliato per la maggior parte dei casi d'uso come fare il crawl di un intero sito web."
                   },
                   "max_depth": {
                     "type": "number",
-                    "description": "Profondità massima del crawl. Utile per estrarre solo fino a n-grado di link."
+                    "description": "Profondità massima del crawl. Utile per estrarre solo fino a n gradi di link."
                   },
                   "include_external": {
                     "type": "boolean",
-                    "description": "Esegui il crawl dei link esterni di primo grado."
+                    "description": "Fai il crawl dei link esterni di primo grado."
                   },
                   "include_subdomain": {
                     "type": "boolean",
@@ -75,12 +75,12 @@
                   },
                   "top_n": {
                     "type": "number",
-                    "description": "Un numero opzionale per eseguire il crawl solo dei primi N link più rilevanti su ogni pagina secondo la query di ricerca."
+                    "description": "Un numero opzionale per fare il crawl solo dei primi N link più rilevanti su ogni pagina secondo la query di ricerca."
                   },
                   "webhook": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL HTTPS per ricevere una richiesta POST quando il crawl è completato. Deve essere un URL pubblicamente accessibile utilizzando il protocollo `http://` o `https://`. Non può puntare a localhost o indirizzi IP privati. Vedi [Webhooks](/api-reference/common/webhooks) per il formato del payload e il comportamento di retry."
+                    "description": "URL HTTPS per ricevere una richiesta POST quando il crawl è completato. Deve essere un URL pubblicamente accessibile usando il protocollo `http://` o `https://`. Non può puntare a localhost o indirizzi IP privati. Vedi [Webhooks](/api-reference/common/webhooks) per il formato del payload e il comportamento di retry."
                   },
                   "timeout": {
                     "type": "number",
@@ -88,7 +88,7 @@
                   },
                   "follow_robots_txt": {
                     "type": "boolean",
-                    "description": "Se rispettare le regole di robots.txt. Se impostato su `false`, il crawler eseguirà lo scraping del sito web indipendentemente dalle direttive di disallow di robots.txt. `true` di default.",
+                    "description": "Se rispettare le regole di robots.txt. Se impostato su `false`, il crawler farà lo scraping del sito web indipendentemente dalle direttive di disallow di robots.txt. `true` di default.",
                     "default": true
                   },
                   "scrape_options": {
@@ -107,7 +107,7 @@
                             "screenshot"
                           ]
                         },
-                        "description": "Formati di output da richiedere per ogni pagina eseguita il crawl. Di default è `[\"html\", \"markdown\"]` quando omesso. `html` è sempre incluso automaticamente. `json` è aggiunto automaticamente quando è fornito un `parser`. Nota: `raw_pdf` non è supportato — i PDF non possono essere eseguiti il crawl.",
+                        "description": "Formati di output da richiedere per ogni pagina di scrape. Di default è `[\"html\", \"markdown\"]` quando omesso. `html` è sempre incluso automaticamente. `json` è aggiunto automaticamente quando è fornito un `parser`. Nota: `raw_pdf` non è supportato — i PDF non possono essere fatti il crawl.",
                         "example": [
                           "markdown",
                           "screenshot"
@@ -115,7 +115,7 @@
                       },
                       "parser": {
                         "type": "string",
-                        "description": "Nome del parser da eseguire su ogni pagina e produrre un output `json` strutturato (ad esempio, `\"@olostep/extract-emails\"`). Aggiunge automaticamente `json` a `formats` quando impostato.",
+                        "description": "Nome del parser da eseguire su ogni pagina per produrre un output `json` strutturato (ad esempio, `\"@olostep/extract-emails\"`). Aggiunge automaticamente `json` a `formats` quando impostato.",
                         "example": "@olostep/extract-emails"
                       }
                     }
@@ -207,7 +207,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri errati o mancanti."
           },
           "500": {
             "description": "Errore interno del server."
@@ -313,7 +313,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri errati o mancanti."
           },
           "404": {
             "description": "Crawl non trovato per l'ID fornito."
@@ -326,7 +326,7 @@
     },
     "/v1/crawls/{crawl_id}/pages": {
       "get": {
-        "summary": "Recupera l'elenco delle pagine scansionate opzionalmente con contenuto",
+        "summary": "Recupera l'elenco delle pagine scansionate, eventualmente con contenuto",
         "description": "Recupera l'elenco delle pagine scansionate e del contenuto che sono stati elaborati per un ID di crawl specifico.",
         "security": [
           {
@@ -350,7 +350,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Intero opzionale che rappresenta l'indice da cui iniziare a recuperare il contenuto. Utile per paginare fino a quando tutti gli URL sono stati recuperati. Inizia con 0, poi fornisci il valore `response['cursor']` dell'ultima richiesta."
+            "description": "Intero opzionale che rappresenta l'indice da cui iniziare a recuperare il contenuto. Utile per paginare fino a quando tutti gli URL sono stati recuperati. Inizia con 0, poi fornisci il valore di `response['cursor']` dell'ultima richiesta."
           },
           {
             "name": "limit",
@@ -359,7 +359,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Intero opzionale per limitare il numero di risultati restituiti. Si consiglia di ottenere 10-50 risultati alla volta. Paginato usando *cursor*. Un massimo di 10MB di contenuto può essere recuperato in una singola richiesta."
+            "description": "Intero opzionale per limitare il numero di risultati restituiti. Consigliato 10-50 risultati alla volta. Paginato usando *cursor*. Massimo 10MB di contenuto possono essere recuperati in una singola richiesta."
           },
           {
             "name": "search_query",
@@ -384,7 +384,7 @@
                 ]
               }
             },
-            "description": "**Deprecato:** Usa l'endpoint `/retrieve` con `retrieve_id`.  Array di formati da recuperare (ad esempio, [\"html\", \"markdown\"])."
+            "description": "**Deprecato:** Usa l'endpoint `/retrieve` con `retrieve_id`.  Array di formati da recuperare (es. [\"html\", \"markdown\"])."
           }
         ],
         "responses": {
@@ -471,7 +471,7 @@
             }
           },
           "400": {
-            "description": "Richiesta errata a causa di parametri mancanti o incorretti."
+            "description": "Richiesta errata a causa di parametri errati o mancanti."
           },
           "404": {
             "description": "Crawl non trovato per l'ID fornito."

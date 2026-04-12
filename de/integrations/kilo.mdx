@@ -1,0 +1,241 @@
+---
+sidebarTitle: "Olostep + Kilo"
+title: "Olostep + Kilo-Integration"
+description: "Verwende den Olostep MCP Server als externes Tool in Kilo für Websuche, Scraping und Inhaltsextraktion"
+---
+
+Kilo ist die All-in-One-Plattform für agentische Entwicklung mit Unterstützung für MCP (Model Context Protocol)-Server. Der Olostep MCP Server integriert sich nahtlos in Kilo und verleiht deinem KI-Agenten leistungsstarke Webdaten-Fähigkeiten.
+
+## Funktionen
+
+Der Olostep MCP Server bietet Zugriff auf 5 Kernfunktionen von Olostep:
+
+<CardGroup cols={2}>
+  <Card title="Website scrapen" icon="file-lines">
+    Extrahiere Inhalte von jeder einzelnen URL in mehreren Formaten (Markdown, HTML, JSON, Text)
+  </Card>
+  
+  <Card title="Web durchsuchen" icon="search">
+    Durchsuche das Web und erhalte strukturierte, parser-basierte Ergebnisse
+  </Card>
+  
+  <Card title="Antworten (KI)" icon="brain">
+    Erhalte KI-gestützte Antworten mit natürlichen Sprachabfragen und Zitaten
+  </Card>
+  
+  <Card title="URLs im Batch scrapen" icon="layer-group">
+    Verarbeite bis zu 10.000 URLs parallel. Perfekt für die großflächige Datenextraktion
+  </Card>
+  
+  <Card title="Websites crawlen" icon="spider-web">
+    Entdecke und scrape autonom ganze Websites, indem du Links folgst
+  </Card>
+</CardGroup>
+
+## Installation
+
+### 1. Hol dir deinen API-Schlüssel
+
+Hol dir deinen Olostep API-Schlüssel vom [Olostep Dashboard](https://olostep.com/dashboard/api-keys).
+
+### 2. Kilo konfigurieren
+
+Erstelle oder bearbeite in deinem Projektverzeichnis `.kilocode/mcp.json`, um den Olostep MCP Server hinzuzufügen:
+
+<CodeGroup>
+```json Remote Hosted MCP (Empfohlen)
+{
+  "mcpServers": {
+    "olostep": {
+      "url": "https://mcp.olostep.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+```json Lokal/Stdio MCP
+{
+  "mcpServers": {
+    "olostep": {
+      "command": "npx",
+      "args": ["-y", "olostep-mcp"],
+      "env": {
+        "OLOSTEP_API_KEY": "YOUR_OLOSTEP_API_KEY"
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+Ersetze `YOUR_OLOSTEP_API_KEY` durch deinen tatsächlichen API-Schlüssel vom Olostep Dashboard.
+
+### 3. Installation überprüfen
+
+Starte Kilo und die Olostep-Tools sollten automatisch verfügbar sein:
+
+```bash
+kilo
+```
+
+## Verfügbare Tools
+
+Sobald konfiguriert, stehen deinem Kilo-Agenten die folgenden Olostep-Tools zur Verfügung:
+
+### scrape_website
+
+Extrahiere Inhalte von einer einzelnen URL. Unterstützt mehrere Formate und JavaScript-Rendering.
+
+**Beispielaufforderung:**
+```
+Scrape den Inhalt von https://example.com und gib mir die Markdown-Version
+```
+
+**Parameter:**
+- `url` - Website-URL zum Scrapen (erforderlich)
+- `format` - Ausgabeformat: `markdown`, `html`, `json` oder `text` (Standard: markdown)
+- `country` - Ländercode für ortsspezifische Inhalte (z.B. "US", "GB")
+- `wait_before_scraping` - Wartezeit in Millisekunden für JavaScript-Rendering (0-10000)
+- `parser` - Optionaler Parser-ID für spezialisierte Extraktion (z.B. "@olostep/amazon-product")
+
+### search_web
+
+Durchsuche das Web und gib strukturierte, parser-basierte Ergebnisse zurück.
+
+**Beispielaufforderung:**
+```
+Suche nach den neuesten Nachrichten über KI-Regulierungen in der EU
+```
+
+**Parameter:**
+- `query` - Suchanfrage (erforderlich)
+- `country` - Ländercode für ortsspezifische Ergebnisse
+
+### answers
+
+Erhalte KI-gestützte Antworten aus Websuchen mit Quellen und Zitaten.
+
+**Beispielaufforderung:**
+```
+Was sind die Top 5 aufkommenden KI-Trends im Jahr 2026? Gib mir strukturierte Antworten mit Quellen.
+```
+
+**Parameter:**
+- `query` - Frage in natürlicher Sprache (erforderlich)
+- `format` - Ausgabeformat für Antworten (JSON-Struktur nach Wahl)
+- `country` - Ländercode für ortsspezifische Suchen
+
+### batch_scrape_urls
+
+Verarbeite mehrere URLs parallel. Perfekt für die großflächige Datenextraktion.
+
+**Beispielaufforderung:**
+```
+Scrape diese 50 Produkt-URLs und extrahiere Titel, Preis und Beschreibung im JSON-Format
+```
+
+**Parameter:**
+- `urls` - Array von URLs zum Scrapen (erforderlich)
+- `format` - Ausgabeformat für alle URLs
+- `country` - Ländercode für ortsspezifische Inhalte
+- `parser` - Optionaler Parser-ID für alle URLs
+
+### create_crawl
+
+Entdecke und scrape autonom ganze Websites, indem du Links von einer Start-URL folgst.
+
+**Beispielaufforderung:**
+```
+Crawle die Website beginnend bei https://example.com und extrahiere alle Produktseiten
+```
+
+**Parameter:**
+- `start_url` - Start-URL für das Crawlen (erforderlich)
+- `max_pages` - Maximale Anzahl der zu crawlenden Seiten (Standard: 10)
+- `follow_links` - Ob Links gefolgt werden soll (Standard: true)
+
+### create_map
+
+Extrahiere alle URLs von einer Website zur Analyse der Seitenstruktur und Inhaltserkennung.
+
+**Beispielaufforderung:**
+```
+Mappe alle URLs auf https://example.com, um die Seitenstruktur zu verstehen
+```
+
+**Parameter:**
+- `website_url` - Website zum Mappen (erforderlich)
+- `search_query` - Optionale Abfrage zur Filterung der Ergebnisse
+- `top_n` - Begrenzung der Anzahl der zurückgegebenen URLs
+
+## Beispiel-Workflows
+
+### Rechercheaufgabe mit Websuche
+
+Lass den Kilo-Agenten Informationen aus dem Web sammeln:
+
+```
+Verwende das search_web-Tool, um aktuelle Artikel über LLM-Sicherheit zu finden,
+dann verwende das answers-Tool, um die wichtigsten Erkenntnisse mit Quellen zu synthetisieren.
+Gib mir eine umfassende Zusammenfassung.
+```
+
+### Produktdatenextraktion
+
+Scrape mehrere Produktseiten:
+
+```
+Ich habe 100 Produkt-URLs von einer E-Commerce-Website. Verwende batch_scrape_urls,
+um Titel, Preis, Beschreibung und Verfügbarkeit von jedem zu extrahieren.
+Formatiere die Ergebnisse als JSON.
+```
+
+### Website-Erkennung und -Analyse
+
+Crawle und analysiere eine Website-Struktur:
+
+```
+Ich möchte die Struktur von https://example.com verstehen.
+Verwende zuerst create_map, um alle URLs zu erhalten, dann crawle die Hauptabschnitte
+und gib mir eine Zusammenfassung der Inhaltsorganisation der Website.
+```
+
+## Umgebungsvariablen
+
+Wenn du die lokale/stdio-Konfiguration verwendest, stelle sicher, dass deine Umgebung den API-Schlüssel gesetzt hat:
+
+```bash
+export OLOSTEP_API_KEY="your_api_key_here"
+kilo
+```
+
+Oder in deiner `.env`-Datei:
+```
+OLOSTEP_API_KEY=your_api_key_here
+```
+
+## Fehlerbehebung
+
+**Tools erscheinen nicht in Kilo:**
+- Überprüfe, ob die `.kilocode/mcp.json` korrekt formatiert ist (gültiges JSON)
+- Stelle sicher, dass dein API-Schlüssel in der Konfiguration korrekt ist
+- Versuche, Kilo nach Konfigurationsänderungen neu zu starten
+
+**API-Schlüssel-Authentifizierungsfehler:**
+- Überprüfe deinen API-Schlüssel vom [Olostep Dashboard](https://olostep.com/dashboard/api-keys)
+- Stelle sicher, dass keine zusätzlichen Leerzeichen oder Sonderzeichen im Schlüssel sind
+
+**Remote gehostetes MCP verbindet sich nicht:**
+- Überprüfe deine Internetverbindung
+- Stelle sicher, dass `https://mcp.olostep.com/mcp` zugänglich ist
+- Stelle sicher, dass das Format des Authorization-Headers korrekt ist: `Bearer YOUR_KEY`
+
+## Mehr erfahren
+
+- [Kilo Website](https://kilo.ai/)
+- [Kilo Dokumentation](https://docs.kilo.ai/)
+- [Olostep MCP Server Repository](https://github.com/olostep/olostep-mcp-server)
+- [Model Context Protocol (MCP) Spezifikation](https://modelcontextprotocol.io/)

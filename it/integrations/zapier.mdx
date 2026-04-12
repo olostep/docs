@@ -1,1001 +1,235 @@
 ---
-sidebarTitle: "Zapier"
-icon: "bolt"
-title: "Integrazione Zapier"
-description: "Automatizza la ricerca web, il scraping e il crawling su oltre 8.000 app senza codice utilizzando il costruttore di flussi di lavoro visivo di Zapier"
+sidebarTitle: "Olostep + Zapier"
+title: "Olostep + Zapier"
+description: "Aggiungi scraping web, ricerche potenziate dall’AI, lavori in batch, crawl e mappe del sito a qualsiasi Zap, senza bisogno di codice."
 ---
 
-L'integrazione Olostep con Zapier porta potenti funzionalità di web scraping nell'ecosistema di oltre 8.000 app di Zapier. Crea flussi di lavoro automatizzati che estraggono, monitorano e elaborano dati web senza scrivere alcun codice.
+L'app verificata [Olostep su Zapier](https://zapier.com/apps/olostep/integrations) ti offre cinque azioni all'interno del builder visivo di Zapier: eseguire lo scraping di un URL, ottenere risposte AI, eseguire lo scraping in batch di migliaia di URL, eseguire il crawl di un sito o mappare tutti i suoi link, quindi connettere i risultati a qualsiasi delle oltre 8.000 app.
 
-[Inizia con Olostep su Zapier →](https://zapier.com/apps/olostep/integrations)
+[Visualizza su Zapier →](https://zapier.com/apps/olostep/integrations)
 
-## Funzionalità
+## Prima di iniziare
 
-L'integrazione offre 5 azioni potenti per l'estrazione automatizzata di dati web e la ricerca potenziata dall'AI:
+- **Un account Olostep con una chiave API:** [ottieni una gratuita](https://olostep.com/dashboard), non è richiesta la carta di credito. I tuoi primi 500 crediti sono inclusi.
+- **Un account Zapier:** qualsiasi piano va bene. I piani gratuiti possono eseguire Zaps manualmente; i piani a pagamento supportano Zaps programmati e multi-step.
+- **Nessun codice richiesto:** tutto in questa guida viene fatto tramite l'editor visivo di Zapier.
+
+---
+
+## Configurazione
+
+<Steps>
+  <Step title="Trova Olostep in Zapier">
+    Apri qualsiasi Zap, clicca su **+** per aggiungere un'azione e cerca **Olostep**. Seleziona **Olostep** dai risultati.
+
+    ![Cerca Olostep nel selettore di azioni di Zapier](/images/integrations/zappier/step-1.png)
+  </Step>
+
+  <Step title="Connetti il tuo account">
+    Clicca su **Accedi a Olostep**. Incolla la tua chiave API nel campo e clicca su **Sì, continua su Olostep**. Zapier verificherà la chiave e salverà la credenziale per tutti i futuri Zaps.
+
+    ![Schermata di connessione dell'account Olostep in Zapier con il campo della chiave API](/images/integrations/zappier/step-2.png)
+
+    Ottieni la tua chiave dal [dashboard di Olostep →](https://olostep.com/dashboard)
+  </Step>
+
+  <Step title="Scegli un'azione">
+    Con il tuo account connesso, scegli una delle cinque azioni di Olostep dal menu a tendina **Azione** e compila i campi richiesti.
+
+    ![Menu a tendina delle azioni Olostep in Zapier che mostra le azioni disponibili](/images/integrations/zappier/step-3.png)
+  </Step>
+
+  <Step title="Configura Scrape Website (URL + formato)">
+    - **URL da eseguire lo scraping:** mappalo dal tuo trigger o inseriscilo manualmente
+    - **Formato di output:** scegli `Markdown`, `HTML`, `JSON` o `Text`
+
+    ![Configura Scrape Website in Zapier con i campi URL e formato di output](/images/integrations/zappier/step-4.png)
+  </Step>
+
+  <Step title="Testa e pubblica">
+    Clicca su **Testa step** per eseguire una richiesta live e confermare l'output. Una volta che sembra corretto, collega i passaggi successivi e pubblica il tuo Zap.
+
+    ![Risultato del test step di Zapier e flusso di pubblicazione](/images/integrations/zappier/step-5.png)
+  </Step>
+</Steps>
+
+---
+
+## Azioni
 
 <CardGroup cols={2}>
   <Card title="Scrape Website" icon="file-lines">
-    Estrai contenuti da qualsiasi URL singolo in più formati (Markdown, HTML, JSON, testo)
+    Estrai contenuti da qualsiasi URL come Markdown, HTML, JSON o testo semplice. Gestisce pagine renderizzate in JS con tempi di attesa opzionali e targeting per paese.
   </Card>
-  
+
+  <Card title="Ask AI Answer" icon="sparkles">
+    Fai una domanda in linguaggio naturale e ottieni una risposta citata basata su pagine che fornisci o su una ricerca web live.
+  </Card>
+
   <Card title="Batch Scrape URLs" icon="layer-group">
-    Elabora fino a 100.000 URL in parallelo. Perfetto per l'estrazione di dati su larga scala
+    Invia fino a 100.000 URL in un unico lavoro, elaborati in parallelo. Restituisce un `batch_id`; recupera i risultati in modo asincrono.
   </Card>
-  
+
   <Card title="Create Crawl" icon="spider-web">
-    Scopri e raschia autonomamente interi siti web seguendo i link
+    Parti da un URL, segui i link ed esegui lo scraping di tutte le sottopagine. Ideale per siti di documentazione, blog o ingestione completa del sito. Restituisce un `crawl_id`.
   </Card>
-  
+
   <Card title="Create Map" icon="map">
-    Estrai tutti gli URL da un sito web per l'analisi della struttura del sito e la scoperta di contenuti
-  </Card>
-
-  <Card title="Ask AI Answer" icon="brain">
-    Ottieni risposte potenziate dall'AI con citazioni da fonti web o dagli URL forniti
+    Ottieni ogni URL su un sito senza eseguire lo scraping del contenuto. Usalo per la scoperta prima di un lavoro in batch. Restituisce un `map_id`.
   </Card>
 </CardGroup>
 
-## Installazione
+<Note>
+  **Batch, Crawl e Map sono asincroni.** Memorizza l'ID restituito e usa un passaggio Delay o un secondo Zap per recuperare i risultati una volta completato l'elaborazione.
+</Note>
 
-### 1. Trova Olostep su Zapier
+---
 
-Cerca "Olostep" nella directory delle app di Zapier o quando crei un nuovo Zap:
+## Esempio di flusso di lavoro: Briefing quotidiano sui concorrenti
 
-1. Vai a [Olostep su Zapier](https://zapier.com/apps/olostep/integrations)
-2. Clicca su "Create Zap"
-3. Cerca "Olostep" nel selettore delle app
-4. Seleziona l'app Olostep
+**Cosa fa:** Ogni mattina, questo Zap esegue lo scraping di una pagina di un concorrente, chiede a Olostep AI Answer di riassumere gli aggiornamenti chiave di quella pagina e pubblica il briefing finale con citazioni su Slack.
 
-In alternativa, visita direttamente la [pagina di integrazione Olostep](https://zapier.com/apps/olostep/integrations) per sfogliare le azioni disponibili e creare il tuo primo Zap.
+**Nodi utilizzati:** Schedule by Zapier -> Olostep Scrape Website -> Olostep Ask AI Answer -> Slack
 
-### 2. Connetti il tuo account
+![Canvas di Zapier: Trigger di pianificazione collegato a Olostep Scrape, Olostep Ask AI Answer e Slack](/images/integrations/zappier/workflow-example.png)
 
-Quando utilizzi Olostep per la prima volta in uno Zap, ti verrà chiesto di connettere il tuo account:
+---
 
-1. Clicca su "Sign in to Olostep"
-2. Inserisci la tua chiave API di Olostep
-3. Clicca su "Yes, Continue to Olostep"
+### Step 1: Aggiungi un trigger di pianificazione
 
-Ottieni la tua chiave API dalla [Dashboard di Olostep](https://olostep.com/dashboard).
+In Zapier, crea un nuovo Zap e imposta il trigger su **Schedule by Zapier**. Impostalo per eseguire **Ogni giorno** a un orario che funziona per il tuo team (ad es. 8 AM).
 
-## Azioni Disponibili
+### Step 2: Aggiungi Olostep Scrape Website
 
-### Scrape Website
+Aggiungi un'azione **Olostep** e scegli **Scrape Website**. Imposta:
+- **URL:** `https://competitor.com/blog`
+- **Formato di output:** Markdown
 
-Estrai contenuti da un singolo URL. Supporta più formati e il rendering JavaScript.
+Markdown mantiene il contenuto della pagina pulito per il passaggio successivo di AI Answer.
 
-**Casi d'uso:**
-- Monitora pagine specifiche per cambiamenti
-- Estrai informazioni sui prodotti da siti e-commerce
-- Raccogli dati da articoli di notizie o post di blog
-- Recupera contenuti per l'aggregazione di contenuti
+### Step 3: Aggiungi Olostep Ask AI Answer
 
-**Configurazione:**
+Aggiungi una seconda azione **Olostep** e scegli **Ask AI Answer**. Imposta:
+- **Domanda:** `Quali sono gli aggiornamenti chiave, gli annunci, i cambiamenti di prodotto o i cambiamenti di prezzo su questa pagina oggi? Restituisci un briefing conciso con punti elenco e includi le citazioni.`
+- **URL di contesto (Array JSON):** mappa l'**URL eseguito lo scraping** dal passaggio 2
+- **Formato:** Markdown
+- **Includi citazioni:** true
 
-<ParamField path="URL to Scrape" type="string" required>
-  URL del sito web da raschiare (deve includere http:// o https://)
-</ParamField>
+### Step 4: Invia a Slack
 
-<ParamField path="Output Format" type="dropdown" default="Markdown">
-  Scegli il formato: Markdown, HTML, JSON o Testo Semplice
-</ParamField>
+Aggiungi un'azione **Slack** impostata su **Invia messaggio al canale**. Mappa:
+- **Canale:** `#competitive-intel`
+- **Testo del messaggio:** `Briefing quotidiano sui concorrenti`
+- **Corpo del messaggio:** `{{Answer (Markdown)}}`
 
-<ParamField path="Country Code" type="string">
-  Codice paese per contenuti specifici della località (es. "US", "GB", "CA")
-</ParamField>
+### Cosa ottieni
 
-<ParamField path="Wait Before Scraping" type="integer">
-  Tempo di attesa in millisecondi per il rendering JavaScript (0-10000)
-</ParamField>
+Ogni mattina il tuo canale Slack riceve un messaggio come:
 
-<ParamField path="Parser" type="string">
-  ID parser opzionale per l'estrazione specializzata (es. "@olostep/amazon-product")
-</ParamField>
+> **Briefing quotidiano sui concorrenti**
+> - Lanciata una nuova integrazione per i flussi di lavoro ecommerce
+> - Aggiornata la pagina dei prezzi con un nuovo piano di fascia media
+> - Pubblicati due nuovi post sul blog sulle migliori pratiche di automazione
+>
+> *Fonti: competitor.com/blog, competitor.com/pricing*
 
-**Campi di Output:**
-- Scrape ID
-- URL Raschiato
-- Contenuto Markdown
-- Contenuto HTML
-- Contenuto JSON
-- Contenuto Testo
-- Stato
-- Timestamp
-- URL Screenshot (se disponibile)
-- Metadati della Pagina
+Da qui puoi estendere questo Zap: aggiungi un Filtro per pubblicare solo se appaiono parole chiave specifiche, scrivi briefing su Google Sheets per il tracciamento, o esegui Zaps separati per diversi URL dei concorrenti.
 
-**Esempi di Flussi di Lavoro:**
+---
+
+## Parser
+
+Aggiungi un ID parser al campo **Parser** su qualsiasi azione Scrape o Batch per ottenere dati strutturati invece di contenuti grezzi:
+
+| Parser | Estrae |
+|--------|--------|
+| `@olostep/amazon-product` | Titolo, prezzo, valutazione, recensioni, immagini, varianti |
+| `@olostep/google-search` | Titoli dei risultati, URL, frammenti |
+| `@olostep/google-maps` | Nome dell'attività, indirizzo, valutazione, recensioni |
+| `@olostep/extract-emails` | Indirizzi email da qualsiasi pagina |
+| `@olostep/extract-socials` | Link a profili social (X, GitHub, LinkedIn, ecc.) |
+| `@olostep/extract-calendars` | Link a Google Calendar e ICS |
+
+Vedi l'elenco completo nel [negozio di parser Olostep →](https://www.olostep.com/store)
+
+---
+
+## Limitazioni di Zapier e soluzioni alternative
+
+### Limiti di task
+Zapier conta ogni azione come un task contro il limite del tuo piano.
+
+**Soluzione alternativa:** Usa **Batch Scrape URLs** per elaborare più URL come un singolo task invece di eseguire un'azione di scraping singola in loop.
+
+### Timeout di esecuzione
+Gli Zaps vanno in timeout dopo 30 secondi. I crawl e i lavori in batch di grandi dimensioni richiedono più tempo.
+
+**Soluzione alternativa:** Memorizza il `crawl_id` o `batch_id` restituito e recupera i risultati in uno Zap separato attivato da un webhook o un ritardo programmato.
+
+### Limiti di dimensione dei dati
+Zapier limita la dimensione dei dati che possono passare tra i passaggi, il che può essere un problema con payload di scraping di grandi dimensioni.
+
+**Soluzione alternativa:** Usa gli URL di output ospitati restituiti da Olostep per recuperare contenuti di grandi dimensioni separatamente piuttosto che passare contenuti grezzi tra i passaggi.
+
+### Trigger di polling
+La maggior parte dei trigger di Zapier fa polling a intervalli di 5-15 minuti, non istantaneamente.
+
+**Soluzione alternativa:** Usa il trigger **Webhooks** di Zapier per notifiche istantanee, o programma Zaps a orari fissi piuttosto che affidarti a polling quasi in tempo reale.
+
+---
+
+## Risoluzione dei problemi
 
 <AccordionGroup>
-  <Accordion title="Monitor Competitor Pricing">
-    **Trigger:** Schedule (Ogni giorno alle 9 AM)
-    
-    **Azione:** Olostep - Scrape Website
-    - URL: Pagina prodotto del concorrente
-    - Formato: JSON
-    - Parser: @olostep/amazon-product
-    
-    **Azione:** Google Sheets - Create Row
-    - Aggiungi dati di prezzo al foglio di tracciamento
-    
-    **Azione:** Gmail - Send Email (Se il prezzo scende)
-    - Avvisa il team sui cambiamenti di prezzo
+  <Accordion title="Chiave API rifiutata">
+    Copia la chiave direttamente da [olostep.com/dashboard](https://olostep.com/dashboard) senza spazi finali. Disconnetti e riconnetti l'account Olostep in Zapier se l'errore persiste.
   </Accordion>
 
-  <Accordion title="Extract and Save Blog Posts">
-    **Trigger:** RSS by Zapier - New Item in Feed
-    
-    **Azione:** Olostep - Scrape Website
-    - URL: \{\{Post URL\}\}
-    - Formato: Markdown
-    
-    **Azione:** Notion - Create Page
-    - Salva il contenuto dell'articolo nel database di Notion
+  <Accordion title="Contenuto eseguito lo scraping vuoto">
+    Aumenta **Attendi prima di eseguire lo scraping** (prova 2000–5000ms per pagine pesanti in JS). Conferma che l'URL sia pubblicamente accessibile senza login. Se un dominio specifico fallisce costantemente, contatta [info@olostep.com](mailto:info@olostep.com).
   </Accordion>
 
-  <Accordion title="Lead Enrichment">
-    **Trigger:** Google Sheets - New Row
-    
-    **Azione:** Olostep - Scrape Website
-    - URL: Sito web aziendale dal foglio
-    - Formato: Markdown
-    
-    **Azione:** OpenAI - Complete Text
-    - Estrai informazioni aziendali utilizzando l'AI
-    
-    **Azione:** Google Sheets - Update Row
-    - Aggiungi dati arricchiti al foglio
+  <Accordion title="Errore di formato URL in batch">
+    Il campo **URL da eseguire lo scraping** si aspetta un array JSON:
+    ```json
+    [
+      { "url": "https://example.com/page-1", "custom_id": "p1" },
+      { "url": "https://example.com/page-2", "custom_id": "p2" }
+    ]
+    ```
+    Usa un passaggio **Code by Zapier** a monte per costruire questo array dai tuoi dati se necessario.
+  </Accordion>
+
+  <Accordion title="Limite di velocità raggiunto">
+    Aggiungi un passaggio **Delay** tra le azioni di scraping, o passa a **Batch Scrape URLs** invece di eseguire scraping singoli in loop. Controlla l'uso corrente nel [dashboard](https://olostep.com/dashboard).
+  </Accordion>
+
+  <Accordion title="Zap va in timeout su crawl o batch">
+    Queste operazioni sono asincrone per design. Memorizza l'ID restituito immediatamente dopo l'azione, quindi usa un secondo Zap o un polling programmato per recuperare i risultati successivamente.
   </Accordion>
 </AccordionGroup>
 
-### Batch Scrape URLs
+---
 
-Elabora più URL in parallelo (fino a 100.000 contemporaneamente). Perfetto per l'estrazione di dati su larga scala.
-
-**Casi d'uso:**
-- Raschia interi cataloghi di prodotti
-- Estrai dati da più risultati di ricerca
-- Elabora elenchi di URL da fogli di calcolo
-- Estrazione di contenuti in blocco
-
-**Configurazione:**
-
-<ParamField path="URLs to Scrape" type="text" required>
-  Array JSON di oggetti con campi url e custom_id. 
-  
-  Esempio: `[{"url":"https://example.com","custom_id":"site1"}]`
-</ParamField>
-
-<ParamField path="Output Format" type="dropdown" default="Markdown">
-  Scegli il formato per tutti gli URL: Markdown, HTML, JSON o Testo Semplice
-</ParamField>
-
-<ParamField path="Country Code" type="string">
-  Codice paese per il raschiamento specifico della località
-</ParamField>
-
-<ParamField path="Wait Before Scraping" type="integer">
-  Tempo di attesa in millisecondi per il rendering JavaScript
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  ID parser opzionale per l'estrazione specializzata
-</ParamField>
-
-**Campi di Output:**
-- Batch ID (usalo per recuperare i risultati in seguito)
-- Stato
-- Totale URL
-- Creato il
-- Formato Richiesto
-- Codice Paese
-- Parser Usato
-
-**Esempi di Flussi di Lavoro:**
-
-<AccordionGroup>
-  <Accordion title="Scrape Product Catalog">
-    **Trigger:** Webhook - Receive POST Request
-    
-    **Azione:** Code by Zapier - Run Python
-    - Converti CSV/elenco in formato array JSON
-    
-    **Azione:** Olostep - Batch Scrape URLs
-    - URL: \{\{JSON array from previous step\}\}
-    - Formato: JSON
-    - Parser: @olostep/amazon-product
-    
-    **Azione:** Webhook - POST
-    - Invia l'ID batch al tuo sistema per il recupero
-  </Accordion>
-
-  <Accordion title="Daily Content Monitoring">
-    **Trigger:** Schedule - Ogni giorno alle 6 AM
-    
-    **Azione:** Google Sheets - Get Rows
-    - Recupera gli URL da monitorare
-    
-    **Azione:** Code by Zapier - Format URLs
-    - Converti in formato array batch
-    
-    **Azione:** Olostep - Batch Scrape URLs
-    - Elabora tutti gli URL contemporaneamente
-    
-    **Azione:** Slack - Send Message
-    - Notifica al team che il raschiamento è completo
-  </Accordion>
-</AccordionGroup>
-
-### Create Crawl
-
-Scopri e raschia autonomamente interi siti web seguendo i link. Perfetto per siti di documentazione, blog e repository di contenuti.
-
-**Casi d'uso:**
-- Esegui il crawling e archivia interi siti di documentazione
-- Estrai tutti i post di blog da un sito web
-- Costruisci basi di conoscenza da contenuti web
-- Monitora i cambiamenti nella struttura del sito
-
-**Configurazione:**
-
-<ParamField path="Start URL" type="string" required>
-  URL di partenza per il crawl (deve includere http:// o https://)
-</ParamField>
-
-<ParamField path="Maximum Pages" type="integer" default="10">
-  Numero massimo di pagine da eseguire il crawling
-</ParamField>
-
-<ParamField path="Follow Links" type="boolean" default="true">
-  Se seguire i link trovati nelle pagine
-</ParamField>
-
-<ParamField path="Output Format" type="dropdown" default="Markdown">
-  Formato per il contenuto raschiato
-</ParamField>
-
-<ParamField path="Country Code" type="string">
-  Codice paese opzionale per il crawling specifico della località
-</ParamField>
-
-<ParamField path="Parser" type="string">
-  ID parser opzionale per l'estrazione di contenuti specializzati
-</ParamField>
-
-**Campi di Output:**
-- Crawl ID (usalo per recuperare i risultati in seguito)
-- Tipo di Oggetto
-- Stato
-- URL di Partenza
-- Pagine Massime
-- Segui Link
-- Timestamp Creato
-- Formati
-
-**Esempi di Flussi di Lavoro:**
-
-<AccordionGroup>
-  <Accordion title="Archive Documentation Site">
-    **Trigger:** Schedule - Mensile il 1° alle 12 AM
-    
-    **Azione:** Olostep - Create Crawl
-    - URL di Partenza: https://docs.example.com
-    - Pagine Massime: 500
-    - Segui Link: true
-    - Formato: Markdown
-    
-    **Azione:** Webhook - POST
-    - Invia l'ID del crawl al tuo sistema di archiviazione
-    
-    **Azione:** Slack - Send Message
-    - Notifica al team che il crawl è in corso
-  </Accordion>
-
-  <Accordion title="Competitor Content Analysis">
-    **Trigger:** Schedule - Settimanale il lunedì alle 9 AM
-    
-    **Azione:** Olostep - Create Crawl
-    - URL di Partenza: URL del blog del concorrente
-    - Pagine Massime: 100
-    - Formato: Markdown
-    
-    **Azione:** Delay - Per 10 minuti
-    - Attendi il completamento del crawl
-    
-    **Azione:** Airtable - Create Records
-    - Memorizza i dati del crawl per l'analisi
-  </Accordion>
-</AccordionGroup>
-
-### Create Map
-
-Estrai tutti gli URL da un sito web per la scoperta di contenuti e l'analisi della struttura del sito.
-
-**Casi d'uso:**
-- Costruisci sitemap e diagrammi della struttura del sito
-- Scopri tutte le pagine prima del raschiamento batch
-- Trova pagine rotte o mancanti
-- Audit e analisi SEO
-
-**Configurazione:**
-
-<ParamField path="Website URL" type="string" required>
-  URL del sito web da cui estrarre i link (deve includere http:// o https://)
-</ParamField>
-
-<ParamField path="Search Query" type="string">
-  Query di ricerca opzionale per filtrare gli URL (es. "blog")
-</ParamField>
-
-<ParamField path="Top N URLs" type="integer">
-  Limita il numero di URL restituiti
-</ParamField>
-
-<ParamField path="Include URL Patterns" type="string">
-  Modelli glob per includere percorsi specifici (es. "/blog/**")
-</ParamField>
-
-<ParamField path="Exclude URL Patterns" type="string">
-  Modelli glob per escludere percorsi specifici (es. "/admin/**")
-</ParamField>
-
-**Campi di Output:**
-- Map ID
-- Tipo di Oggetto
-- URL del Sito Web
-- Totale URL Trovati
-- URL (array JSON)
-- Query di Ricerca
-- Limite Top N
-
-**Esempi di Flussi di Lavoro:**
-
-<AccordionGroup>
-  <Accordion title="Discover and Scrape">
-    **Trigger:** Clic su Pulsante in Zapier
-    
-    **Azione:** Olostep - Create Map
-    - URL: https://example.com
-    - Include Patterns: /products/**
-    - Top N: 500
-    
-    **Azione:** Code by Zapier - Extract URLs
-    - Analizza gli URL dal risultato della mappa
-    
-    **Azione:** Olostep - Batch Scrape URLs
-    - URL: \{\{URLs from map\}\}
-    - Formato: JSON
-    
-    **Azione:** Google Sheets - Create Rows
-    - Aggiungi tutti i dati dei prodotti al foglio di calcolo
-  </Accordion>
-
-  <Accordion title="SEO Site Audit">
-    **Trigger:** Schedule - Mensile
-    
-    **Azione:** Olostep - Create Map
-    - URL: Il tuo sito web
-    - Top N: 1000
-    
-    **Azione:** Airtable - Create Records
-    - Memorizza tutti gli URL per il tracciamento
-    
-    **Azione:** Slack - Send Message
-    - Riporta il totale delle pagine trovate
-  </Accordion>
-</AccordionGroup>
-
-### Ask AI Answer
-
-Ottieni risposte potenziate dall'AI a domande utilizzando la ricerca web o i tuoi URL di contesto forniti. Perfetto per l'automazione della ricerca, la generazione di contenuti e l'analisi dei dati.
-
-**Casi d'uso:**
-- Automazione della ricerca con citazioni
-- Riassumi contenuti da più URL
-- Genera report con riferimenti alle fonti
-- Rispondi a domande utilizzando pagine web specifiche
-- Analisi e estrazione di contenuti
-
-**Configurazione:**
-
-<ParamField path="Question" type="string" required>
-  La domanda a cui vuoi che Olostep Answers risponda
-</ParamField>
-
-<ParamField path="Context URLs (JSON Array)" type="string">
-  Array JSON opzionale di URL per fondare la risposta (es. ["https://example.com/page1", "https://example.com/page2"])
-</ParamField>
-
-<ParamField path="Search Query" type="string">
-  Query opzionale per recuperare fonti dal web se non vengono forniti URL di contesto (es. "site:example.com pricing")
-</ParamField>
-
-<ParamField path="Number of Sources" type="integer">
-  Limita il numero di fonti utilizzate per generare la risposta
-</ParamField>
-
-<ParamField path="Format" type="dropdown" default="Markdown">
-  Scegli il formato della risposta: Markdown, JSON o Testo Semplice
-</ParamField>
-
-<ParamField path="Include Citations" type="boolean" default="true">
-  Se includere citazioni/fonti nella risposta
-</ParamField>
-
-**Campi di Output:**
-- Answer ID
-- Tipo di Oggetto
-- Domanda
-- Risposta (Testo)
-- Risposta (Markdown)
-- Risposta (JSON)
-- Citazioni (array JSON con URL, titoli, frammenti)
-- Timestamp Creato
-- Formato
-- URL di Contesto
-- Query di Ricerca
-- Numero di Fonti
-
-**Esempi di Flussi di Lavoro:**
-
-<AccordionGroup>
-  <Accordion title="Automated Research Report">
-    **Trigger:** Slack - New Message (contenente richiesta di ricerca)
-    
-    **Azione:** Olostep - Ask AI Answer
-    - Domanda: \{\{Slack message\}\}
-    - Query di Ricerca: Termini di ricerca correlati
-    - Numero di Fonti: 5
-    - Formato: Markdown
-    - Includi Citazioni: true
-    
-    **Azione:** Slack - Send Message
-    - Rispondi con risposta generata dall'AI e citazioni
-  </Accordion>
-
-  <Accordion title="Content Summarization from URLs">
-    **Trigger:** Google Sheets - New Row (con URL)
-    
-    **Azione:** Olostep - Ask AI Answer
-    - Domanda: "Riassumi i punti chiave di queste pagine"
-    - URL di Contesto: \{\{URLs from sheet\}\}
-    - Formato: Markdown
-    - Includi Citazioni: true
-    
-    **Azione:** Notion - Create Page
-    - Salva il riassunto con i link alle fonti
-  </Accordion>
-
-  <Accordion title="Competitive Intelligence">
-    **Trigger:** Schedule - Settimanale
-    
-    **Azione:** Olostep - Ask AI Answer
-    - Domanda: "Quali sono gli ultimi aggiornamenti sui prodotti e i cambiamenti di prezzo?"
-    - Query di Ricerca: site:competitor.com news OR updates
-    - Numero di Fonti: 10
-    - Formato: JSON
-    
-    **Azione:** Airtable - Create Record
-    - Memorizza le intuizioni competitive
-    
-    **Azione:** Email - Send Report
-    - Invia l'analisi competitiva settimanale
-  </Accordion>
-
-  <Accordion title="FAQ Auto-Response">
-    **Trigger:** Typeform - New Response
-    
-    **Azione:** Olostep - Ask AI Answer
-    - Domanda: \{\{Customer question\}\}
-    - URL di Contesto: ["https://yoursite.com/docs", "https://yoursite.com/faq"]
-    - Formato: Testo
-    - Includi Citazioni: true
-    
-    **Azione:** Gmail - Send Email
-    - Rispondi al cliente con risposta generata dall'AI
-  </Accordion>
-</AccordionGroup>
-
-## Esempi di Flussi di Lavoro Popolari
-
-### Monitoraggio Prezzi E-commerce
-
-Monitora i prezzi dei concorrenti e ricevi avvisi istantanei:
-
-```
-Trigger: Schedule (Ogni ora)
-↓
-Azione: Olostep - Scrape Website
-  - URL: Pagina prodotto del concorrente
-  - Formato: JSON
-  - Parser: @olostep/amazon-product
-↓
-Azione: Filter (Continua solo se il prezzo è cambiato)
-↓
-Azione: Slack - Send Message
-  - Avviso: "Il prezzo è cambiato a $\{\{price\}\}"
-```
-
-### Aggregazione di Contenuti
-
-Aggrega contenuti da più fonti:
-
-```
-Trigger: Google Sheets - New Row
-↓
-Azione: Olostep - Scrape Website
-  - URL: \{\{URL from sheet\}\}
-  - Formato: Markdown
-↓
-Azione: OpenAI - Summarize
-  - Riassumi il contenuto
-↓
-Azione: Airtable - Create Record
-  - Memorizza l'articolo con riassunto
-```
-
-### Pipeline di Arricchimento Lead
-
-Arricchisci i dati dei lead con informazioni web:
-
-```
-Trigger: HubSpot - New Contact
-↓
-Azione: Olostep - Scrape Website
-  - URL: \{\{Company website\}\}
-  - Formato: Markdown
-↓
-Azione: OpenAI - Extract Data
-  - Estrai: dimensione aziendale, settore, prodotti
-↓
-Azione: HubSpot - Update Contact
-  - Aggiungi dati arricchiti al contatto
-```
-
-### Automazione della Ricerca
-
-Automatizza la ricerca da più fonti:
-
-```
-Trigger: Airtable - New Record
-↓
-Azione: Olostep - Create Map
-  - URL: Sito web target di ricerca
-  - Include: /research/**
-↓
-Azione: Code - Parse URLs
-↓
-Azione: Olostep - Batch Scrape URLs
-  - URL: \{\{Discovered URLs\}\}
-  - Formato: Markdown
-↓
-Azione: Notion - Create Pages
-  - Crea database di ricerca
-```
-
-### Monitoraggio dei Social Media
-
-Traccia menzioni e contenuti:
-
-```
-Trigger: Schedule (Ogni 6 ore)
-↓
-Azione: Olostep - Scrape Website
-  - URL: Pagina di ricerca del sito di notizie
-  - Formato: HTML
-↓
-Azione: Code - Extract Mentions
-  - Trova menzioni del brand
-↓
-Azione: Google Sheets - Create Row
-  - Registra menzioni con timestamp
-```
-
-## Flussi di Lavoro Multi-Step
-
-### Pipeline Completa di Scraping Prodotti
-
-Costruisci una pipeline completa di dati sui prodotti:
-
-<Steps>
-  <Step title="Scopri URL dei Prodotti">
-    Usa **Create Map** per trovare tutte le pagine dei prodotti sul sito target
-    - Include patterns: `/products/**`
-    - Exclude patterns: `/cart/**`, `/checkout/**`
-  </Step>
-  
-  <Step title="Elaborazione Batch dei Prodotti">
-    Usa **Batch Scrape URLs** per estrarre tutti i dati dei prodotti
-    - Formato: JSON
-    - Parser: Parser specifico per il prodotto se disponibile
-  </Step>
-  
-  <Step title="Memorizza nel Database">
-    Invia l'ID batch al tuo sistema o attendi e recupera i risultati
-    - Usa Airtable, Google Sheets o il tuo database
-  </Step>
-  
-  <Step title="Monitora i Cambiamenti">
-    Pianifica raschiamenti giornalieri per monitorare i cambiamenti di prezzo/disponibilità
-    - Confronta con i dati esistenti
-    - Avvisa sui cambiamenti significativi
-  </Step>
-</Steps>
-
-### Strategia di Contenuti SEO
-
-Analizza i concorrenti e pianifica i contenuti:
-
-<Steps>
-  <Step title="Mappa i Siti dei Concorrenti">
-    Usa **Create Map** sui siti dei concorrenti
-    - Estrai tutti i post di blog e le pagine di contenuto
-  </Step>
-  
-  <Step title="Raschia il Contenuto">
-    Usa **Batch Scrape URLs** per ottenere il contenuto completo
-    - Formato: Markdown per un'analisi facile
-  </Step>
-  
-  <Step title="Analisi AI">
-    Usa OpenAI per analizzare argomenti e parole chiave
-    - Identifica i gap di contenuto
-    - Trova argomenti di tendenza
-  </Step>
-  
-  <Step title="Crea Calendario dei Contenuti">
-    Aggiungi intuizioni a Notion o Airtable
-    - Pianifica la tua strategia di contenuti
-  </Step>
-</Steps>
-
-## Parser Specializzati
-
-Olostep fornisce parser pre-costruiti per siti web popolari. Usali con il campo `Parser`:
-
-<CardGroup cols={2}>
-  <Card title="Google Search" icon="google">
-    `@olostep/google-search`
-    
-    Estrai: risultati di ricerca, titoli, frammenti, URL
-  </Card>
-  
-</CardGroup>
-
-### Utilizzo dei Parser
-
-Basta aggiungere l'ID del parser al campo Parser:
-
-```
-Azione: Olostep - Scrape Website
-  - URL: https://www.amazon.com/dp/PRODUCT_ID
-  - Formato: JSON
-  - Parser: @olostep/amazon-product
-```
-
-Il parser estrae automaticamente dati strutturati specifici per quel tipo di sito web.
-
-## Integrazione con App Popolari
-
-### Google Sheets
-
-Perfetto per la raccolta e il tracciamento dei dati:
-
-```
-1. Olostep raschia il sito web
-2. Filtra o trasforma i dati
-3. Google Sheets - Create/Update Row
-```
-
-**Casi d'uso:**
-- Fogli di tracciamento dei prezzi
-- Database di arricchimento lead
-- Inventario di contenuti
-- Fogli di analisi dei concorrenti
-
-### Airtable
-
-Costruisci potenti database con dati raschiati:
-
-```
-1. Olostep raschia o esegue il crawling
-2. Code - Format data
-3. Airtable - Create Records
-```
-
-**Casi d'uso:**
-- Cataloghi di prodotti
-- Database di ricerca
-- Calendari di contenuti
-- Database di link
-
-### Slack
-
-Ricevi notifiche istantanee:
-
-```
-1. Olostep monitora la pagina
-2. Filter - Verifica i cambiamenti
-3. Slack - Send Message
-```
-
-**Casi d'uso:**
-- Avvisi di calo prezzo
-- Notifiche di aggiornamento contenuti
-- Monitoraggio degli errori
-- Riepiloghi giornalieri
-
-### HubSpot / Salesforce
-
-Arricchisci automaticamente i dati CRM:
-
-```
-1. Nuovo contatto aggiunto
-2. Olostep raschia il sito web aziendale
-3. OpenAI estrae informazioni chiave
-4. CRM - Aggiorna contatto
-```
-
-**Casi d'uso:**
-- Arricchimento lead
-- Ricerca aziendale
-- Intelligenza competitiva
-- Mappatura account
-
-### Notion
-
-Costruisci basi di conoscenza:
-
-```
-1. Olostep esegue il crawling della documentazione
-2. Code - Analizza il contenuto
-3. Notion - Create Pages
-```
-
-**Casi d'uso:**
-- Specchi di documentazione
-- Repository di ricerca
-- Librerie di contenuti
-- Wiki del team
-
-## Best Practices
-
-<AccordionGroup>
-  <Accordion title="Usa l'Elaborazione Batch per Più URL">
-    Quando raschi più di 3-5 URL, usa **Batch Scrape URLs** invece di più azioni **Scrape Website**. L'elaborazione batch è:
-    - Molto più veloce (elaborazione parallela)
-    - Più conveniente
-    - Più facile da gestire
-    - Migliore per i limiti di velocità
-  </Accordion>
-
-  <Accordion title="Imposta Tempi di Attesa Appropriati">
-    Per i siti pesanti in JavaScript, usa il parametro "Wait Before Scraping":
-    - Siti semplici: 0-1000ms
-    - Siti dinamici: 2000-3000ms
-    - JavaScript pesante: 5000-8000ms
-    
-    Testa con valori diversi per trovare il tempo di attesa ottimale.
-  </Accordion>
-
-  <Accordion title="Usa Parser Specializzati">
-    Per siti web popolari (Amazon, LinkedIn, Google), usa parser pre-costruiti:
-    - Ottieni dati strutturati automaticamente
-    - Estrazione più affidabile
-    - Nessun bisogno di parsing personalizzato
-    - Manutenzione da parte di Olostep
-  </Accordion>
-
-  <Accordion title="Filtra Prima di Raschiare">
-    Usa l'azione Filter di Zapier per evitare raschiamenti non necessari:
-    - Verifica se l'URL è cambiato
-    - Verifica che i dati non siano stati raschiati di recente
-    - Applica logica aziendale prima del raschiamento
-    
-    Questo risparmia crediti API e tempo di esecuzione.
-  </Accordion>
-
-  <Accordion title="Gestisci Operazioni Asincrone">
-    Le operazioni Batch, Crawl e Map sono asincrone:
-    - Memorizza l'ID restituito (batch_id, crawl_id, map_id)
-    - Usa un'azione Delay se recuperi immediatamente
-    - Considera i callback webhook per il completamento
-    - Imposta Zap separati per il recupero
-  </Accordion>
-
-  <Accordion title="Memorizza i Risultati Correttamente">
-    Scegli l'archiviazione giusta in base alle tue esigenze:
-    - **Google Sheets**: Tracciamento semplice, collaborazione del team
-    - **Airtable**: Dati relazionali, formattazione ricca
-    - **Database**: Su larga scala, query complesse
-    - **Notion**: Base di conoscenza, documentazione
-  </Accordion>
-
-  <Accordion title="Monitora e Avvisa">
-    Imposta il monitoraggio per i tuoi flussi di lavoro di raschiamento:
-    - Usa percorsi di errore negli Zap
-    - Invia avvisi a Slack/Email in caso di errori
-    - Traccia l'uso dell'API nella dashboard di Olostep
-    - Registra metriche importanti
-  </Accordion>
-</AccordionGroup>
-
-## Casi d'Uso Comuni per Settore
-
-### E-commerce
-- **Monitoraggio Prezzi**: Traccia i prezzi dei concorrenti in tempo reale
-- **Ricerca Prodotti**: Scopri prodotti di tendenza e lacune di mercato
-- **Tracciamento Inventario**: Monitora la disponibilità di stock
-- **Analisi Recensioni**: Aggrega e analizza le recensioni dei clienti
-
-### Marketing & SEO
-- **Scoperta di Contenuti**: Trova opportunità di contenuti
-- **Analisi dei Concorrenti**: Traccia le strategie dei concorrenti
-- **Ricerca Backlink**: Scopri opportunità di link
-- **Ricerca Parole Chiave**: Estrai dati di parole chiave dai risultati di ricerca
-
-### Vendite & Generazione Lead
-- **Arricchimento Lead**: Migliora i dati CRM con informazioni web
-- **Ricerca Aziendale**: Raccogli intelligence aziendale
-- **Scoperta Contatti**: Trova decisori
-- **Intelligenza Competitiva**: Traccia le mosse dei concorrenti
-
-### Ricerca & Analisi
-- **Raccolta Dati**: Raccogli dati da più fonti
-- **Ricerca di Mercato**: Traccia le tendenze del settore
-- **Ricerca Accademica**: Raccogli dati di ricerca
-- **Intelligenza sui Prezzi**: Analizza le strategie di prezzo
-
-### Media & Editoria
-- **Aggregazione di Contenuti**: Cura contenuti da più siti
-- **Monitoraggio Notizie**: Traccia notizie e menzioni
-- **Social Media**: Monitora le piattaforme social
-- **Rilevamento Tendenze**: Identifica argomenti di tendenza
-
-## Risoluzione dei Problemi
-
-<AccordionGroup>
-  <Accordion title="Autenticazione Fallita">
-    **Errore**: "Chiave API non valida"
-    
-    **Soluzioni**:
-    - Controlla la chiave API dalla [dashboard](https://olostep.com/dashboard)
-    - Assicurati che non ci siano spazi extra nella chiave API
-    - Riconnetti il tuo account Olostep in Zapier
-    - Verifica che la chiave API sia attiva
-  </Accordion>
-
-  <Accordion title="Il Raschiamento Restituisce Contenuto Vuoto">
-    **Errore**: I campi di contenuto sono vuoti
-    
-    **Soluzioni**:
-    - Aumenta il tempo di "Wait Before Scraping"
-    - Controlla se il sito richiede il login
-    - Prova un formato diverso (HTML vs Markdown)
-    - Verifica che l'URL sia accessibile
-    - Controlla se il sito blocca l'accesso automatico
-  </Accordion>
-
-  <Accordion title="Errore di Formato Array Batch">
-    **Errore**: "Formato JSON non valido per l'array batch"
-    
-    **Soluzioni**:
-    - Usa il formato: `[{"url":"https://example.com","custom_id":"id1"}]`
-    - Assicurati della corretta sintassi JSON
-    - Usa il passaggio Code per formattare correttamente gli URL
-    - Testa il JSON con un validatore online
-  </Accordion>
-
-  <Accordion title="Limite di Velocità Superato">
-    **Errore**: "Limite di velocità superato"
-    
-    **Soluzioni**:
-    - Distanza le esecuzioni degli Zap con ritardi
-    - Usa l'elaborazione batch invece di raschiamenti individuali
-    - Aggiorna il tuo piano Olostep
-    - Controlla il limite di velocità nella dashboard
-  </Accordion>
-
-  <Accordion title="URL Non Raschiato">
-    **Errore**: URL specifici non vengono raschiati
-    
-    **Soluzioni**:
-    - Verifica il formato dell'URL (includi http:// o https://)
-    - Controlla se l'URL richiede autenticazione
-    - Testa l'URL prima nel browser
-    - Prova con il parametro del paese
-    - Contatta il supporto per domini bloccati
-  </Accordion>
-</AccordionGroup>
-
-## Limitazioni di Zapier e Soluzioni Alternative
-
-### Limiti di Task
-Zapier ha limiti di task basati sul tuo piano. Ogni azione Olostep conta come 1 task.
-
-**Soluzione Alternativa**: Usa l'elaborazione batch per raschiare più URL come un singolo task.
-
-### Tempo di Esecuzione
-Gli Zap scadono dopo 30 secondi. I crawl e i batch grandi possono richiedere più tempo.
-
-**Soluzione Alternativa**: Memorizza l'ID e recupera i risultati in uno Zap separato o usa webhook.
-
-### Dimensione dei Dati
-Zapier ha limiti sulla dimensione dei dati per task.
-
-**Soluzione Alternativa**: Usa URL ospitati nell'output per recuperare separatamente contenuti di grandi dimensioni.
-
-### Polling vs Istantaneo
-I trigger sono basati su polling (controllo ogni 5-15 minuti).
-
-**Soluzione Alternativa**: Usa webhook per notifiche istantanee o pianifica a orari specifici.
-
-## Prezzi
-
-Olostep addebita in base all'uso dell'API, indipendentemente da Zapier:
-
-- **Raschiamenti**: Paghi per raschiamento
-- **Batch**: Paghi per URL nel batch
-- **Crawl**: Paghi per pagina eseguita il crawling
-- **Mappe**: Paghi per operazione di mappa
-
-Controlla i prezzi attuali su [olostep.com/pricing](https://olostep.com/pricing).
-
-**Piano Zapier**: Hai anche bisogno di un piano Zapier attivo per eseguire gli Zap.
-
-## Supporto
-
-Hai bisogno di aiuto con l'integrazione Zapier?
-
-<CardGroup cols={2}>
-  <Card title="Documentazione" icon="book" href="https://docs.olostep.com">
-    Sfoglia la documentazione completa dell'API
-  </Card>
-  
-  <Card title="Email di Supporto" icon="envelope" href="mailto:info@olostep.com">
-    Email: info@olostep.com
-  </Card>
-  
-  <Card title="Community Zapier" icon="users" href="https://community.zapier.com">
-    Chiedi nella Community di Zapier
-  </Card>
-  
-</CardGroup>
-
-## Risorse Correlate
+## Correlati
 
 <CardGroup cols={2}>
   <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    Scopri l'endpoint Scrapes
+    Riferimento completo per l'endpoint di scraping
   </Card>
-  
+
   <Card title="Batches API" icon="layer-group" href="/features/batches">
-    Scopri l'endpoint Batches
+    Come funzionano i lavori in batch e come recuperare i risultati
   </Card>
-  
+
   <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    Scopri l'endpoint Crawls
+    Configurazione del crawl e recupero dei risultati
   </Card>
-  
+
   <Card title="Maps API" icon="map" href="/features/maps">
-    Scopri l'endpoint Maps
+    Scoperta degli URL e opzioni di filtraggio
   </Card>
-  
-  <Card title="Python SDK" icon="python" href="/sdks/python">
-    Usa Olostep con Python
-  </Card>
-  
-  <Card title="Integrazione LangChain" icon="link" href="/integrations/langchain">
-    Costruisci agenti AI con LangChain
+  <Card title="Sito web di Zapier" icon="link" href="https://zapier.com">
+    Piattaforma Zapier
   </Card>
 </CardGroup>
-
-## Inizia
-
-Pronto per automatizzare i tuoi flussi di lavoro di web scraping?
-
-<Card title="Crea il Tuo Primo Zap" icon="bolt" href="https://zapier.com/apps/olostep/integrations">
-  Inizia a costruire flussi di lavoro automatizzati con Olostep e Zapier
-</Card>
-
-Connetti Olostep con oltre 8.000 app e automatizza oggi stesso la tua estrazione di dati web!

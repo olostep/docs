@@ -4,30 +4,30 @@ title: "回答 API"
 icon: "globe-pointer"
 ---
 
-Olostepの`/v1/answers`エンドポイントを通じて、自然言語でウェブ検索を行い、AIによる回答とデータを希望するJSON形式で返すことができます。これにより、製品を実世界のデータと情報源に基づかせ、データポイントやスプレッドシートを充実させることができます。
+Olostep の `/v1/answers` エンドポイントを通じて、自然言語でウェブ検索を行い、AI によって生成された回答やデータを希望の JSON 形式で返すことができます。これにより、製品を現実世界のデータやソースに基づかせ、データポイントやスプレッドシートを強化することができます。
 
-- 質問をしたり、AIに充実させたいデータポイントを提供したりする
-- オプション: 戻り値として希望するJSON構造を指定する
+- 質問をするか、AI に強化したいデータポイントを提供する
+- オプション: 返してほしい JSON 構造を指定する
 
-これにより:
-- ウェブ上で見つけたデータを検索、クリーン、検証し、返します
-- 回答を生成するために使用した情報源を返します
-- データが検証できない場合は`NOT_FOUND`値で不確実性を処理します
+これにより以下が行われます:
+- ウェブ上で見つけたデータを検索、クリーン、検証し、返す
+- 回答を生成するために使用したソースを返す
+- データが確認できない場合は `NOT_FOUND` 値で不確実性を処理する
 
-APIの詳細については、[回答エンドポイントAPIリファレンス](/api-reference/answers/create)を参照してください。
+API の詳細については、[回答エンドポイント API リファレンス](/api-reference/answers/create)を参照してください。
 
-デフォルトでは、一般的なウェブインデックスとコスト効率の良いLLMバリデーターを使用しています。
+デフォルトでは、一般的なウェブインデックスとコスト効率の良い LLM バリデーターを使用します。
 
-エンタープライズ顧客は、専用の業界特化型ウェブインデックス、独占的なプライベートデータ（電話番号やメールアドレスを含む）、およびユースケースに最も適したカスタムLLMモデルにアクセスできます。アクセスについてはお問い合わせください: info@olostep.com
+エンタープライズ顧客は、特定の業界専用のウェブインデックス、電話番号やメールアドレスを含む排他的なプライベートデータ、および特定のユースケースに最適なカスタム LLM モデルにアクセスできます。アクセスについてはお問い合わせください: info@olostep.com
 
 
 
 ## ユースケース
-回答エンドポイントは以下の用途に使用できます:
- - AIアプリケーションを実世界のデータと事実に基づかせる
- - 採用、金融、コンサルティング、営業のためにスプレッドシートやデータポイントを充実させる
+回答エンドポイントは以下に使用できます:
+ - AI アプリケーションを現実世界のデータと事実に基づかせる
+ - 採用、金融、コンサルティング、営業のためにスプレッドシートやデータポイントを強化する
 
-こちらは、回答エンドポイントによって強化されたAI駆動のスプレッドシートのデモです:
+こちらは、回答エンドポイントによって強化された AI 搭載スプレッドシートのデモです:
 https://www.olostep.com/demos/spreadsheet-enrich
 
 
@@ -45,7 +45,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl は macOS、Linux、Windows でデフォルトで利用可能です
 ```
 
 ```javascript Node (API)
@@ -58,9 +58,9 @@ pip install requests
 
 </CodeGroup>
 
-## 使用法
+## 使用方法
 
-質問をして、出力をガイドするためのJSONスキーマを渡します。`json`パラメータを渡さない場合、APIは`result`フィールド内に回答テキストを含むjsonオブジェクトを返します。
+質問をして、出力をガイドするための JSON スキーマを渡します。`json` パラメータを渡さない場合、API は `result` フィールド内に回答テキストが入った json オブジェクトを返します。
 
 <CodeGroup>
 
@@ -70,7 +70,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="What is the latest book by J.K. Rowling?",
+    task="J.K.ローリングの最新の本は何ですか？",
     json_format={"book_title": "", "author": "", "release_date": ""},
 )
 
@@ -84,7 +84,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'What is the latest book by J.K. Rowling?',
+  task: 'J.K.ローリングの最新の本は何ですか？',
   jsonFormat: { book_title: '', author: '', release_date: '' },
 })
 
@@ -97,7 +97,7 @@ curl -s -X POST "https://api.olostep.com/v1/answers" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "What is the latest book by J.K. Rowling?",
+    "task": "J.K.ローリングの最新の本は何ですか？",
     "json": {"book_title": "", "author": "", "release_date": ""}
   }'
 ```
@@ -107,7 +107,7 @@ const res = await fetch('https://api.olostep.com/v1/answers', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    task: 'What is the latest book by J.K. Rowling?',
+    task: 'J.K.ローリングの最新の本は何ですか？',
     json: { book_title: '', author: '', release_date: '' }
   })
 })
@@ -119,7 +119,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "What is the latest book by J.K. Rowling?",
+  "task": "J.K.ローリングの最新の本は何ですか？",
   "json": {"book_title": "", "author": "", "release_date": ""}
 }
 headers = {"Authorization": "Bearer <YOUR_API_KEY>", "Content-Type": "application/json"}
@@ -132,7 +132,7 @@ print(json.dumps(response.json(), indent=2))
 
 ## レスポンス
 
-他のOlostepエンドポイントと同様に、`answer`オブジェクトをレスポンスとして受け取ります。`answer`オブジェクトには`id`や`result`といったいくつかのプロパティがあります。
+他の Olostep エンドポイントと同様に、`answer` オブジェクトがレスポンスとして返されます。`answer` オブジェクトには `id` や `result` などのプロパティがあります。
 
 ```json
 {
@@ -160,17 +160,17 @@ print(json.dumps(response.json(), indent=2))
 }
 ```
 
-`json`パラメータに従ってフォーマットされた回答は`response.result.json_content`にあり、情報源のリストは`response.result.sources`にあります。文字列化されたJSONを解析して構造化データにアクセスできます。
+`json` パラメータに従ってフォーマットされた回答は `response.result.json_content` にあり、ソースのリストは `response.result.sources` にあります。文字列化された JSON を解析して構造化データにアクセスできます。
 
 ```json
 {
   "book_title": "The Hallmarked Man",
   "author": "J.K. Rowling",
-  "release_date": "2025年9月2日"
+  "release_date": "September 2, 2025"
 }
 ```
 
-情報源の例:
+ソースの例:
 
 ```json
 [
@@ -182,18 +182,18 @@ print(json.dumps(response.json(), indent=2))
 ]
 ```
 
-`json`パラメータを渡さない場合、APIは`result`フィールド内に回答テキストを含むjsonオブジェクトを返します。
+`json` パラメータを渡さない場合、API は `result` フィールド内に回答テキストが入った json オブジェクトを返します。
 
 ```json
 {
-  "result": "J.K.ローリングの最新の本はThe Hallmarked Manです。"
+  "result": "J.K.ローリングの最新の本は The Hallmarked Man です。"
 }
 ```
 
-### 柔軟な`json`パラメータ
+### 柔軟な `json` パラメータ
 
-- 空の値を持つJSONオブジェクトをスキーマとして提供するか、希望するデータを記述する文字列を提供します。
-- エージェントが自信を持てない場合、そのフィールドに対して`NOT_FOUND`を返します。
+- 空の値を持つ JSON オブジェクトをスキーマとして提供するか、希望するデータを説明する文字列を提供します。
+- エージェントが自信を持てない場合、そのフィールドには `NOT_FOUND` が返されます。
 
 <CodeGroup>
 
@@ -203,7 +203,7 @@ from olostep import Olostep
 client = Olostep(api_key="YOUR_REAL_KEY")
 
 answer = client.answers.create(
-    task="how much did Olostep raise?",
+    task="Olostep はいくら調達しましたか？",
     json_format={"amount": ""},
 )
 
@@ -216,7 +216,7 @@ import Olostep from 'olostep'
 const client = new Olostep({ apiKey: 'YOUR_REAL_KEY' })
 
 const answer = await client.answers.create({
-  task: 'how much did Olostep raise?',
+  task: 'Olostep はいくら調達しましたか？',
   jsonFormat: { amount: '' },
 })
 
@@ -228,7 +228,7 @@ import requests, json
 
 endpoint = "https://api.olostep.com/v1/answers"
 payload = {
-  "task": "how much did Olostep raise?", 
+  "task": "Olostep はいくら調達しましたか？", 
   "json": {
     "amount": ""
   }
@@ -251,6 +251,6 @@ print(json.dumps(response.json(), indent=2))
 }
 ```
 
-## 料金
+## 価格
 
-回答はリクエストごとに20クレジットかかります。
+回答はリクエストごとに 20 クレジットかかります。

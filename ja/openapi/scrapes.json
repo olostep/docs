@@ -66,7 +66,7 @@
                       "none",
                       "array"
                     ],
-                    "description": "コンテンツから特定のCSSセレクタを削除するオプション。オプションで、削除したい特定のセレクタのJSON文字列化された配列を渡すこともできます。このオプションがデフォルトに設定されている場合に削除されるCSSセレクタは、['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]です。"
+                    "description": "コンテンツから特定のCSSセレクタを削除するオプション。オプションで、削除したい特定のセレクタのJSON文字列化された配列を渡すこともできます。このオプションがデフォルトに設定されている場合に削除されるCSSセレクタは ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]] です。"
                   },
                   "actions": {
                     "type": "array",
@@ -183,7 +183,7 @@
                   },
                   "country": {
                     "type": "string",
-                    "description": "リクエストをロードする居住国。  サポートされている値は次の通りです： - US (United States) - CA (Canada) - IT (Italy) - IN (India) - GB (England) - JP (Japan) - MX (Mexico) - AU (Australia) - ID (Indonesia) - UA (UAE) - RU (Russia) - RANDOM  Google SearchやGoogle Newsのスクレイピングのような一部の操作は、すべての国をサポートしています。"
+                    "description": "リクエストをロードする居住国。  サポートされている値は次のとおりです： - US (United States) - CA (Canada) - IT (Italy) - IN (India) - GB (England) - JP (Japan) - MX (Mexico) - AU (Australia) - ID (Indonesia) - UA (UAE) - RU (Russia) - RANDOM  Google SearchやGoogle Newsのスクレイピングのような一部の操作は、すべての国をサポートしています。"
                   },
                   "transformer": {
                     "type": "string",
@@ -233,25 +233,25 @@
                       "absolute_links": {
                         "type": "boolean",
                         "default": true,
-                        "description": "trueの場合、相対パス（例: '/page'）の代わりに完全なURL（例: 'https://example.com/page'）を返すよ。"
+                        "description": "trueの場合、相対パス（例: '/page'）ではなく、完全なURL（例: 'https://example.com/page'）を返すよ。"
                       },
                       "query_to_order_links_by": {
                         "type": "string",
-                        "description": "提供されたクエリテキストとの類似性によって返されたリンクを順序付け、最も関連性の高い一致を優先します。"
+                        "description": "提供されたクエリテキストとの類似性に基づいて返されるリンクを順序付け、最も関連性の高い一致を優先します。"
                       },
                       "include_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "`include_links`を使用してグロブパターンで抽出されたリンクをフィルタリングします。ファイル拡張子に一致する\"*.pdf\"や、特定のパス用の\"/blog/*\"、または\" https://example.com/*\"のような完全なURLを使用します。ワイルドカード（*）、文字クラス（[a-z]）、および交互（{pattern1,pattern2}）をサポートします。"
+                        "description": "`include_links`を使用してグロブパターンで抽出されたリンクをフィルタリングします。 \"*.pdf\"のようなファイル拡張子に一致するパターン、\"/blog/*\"のような特定のパス、または \"https://example.com/*\"のような完全なURLを使用します。ワイルドカード（*）、文字クラス（[a-z]）、および交互（{pattern1,pattern2}）をサポートします。"
                       },
                       "exclude_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "`exclude_links`を使用してグロブパターンで抽出されたリンクをフィルタリングします。ファイル拡張子に一致する\"*.pdf\"や、特定のパス用の\"/blog/*\"、または\" https://example.com/*\"のような完全なURLを使用します。ワイルドカード（*）、文字クラス（[a-z]）、および交互（{pattern1,pattern2}）をサポートします。"
+                        "description": "`exclude_links`を使用してグロブパターンで抽出されたリンクをフィルタリングします。 \"*.pdf\"のようなファイル拡張子に一致するパターン、\"/blog/*\"のような特定のパス、または \"https://example.com/*\"のような完全なURLを使用します。ワイルドカード（*）、文字クラス（[a-z]）、および交互（{pattern1,pattern2}）をサポートします。"
                       }
                     },
                     "description": "このオプションを使用すると、スクレイピングしたページに存在するすべてのリンクを取得できます。"
@@ -284,7 +284,7 @@
                     "properties": {
                       "full_page": {
                         "type": "boolean",
-                        "description": "trueが渡された場合、サイトの一番下までスクロールした後に全ページのスクリーンショットが撮られます。"
+                        "description": "trueが渡された場合、サイトの下部までスクロールした後に全ページのスクリーンショットが撮られます。"
                       }
                     }
                   },
@@ -302,7 +302,7 @@
         },
         "responses": {
           "200": {
-            "description": "スクレイピング開始の詳細を含む成功レスポンス。",
+            "description": "スクレイピング開始の詳細を含む成功したレスポンス。",
             "content": {
               "application/json": {
                 "schema": {
@@ -398,7 +398,7 @@
     "/v1/scrapes/{scrape_id}": {
       "get": {
         "summary": "スクレイプ結果を取得",
-        "description": "このエンドポイントは、以前に開始されたスクレイプの結果を取得することを可能にします。",
+        "description": "このエンドポイントは、以前に開始されたスクレイプの結果を取得することができます。",
         "security": [
           {
             "Authorization": []
@@ -417,7 +417,7 @@
         ],
         "responses": {
           "200": {
-            "description": "スクレイプ結果を含む成功レスポンス。",
+            "description": "スクレイプ結果を含む成功したレスポンス。",
             "content": {
               "application/json": {
                 "schema": {

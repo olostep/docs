@@ -5,15 +5,15 @@ description: "APIリクエストのコンテキストとして使用するため
 icon: "file-upload"
 ---
 
-Olostepの`/v1/files`エンドポイントを通じて、APIリクエストのコンテキストとして使用できるJSONファイルをアップロードできます。これにより、スクレイピング、回答、その他の操作を強化するための構造化データを提供できます。
+Olostepの`/v1/files`エンドポイントを通じて、APIリクエストのコンテキストとして使用できるJSONファイルをアップロードできます。これにより、構造化されたデータを提供して、スクレイプ、回答、その他の操作を強化することができます。
 
-- 最大200MBのJSONファイルをアップロード
+- 最大200MBのJSONファイルをアップロード可能
 - ファイルは自動的に正しいJSON形式であることが検証されます
-- スクレイピング、回答、その他のエンドポイントのコンテキストとしてファイルを使用
-- ファイルは30日後に期限切れになります
-- セキュアな署名付きURLアップロードプロセス
+- スクレイプ、回答、その他のエンドポイントでコンテキストとしてファイルを使用
+- ファイルは30日後に期限切れ
+- 安全な事前署名付きURLアップロードプロセス
 
-APIの詳細については、[Files Endpoint API Reference](/api-reference/files/create)を参照してください。
+APIの詳細については、[ファイルエンドポイントAPIリファレンス](/api-reference/files/create)を参照してください。
 
 ## インストール
 
@@ -36,16 +36,16 @@ const fetch = require('node-fetch')
 ```
 
 ```bash cURL
-# macOS: builtin curl is fine
+# macOS: 組み込みのcurlで問題ありません
 ```
 
 </CodeGroup>
 
 ## ファイルをアップロードする
 
-ファイルのアップロードプロセスは2つのステップで構成されています：
-1. **アップロードURLを作成**: ファイルをアップロードするための署名付きURLをリクエスト
-2. **アップロードを完了**: 署名付きURLにファイルをアップロードし、検証と最終化のために完了エンドポイントを呼び出す
+ファイルのアップロードプロセスは2つのステップで構成されます：
+1. **アップロードURLを作成**: ファイルをアップロードするための事前署名付きURLをリクエスト
+2. **アップロードを完了**: 事前署名付きURLにファイルをアップロードし、検証と最終化のために完了エンドポイントを呼び出す
 
 ### ステップ1: アップロードURLを作成
 
@@ -63,7 +63,7 @@ API_URL = "https://api.olostep.com/v1"
 # ステップ1: アップロードURLを作成
 payload = {
     "filename": "my-data.json",
-    "purpose": "context"  # オプション、デフォルトは"context"。サポートされる値: "context"または"batch"
+    "purpose": "context"  # オプション、デフォルトは "context"。サポートされる値: "context" または "batch"
 }
 
 headers = {
@@ -75,7 +75,7 @@ response = requests.post(f"{API_URL}/files", headers=headers, json=payload)
 upload_data = response.json()
 
 print(json.dumps(upload_data, indent=2))
-# レスポンスには: id, upload_url, expires_inが含まれます
+# レスポンスには: id, upload_url, expires_in が含まれます
 ```
 
 ```js Node
@@ -86,7 +86,7 @@ const res = await fetch(`${API_URL}/files`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json' },
   body: JSON.stringify({
     filename: 'my-data.json',
-    purpose: 'context'  // オプション、デフォルトは"context"。サポートされる値: "context"または"batch"
+    purpose: 'context'  // オプション、デフォルトは "context"。サポートされる値: "context" または "batch"
   })
 })
 const uploadData = await res.json()
@@ -114,7 +114,7 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
 
 </CodeGroup>
 
-レスポンスには、10分後に期限切れとなる署名付き`upload_url`が含まれています：
+レスポンスには、10分後に期限切れとなる事前署名付き`upload_url`が含まれます：
 
 ```json
 {
@@ -128,7 +128,7 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
 
 ### ステップ2: ファイルをアップロードして完了
 
-署名付きURLにJSONファイルをアップロードし、アップロードを検証および最終化するために完了エンドポイントを呼び出します。
+事前署名付きURLにJSONファイルをアップロードし、アップロードを検証して最終化するために完了エンドポイントを呼び出します。
 
 <CodeGroup>
 
@@ -139,7 +139,7 @@ import json
 API_KEY = "<YOUR_API_KEY>"
 API_URL = "https://api.olostep.com/v1"
 
-# ステップ1で取得したupload_urlの後
+# ステップ1からのupload_urlを取得した後
 file_id = upload_data["id"]
 upload_url = upload_data["upload_url"]
 
@@ -151,7 +151,7 @@ json_data = {
     ]
 }
 
-# ステップ2a: 署名付きURLにファイルをアップロード
+# ステップ2a: 事前署名付きURLにファイルをアップロード
 upload_response = requests.put(
     upload_url,
     data=json.dumps(json_data),
@@ -172,7 +172,7 @@ print(json.dumps(file_info, indent=2))
 ```js Node
 const API_URL = 'https://api.olostep.com/v1'
 
-// ステップ1で取得したupload_urlの後
+// ステップ1からのupload_urlを取得した後
 const fileId = uploadData.id
 const uploadUrl = uploadData.upload_url
 
@@ -184,7 +184,7 @@ const jsonData = {
   ]
 }
 
-// ステップ2a: 署名付きURLにファイルをアップロード
+// ステップ2a: 事前署名付きURLにファイルをアップロード
 await fetch(uploadUrl, {
   method: 'PUT',
   headers: { 'Content-Type': 'application/json' },
@@ -201,7 +201,7 @@ console.log(fileInfo)
 ```
 
 ```bash cURL
-# ステップ2a: 署名付きURLにファイルをアップロード
+# ステップ2a: 事前署名付きURLにファイルをアップロード
 curl -X PUT "$UPLOAD_URL" \
   -H "Content-Type: application/json" \
   -d @my-data.json
@@ -227,9 +227,9 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 }
 ```
 
-## ファイルメタデータをIDで取得
+## IDでファイルメタデータを取得
 
-ファイルのIDを使用してメタデータを取得します。
+IDでファイルのメタデータを取得します。
 
 <CodeGroup>
 
@@ -259,9 +259,9 @@ curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## ファイルオブジェクトをIDで取得
+## IDでファイルオブジェクトを取得
 
-完了したファイルのJSONコンテンツをダウンロードするための署名付きURLを取得します。オプションで、`expires_in`クエリパラメータを使用してダウンロードURLの有効期限を指定できます（デフォルトは600秒/10分）。
+完了したファイルのJSONコンテンツをダウンロードするための事前署名付きURLを取得します。`expires_in`クエリパラメータを使用してダウンロードURLの有効期限を指定することもできます（デフォルトは600秒/10分）。
 
 <CodeGroup>
 
@@ -275,12 +275,12 @@ response = requests.get(
 download_info = response.json()
 download_url = download_info["download_url"]
 
-# 署名付きURLを使用してファイルコンテンツをダウンロード
+# 事前署名付きURLを使用してファイルコンテンツをダウンロード
 file_response = requests.get(download_url)
 file_content = file_response.json()
 print(json.dumps(file_content, indent=2))
 
-# カスタム有効期限の例（3600秒 = 1時間）
+# カスタム有効期限（3600秒 = 1時間）の例
 response = requests.get(
     f"{API_URL}/files/{file_id}/content?expires_in=3600",
     headers={"Authorization": f"Bearer {API_KEY}"}
@@ -299,12 +299,12 @@ const res = await fetch(`${API_URL}/files/${fileId}/content`, {
 const downloadInfo = await res.json()
 const downloadUrl = downloadInfo.download_url
 
-// 署名付きURLを使用してファイルコンテンツをダウンロード
+// 事前署名付きURLを使用してファイルコンテンツをダウンロード
 const fileRes = await fetch(downloadUrl)
 const fileContent = await fileRes.json()
 console.log(fileContent)
 
-// カスタム有効期限の例（3600秒 = 1時間）
+// カスタム有効期限（3600秒 = 1時間）の例
 const customRes = await fetch(`${API_URL}/files/${fileId}/content?expires_in=3600`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
@@ -317,17 +317,17 @@ console.log(`ダウンロードURLの有効期限: ${customDownloadInfo.expires_
 curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# カスタム有効期限でダウンロードURLを取得（3600秒 = 1時間）
+# カスタム有効期限（3600秒 = 1時間）のダウンロードURLを取得
 curl -s -X GET "https://api.olostep.com/v1/files/$FILE_ID/content?expires_in=3600" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# 署名付きURLを使用してファイルをダウンロード
+# 事前署名付きURLを使用してファイルをダウンロード
 curl -s "$DOWNLOAD_URL"
 ```
 
 </CodeGroup>
 
-レスポンスには、指定された時間後に期限切れとなる署名付き`download_url`が含まれています：
+レスポンスには、指定された時間後に期限切れとなる事前署名付き`download_url`が含まれます：
 
 ```json
 {
@@ -343,7 +343,7 @@ curl -s "$DOWNLOAD_URL"
 
 ## ファイルを一覧表示
 
-チームのすべての完了したファイルを一覧表示します。オプションで目的でフィルタリング（サポートされる値: `"context"`または`"batch"`）できます。
+チームのすべての完了したファイルを一覧表示します。オプションで目的によってフィルタリングできます（サポートされる値: `"context"`または`"batch"`）。
 
 <CodeGroup>
 
@@ -356,7 +356,7 @@ response = requests.get(
 files = response.json()
 print(json.dumps(files, indent=2))
 
-# 目的でフィルタリングされたファイルを一覧表示
+# 目的によってフィルタリングされたファイルを一覧表示
 response = requests.get(
     f"{API_URL}/files?purpose=context",
     headers={"Authorization": f"Bearer {API_KEY}"}
@@ -373,7 +373,7 @@ const res = await fetch(`${API_URL}/files`, {
 const files = await res.json()
 console.log(files)
 
-// 目的でフィルタリングされたファイルを一覧表示
+// 目的によってフィルタリングされたファイルを一覧表示
 const contextRes = await fetch(`${API_URL}/files?purpose=context`, {
   headers: { 'Authorization': 'Bearer <YOUR_API_KEY>' }
 })
@@ -386,14 +386,14 @@ console.log(contextFiles)
 curl -s -X GET "https://api.olostep.com/v1/files" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 
-# 目的でフィルタリングされたファイルを一覧表示
+# 目的によってフィルタリングされたファイルを一覧表示
 curl -s -X GET "https://api.olostep.com/v1/files?purpose=context" \
   -H "Authorization: Bearer $OLOSTEP_API_KEY"
 ```
 
 </CodeGroup>
 
-レスポンスにはファイルのリストが含まれています：
+レスポンスにはファイルのリストが含まれます：
 
 ```json
 {
@@ -414,7 +414,7 @@ curl -s -X GET "https://api.olostep.com/v1/files?purpose=context" \
 
 ## ファイルを削除
 
-ファイルとその関連データをストレージから削除します。
+ストレージからファイルとその関連データを削除します。
 
 <CodeGroup>
 
@@ -445,9 +445,9 @@ curl -s -X DELETE "https://api.olostep.com/v1/files/$FILE_ID" \
 
 </CodeGroup>
 
-## 完了したアップロード例（コンテキスト目的）
+## 完了したアップロードの例（コンテキスト目的）
 
-`purpose="context"`でJSONファイルをアップロードする完全な例を以下に示します：
+こちらは`purpose="context"`でJSONファイルをアップロードする完全な例です：
 
 <CodeGroup>
 
@@ -534,9 +534,9 @@ console.log(`ファイルサイズ: ${fileInfo.bytes} バイト`)
 
 </CodeGroup>
 
-## バッチファイルアップロード例
+## バッチファイルのアップロード例
 
-`purpose="batch"`で有効なバッチデータを含むJSONファイルをアップロードする例を以下に示します。このデータは`/v1/batches`エンドポイントで使用できます：
+こちらは`purpose="batch"`でJSONファイルをアップロードし、`/v1/batches`エンドポイントで使用できる有効なバッチデータを含む例です：
 
 <CodeGroup>
 
@@ -639,7 +639,7 @@ curl -s -X POST "https://api.olostep.com/v1/files" \
     "purpose": "batch"
   }'
 
-# ステップ2: バッチJSONデータをアップロード（最初にbatch-items.jsonに保存）
+# ステップ2: バッチJSONデータをアップロード（まずbatch-items.jsonに保存）
 # batch-items.jsonの内容:
 # {
 #   "items": [
@@ -672,11 +672,11 @@ curl -s -X POST "https://api.olostep.com/v1/files/$FILE_ID/complete" \
 ## ファイル要件
 
 - **ファイル形式**: JSONファイルのみサポート（`.json`拡張子が必要）
-- **ファイルサイズ**: 1ファイルあたり最大200MB
+- **ファイルサイズ**: ファイルごとに最大200MB
 - **有効期限**: ファイルは30日後に期限切れ
-- **アップロードURL**: 署名付きURLは10分後に期限切れ
+- **アップロードURL**: 事前署名付きURLは10分後に期限切れ
 - **目的パラメータ**: `"context"`または`"batch"`の値のみサポート（デフォルトは`"context"`）
 
-## 料金
+## 価格
 
-ファイルのアップロードは無料です。ファイルは安全に保存され、30日後に自動的に期限切れになります。
+ファイルのアップロードは無料です。ファイルは安全に保存され、30日後に自動的に期限切れとなります。

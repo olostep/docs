@@ -22,7 +22,7 @@
     "/v1/scrapes": {
       "post": {
         "summary": "启动网页抓取",
-        "description": "这个端点允许用户通过各种配置启动网页抓取。",
+        "description": "这个端点允许用户以各种配置启动网页抓取。",
         "security": [
           {
             "Authorization": []
@@ -42,7 +42,7 @@
                   },
                   "wait_before_scraping": {
                     "type": "integer",
-                    "description": "开始抓取前等待的时间，以毫秒为单位。"
+                    "description": "在开始抓取前等待的时间，以毫秒为单位。"
                   },
                   "formats": {
                     "type": "array",
@@ -66,7 +66,7 @@
                       "none",
                       "array"
                     ],
-                    "description": "选项用于从内容中移除某些CSS选择器。你也可以传递一个JSON字符串化的特定选择器数组来移除。当此选项设置为默认时，移除的CSS选择器为 ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
+                    "description": "选项：从内容中移除某些CSS选择器。你也可以传递一个JSON字符串化的特定选择器数组来移除。当此选项设置为默认时，移除的CSS选择器为 ['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]"
                   },
                   "actions": {
                     "type": "array",
@@ -133,7 +133,7 @@
                               "enum": [
                                 "fill_input"
                               ],
-                              "description": "用一个值填写输入元素"
+                              "description": "用一个值填充输入元素"
                             },
                             "selector": {
                               "type": "string",
@@ -191,11 +191,11 @@
                       "postlight",
                       "none"
                     ],
-                    "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的抓取内容。"
+                    "description": "指定要使用的HTML转换器（如果有）。使用Postlight的Mercury Parser库来移除广告和其他不需要的内容。"
                   },
                   "remove_images": {
                     "type": "boolean",
-                    "description": "选项用于从抓取的内容中移除图像。默认为false。",
+                    "description": "选项：从抓取的内容中移除图像。默认为false。",
                     "default": false
                   },
                   "remove_class_names": {
@@ -244,14 +244,14 @@
                         "items": {
                           "type": "string"
                         },
-                        "description": "使用`include_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"用于特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
+                        "description": "使用`include_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"匹配特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
                       },
                       "exclude_links": {
                         "type": "array",
                         "items": {
                           "type": "string"
                         },
-                        "description": "使用`exclude_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"用于特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
+                        "description": "使用`exclude_links`通过glob模式过滤提取的链接。使用类似\"*.pdf\"的模式匹配文件扩展名，\"/blog/*\"匹配特定路径，或完整URL如\"https://example.com/*\"。支持通配符 (*)、字符类 ([a-z]) 和交替 ({pattern1,pattern2})。"
                       }
                     },
                     "description": "使用此选项，你可以获取你抓取的页面上存在的所有链接。"
@@ -284,13 +284,13 @@
                     "properties": {
                       "full_page": {
                         "type": "boolean",
-                        "description": "如果传递 true，则在滚动到网站底部后截取整个页面的截图。"
+                        "description": "如果传递 true，整个页面的截图将在滚动到网站底部后拍摄。"
                       }
                     }
                   },
                   "metadata": {
                     "type": "object",
-                    "description": "用户定义的元数据。尚不支持"
+                    "description": "用户定义的元数据。目前尚不支持。"
                   }
                 },
                 "required": [
@@ -342,7 +342,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "来自解析器的内容"
+                          "description": "来自解析器的内容。"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"
@@ -381,13 +381,13 @@
             }
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "Bad request due to incorrect or missing parameters."
           },
           "402": {
             "description": "由于无效的 API 密钥，需要付款。"
           },
           "404": {
-            "description": "当请求的抓取未找到时出现未找到错误。"
+            "description": "当请求的抓取未找到时，出现未找到错误。"
           },
           "500": {
             "description": "内部服务器错误。"
@@ -398,7 +398,7 @@
     "/v1/scrapes/{scrape_id}": {
       "get": {
         "summary": "获取抓取结果",
-        "description": "此端点允许用户获取之前启动的抓取结果。",
+        "description": "此端点允许用户获取先前启动的抓取结果。",
         "security": [
           {
             "Authorization": []
@@ -454,7 +454,7 @@
                         },
                         "json_content": {
                           "type": "string",
-                          "description": "来自解析器的内容"
+                          "description": "来自解析器的内容。"
                         },
                         "screenshot_hosted_url": {
                           "type": "string"
@@ -494,13 +494,13 @@
             }
           },
           "400": {
-            "description": "由于参数错误或缺失导致的错误请求。"
+            "description": "Bad request due to incorrect or missing parameters."
           },
           "402": {
             "description": "由于无效的 API 密钥，需要付款。"
           },
           "404": {
-            "description": "当请求的抓取未找到时出现未找到错误。"
+            "description": "当请求的抓取未找到时，出现未找到错误。"
           },
           "500": {
             "description": "内部服务器错误。"

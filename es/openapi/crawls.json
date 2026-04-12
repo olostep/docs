@@ -93,7 +93,7 @@
                   },
                   "scrape_options": {
                     "type": "object",
-                    "description": "Controla lo que cada solicitud de raspado de página individual pide al API de Olostep. Todos los campos son opcionales.",
+                    "description": "Controla lo que cada solicitud de raspado de página individual pide a la API de Olostep. Todos los campos son opcionales.",
                     "properties": {
                       "formats": {
                         "type": "array",
@@ -139,7 +139,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "ID del Rastreo"
+                      "description": "ID de Rastreo"
                     },
                     "object": {
                       "type": "string",
@@ -245,7 +245,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "ID del Rastreo"
+                      "description": "ID de Rastreo"
                     },
                     "object": {
                       "type": "string",
@@ -327,7 +327,7 @@
     "/v1/crawls/{crawl_id}/pages": {
       "get": {
         "summary": "Recuperar lista de páginas rastreadas opcionalmente con contenido",
-        "description": "Obtiene la lista de páginas rastreadas y contenido que han sido procesados para un ID de rastreo específico.",
+        "description": "Obtiene la lista de páginas rastreadas y el contenido que ha sido procesado para un ID de rastreo específico.",
         "security": [
           {
             "Authorization": []
@@ -359,7 +359,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Entero opcional para limitar el número de resultados devueltos. Se recomienda de 10 a 50 resultados a la vez. Paginado usando *cursor*. Máximo 10MB de contenido puede ser obtenido en una sola solicitud."
+            "description": "Entero opcional para limitar el número de resultados devueltos. Se recomienda de 10 a 50 resultados a la vez. Paginado usando *cursor*. Se puede obtener un máximo de 10MB de contenido en una sola solicitud."
           },
           {
             "name": "search_query",
@@ -397,7 +397,7 @@
                   "properties": {
                     "crawl_id": {
                       "type": "string",
-                      "description": "ID del Rastreo"
+                      "description": "ID de Rastreo"
                     },
                     "object": {
                       "type": "string",
@@ -463,7 +463,7 @@
                     },
                     "cursor": {
                       "type": "integer",
-                      "description": "Para pasar en la consulta en la próxima solicitud para obtener los siguientes elementos."
+                      "description": "Debe pasarse en la consulta en la próxima solicitud para obtener los siguientes elementos."
                     }
                   }
                 }

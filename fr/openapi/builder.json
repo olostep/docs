@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "API du Builder",
+    "title": "API du Constructeur",
     "version": "1.0.0"
   },
   "servers": [
@@ -25,7 +25,7 @@
     "/olostep-p2p-incomingAPI": {
       "get": {
         "summary": "Initier le scraping de pages web avec diverses configurations",
-        "description": "Ce point de terminaison permet aux utilisateurs de scraper des pages web avec diverses options telles que la définition de délais d'attente, le temps d'attente avant le scraping, les préférences de format de données, et plus encore.",
+        "description": "Ce point de terminaison te permet de scraper des pages web avec diverses options comme définir des délais d'attente, le temps d'attente avant le scraping, les préférences de format de données, et plus encore.",
         "servers": [
           {
             "url": "https://agent.olostep.com"
@@ -91,7 +91,7 @@
             "name": "removeCSSselectors",
             "in": "query",
             "required": false,
-            "description": "Option pour supprimer certains sélecteurs CSS du contenu. Tu peux également passer un tableau JSON stringifié de sélecteurs spécifiques que tu souhaites supprimer. Les sélecteurs CSS supprimés lorsque cette option est définie sur `default` sont `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
+            "description": "Option pour supprimer certains sélecteurs CSS du contenu. Tu peux aussi passer un tableau JSON stringifié de sélecteurs spécifiques que tu veux supprimer. Les sélecteurs CSS supprimés lorsque cette option est réglée sur `default` sont `['nav','footer','script','style','noscript','svg',[role=alert],[role=banner],[role=dialog],[role=alertdialog],[role=region][aria-label*=skip i],[aria-modal=true]]`",
             "schema": {
               "type": "string",
               "default": "default",
@@ -106,7 +106,7 @@
             "name": "htmlTransformer",
             "in": "query",
             "required": false,
-            "description": "Spécifie le transformateur HTML à utiliser, le cas échéant. La bibliothèque Mercury Parser de Postlight est utilisée pour supprimer les publicités et autres contenus indésirables du contenu scrappé.",
+            "description": "Spécifie le transformateur HTML à utiliser, si nécessaire. La bibliothèque Mercury Parser de Postlight est utilisée pour supprimer les publicités et autres contenus indésirables du contenu scrappé.",
             "schema": {
               "type": "string",
               "default": "none",
@@ -289,7 +289,7 @@
           }
         ],
         "summary": "Récupérer les informations du jeu de données",
-        "description": "Permet aux utilisateurs de récupérer les informations du jeu de données au format Markdown et/ou HTML en fonction de l'ID du jeu de données fourni.",
+        "description": "Permet aux utilisateurs de récupérer les informations du jeu de données au format Markdown et/ou HTML basé sur l'ID du jeu de données fourni.",
         "security": [
           {
             "Authorization": []

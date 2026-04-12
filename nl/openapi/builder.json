@@ -41,7 +41,7 @@
             "name": "url",
             "in": "query",
             "required": true,
-            "description": "De URL om te beginnen met scrapen.",
+            "description": "De URL om het scrapen te starten.",
             "schema": {
               "type": "string",
               "format": "uri"
@@ -106,7 +106,7 @@
             "name": "htmlTransformer",
             "in": "query",
             "required": false,
-            "description": "Specificeer de HTML-transformer die je wilt gebruiken, indien van toepassing. De Mercury Parser-bibliotheek van Postlight wordt gebruikt om advertenties en andere ongewenste inhoud uit de gescrapete inhoud te verwijderen.",
+            "description": "Specificeer de HTML-transformer die je wilt gebruiken, indien van toepassing. Postlight's Mercury Parser-bibliotheek wordt gebruikt om advertenties en andere ongewenste inhoud uit de gescrapete inhoud te verwijderen.",
             "schema": {
               "type": "string",
               "default": "none",
@@ -130,7 +130,7 @@
             "name": "expandMarkdown",
             "in": "query",
             "required": false,
-            "description": "Als dit waar is, wordt de markdown-inhoud geretourneerd in het markdown_content veld.",
+            "description": "Als dit waar is, wordt de markdown-inhoud geretourneerd in het markdown_content-veld.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -140,7 +140,7 @@
             "name": "expandHtml",
             "in": "query",
             "required": false,
-            "description": "Als dit waar is, wordt de HTML-inhoud geretourneerd in het html_content veld.",
+            "description": "Als dit waar is, wordt de HTML-inhoud geretourneerd in het html_content-veld.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -172,7 +172,7 @@
                         "enum": [
                           "wait"
                         ],
-                        "description": "Wacht een gespecificeerde hoeveelheid milliseconden"
+                        "description": "Wacht een opgegeven aantal milliseconden"
                       },
                       "milliseconds": {
                         "type": "integer",
@@ -216,7 +216,7 @@
                         "enum": [
                           "fill_input"
                         ],
-                        "description": "Vul een invoerelement met een waarde in"
+                        "description": "Vul een invoerelement met een waarde"
                       },
                       "selector": {
                         "type": "string",
@@ -224,13 +224,13 @@
                       },
                       "value": {
                         "type": "string",
-                        "description": "Tekst om in te voeren in de invoer"
+                        "description": "Tekst om in te voeren in de input"
                       }
                     }
                   },
                   {
                     "type": "object",
-                    "title": "Scrollen",
+                    "title": "Scroll",
                     "required": [
                       "type",
                       "direction",
@@ -270,10 +270,10 @@
             "description": "Succesvolle reactie met de gevraagde gegevens."
           },
           "400": {
-            "description": "Slechte aanvraag vanwege onjuiste of ontbrekende parameters."
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
           },
           "401": {
-            "description": "Ongeautoriseerde toegang vanwege ontbrekende of ongeldige API-token."
+            "description": "Ongeautoriseerde toegang door ontbrekende of ongeldige API-token."
           },
           "500": {
             "description": "Interne serverfout."
@@ -288,8 +288,8 @@
             "url": "https://dataset.olostep.com"
           }
         ],
-        "summary": "Datasetinformatie ophalen",
-        "description": "Stelt gebruikers in staat om datasetinformatie in Markdown- en/of HTML-formaat op te halen op basis van de verstrekte dataset-ID.",
+        "summary": "Haal datasetinformatie op",
+        "description": "Stelt gebruikers in staat om datasetinformatie op te halen in Markdown- en/of HTML-formaat op basis van de verstrekte dataset-ID.",
         "security": [
           {
             "Authorization": []
@@ -341,7 +341,7 @@
             "description": "Succesvolle reactie met de datasetinformatie."
           },
           "400": {
-            "description": "Slechte aanvraag vanwege onjuiste of ontbrekende parameters."
+            "description": "Foute aanvraag door onjuiste of ontbrekende parameters."
           },
           "404": {
             "description": "Dataset niet gevonden voor de verstrekte ID."

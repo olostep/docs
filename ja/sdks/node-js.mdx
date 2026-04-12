@@ -5,7 +5,7 @@ icon: "node-js"
 description: "Webからデータを検索、抽出、構造化するための公式NodeJS SDK"
 ---
 
-**NPMパッケージ**: [olostep](https://www.npmjs.com/package/olostep)
+**NPMパッケージ**: [olostep](https://www.npmjs.com/package/olostep) 
 
 ## はじめに
 
@@ -13,7 +13,8 @@ description: "Webからデータを検索、抽出、構造化するための公
 npm install olostep
 ```
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
@@ -22,14 +23,29 @@ const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
 const result = await client.scrapes.create('https://example.com');
 console.log(result.id, result.html_content);
 ```
+```ts snake_case
+import Olostep from 'olostep';
 
-## 使用方法
+const client = new Olostep({api_key: process.env.OLOSTEP_API_KEY});
+
+// 最小限のスクレイピング例
+const result = await client.scrapes.create('https://example.com');
+console.log(result.id, result.html_content);
+```
+</CodeGroup>
+
+<Note>
+NodeJS SDKはすべてのパラメータに対して**camelCase**と**snake_case**の両方を受け入れます。AIエージェント用に構築する場合は、APIのネイティブフィールド名に一致する**snake_case**を使用してください。
+</Note>
+
+## 使用法
 
 ### スクレイピング
 
-さまざまなオプションを使用して単一のURLをスクレイピングします：
+さまざまなオプションで単一のURLをスクレイピングします:
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Format} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -49,15 +65,40 @@ const scrape = await client.scrapes.create({
 console.log(scrape.html_content);
 console.log(scrape.markdown_content);
 
-// IDでスクレイプを取得
+// IDでスクレイピングを取得
 const fetched = await client.scrapes.get(scrape.id);
 ```
+```ts snake_case
+import Olostep, {Format} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// シンプルなスクレイピング
+const scrape = await client.scrapes.create('https://example.com');
+
+// 複数のフォーマットで
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  formats: [Format.HTML, Format.MARKDOWN, Format.TEXT],
+  wait_before_scraping: 1000,
+  remove_images: true
+});
+
+// コンテンツにアクセス
+console.log(scrape.html_content);
+console.log(scrape.markdown_content);
+
+// IDでスクレイピングを取得
+const fetched = await client.scrapes.get(scrape.id);
+```
+</CodeGroup>
 
 ### バッチ処理
 
-複数のURLを一度に処理します：
+複数のURLを一度に処理します:
 
-```ts
+<CodeGroup>
+```ts camelCase
 // URL文字列を使用（カスタムIDは自動生成）
 const batch = await client.batches.create([
   'https://example.com',
@@ -71,7 +112,7 @@ const batch = await client.batches.create([
   {url: 'https://example.org', customId: 'site-2'}
 ]);
 
-console.log(`バッチ${batch.id}が${batch.total_urls}個のURLで作成されました`);
+console.log(`Batch ${batch.id} created with ${batch.total_urls} URLs`);
 
 // 完了を待つ
 await batch.waitTillDone({
@@ -88,12 +129,45 @@ for await (const item of batch.items()) {
   console.log(item.custom_id);
 }
 ```
+```ts snake_case
+// URL文字列を使用（カスタムIDは自動生成）
+const batch = await client.batches.create([
+  'https://example.com',
+  'https://example.org',
+  'https://example.net'
+]);
+
+// または明示的なカスタムIDで
+const batch = await client.batches.create([
+  {url: 'https://example.com', custom_id: 'site-1'},
+  {url: 'https://example.org', custom_id: 'site-2'}
+]);
+
+console.log(`Batch ${batch.id} created with ${batch.total_urls} URLs`);
+
+// 完了を待つ
+await batch.waitTillDone({
+  check_every_n_secs: 5,
+  timeout_seconds: 120
+});
+
+// バッチ情報を取得
+const info = await batch.info();
+console.log(info);
+
+// 個々の結果をストリーム
+for await (const item of batch.items()) {
+  console.log(item.custom_id);
+}
+```
+</CodeGroup>
 
 ### クロール
 
-ウェブサイト全体をクロールします：
+ウェブサイト全体をクロールします:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const crawl = await client.crawls.create({
   url: 'https://example.com',
   maxPages: 100,
@@ -102,7 +176,7 @@ const crawl = await client.crawls.create({
   excludeUrls: ['*/admin/*']
 });
 
-console.log(`クロール${crawl.id}が開始されました`);
+console.log(`Crawl ${crawl.id} started`);
 
 // 完了を待つ
 await crawl.waitTillDone({
@@ -112,19 +186,47 @@ await crawl.waitTillDone({
 
 // クロール情報を取得
 const info = await crawl.info();
-console.log(`クロールされたページ数: ${info.pages_crawled}`);
+console.log(`Crawled ${info.pages_crawled} pages`);
 
 // クロールされたページをストリーム
 for await (const page of crawl.pages()) {
   console.log(page.url, page.status_code);
 }
 ```
+```ts snake_case
+const crawl = await client.crawls.create({
+  url: 'https://example.com',
+  max_pages: 100,
+  max_depth: 3,
+  include_urls: ['*/blog/*'],
+  exclude_urls: ['*/admin/*']
+});
+
+console.log(`Crawl ${crawl.id} started`);
+
+// 完了を待つ
+await crawl.waitTillDone({
+  check_every_n_secs: 10,
+  timeout_seconds: 300
+});
+
+// クロール情報を取得
+const info = await crawl.info();
+console.log(`Crawled ${info.pages_crawled} pages`);
+
+// クロールされたページをストリーム
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.status_code);
+}
+```
+</CodeGroup>
 
 ### サイトマッピング
 
-ウェブサイトからURLのサイトマップを生成します：
+ウェブサイトからURLのサイトマップを生成します:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const map = await client.maps.create({
   url: 'https://example.com',
   topN: 100,
@@ -132,7 +234,7 @@ const map = await client.maps.create({
   searchQuery: 'blog posts'
 });
 
-console.log(`マップ${map.id}が作成されました`);
+console.log(`Map ${map.id} created`);
 
 // URLをストリーム
 for await (const url of map.urls()) {
@@ -142,10 +244,86 @@ for await (const url of map.urls()) {
 // マップ情報を取得
 const info = await map.info();
 ```
+```ts snake_case
+const map = await client.maps.create({
+  url: 'https://example.com',
+  top_n: 100,
+  include_subdomain: true,
+  search_query: 'blog posts'
+});
+
+console.log(`Map ${map.id} created`);
+
+// URLをストリーム
+for await (const url of map.urls()) {
+  console.log(url);
+}
+
+// マップ情報を取得
+const info = await map.info();
+```
+</CodeGroup>
+
+### AI駆動の回答
+
+AIを使用してウェブページから回答を取得します:
+
+<CodeGroup>
+```ts camelCase
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// シンプルなタスク: 文字列を直接渡す
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// 構造化されたJSON出力で
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  jsonFormat: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// 以前に作成された回答をIDで取得
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// シンプルなタスク: 文字列を直接渡す
+const answer = await client.answers.create(
+  'What is the main topic of https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// 構造化されたJSON出力で
+const structured = await client.answers.create({
+  task: 'Extract all product names and prices from https://example.com',
+  json_format: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// 以前に作成された回答をIDで取得
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+</CodeGroup>
 
 ### コンテンツの取得
 
-以前にスクレイプされたコンテンツを取得します：
+以前にスクレイピングされたコンテンツを取得します:
 
 ```ts
 // 特定のフォーマットでコンテンツを取得
@@ -163,7 +341,7 @@ const content = await client.retrieve(retrieveId, [
 
 #### カスタムアクション
 
-スクレイピング前にブラウザアクションを実行します：
+スクレイピング前にブラウザアクションを実行します:
 
 ```ts
 const scrape = await client.scrapes.create({
@@ -179,9 +357,10 @@ const scrape = await client.scrapes.create({
 
 #### 地理的ロケーション
 
-事前定義された国コードまたは有効な国コード文字列を使用して異なる国からスクレイプします：
+事前定義された国コードまたは有効な国コード文字列を使用して異なる国からスクレイピングします:
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Country} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -198,12 +377,31 @@ const scrape2 = await client.scrapes.create({
   country: 'jp'  // 日本
 });
 ```
+```ts snake_case
+import Olostep, {Country} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// 事前定義された列挙値を使用（US, DE, FR, GB, SG）
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  country: Country.DE  // ドイツ
+});
+
+// または有効な国コードを文字列として使用
+const scrape2 = await client.scrapes.create({
+  url: 'https://example.com',
+  country: 'jp'  // 日本
+});
+```
+</CodeGroup>
 
 #### LLM抽出
 
-LLMを使用して構造化データを抽出します：
+LLMを使用して構造化データを抽出します:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const scrape = await client.scrapes.create({
   url: 'https://example.com',
   llmExtract: {
@@ -212,15 +410,29 @@ const scrape = await client.scrapes.create({
       price: 'number',
       description: 'string'
     },
-    // オプションで抽出をガイドするプロンプトを提供
-    prompt: 'このページから製品情報を抽出してください'
+    prompt: 'Extract product information from this page'
   }
 });
 ```
+```ts snake_case
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  llm_extract: {
+    schema: {
+      title: 'string',
+      price: 'number',
+      description: 'string'
+    },
+    prompt: 'Extract product information from this page'
+  }
+});
+```
+</CodeGroup>
 
 ### クライアント設定
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({
@@ -234,11 +446,26 @@ const client = new Olostep({
   userAgent: 'MyApp/1.0'  // オプション
 });
 ```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({
+  api_key: 'your_api_key',
+  api_base_url: 'https://api.olostep.com/v1',  // オプション
+  timeout_ms: 150000,  // 150秒（オプション）
+  retry: {
+    max_retries: 3,
+    initial_delay_ms: 1000
+  },
+  user_agent: 'MyApp/1.0'  // オプション
+});
+```
+</CodeGroup>
 
 ### 機能のハイライト
 
-- 非同期ファーストのクライアントで、完全なTypeScriptサポート。
-- TypeScriptの列挙型とインターフェースを使用した型安全な入力（Formats, Countries, Actionsなど）。
-- 簡潔な呼び出し（`client.scrapes.create()`）と明示的なメソッド（`client.scrapes.get()`）を備えた豊富なリソースネームスペース。
+- フルTypeScriptサポートの非同期ファーストクライアント。
+- TypeScriptの列挙型とインターフェース（Formats, Countries, Actionsなど）を使用した型安全な入力。
+- リッチなリソースネームスペース、短縮呼び出し（`client.scrapes.create()`）と明示的なメソッド（`client.scrapes.get()`）の両方。
 - リトライ、タイムアウト、JSONデコードを備えた共有トランスポートレイヤー。
-- 包括的なエラーハイアラーキー。
+- 包括的なエラーハイアラキー。

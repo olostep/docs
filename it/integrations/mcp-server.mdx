@@ -1,14 +1,14 @@
 ---
-sidebarTitle: "MCP Server"
+sidebarTitle: "Server MCP"
 icon: "hammer"
-title: "MCP Server"
-description: "Usa Olostep tramite il Model Context Protocol per dati web veloci ed efficienti"
+title: "Server MCP"
+description: "Usa Olostep attraverso il Model Context Protocol per dati web veloci ed efficienti"
 ---
 
-Olostep MCP Server offre strumenti di accesso web per le tue app AI. Consente alla tua AI di:
-1. Cercare sul web per ancorare l'AI su dati del mondo reale (fatti, documenti, eventi)
+Il Server MCP di Olostep offre strumenti di accesso web alle tue app AI. Permette alla tua AI di:
+1. Cercare sul web per ancorare l'AI a dati del mondo reale (fatti, documenti, eventi)
 2. Ottenere il contenuto markdown di qualsiasi pagina web
-3. Scoprire e filtrare gli URL rilevanti all'interno di un sito web.
+3. Scoprire e filtrare URL rilevanti all'interno di un sito web.
 
 ## Installazione
 Hai bisogno di una chiave API. Ottieni la chiave API da https://www.olostep.com/dashboard/api-keys.
@@ -73,7 +73,7 @@ claude mcp add --transport stdio --env OLOSTEP_API_KEY=YOUR_API_KEY olostep \
 ### Esecuzione su Cursor
 
 <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=olostep-web&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIm9sb3N0ZXAtbWNwIl0sImVudiI6eyJPTE9TVEVQX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D">
-  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Aggiungi Olostep MCP server a Cursor" style={{ maxHeight: 32 }} />
+  <img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Aggiungi il server MCP di Olostep a Cursor" style={{ maxHeight: 32 }} />
 </a>
 
 #### Configurazione manuale
@@ -111,12 +111,12 @@ Alternativa (locale / stdio)
   }
 }
 ```
-- Ricorda di sostituire `YOUR_API_KEY` con la tua chiave API effettiva che puoi ottenere dalla [dashboard di Olostep](https://www.olostep.com/dashboard)
-- Ora puoi chiudere la scheda delle impostazioni. Se necessario, aggiorna l'elenco dei server MCP per vedere i nuovi strumenti.
+- Ricorda di sostituire `YOUR_API_KEY` con la tua chiave API effettiva che puoi ottenere dal [dashboard di Olostep](https://www.olostep.com/dashboard)
+- Ora puoi chiudere la scheda delle impostazioni. Se necessario, aggiorna l'elenco dei server MCP per vedere i nuovi strumenti
 
-> Se stai usando Windows e riscontri problemi, prova `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
+> Se stai usando Windows e hai problemi, prova `cmd /c "set OLOSTEP_API_KEY=your-api-key && npx -y olostep-mcp"`
 
-La prossima volta che usi Cursor, utilizzerà automaticamente Olostep MCP quando necessario. Puoi anche richiedere esplicitamente di usare Olostep MCP quando hai bisogno di informazioni aggiornate dal web.
+La prossima volta che usi Cursor, utilizzerà automaticamente l'Olostep MCP quando necessario. Puoi anche richiedere esplicitamente di usare l'Olostep MCP quando hai bisogno di informazioni aggiornate dal web.
 
 ### Esecuzione su Windsurf
 Aggiungi questo al tuo ./codeium/windsurf/model_config.json:
@@ -153,13 +153,12 @@ Alternativa (locale / stdio)
 - **scrape_website**: Estrai contenuti da un singolo URL. Supporta più formati e rendering JavaScript.
 - **search_web**: Cerca sul web per una determinata query e restituisce risultati strutturati (non AI, basato su parser).
 - **answers**: Cerca sul web e restituisce risposte potenziate dall'AI nella struttura JSON desiderata, con fonti e citazioni.
-- **batch_scrape_urls**: Esegui scraping fino a 10k URL contemporaneamente. Perfetto per l'estrazione di dati su larga scala.
-- **get_batch_results**: Recupera lo stato e il contenuto estratto per un lavoro batch. Se completato, recupera gli elementi e il contenuto per ogni URL.
-- **create_crawl**: Scopri e esegui scraping autonomamente di interi siti web seguendo i link da un URL di partenza.
+- **batch_scrape_urls**: Raccogli fino a 10k URL contemporaneamente. Perfetto per l'estrazione di dati su larga scala.
+- **get_batch_results**: Recupera lo stato e il contenuto raccolto per un lavoro batch. Se completato, recupera gli elementi e il contenuto per ogni URL.
+- **create_crawl**: Scopri e raccogli autonomamente interi siti web seguendo i link da un URL di partenza.
 - **create_map**: Ottieni tutti gli URL su un sito web. Estrai URL per la scoperta e l'analisi del sito.
 - **get_webpage_content**: Recupera il contenuto di una pagina web in formato markdown.
 - **get_website_urls**: Cerca e recupera URL rilevanti da un sito web.
-- **google_search**: Recupera dati strutturati dai risultati di ricerca di Google.
 
 ## Conclusione
 Puoi trovare dettagli completi su Olostep MCP [qui](https://github.com/olostep/olostep-mcp-server).

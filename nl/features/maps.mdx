@@ -9,9 +9,9 @@ Via de Olostep `/v1/maps` endpoint kun je alle URL's op een website verkrijgen. 
 - Verkrijg alle URL's op een website (inclusief sitemaps en ontdekte links)
 - Gebruik speciale patronen om paden in of uit te sluiten (bijv. `/blog/**`)
 - Pagineer grote reacties met `cursor` (tot 10MB per reactie)
-- Beperk het volume met `top_n`
+- Beperk volume met `top_n`
 
-Voor API-details zie de [Map Endpoint API Reference](/api-reference/maps/create).
+Voor API-details zie de [Kaart Endpoint API Referentie](/api-reference/maps/create).
 
 ## Installatie
 
@@ -26,7 +26,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl is standaard beschikbaar op macOS, Linux en Windows
 ```
 
 ```javascript Node (API)
@@ -109,22 +109,21 @@ print(json.dumps(response.json(), indent=2))
 
 </CodeGroup>
 
-De responstijd is meestal binnen enkele seconden, maar kan oplopen tot 120 seconden voor complexere websites. Het kan alle URL's van een website extraheren, zelfs backlinks en die niet aanwezig zijn in de Sitemaps. Je kunt ook beslissen welke URL-paden je wilt opnemen of uitsluiten van de reactie.
+De responstijd is meestal binnen enkele seconden, maar kan tot 120 seconden duren voor complexere websites. Het kan alle URL's van een website extraheren, zelfs backlinks en die niet in de Sitemaps aanwezig zijn. Je kunt ook beslissen welke URL-paden je wilt opnemen of uitsluiten van de reactie.
 
-Standaard retourneert de endpoint ongeveer 100k URL's in een enkele oproep (maximaal 10MB). Als de reactie meer data bevat, retourneert de API een `cursor` parameter die kan worden gebruikt voor paginering en het verkrijgen van de volgende URL's. Voor meer details raadpleeg de [API Reference](/api-reference/maps/create#body-cursor)
+Standaard retourneert de endpoint ongeveer 100k URL's in één oproep (maximaal 10MB). Als de reactie meer gegevens bevat, retourneert de API een `cursor` parameter die kan worden gebruikt voor paginering en het verkrijgen van de volgende URL's. Voor meer details raadpleeg de [API Referentie](/api-reference/maps/create#body-cursor).
 
 Deze endpoint is bijzonder nuttig wanneer je:
 - Alle contentpagina's op een website wilt ontdekken
 - De sitestructuur en hiërarchie wilt analyseren
 - URL's wilt voorbereiden voor batchverwerking
-- Wilt beslissen welke specifieke URL's je wilt scrapen
+- Beslissen welke specifieke URL's je wilt scrapen
 
 Voor meer gedetailleerde controle over de geretourneerde URL's kun je de parameters `include_urls` en `exclude_urls` gebruiken.
 
 ### Voorbeeld
 
-Stel dat je van www.brex.com alle URL's wilt extraheren die de paden na `/product/` hebben, bijv. `https://www.brex.com/product/api/no-code`, maar ook `www.brex.com/product` wilt opnemen.
-Je kunt de volgende code gebruiken:
+Stel dat je van www.brex.com alle URL's wilt extraheren die de paden na `/product/` hebben, bijv. `https://www.brex.com/product/api/no-code`, maar ook `www.brex.com/product` wilt opnemen. Je kunt de volgende code gebruiken:
 
 <CodeGroup>
 
@@ -213,7 +212,7 @@ print(response.text)
 
 ## Conclusie
 
-De maps endpoint is een krachtig hulpmiddel voor contentontdekking en site-analyse. Het biedt een uitgebreide lijst van URL's op een website, waardoor je content van specifieke pagina's kunt extraheren of de sitestructuur kunt analyseren. Deze endpoint is bijzonder nuttig voor SEO-professionals, contentmarketeers, AI-agenten die website-inhoud of -structuur moeten analyseren.
+De maps endpoint is een krachtig hulpmiddel voor contentontdekking en site-analyse. Het biedt een uitgebreide lijst van URL's op een website, waarmee je content van specifieke pagina's kunt extraheren of de sitestructuur kunt analyseren. Deze endpoint is bijzonder nuttig voor SEO-professionals, contentmarketeers, AI-agenten die website-inhoud of -structuur moeten analyseren.
 
 ## Prijzen
 

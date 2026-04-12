@@ -1,11 +1,10 @@
 ---
-sidebarTitle: "Apify"
-icon: "robot"
-title: "Apify Integratie"
-description: "Automatiseer webzoekopdrachten, scraping en crawling met Apify Actors met behulp van Olostep — de API om webgegevens te zoeken, extraheren en structureren."
+sidebarTitle: "Olostep + Apify"
+title: "Olostep + Apify Integratie"
+description: "Automatiseer webzoekopdrachten, scraping en crawling met Apify Actors en Olostep — de API om webgegevens te zoeken, extraheren en structureren."
 ---
 
-Olostep is een Web zoek-, scraping- en crawling-API — een API om webgegevens te zoeken, extraheren en structureren. Deze gids laat zien hoe je Olostep kunt gebruiken met Apify Actors om betrouwbare webgegevenspijplijnen van begin tot eind te bouwen.
+Olostep is een Web zoek-, scraping- en crawling-API — een API om webgegevens te zoeken, extraheren en structureren. Deze gids laat zien hoe je Olostep met Apify Actors kunt gebruiken om betrouwbare webdatapijplijnen van begin tot eind te bouwen.
 
 ## Wat je kunt bouwen
 
@@ -14,7 +13,7 @@ Olostep is een Web zoek-, scraping- en crawling-API — een API om webgegevens t
     Haal inhoud op van elke enkele URL in Markdown, HTML, JSON of Tekst
   </Card>
   <Card title="Batch Scrapen van URL's" icon="layer-group">
-    Verwerk grote lijsten van URL's parallel met gestructureerde uitkomsten
+    Verwerk grote lijsten van URL's parallel met gestructureerde outputs
   </Card>
   <Card title="Crawl Maken" icon="spider-web">
     Ontdek en scrape gelinkte pagina's om complete datasets te bouwen
@@ -38,7 +37,7 @@ apify --version
 
 ### 2) Verkrijg je Olostep API-sleutel
 
-Van het Olostep Dashboard → API Sleutels.
+Van het Olostep Dashboard → API-sleutels.
 
 ### 3) Voer de Olostep Actor lokaal uit
 
@@ -60,7 +59,7 @@ Voorbeeldinvoer:
 }
 ```
 
-### 4) Deploy naar Apify (cloud)
+### 4) Implementeer naar Apify (cloud)
 
 ```bash
 apify login
@@ -71,21 +70,21 @@ Open vervolgens Apify Console → Actors → voer de actor uit met je gewenste i
 
 ### Voer uit in Apify Console (stap voor stap)
 
-1. Open je Actor in Apify Console → Bron → Invoer.  
+1. Open je Actor in Apify Console → Source → Input.  
 2. In het Handmatige tabblad zie je een zichtbaar veld “Olostep API Key”. Plak je sleutel van het Olostep Dashboard.  
 3. Kies een operatie (standaard is “scrape”).  
-4. Vul de relevante velden in (voor “scrape”, stel “URL om te Scrapen” in).  
+4. Vul de relevante velden in (voor “scrape”, stel “URL to Scrape” in).  
 5. Klik op Opslaan → Start.  
-6. Wanneer de uitvoering is voltooid, open het Dataset-tabblad om resultaten te downloaden (JSON/CSV/Excel).
+6. Wanneer de run is voltooid, open het Dataset-tabblad om resultaten te downloaden (JSON/CSV/Excel).
 
 Opmerkingen:
-- Voor “URL om te Scrapen” kun je plakken met of zonder schema. Als het ontbreekt, voegt de actor automatisch `https://` toe.  
-- Als een site zwaar is in JavaScript en je ziet een timeout, stel “Wacht Voor Scrapen” in op 2000–5000 ms en voer opnieuw uit.
+- Voor “URL to Scrape” kun je plakken met of zonder schema. Als het ontbreekt, voegt de actor automatisch `https://` toe.  
+- Als een site zwaar is in JavaScript en je ziet een timeout, stel “Wait Before Scraping” in op 2000–5000 ms en voer opnieuw uit.
 
 ## Beschikbare operaties
 
 ### Website Scrapen
-Haal inhoud op van een enkele URL. Geweldig voor paginaniveau-automatisering.
+Haal inhoud op van een enkele URL. Geweldig voor pagina-niveau automatisering.
 
 <ParamField path="operation" type="constant" default="scrape">
   Moet "scrape" zijn
@@ -175,7 +174,7 @@ Uitvoervelden:
 - crawl_id, object, status, start_url, max_pages, follow_links, created, formats
 
 ### Kaart Maken
-Ontdek alle URL's op een website en bereid voor op latere batchscraping.
+Ontdek alle URL's op een website en bereid voor op latere batch scraping.
 
 <ParamField path="operation" type="constant" default="map">
   Moet "map" zijn
@@ -187,22 +186,22 @@ Ontdek alle URL's op een website en bereid voor op latere batchscraping.
   De website om in kaart te brengen
 </ParamField>
 <ParamField path="search_query" type="string">
-  Optioneel queryfilter
+  Optionele zoekopdracht filter
 </ParamField>
 <ParamField path="top_n" type="integer">
   Beperk aantal URL's
 </ParamField>
 <ParamField path="include_patterns" type="string">
-  Inclusiepatronen, bijv. "/products/**"
+  Inclusie glob(s), bijv. "/products/**"
 </ParamField>
 <ParamField path="exclude_patterns" type="string">
-  Exclusiepatronen, bijv. "/admin/**"
+  Exclusie glob(s), bijv. "/admin/**"
 </ParamField>
 
 Uitvoervelden:
 - map_id, object, website_url, total_urls, urls[], search_query, top_n
 
-## Kopieer-plak JSON-voorbeelden (Console → Invoer → JSON)
+## Kopieer-plak JSON voorbeelden (Console → Input → JSON)
 
 ### Scrape
 ```json
@@ -253,7 +252,7 @@ Uitvoervelden:
 {
   "operation": "answers",
   "apiKey": "YOUR_OLOSTEP_API_KEY",
-  "task": "Wat is de laatste financieringsronde van Olostep? Geef bedrijf, ronde, datum, bedrag.",
+  "task": "What is the latest funding round of Olostep? Provide company, round, date, amount.",
   "json": "{\"company\":\"\",\"round\":\"\",\"date\":\"\",\"amount\":\"\"}"
 }
 ```
@@ -262,40 +261,40 @@ Uitvoervelden:
 
 <AccordionGroup>
   <Accordion title="Ontdek en Scrape Producten">
-    1) Kaart Maken → include "/products/**"  
-    2) Parseer URL's → bouw batch array  
-    3) Batch Scrapen van URL's → formats: JSON  
+    1) Maak Kaart → include "/products/**"  
+    2) Parse URL's → bouw batch array  
+    3) Batch Scrape URL's → formats: JSON  
     4) Stuur naar Google Sheets / Airtable
   </Accordion>
-  <Accordion title="Dagelijkse Content Monitoring">
+  <Accordion title="Dagelijkse Inhoud Monitoring">
     1) Plan actor (dagelijks)  
-    2) Website Scrapen → formats: Markdown  
+    2) Scrape Website → formats: Markdown  
     3) Samenvatten met LLM  
-    4) Meld op Slack
+    4) Notificeren op Slack
   </Accordion>
-  <Accordion title="Concurrentie Kennisbank">
-    1) Crawl Maken (blog/docs)  
-    2) Bewaar uitkomsten in Notion  
-    3) Wekelijks verversen met Schema
+  <Accordion title="Concurrenten Kennisbank">
+    1) Maak Crawl (blog/docs)  
+    2) Bewaar outputs in Notion  
+    3) Wekelijks vernieuwen met Schema
   </Accordion>
 </AccordionGroup>
 
 ## Gespecialiseerde parsers
 
-Olostep ondersteunt parsers om gegevens voor populaire sites te structureren.
+Olostep ondersteunt parsers om gegevens te structureren voor populaire sites.
 
 <CardGroup cols={2}>
   <Card title="Amazon Product" icon="amazon">
     `@olostep/amazon-product` → titel, prijs, beoordeling, reviews, afbeeldingen, varianten
   </Card>
-  <Card title="Google Zoeken" icon="google">
+  <Card title="Google Search" icon="google">
     `@olostep/google-search` → resultaten, titels, snippets, URL's
   </Card>
   <Card title="Google Maps" icon="map">
     `@olostep/google-maps` → bedrijfsinformatie, reviews, beoordelingen, locatie
   </Card>
   <Card title="Meer Parsers" icon="cart-shopping" href="https://www.olostep.com/store">
-    Verken e-mail extractors, sociale handvatzoekers, kalenderlink extractors en meer
+    Ontdek e-mail extractors, sociale media handle finders, kalenderlink extractors en meer
   </Card>
 </CardGroup>
 
@@ -309,17 +308,17 @@ Olostep ondersteunt parsers om gegevens voor populaire sites te structureren.
     JS-zware sites: verhoog `wait_before_scraping` (bijv., 2000–5000ms).
   </Accordion>
   <Accordion title="Filter voordat je scrapt">
-    Vermijd onnodige taken — controleer eerst wijzigingen, houd deduplicatiestatus bij.
+    Vermijd onnodige taken — controleer eerst wijzigingen, houd deduplicatie status bij.
   </Accordion>
   <Accordion title="Bewaar grote inhoud via gehoste URL's">
-    Gebruik gehoste uitkomsten om payloadgroottebeperkingen in Apify-flows te omzeilen.
+    Gebruik gehoste outputs om payload groottebeperkingen in Apify-flows te omzeilen.
   </Accordion>
   <Accordion title="Behandel asynchrone operaties als langlopend">
     Batch/Crawl/Map geven ID's terug; haal later op of koppel met een vertraging.
   </Accordion>
   <Accordion title="Behandel tijdelijke timeouts netjes">
     Als je een 504 of tijdelijke timeout ziet, probeert de actor automatisch opnieuw met een korte wachttijd.  
-    Je kunt ook “Wacht Voor Scrapen” instellen op 2000–5000 ms voor JS-zware pagina's.
+    Je kunt ook “Wait Before Scraping” instellen op 2000–5000 ms voor JS-zware pagina's.
   </Accordion>
 </AccordionGroup>
 
@@ -337,13 +336,13 @@ Olostep ondersteunt parsers om gegevens voor populaire sites te structureren.
     - Probeer een ander uitvoerformaat
   </Accordion>
   <Accordion title="Rate limit overschreden">
-    - Ruimte-uitvoeringen via schema  
+    - Ruimte runs via schema  
     - Geef de voorkeur aan batch voor veel URL's  
-    - Upgrade Olostep-abonnement indien nodig
+    - Upgrade Olostep plan indien nodig
   </Accordion>
   <Accordion title="Geblokkeerde of dynamische sites">
     - Probeer landparameter  
-    - Pas wacht en parser aan  
+    - Pas wachttijd en parser aan  
     - Neem contact op met ondersteuning voor begeleiding
   </Accordion>
 </AccordionGroup>
@@ -358,10 +357,10 @@ Olostep rekent per API-gebruik (onafhankelijk van Apify):
 
 Zie `https://olostep.com/pricing`.
 
-## Veiligheid
+## Beveiliging
 
 - Je API-sleutel wordt als Bearer-token verzonden tijdens runtime.  
-- Commit geen sleutels naar versiebeheer; Apify slaat invoer op in Key-Value Store.  
+- Commitsleutels niet naar versiebeheer; Apify slaat invoer op in Key‑Value Store.  
 - In lokale ontwikkeling, houd sleutels in `storage/key_value_stores/default/INPUT.json` (gitignored).
 
 ## Gerelateerde bronnen
@@ -377,20 +376,23 @@ Zie `https://olostep.com/pricing`.
     Ontdek en scrape de inhoud van een site recursief.
   </Card>
   <Card title="Maps API" icon="map" href="/features/maps">
-    Verkrijg alle URL's op een website om batchscrapes voor te bereiden.
+    Verkrijg alle URL's op een website om batch scrapes voor te bereiden.
   </Card>
 </CardGroup>
 
 ## Ondersteuning
 
 <CardGroup cols={2}>
+  <Card title="Apify Website" icon="link" href="https://apify.com">
+    Apify platform
+  </Card>
+  <Card title="Apify Docs" icon="book" href="https://docs.apify.com">
+    Apify platform & SDK docs
+  </Card>
   <Card title="Documentatie" icon="book" href="https://docs.olostep.com">
-    Volledige API-documentatie
+    Complete API-documentatie
   </Card>
-  <Card title="Ondersteuning E-mail" icon="envelope" href="mailto:info@olostep.com">
+  <Card title="Ondersteuning Email" icon="envelope" href="mailto:info@olostep.com">
     info@olostep.com
-  </Card>
-  <Card title="Apify Docs" icon="link" href="https://docs.apify.com">
-    Apify platform & SDK documentatie
   </Card>
 </CardGroup>

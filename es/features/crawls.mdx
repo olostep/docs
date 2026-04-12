@@ -1,18 +1,18 @@
 ---
 sidebarTitle: "Crawl"
 title: "Crawl"
-description: "Rastrear una URL y obtener el contenido de todas las subpáginas"
+description: "Rastrea una URL y obtiene el contenido de todas las subpáginas"
 icon: "spider"
 ---
 
-A través del endpoint `/v1/crawls` de Olostep puedes rastrear un sitio web y obtener el contenido de todas las páginas.
+A través del endpoint de Olostep `/v1/crawls` puedes rastrear un sitio web y obtener el contenido de todas las páginas.
 
-- Rastrear un sitio web y obtener el contenido de todas las subpáginas (o limitar la profundidad del rastreo)
-- Usar patrones especiales para rastrear páginas específicas (por ejemplo, `/blog/**`)
-- Pasar un `webhook_url` para recibir notificaciones cuando el rastreo esté completo
+- Rastrea un sitio web y obtiene el contenido de todas las subpáginas (o limita la profundidad del rastreo)
+- Usa patrones especiales para rastrear páginas específicas (por ejemplo, `/blog/**`)
+- Pasa un `webhook_url` para recibir notificaciones cuando el rastreo se complete
 - Consulta de búsqueda para encontrar solo páginas específicas y ordenar por relevancia
 
-Para detalles del API, consulta la [Referencia del API del Endpoint de Crawl](/api-reference/crawls/create).
+Para detalles de la API, consulta la [Referencia de la API del Endpoint de Crawl](/api-reference/crawls/create).
 
 ## Instalación
 
@@ -27,7 +27,7 @@ npm install olostep
 ```
 
 ```bash cURL
-# curl is available by default on macOS, Linux, and Windows
+# curl está disponible por defecto en macOS, Linux y Windows
 ```
 
 ```javascript Node (API)
@@ -130,7 +130,7 @@ print(json.dumps(crawl, indent=2))
 
 </CodeGroup>
 
-Dado que todo en Olostep es un objeto, recibirás un objeto `crawl` en respuesta. El objeto `crawl` tiene algunas propiedades como `id` y `status`, que puedes usar para rastrear el progreso.
+Dado que todo en Olostep es un objeto, recibirás un objeto `crawl` en respuesta. El objeto `crawl` tiene algunas propiedades como `id` y `status`, que puedes usar para rastrear el progreso del rastreo.
 
 ## Verificar el estado del rastreo
 
@@ -139,20 +139,20 @@ Consulta el rastreo para seguir el progreso hasta que el `status` sea `completed
 <CodeGroup>
 
 ```python Python
-# Using the crawl object from the previous step
+# Usando el objeto crawl del paso anterior
 info = crawl.info()
 print(info.status, info.pages_count)
 
-# Or wait until completed
+# O espera hasta que se complete
 crawl.wait_till_done(check_every_n_secs=5)
 ```
 
 ```js Node
-// Using the crawl object from the previous step
+// Usando el objeto crawl del paso anterior
 const info = await crawl.info()
 console.log(info.status, info.pages_count)
 
-// Or wait until completed
+// O espera hasta que se complete
 await crawl.waitTillDone({ checkEveryNSecs: 5 })
 ```
 
@@ -186,7 +186,7 @@ while True:
 
 </CodeGroup>
 
-Alternativamente, puedes pasar un `webhook_url` al iniciar el rastreo para ser notificado cuando el rastreo esté completo.
+Alternativamente, puedes pasar un `webhook_url` al iniciar el rastreo para ser notificado cuando el rastreo se complete.
 
 ## Listar páginas (paginación/stream con cursor)
 
@@ -195,13 +195,13 @@ Obtén páginas e itera usando `cursor` y `limit`. Funciona mientras el rastreo 
 <CodeGroup>
 
 ```python Python
-# Iterate all pages (auto-waits for crawl completion, handles pagination)
+# Itera todas las páginas (espera automáticamente a que el rastreo se complete, maneja la paginación)
 for page in crawl.pages():
     print(page.url, page.retrieve_id)
 ```
 
 ```js Node
-// Iterate all pages (auto-waits for crawl completion, handles pagination)
+// Itera todas las páginas (espera automáticamente a que el rastreo se complete, maneja la paginación)
 for await (const page of crawl.pages()) {
   console.log(page.url, page.retrieve_id)
 }
@@ -327,14 +327,14 @@ Usa el `retrieve_id` de cada página con `/v1/retrieve` para obtener `html_conte
 <CodeGroup>
 
 ```python Python
-# Retrieve content for each crawled page
+# Recupera contenido para cada página rastreada
 for page in crawl.pages():
     content = page.retrieve(["markdown"])
     print(content.markdown_content)
 ```
 
 ```js Node
-// Retrieve content for each crawled page
+// Recupera contenido para cada página rastreada
 for await (const page of crawl.pages()) {
   const content = await client.retrieve.get(page.retrieve_id, ['markdown'])
   console.log(content.markdown_content)
@@ -365,9 +365,9 @@ for page in get_pages(crawl['id'], limit=5)['pages']:
 
 ## Notas
 
-- La paginación se basa en cursor; repite las solicitudes hasta que el `cursor` esté ausente.
+- La paginación se basa en cursor; repite solicitudes hasta que el `cursor` esté ausente.
 - Los campos de contenido en `/v1/crawls/{crawl_id}/pages` están obsoletos; prefiere `/v1/retrieve`.
-- Webhooks: configura `webhook_url` para recibir un POST cuando el rastreo se complete.
+- Webhooks: establece `webhook_url` para recibir un POST cuando el rastreo se complete.
 
 ## Precios
 

@@ -1,15 +1,15 @@
 ---
 sidebarTitle: "Zoeken"
 title: "Zoek-API"
-icon: "vergrootglas"
+icon: "magnifying-glass"
 ---
 
 De Olostep `/v1/searches` endpoint stelt je in staat om het web te doorzoeken met een natuurlijke taalquery en een gededupliceerde lijst van relevante links met titels en beschrijvingen terug te krijgen.
 
 - Stuur een query in gewoon Engels
-- Ontvang gestructureerde links van over het hele web
+- Krijg gestructureerde links van over het hele web terug
 
-Het zal de query semantisch over het web doorzoeken en resultaten retourneren.
+Het zal semantisch naar de query zoeken over het web en resultaten teruggeven.
 
 Voor API-details, zie de [Zoek Endpoint API Referentie](/api-reference/searches/create).
 
@@ -41,7 +41,7 @@ const fetch = require('node-fetch')
 
 ## Gebruik
 
-Stuur een query in natuurlijke taal en ontvang een lijst van relevante links.
+Stuur een natuurlijke taalquery en ontvang een lijst met relevante links.
 
 <CodeGroup>
 
@@ -103,12 +103,12 @@ Je ontvangt een `search` object als reactie. Het `search` object bevat een `id`,
       {
         "url": "https://www.failory.com/startups/search-engine",
         "title": "Top 48 Search Engine Startups to Watch in 2026",
-        "description": "Een diepgaande blik op de 48 meest veelbelovende zoekmachine startups..."
+        "description": "A deep dive into the 48 most promising search engine startups..."
       },
       {
         "url": "https://clutch.co/seo-firms/startups",
         "title": "Top 30 SEO Companies for Startups - Mar 2026 Rankings",
-        "description": "Verbind met de beste SEO bedrijven..."
+        "description": "Connect with the best SEO companies..."
       }
     ]
   }
@@ -117,11 +117,11 @@ Je ontvangt een `search` object als reactie. Het `search` object bevat een `id`,
 
 Elke link in `result.links` bevat:
 
-| Veld          | Type   | Beschrijving                              |
-|---------------|--------|-------------------------------------------|
-| `url`         | string | De URL van het zoekresultaat              |
-| `title`       | string | De titel van de resultaatpagina           |
-| `description` | string | Een korte beschrijving van het resultaat  |
+| Veld          | Type   | Beschrijving                             |
+|---------------|--------|------------------------------------------|
+| `url`         | string | De URL van het zoekresultaat             |
+| `title`       | string | De titel van de resultaatpagina          |
+| `description` | string | Een korte beschrijving van het resultaat |
 
 Het volledige resultaat is ook beschikbaar als een gehost JSON-bestand op `result.json_hosted_url`.
 

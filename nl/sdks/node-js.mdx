@@ -2,7 +2,7 @@
 sidebarTitle: "NodeJS"
 title: "Olostep NodeJS SDK"
 icon: "node-js"
-description: "Officiële NodeJS SDK om gegevens van het web te zoeken, extraheren en structureren"
+description: "Officiële NodeJS SDK om data van het web te zoeken, extraheren en structureren"
 ---
 
 **NPM Package**: [olostep](https://www.npmjs.com/package/olostep) 
@@ -13,23 +13,38 @@ description: "Officiële NodeJS SDK om gegevens van het web te zoeken, extrahere
 npm install olostep
 ```
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({apiKey: process.env.OLOSTEP_API_KEY});
 
-// Minimale scrape voorbeeld
+// Minimal scrape voorbeeld
 const result = await client.scrapes.create('https://example.com');
 console.log(result.id, result.html_content);
 ```
+```ts snake_case
+import Olostep from 'olostep';
 
+const client = new Olostep({api_key: process.env.OLOSTEP_API_KEY});
+
+// Minimal scrape voorbeeld
+const result = await client.scrapes.create('https://example.com');
+console.log(result.id, result.html_content);
+```
+</CodeGroup>
+
+<Note>
+De NodeJS SDK accepteert zowel **camelCase** als **snake_case** voor alle parameters. Gebruik **snake_case** als je bouwt voor AI-agenten, het komt overeen met de native veldnamen van de API.
+</Note>
 ## Gebruik
 
 ### Scraping
 
 Scrape een enkele URL met verschillende opties:
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Format} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -49,51 +64,109 @@ const scrape = await client.scrapes.create({
 console.log(scrape.html_content);
 console.log(scrape.markdown_content);
 
-// Haal scrape op via ID
+// Scrape ophalen via ID
 const fetched = await client.scrapes.get(scrape.id);
 ```
+```ts snake_case
+import Olostep, {Format} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Eenvoudige scrape
+const scrape = await client.scrapes.create('https://example.com');
+
+// Met meerdere formaten
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  formats: [Format.HTML, Format.MARKDOWN, Format.TEXT],
+  wait_before_scraping: 1000,
+  remove_images: true
+});
+
+// Toegang tot de inhoud
+console.log(scrape.html_content);
+console.log(scrape.markdown_content);
+
+// Scrape ophalen via ID
+const fetched = await client.scrapes.get(scrape.id);
+```
+</CodeGroup>
 
 ### Batchverwerking
 
-Verwerk meerdere URL's in een enkele batch:
+Verwerk meerdere URLs in één batch:
 
-```ts
-// Met behulp van URL-strings (aangepaste ID's automatisch gegenereerd)
+<CodeGroup>
+```ts camelCase
+// Gebruik van URL-strings (aangepaste IDs automatisch gegenereerd)
 const batch = await client.batches.create([
   'https://example.com',
   'https://example.org',
   'https://example.net'
 ]);
 
-// Of met expliciete aangepaste ID's
+// Of met expliciete aangepaste IDs
 const batch = await client.batches.create([
   {url: 'https://example.com', customId: 'site-1'},
   {url: 'https://example.org', customId: 'site-2'}
 ]);
 
-console.log(`Batch ${batch.id} aangemaakt met ${batch.total_urls} URL's`);
+console.log(`Batch ${batch.id} aangemaakt met ${batch.total_urls} URLs`);
 
-// Wacht op voltooiing
+// Wachten op voltooiing
 await batch.waitTillDone({
   checkEveryNSecs: 5,
   timeoutSeconds: 120
 });
 
-// Haal batchinformatie op
+// Batchinformatie ophalen
 const info = await batch.info();
 console.log(info);
 
-// Stream individuele resultaten
+// Individuele resultaten streamen
 for await (const item of batch.items()) {
   console.log(item.custom_id);
 }
 ```
+```ts snake_case
+// Gebruik van URL-strings (aangepaste IDs automatisch gegenereerd)
+const batch = await client.batches.create([
+  'https://example.com',
+  'https://example.org',
+  'https://example.net'
+]);
+
+// Of met expliciete aangepaste IDs
+const batch = await client.batches.create([
+  {url: 'https://example.com', custom_id: 'site-1'},
+  {url: 'https://example.org', custom_id: 'site-2'}
+]);
+
+console.log(`Batch ${batch.id} aangemaakt met ${batch.total_urls} URLs`);
+
+// Wachten op voltooiing
+await batch.waitTillDone({
+  check_every_n_secs: 5,
+  timeout_seconds: 120
+});
+
+// Batchinformatie ophalen
+const info = await batch.info();
+console.log(info);
+
+// Individuele resultaten streamen
+for await (const item of batch.items()) {
+  console.log(item.custom_id);
+}
+```
+</CodeGroup>
 
 ### Crawlen
 
 Crawl een volledige website:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const crawl = await client.crawls.create({
   url: 'https://example.com',
   maxPages: 100,
@@ -104,27 +177,55 @@ const crawl = await client.crawls.create({
 
 console.log(`Crawl ${crawl.id} gestart`);
 
-// Wacht op voltooiing
+// Wachten op voltooiing
 await crawl.waitTillDone({
   checkEveryNSecs: 10,
   timeoutSeconds: 300
 });
 
-// Haal crawl-informatie op
+// Crawl-informatie ophalen
 const info = await crawl.info();
-console.log(`Gecrawlde ${info.pages_crawled} pagina's`);
+console.log(`Gecrawld ${info.pages_crawled} pagina's`);
 
-// Stream gecrawlde pagina's
+// Gecrawlde pagina's streamen
 for await (const page of crawl.pages()) {
   console.log(page.url, page.status_code);
 }
 ```
+```ts snake_case
+const crawl = await client.crawls.create({
+  url: 'https://example.com',
+  max_pages: 100,
+  max_depth: 3,
+  include_urls: ['*/blog/*'],
+  exclude_urls: ['*/admin/*']
+});
+
+console.log(`Crawl ${crawl.id} gestart`);
+
+// Wachten op voltooiing
+await crawl.waitTillDone({
+  check_every_n_secs: 10,
+  timeout_seconds: 300
+});
+
+// Crawl-informatie ophalen
+const info = await crawl.info();
+console.log(`Gecrawld ${info.pages_crawled} pagina's`);
+
+// Gecrawlde pagina's streamen
+for await (const page of crawl.pages()) {
+  console.log(page.url, page.status_code);
+}
+```
+</CodeGroup>
 
 ### Site Mapping
 
-Genereer een sitemap van URL's van een website:
+Genereer een sitemap van URLs van een website:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const map = await client.maps.create({
   url: 'https://example.com',
   topN: 100,
@@ -134,21 +235,97 @@ const map = await client.maps.create({
 
 console.log(`Map ${map.id} aangemaakt`);
 
-// Stream URL's
+// URLs streamen
 for await (const url of map.urls()) {
   console.log(url);
 }
 
-// Haal kaartinformatie op
+// Mapinformatie ophalen
 const info = await map.info();
 ```
+```ts snake_case
+const map = await client.maps.create({
+  url: 'https://example.com',
+  top_n: 100,
+  include_subdomain: true,
+  search_query: 'blog posts'
+});
 
-### Inhoud ophalen
+console.log(`Map ${map.id} aangemaakt`);
+
+// URLs streamen
+for await (const url of map.urls()) {
+  console.log(url);
+}
+
+// Mapinformatie ophalen
+const info = await map.info();
+```
+</CodeGroup>
+
+### AI-gestuurde Antwoorden
+
+Krijg antwoorden van webpagina's met behulp van AI:
+
+<CodeGroup>
+```ts camelCase
+import Olostep from 'olostep';
+
+const client = new Olostep({apiKey: 'your_api_key'});
+
+// Eenvoudige taak: geef een string direct door
+const answer = await client.answers.create(
+  'Wat is het hoofdonderwerp van https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// Met gestructureerde JSON-uitvoer
+const structured = await client.answers.create({
+  task: 'Haal alle productnamen en prijzen van https://example.com',
+  jsonFormat: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// Een eerder gemaakt antwoord ophalen via ID
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+```ts snake_case
+import Olostep from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Eenvoudige taak: geef een string direct door
+const answer = await client.answers.create(
+  'Wat is het hoofdonderwerp van https://example.com?'
+);
+console.log(answer.answer);
+console.log(answer.sources);
+
+// Met gestructureerde JSON-uitvoer
+const structured = await client.answers.create({
+  task: 'Haal alle productnamen en prijzen van https://example.com',
+  json_format: {
+    products: [{name: '', price: ''}]
+  }
+});
+console.log(structured.json_content);
+
+// Een eerder gemaakt antwoord ophalen via ID
+const fetched = await client.answers.get(answer.id);
+console.log(fetched.answer);
+```
+</CodeGroup>
+
+### Inhoud Terughalen
 
 Haal eerder gescrapete inhoud op:
 
 ```ts
-// Haal inhoud op in specifiek(e) formaat(en)
+// Inhoud ophalen in specifiek(e) formaat(en)
 const content = await client.retrieve(retrieveId, Format.MARKDOWN);
 console.log(content.markdown_content);
 
@@ -179,9 +356,10 @@ const scrape = await client.scrapes.create({
 
 #### Geografische Locatie
 
-Scrape vanuit verschillende landen met behulp van vooraf gedefinieerde landcodes of een geldige landcode-string:
+Scrape vanuit verschillende landen met behulp van vooraf gedefinieerde landcodes of een geldige landcode als string:
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep, {Country} from 'olostep';
 
 const client = new Olostep({apiKey: 'your_api_key'});
@@ -198,12 +376,31 @@ const scrape2 = await client.scrapes.create({
   country: 'jp'  // Japan
 });
 ```
+```ts snake_case
+import Olostep, {Country} from 'olostep';
+
+const client = new Olostep({api_key: 'your_api_key'});
+
+// Gebruik van vooraf gedefinieerde enum-waarden (US, DE, FR, GB, SG)
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  country: Country.DE  // Duitsland
+});
+
+// Of gebruik een geldige landcode als string
+const scrape2 = await client.scrapes.create({
+  url: 'https://example.com',
+  country: 'jp'  // Japan
+});
+```
+</CodeGroup>
 
 #### LLM Extractie
 
-Extraheer gestructureerde gegevens met behulp van LLM's:
+Extraheer gestructureerde data met behulp van LLMs:
 
-```ts
+<CodeGroup>
+```ts camelCase
 const scrape = await client.scrapes.create({
   url: 'https://example.com',
   llmExtract: {
@@ -212,15 +409,29 @@ const scrape = await client.scrapes.create({
       price: 'number',
       description: 'string'
     },
-    // Optioneel een prompt geven om de extractie te begeleiden
     prompt: 'Extraheer productinformatie van deze pagina'
   }
 });
 ```
+```ts snake_case
+const scrape = await client.scrapes.create({
+  url: 'https://example.com',
+  llm_extract: {
+    schema: {
+      title: 'string',
+      price: 'number',
+      description: 'string'
+    },
+    prompt: 'Extraheer productinformatie van deze pagina'
+  }
+});
+```
+</CodeGroup>
 
 ### Clientconfiguratie
 
-```ts
+<CodeGroup>
+```ts camelCase
 import Olostep from 'olostep';
 
 const client = new Olostep({
@@ -234,11 +445,26 @@ const client = new Olostep({
   userAgent: 'MyApp/1.0'  // optioneel
 });
 ```
+```ts snake_case
+import Olostep from 'olostep';
 
-### Kenmerken hoogtepunten
+const client = new Olostep({
+  api_key: 'your_api_key',
+  api_base_url: 'https://api.olostep.com/v1',  // optioneel
+  timeout_ms: 150000,  // 150 seconden (optioneel)
+  retry: {
+    max_retries: 3,
+    initial_delay_ms: 1000
+  },
+  user_agent: 'MyApp/1.0'  // optioneel
+});
+```
+</CodeGroup>
+
+### Belangrijkste kenmerken
 
 - Async-first client met volledige TypeScript-ondersteuning.
 - Type-veilige invoer met behulp van TypeScript enums en interfaces (Formats, Countries, Actions, etc.).
-- Rijke resource namespaces met zowel verkorte oproepen (`client.scrapes.create()`) als expliciete methoden (`client.scrapes.get()`).
+- Rijke resource namespaces met zowel verkorte aanroepen (`client.scrapes.create()`) als expliciete methoden (`client.scrapes.get()`).
 - Gedeelde transportlaag met retries, timeouts en JSON-decoding.
-- Uitgebreide foutenhierarchie
+- Uitgebreide fouthiërarchie

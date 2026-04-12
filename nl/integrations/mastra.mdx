@@ -1,33 +1,32 @@
 ---
-sidebarTitle: "Mastra"
-icon: "robot"
-title: "Mastra Integratie"
+sidebarTitle: "Olostep + Mastra"
+title: "Olostep + Mastra Integratie"
 description: "Bouw AI-agenten met webzoek-, scraping- en crawling-mogelijkheden met behulp van het agentframework van Mastra.ai"
 ---
 
-De Olostep Mastra-integratie brengt krachtige webdata-extractiemogelijkheden naar Mastra.ai-agenten. Olostep is een Webzoek-, scraping- en crawling-API — een API om webdata te zoeken, extraheren en structureren. Bouw intelligente AI-agenten die autonoom data van elke website kunnen zoeken, scrapen, analyseren en structureren.
+De Olostep Mastra-integratie brengt krachtige webdata-extractiemogelijkheden naar Mastra.ai-agenten. Olostep is een Webzoek-, scraping- en crawling-API — een API om webdata te zoeken, te extraheren en te structureren. Bouw intelligente AI-agenten die autonoom data van elke website kunnen zoeken, scrapen, analyseren en structureren.
 
-[Installeer vanuit npm →](https://www.npmjs.com/package/@olostep/mastra-tools)
+[Installeer vanaf npm →](https://www.npmjs.com/package/@olostep/mastra-tools)
 
 ## Functies
 
 De integratie biedt 4 krachtige API's voor geautomatiseerde webdata-extractie:
 
 <CardGroup cols={2}>
-  <Card title="Website Scrapen" icon="file-lines">
-    Haal content op van elke enkele URL in meerdere formaten (Markdown, HTML, JSON, tekst)
+  <Card title="Scrape Website" icon="file-lines">
+    Extraheer inhoud van elke enkele URL in meerdere formaten (Markdown, HTML, JSON, tekst)
   </Card>
   
-  <Card title="Batch Scrapen van URL's" icon="layer-group">
+  <Card title="Batch Scrape URLs" icon="layer-group">
     Verwerk tot 100.000 URL's parallel. Perfect voor grootschalige data-extractie
   </Card>
   
-  <Card title="Crawl Maken" icon="spider-web">
-    Ontdek en scrape zelfstandig volledige websites door links te volgen
+  <Card title="Create Crawl" icon="spider-web">
+    Ontdek en scrape autonoom volledige websites door links te volgen
   </Card>
   
-  <Card title="Kaart Maken" icon="map">
-    Haal alle URL's van een website op voor site-structuuranalyse en contentontdekking
+  <Card title="Create Map" icon="map">
+    Extraheer alle URL's van een website voor site-structuuranalyse en inhoudsontdekking
   </Card>
 </CardGroup>
 
@@ -92,7 +91,7 @@ Of in je `.env` bestand:
 OLOSTEP_API_KEY=your-api-key-here
 ```
 
-Haal je API-sleutel op van het [Olostep Dashboard](https://olostep.com/dashboard).
+Verkrijg je API-sleutel van het [Olostep Dashboard](https://olostep.com/dashboard).
 
 ## Beschikbare API's
 
@@ -100,13 +99,13 @@ De integratie stelt 4 API's bloot die je Mastra-agenten kunnen gebruiken:
 
 ### scrapeWebsite
 
-Haal content op van een enkele URL. Ondersteunt meerdere formaten en JavaScript-rendering.
+Extraheer inhoud van een enkele URL. Ondersteunt meerdere formaten en JavaScript-rendering.
 
 **Gebruiksscenario's:**
-- Bewaak specifieke pagina's op wijzigingen
-- Haal productinformatie op van e-commerce sites
+- Monitor specifieke pagina's op wijzigingen
+- Extraheer productinformatie van e-commercesites
 - Verzamel data van nieuwsartikelen of blogposts
-- Haal content op voor contentaggregatie
+- Haal inhoud op voor contentaggregatie
 
 **Schema Parameters:**
 
@@ -123,7 +122,7 @@ Haal content op van een enkele URL. Ondersteunt meerdere formaten en JavaScript-
 </ParamField>
 
 <ParamField path="country" type="string">
-  Landcode voor locatie-specifieke content (bijv. "US", "GB", "CA")
+  Landcode voor locatie-specifieke inhoud (bijv. "US", "GB", "CA")
 </ParamField>
 
 <ParamField path="wait_before_scraping" type="number">
@@ -137,14 +136,14 @@ Haal content op van een enkele URL. Ondersteunt meerdere formaten en JavaScript-
 **Antwoord:**
 - `id` - Scrape ID
 - `url_to_scrape` - Gescrapete URL
-- `result.markdown_content` - Markdown content
-- `result.html_content` - HTML content
-- `result.json_content` - JSON content
-- `result.text_content` - Tekst content
-- `result.screenshot_hosted_url` - Screenshot URL (indien beschikbaar)
-- `result.markdown_hosted_url` - Gehoste markdown URL
+- `result.markdown_content` - Markdown-inhoud
+- `result.html_content` - HTML-inhoud
+- `result.json_content` - JSON-inhoud
+- `result.text_content` - Tekstinhoud
+- `result.screenshot_hosted_url` - Screenshot-URL (indien beschikbaar)
+- `result.markdown_hosted_url` - Gehoste markdown-URL
 - `object` - Objecttype ("scrape")
-- `created` - Unix-tijdstempel
+- `created` - Unix-timestamp
 
 **Voorbeeld Gebruik:**
 
@@ -170,7 +169,7 @@ Verwerk meerdere URL's parallel (tot 100.000 tegelijk). Perfect voor grootschali
 
 **Gebruiksscenario's:**
 - Scrape volledige productcatalogi
-- Haal data op van meerdere zoekresultaten
+- Extraheer data van meerdere zoekresultaten
 - Verwerk lijsten van URL's uit spreadsheets
 - Bulk contentextractie
 
@@ -228,13 +227,13 @@ const result = await mastra.callApi({
 
 ### createCrawl
 
-Ontdek en scrape zelfstandig volledige websites door links te volgen. Perfect voor documentatiesites, blogs en contentrepositories.
+Ontdek en scrape autonoom volledige websites door links te volgen. Perfect voor documentatiesites, blogs en inhoudsrepositories.
 
 **Gebruiksscenario's:**
 - Crawl en archiveer volledige documentatiesites
-- Haal alle blogposts van een website op
-- Bouw kennisbanken van webcontent
-- Bewaak wijzigingen in de websitestructuur
+- Extraheer alle blogposts van een website
+- Bouw kennisbanken van webinhoud
+- Monitor wijzigingen in de websitestructuur
 
 **Schema Parameters:**
 
@@ -255,7 +254,7 @@ Ontdek en scrape zelfstandig volledige websites door links te volgen. Perfect vo
 </ParamField>
 
 <ParamField path="formats" type="array" default="['markdown']">
-  Formaat voor gescrapete content
+  Formaat voor gescrapete inhoud
 </ParamField>
 
 <ParamField path="country" type="string">
@@ -263,14 +262,14 @@ Ontdek en scrape zelfstandig volledige websites door links te volgen. Perfect vo
 </ParamField>
 
 <ParamField path="parser" type="string">
-  Optionele parser-ID voor gespecialiseerde contentextractie
+  Optionele parser-ID voor gespecialiseerde inhoudsextractie
 </ParamField>
 
 **Antwoord:**
 - `id` - Crawl ID (gebruik dit om later resultaten op te halen)
 - `object` - Objecttype ("crawl")
 - `status` - Crawlstatus
-- `created` - Unix-tijdstempel
+- `created` - Unix-timestamp
 
 **Voorbeeld Gebruik:**
 
@@ -292,7 +291,7 @@ const result = await mastra.callApi({
 
 ### createMap
 
-Haal alle URL's van een website op voor contentontdekking en site-structuuranalyse.
+Extraheer alle URL's van een website voor inhoudsontdekking en site-structuuranalyse.
 
 **Gebruiksscenario's:**
 - Bouw sitemaps en site-structuurdiagrammen
@@ -307,7 +306,7 @@ Haal alle URL's van een website op voor contentontdekking en site-structuuranaly
 </ParamField>
 
 <ParamField path="url" type="string" required>
-  Website-URL om links van op te halen (moet http:// of https:// bevatten)
+  Website-URL om links uit te extraheren (moet http:// of https:// bevatten)
 </ParamField>
 
 <ParamField path="search_query" type="string">
@@ -368,7 +367,7 @@ const agent = new Agent({
   name: 'web-researcher',
   instructions: `
     Je bent een webonderzoeksassistent. Wanneer gebruikers je vragen om informatie van een website te halen,
-    gebruik je de Olostep scrapeWebsite API om de content te extraheren en deze vervolgens samen te vatten voor hen.
+    gebruik je de Olostep scrapeWebsite API om de inhoud te extraheren en deze vervolgens voor hen samen te vatten.
   `,
   model: 'openai/gpt-4',
 });
@@ -378,10 +377,10 @@ const agent = new Agent({
 
 ### Agent Workflow Voorbeeld
 
-Bouw een onderzoeksworkflow die content ontdekt en scrapt:
+Bouw een onderzoeksworkflow die inhoud ontdekt en scrapt:
 
 ```typescript
-// 1. Kaart een website om URL's te ontdekken
+// 1. Map een website om URL's te ontdekken
 const mapResult = await mastra.callApi({
   integrationName: 'olostep',
   api: 'createMap',
@@ -411,7 +410,7 @@ const batchResult = await mastra.callApi({
 const summary = await agent.generate({
   messages: [{
     role: 'user',
-    content: `Vat deze content samen: ${batchResult.result.markdown_content}`
+    content: `Vat deze inhoud samen: ${batchResult.result.markdown_content}`
   }]
 });
 ```
@@ -420,59 +419,59 @@ const summary = await agent.generate({
 
 ### Onderzoeksagent
 
-Bouw een agent die zelfstandig onderwerpen onderzoekt:
+Bouw een agent die autonoom onderwerpen onderzoekt:
 
 <AccordionGroup>
-  <Accordion title="Multi-Source Onderzoek">
+  <Accordion title="Multi-Source Research">
     **Workflow:**
     1. Gebruiker vraagt: "Onderzoek AI-trends"
     2. Agent gebruikt `createMap` om relevante pagina's te ontdekken
-    3. Agent gebruikt `batchScrape` om content te extraheren
+    3. Agent gebruikt `batchScrape` om inhoud te extraheren
     4. Agent analyseert en vat bevindingen samen
     5. Geeft gestructureerd onderzoeksrapport terug
   </Accordion>
 
-  <Accordion title="Concurrentie Monitoring">
+  <Accordion title="Competitor Monitoring">
     **Workflow:**
     1. Plan dagelijkse monitoring
     2. Gebruik `scrapeWebsite` om concurrentiepagina's te controleren
     3. Vergelijk met eerdere data
-    4. Waarschuw bij significante wijzigingen
+    4. Waarschuw bij significante veranderingen
     5. Genereer wekelijkse rapporten
   </Accordion>
 
-  <Accordion title="Content Aggregatie">
+  <Accordion title="Content Aggregation">
     **Workflow:**
     1. Gebruik `createCrawl` om alle blogposts te ontdekken
-    2. Gebruik `batchScrape` om content te extraheren
+    2. Gebruik `batchScrape` om inhoud te extraheren
     3. Verwerk met AI om belangrijke onderwerpen te extraheren
     4. Sla op in kennisbank
     5. Genereer contentkalender
   </Accordion>
 </AccordionGroup>
 
-### E-commerce Intelligentie
+### E-commerce Intelligence
 
 Monitor producten en prijzen:
 
 ```
 Agent Workflow:
 1. Scrape productpagina's (scrapeWebsite)
-2. Haal gestructureerde data op (met parser)
-3. Volg prijswijzigingen
+2. Extraheer gestructureerde data (met parser)
+3. Volg prijsveranderingen
 4. Genereer waarschuwingen
 5. Update database
 ```
 
 ### SEO Analyse
 
-Analyseer websitestructuur en content:
+Analyseer websitestructuur en inhoud:
 
 ```
 Agent Workflow:
-1. Kaart websitestructuur (createMap)
+1. Map websitestructuur (createMap)
 2. Crawl belangrijke secties (createCrawl)
-3. Analyseer contentkwaliteit
+3. Analyseer inhoudskwaliteit
 4. Identificeer SEO-kansen
 5. Genereer aanbevelingen
 ```
@@ -483,21 +482,21 @@ Olostep biedt vooraf gebouwde parsers voor populaire websites. Gebruik ze met de
 
 <CardGroup cols={2}>
   
-  <Card title="Google Zoeken" icon="google">
+  <Card title="Google Search" icon="google">
     `@olostep/google-search`
     
-    Extraheer: zoekresultaten, titels, snippets, URL's
+    Extraheer: zoekresultaten, titels, fragmenten, URL's
   </Card>
   
   <Card title="Google Maps" icon="map">
     `@olostep/google-maps`
     
-    Extraheer: bedrijfsinfo, beoordelingen, beoordelingen, locatie
+    Extraheer: bedrijfsinformatie, beoordelingen, beoordelingen, locatie
   </Card>
 
 </CardGroup>
 
-### Gebruik van Parsers
+### Parsers Gebruiken
 
 Voeg de parser-ID toe aan de `parser` parameter:
 
@@ -516,9 +515,9 @@ const result = await mastra.callApi({
 });
 ```
 
-De parser extraheert automatisch gestructureerde data specifiek voor dat websitetype.
+De parser extraheert automatisch gestructureerde data specifiek voor dat type website.
 
-## Beste Praktijken
+## Best Practices
 
 <AccordionGroup>
   <Accordion title="Gebruik Batchverwerking voor Meerdere URL's">
@@ -526,7 +525,7 @@ De parser extraheert automatisch gestructureerde data specifiek voor dat website
     - Veel sneller (parallelle verwerking)
     - Kosteneffectiever
     - Makkelijker te beheren
-    - Beter voor rate limits
+    - Beter voor snelheidslimieten
   </Accordion>
 
   <Accordion title="Stel Geschikte Wachttijden In">
@@ -563,14 +562,14 @@ De parser extraheert automatisch gestructureerde data specifiek voor dat website
         payload: { data: {...} }
       });
     } catch (error) {
-      // Behandel authenticatie-, rate limit- of netwerkfouten
+      // Behandel authenticatie-, snelheidslimiet- of netwerkfouten
       console.error('Scraping mislukt:', error.message);
     }
     ```
   </Accordion>
 
-  <Accordion title="Rate Limiting">
-    Wees bewust van rate limits:
+  <Accordion title="Snelheidslimieten">
+    Wees bewust van snelheidslimieten:
     - Spreid verzoeken met vertragingen
     - Gebruik batchverwerking indien mogelijk
     - Monitor gebruik in Olostep dashboard
@@ -578,9 +577,9 @@ De parser extraheert automatisch gestructureerde data specifiek voor dat website
   </Accordion>
 </AccordionGroup>
 
-## Compleet Voorbeeld
+## Volledig Voorbeeld
 
-Hier is een compleet voorbeeld van het bouwen van een onderzoeksagent:
+Hier is een volledig voorbeeld van het bouwen van een onderzoeksagent:
 
 ```typescript
 import { Mastra } from '@mastra/core';
@@ -606,7 +605,7 @@ const researchAgent = new Agent({
     Je bent een onderzoeksassistent die webdata kan zoeken, extraheren en structureren.
     Wanneer gebruikers je vragen om een onderwerp te onderzoeken:
     1. Gebruik Olostep's createMap om relevante pagina's te ontdekken
-    2. Gebruik batchScrape om content van meerdere bronnen te extraheren
+    2. Gebruik batchScrape om inhoud van meerdere bronnen te extraheren
     3. Analyseer en vat de bevindingen samen
     4. Presenteer gestructureerde onderzoeksrapporten
   `,
@@ -676,25 +675,25 @@ async function researchTopic(topic: string) {
     - Herstart Mastra-server na wijzigingen
   </Accordion>
 
-  <Accordion title="Scrape Geeft Lege Content Terug">
-    **Fout**: Contentvelden zijn leeg
+  <Accordion title="Scrape Geeft Lege Inhoud Terug">
+    **Fout**: Inhoudsvelden zijn leeg
     
     **Oplossingen**:
     - Verhoog `wait_before_scraping` tijd
-    - Controleer of website inloggen vereist
-    - Probeer een ander formaat (HTML vs Markdown)
-    - Verifieer dat URL toegankelijk is
+    - Controleer of website login vereist
+    - Probeer ander formaat (HTML vs Markdown)
+    - Verifieer of URL toegankelijk is
     - Controleer of site geautomatiseerde toegang blokkeert
   </Accordion>
 
-  <Accordion title="Rate Limiet Overschreden">
-    **Fout**: "Rate limit overschreden"
+  <Accordion title="Snelheidslimiet Overschreden">
+    **Fout**: "Snelheidslimiet overschreden"
     
     **Oplossingen**:
     - Spreid verzoeken met vertragingen
     - Gebruik batchverwerking in plaats van individuele scrapes
     - Upgrade je Olostep-plan
-    - Controleer rate limit in dashboard
+    - Controleer snelheidslimiet in dashboard
   </Accordion>
 
   <Accordion title="TypeScript Fouten">
@@ -715,7 +714,7 @@ Olostep rekent kosten op basis van API-gebruik, onafhankelijk van Mastra:
 - **Scrapes**: Betalen per scrape
 - **Batches**: Betalen per URL in batch
 - **Crawls**: Betalen per gecrawlde pagina
-- **Maps**: Betalen per kaartoperatie
+- **Maps**: Betalen per map-operatie
 
 Bekijk de huidige prijzen op [olostep.com/pricing](https://olostep.com/pricing).
 
@@ -725,15 +724,15 @@ Hulp nodig met de Mastra-integratie?
 
 <CardGroup cols={2}>
   <Card title="Documentatie" icon="book" href="https://docs.olostep.com">
-    Blader door de volledige API-documentatie
+    Blader door volledige API-documentatie
   </Card>
   
   <Card title="Ondersteuning Email" icon="envelope" href="mailto:info@olostep.com">
-    Email: info@olostep.com
+    E-mail: info@olostep.com
   </Card>
   
   <Card title="Mastra Docs" icon="robot" href="https://mastra.ai/docs">
-    Leer meer over het Mastra-framework
+    Leer over het Mastra-framework
   </Card>
   
 </CardGroup>
@@ -742,19 +741,19 @@ Hulp nodig met de Mastra-integratie?
 
 <CardGroup cols={2}>
   <Card title="Scrapes API" icon="file-lines" href="/features/scrapes">
-    Leer meer over het Scrapes eindpunt
+    Leer over de Scrapes endpoint
   </Card>
   
   <Card title="Batches API" icon="layer-group" href="/features/batches">
-    Leer meer over het Batches eindpunt
+    Leer over de Batches endpoint
   </Card>
   
   <Card title="Crawls API" icon="spider-web" href="/features/crawls">
-    Leer meer over het Crawls eindpunt
+    Leer over de Crawls endpoint
   </Card>
   
   <Card title="Maps API" icon="map" href="/features/maps">
-    Leer meer over het Maps eindpunt
+    Leer over de Maps endpoint
   </Card>
   
   <Card title="Zapier Integratie" icon="bolt" href="/integrations/zapier">
@@ -764,14 +763,18 @@ Hulp nodig met de Mastra-integratie?
   <Card title="LangChain Integratie" icon="link" href="/integrations/langchain">
     Bouw AI-agenten met LangChain
   </Card>
+  
+  <Card title="Mastra Website" icon="link" href="https://mastra.ai">
+    Mastra platform
+  </Card>
 </CardGroup>
 
 ## Aan de Slag
 
-Klaar om AI-agenten te bouwen met webscraping-mogelijkheden?
+Klaar om AI-agenten te bouwen met web scraping-mogelijkheden?
 
 <Card title="Installeer Pakket" icon="download" href="https://www.npmjs.com/package/@olostep/mastra-tools">
-  Installeer @olostep/mastra-tools van npm
+  Installeer @olostep/mastra-tools vanaf npm
 </Card>
 
 Bouw intelligente AI-agenten die webdata kunnen zoeken, extraheren en structureren met Olostep en Mastra!
